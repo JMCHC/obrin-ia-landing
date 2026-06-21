@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="es" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Obrín IA | Asistente de Diagnóstico Constructivo</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Tailwind Config -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            400: '#38bdf8',
+                            500: '#0ea5e9',
+                            600: '#0284c7', // Primary Blue
+                            900: '#0f2942', // PUC Navy
+                        }
+                    },
+                    boxShadow: {
+                        'soft': '0 10px 40px -10px rgba(0,0,0,0.08)',
+                        'glow': '0 0 40px -10px rgba(2, 132, 199, 0.3)',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* Fluid animations */
+        .fade-in-up {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 1s cubic-bezier(0.16, 1, 0.3, 1), transform 1s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .fade-in-up.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .float-animation {
+            animation: float 6s ease-in-out infinite;
+        }
+        .float-animation-delayed {
+            animation: float 6s ease-in-out 3s infinite;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-15px); }
+            100% { transform: translateY(0px); }
+        }
+        
+        /* Modern Phone Bezel */
+        .sleek-phone {
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15), inset 0 0 0 6px #e2e8f0;
+            border: 1px solid #cbd5e1;
+            background-color: #ffffff;
+        }
+        
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        /* Subtle mesh background */
+        .bg-mesh {
+            background-image: 
+                radial-gradient(at 0% 0%, hsla(210, 100%, 95%, 1) 0px, transparent 50%),
+                radial-gradient(at 100% 0%, hsla(200, 100%, 95%, 1) 0px, transparent 50%);
+        }
+    </style>
+</head>
+<body class="bg-white text-slate-800 font-sans selection:bg-brand-500 selection:text-white">
+
+    <!-- Navigation -->
+    <nav class="fixed w-full z-50 transition-all duration-500 bg-white/70 backdrop-blur-xl border-b border-slate-200/50" id="navbar">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-20 items-center">
+                <!-- Logo -->
+                <div class="flex-shrink-0 flex items-center cursor-pointer transition-transform hover:scale-105" onclick="window.scrollTo(0,0)">
+                    <img src="https://lh3.googleusercontent.com/pw/AP1GczOOE3ZHICrV-_RfZdqAjRIdP5vT8mk8EUJgp83JaAa8uF1SEOlEcN5nkO410n_kUGrx1VZJU2MAD_yk6HcbPAhoW4zzYVJH3KVOOof-U3bsfH4yL6P5J2U9i8SaDuth_yZPP6_IihvtadZrNgEjzDIeUQ=w599-h599-s-no-gm?authuser=0" alt="Obrín IA Logo" class="h-24 w-auto object-contain" onerror="this.onerror=null; this.src='https://placehold.co/150x50/ffffff/0f2942?text=Obrin+IA';">
+                </div>
+                
+                <!-- Desktop Menu -->
+                <div class="hidden md:flex space-x-10">
+                    <a href="#problema" class="text-slate-500 hover:text-brand-600 font-medium text-sm transition-colors nav-link">El Problema</a>
+                    <a href="#solucion" class="text-slate-500 hover:text-brand-600 font-medium text-sm transition-colors nav-link">Solución</a>
+                    <a href="#tutorial" class="text-slate-500 hover:text-brand-600 font-medium text-sm transition-colors nav-link">Tutorial</a>
+                    <a href="#caracteristicas" class="text-slate-500 hover:text-brand-600 font-medium text-sm transition-colors nav-link">Tecnología</a>
+                    <a href="#equipo" class="text-slate-500 hover:text-brand-600 font-medium text-sm transition-colors nav-link">Equipo</a>
+                </div>
+
+                <!-- CTA Button -->
+                <div class="hidden md:flex">
+                    <a href="https://gemini.google.com/share/09e456b60e0a" target="_blank" class="bg-brand-600 hover:bg-brand-500 text-white px-6 py-2.5 rounded-full text-sm font-semibold transition-all shadow-glow hover:shadow-lg hover:-translate-y-0.5">
+                        Solicitar Demo
+                    </a>
+                </div>
+
+                <!-- Mobile Menu Button -->
+                <div class="md:hidden flex items-center">
+                    <button id="mobile-menu-btn" class="text-slate-500 hover:text-slate-900 focus:outline-none">
+                        <i class="fa-solid fa-bars text-2xl"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Menu Panel -->
+        <div id="mobile-menu" class="hidden md:hidden bg-white/95 backdrop-blur-xl border-b border-slate-200 shadow-xl absolute w-full">
+            <div class="px-4 pt-4 pb-8 space-y-2">
+                <a href="#problema" class="block px-4 py-3 rounded-xl text-base font-medium text-slate-600 hover:text-brand-600 hover:bg-slate-50 nav-link">El Problema</a>
+                <a href="#solucion" class="block px-4 py-3 rounded-xl text-base font-medium text-slate-600 hover:text-brand-600 hover:bg-slate-50 nav-link">Solución</a>
+                <a href="#tutorial" class="block px-4 py-3 rounded-xl text-base font-medium text-slate-600 hover:text-brand-600 hover:bg-slate-50 nav-link">Tutorial</a>
+                <a href="#caracteristicas" class="block px-4 py-3 rounded-xl text-base font-medium text-slate-600 hover:text-brand-600 hover:bg-slate-50 nav-link">Tecnología</a>
+                <a href="#equipo" class="block px-4 py-3 rounded-xl text-base font-medium text-slate-600 hover:text-brand-600 hover:bg-slate-50 nav-link">Equipo</a>
+                <a href="https://gemini.google.com/share/09e456b60e0a" target="_blank" class="block w-full text-center mt-6 bg-brand-600 text-white px-5 py-3 rounded-xl font-semibold shadow-md">Solicitar Demo</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="relative pt-32 pb-20 lg:pt-48 lg:pb-32 overflow-hidden bg-mesh">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div class="grid lg:grid-cols-12 gap-12 lg:gap-8 items-center">
+                
+                <!-- Text Content (Left) -->
+                <div class="lg:col-span-7 fade-in-up text-center lg:text-left">
+                    <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white border border-slate-200 shadow-sm text-slate-600 text-xs font-semibold mb-8 tracking-wide">
+                        <span class="w-2 h-2 rounded-full bg-brand-500 animate-pulse"></span>
+                        Reto Construye Academia CChC
+                    </div>
+                    
+                    <h1 class="text-4xl md:text-6xl lg:text-7xl font-extrabold text-slate-900 tracking-tight leading-[1.1] mb-6">
+                        La inspección visual, <br class="hidden md:block" />
+                        transformada en <br class="hidden md:block" />
+                        <span class="text-transparent bg-clip-text bg-gradient-to-r from-brand-600 to-blue-400">datos exactos.</span>
+                    </h1>
+                    
+                    <p class="text-lg md:text-xl text-slate-500 mb-10 max-w-2xl mx-auto lg:mx-0 leading-relaxed font-light">
+                        Asistente de diagnóstico en terreno impulsado por <strong class="font-semibold text-slate-700">IA e IoT</strong>. Elimina la subjetividad, automatiza tus presupuestos y protege la rentabilidad de la obra.
+                    </p>
+                    
+                    <div class="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4">
+                        <a href="https://gemini.google.com/share/09e456b60e0a" target="_blank" class="w-full sm:w-auto bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 px-8 py-4 rounded-full font-semibold transition-all shadow-sm hover:shadow-md text-center flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-play text-brand-600 text-sm"></i> Solicitar Demo
+                        </a>
+                    </div>
+                </div>
+
+                <!-- App Mockup (Right) -->
+                <div class="lg:col-span-5 relative flex justify-center fade-in-up" style="transition-delay: 0.2s;">
+                    
+                    <!-- Decorative blur -->
+                    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-72 h-72 bg-brand-400 rounded-full mix-blend-multiply filter blur-[80px] opacity-30"></div>
+
+                    <!-- Floating Card 1: Patología -->
+                    <div class="absolute -left-6 md:-left-12 top-20 bg-white/80 backdrop-blur-lg border border-white/40 p-4 rounded-2xl shadow-soft z-20 float-animation w-48">
+                        <div class="flex items-start gap-3">
+                            <div class="w-8 h-8 rounded-full bg-brand-50 flex items-center justify-center text-brand-600 shrink-0 mt-1"><i class="fa-solid fa-microscope text-xs"></i></div>
+                            <div>
+                                <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-0.5">IA Detecta</p>
+                                <p class="font-semibold text-slate-800 text-sm leading-tight">Fractura por impacto</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Floating Card 2: Costo -->
+                    <div class="absolute -right-6 md:-right-10 bottom-32 bg-slate-900/90 backdrop-blur-lg border border-slate-700 p-4 rounded-2xl shadow-xl z-20 float-animation-delayed w-44">
+                        <div class="flex items-start gap-3">
+                            <div class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-green-400 shrink-0 mt-1"><i class="fa-solid fa-calculator text-xs"></i></div>
+                            <div>
+                                <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-0.5">Costo / m²</p>
+                                <p class="font-bold text-white text-base leading-tight">$25.000</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- The Phone (Clean, Light Theme) -->
+                    <div class="relative w-[280px] md:w-[320px] h-[600px] rounded-[3rem] sleek-phone overflow-hidden flex flex-col z-10">
+                        <!-- Top Notch -->
+                        <div class="absolute top-0 inset-x-0 h-6 bg-slate-100 rounded-b-2xl w-32 mx-auto z-30"></div>
+                        
+                        <!-- App Header -->
+                        <div class="pt-12 pb-4 px-6 bg-white border-b border-slate-100 flex justify-between items-center z-20">
+                            <i class="fa-solid fa-arrow-left text-slate-400 text-lg"></i>
+                            <span class="font-bold text-slate-800 text-xs tracking-widest uppercase">Obrín IA</span>
+                            <i class="fa-solid fa-ellipsis-vertical text-slate-400 text-lg"></i>
+                        </div>
+
+                        <!-- App Content -->
+                        <div class="flex-1 overflow-y-auto no-scrollbar p-5 bg-slate-50 space-y-4 relative">
+                            <!-- Element Header -->
+                            <div class="mb-2">
+                                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Elemento Analizado</p>
+                                <div class="flex justify-between items-start">
+                                    <h3 class="text-xl font-bold text-slate-900 leading-tight">Pavimento<br>Cerámico</h3>
+                                    <span class="bg-amber-100 text-amber-700 text-[9px] font-bold px-2 py-1 rounded-full uppercase">Moderado</span>
+                                </div>
+                            </div>
+
+                            <!-- Diagnosis Card -->
+                            <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-100/50">
+                                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Diagnóstico de Patología</p>
+                                <p class="text-slate-700 text-sm leading-relaxed font-medium">Desprendimiento de material y exposición de mortero de pega por impacto.</p>
+                            </div>
+
+                            <!-- Solution Card -->
+                            <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-100/50">
+                                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Propuesta Técnica</p>
+                                <p class="text-slate-700 text-sm leading-relaxed font-medium">Remoción técnica de piezas, limpieza de sustrato, adhesivo tipo AC y fraguado.</p>
+                            </div>
+
+                            <!-- Cost Card -->
+                            <div class="bg-gradient-to-br from-brand-600 to-brand-800 rounded-2xl p-5 text-white shadow-md relative overflow-hidden mt-6">
+                                <div class="absolute right-0 bottom-0 opacity-10 transform translate-x-4 translate-y-4">
+                                    <i class="fa-solid fa-chart-pie text-7xl"></i>
+                                </div>
+                                <p class="text-[10px] font-bold text-brand-200 uppercase tracking-wider mb-1">Inversión Unitaria Ref.</p>
+                                <div class="flex items-end gap-1">
+                                    <p class="text-3xl font-bold tracking-tight">$22.000</p>
+                                    <p class="text-xs text-brand-200 mb-1.5 font-medium">CLP/m²</p>
+                                </div>
+                                <div class="mt-3 pt-3 border-t border-white/20 flex justify-between items-center">
+                                    <span class="text-[10px] text-brand-100">Región: Metropolitana</span>
+                                    <i class="fa-solid fa-location-dot text-[10px] text-brand-200"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- The Problem / Stats -->
+    <section id="problema" class="py-24 md:py-32 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid lg:grid-cols-12 gap-16 items-start">
+                
+                <div class="lg:col-span-5 fade-in-up">
+                    <h2 class="text-brand-600 font-bold tracking-widest uppercase text-xs mb-3">El Problema de la Industria</h2>
+                    <h3 class="text-3xl md:text-4xl font-extrabold text-slate-900 mb-6 tracking-tight leading-tight">El costo oculto de la evaluación visual.</h3>
+                    <p class="text-lg text-slate-500 leading-relaxed mb-6 font-light">
+                        La construcción transita hacia la industrialización, pero la captura de datos sigue siendo análoga. El levantamiento de fallas depende del ojo humano, generando diagnósticos subjetivos.
+                    </p>
+                    <p class="text-lg text-slate-500 leading-relaxed font-light">
+                        Estas desviaciones tempranas y correcciones mal diagnosticadas <strong class="text-slate-800 font-semibold">destruyen silenciosamente los márgenes de utilidad</strong> en los contratos "llave en mano".
+                    </p>
+                </div>
+
+                <div class="lg:col-span-7 grid sm:grid-cols-2 gap-8">
+                    <!-- Stat 1 -->
+                    <div class="bg-slate-50 rounded-3xl p-8 border border-slate-100 hover:shadow-soft transition-all fade-in-up">
+                        <div class="text-5xl font-light text-slate-900 mb-4 tracking-tighter">21.7<span class="text-brand-600 font-bold text-3xl">%</span></div>
+                        <h4 class="text-base font-bold text-slate-900 mb-2">Retrabajos Constantes</h4>
+                        <p class="text-sm text-slate-500 leading-relaxed mb-4">De las partidas presentan observaciones tempranas. Corregirlas consume hasta un 6% del presupuesto total.</p>
+                        <p class="text-[10px] uppercase tracking-wider text-slate-400 font-semibold">Matrix Consulting & CChC</p>
+                    </div>
+
+                    <!-- Stat 2 -->
+                    <div class="bg-slate-50 rounded-3xl p-8 border border-slate-100 hover:shadow-soft transition-all fade-in-up" style="transition-delay: 0.1s;">
+                        <div class="text-5xl font-light text-slate-900 mb-4 tracking-tighter">71<span class="text-brand-600 font-bold text-3xl">%</span></div>
+                        <h4 class="text-base font-bold text-slate-900 mb-2">Desviaciones Críticas</h4>
+                        <p class="text-sm text-slate-500 leading-relaxed mb-4">Obras que no se entregan a tiempo en Chile, promediando un atraso de 4 meses por reprocesos.</p>
+                        <p class="text-[10px] uppercase tracking-wider text-slate-400 font-semibold">Matrix Consulting & CChC</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- The Solution (Features) -->
+    <section id="solucion" class="py-24 md:py-32 bg-slate-50 border-y border-slate-200/60">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-2xl mx-auto mb-20 fade-in-up">
+                <h2 class="text-brand-600 font-bold tracking-widest uppercase text-xs mb-3">Plataforma Paramétrica</h2>
+                <h3 class="text-3xl md:text-4xl font-extrabold text-slate-900 mb-4 tracking-tight">Estandarización impulsada por IA + IoT</h3>
+                <p class="text-lg text-slate-500 font-light">Un ecosistema tecnológico diseñado para emitir prescripciones técnicas exactas de forma instantánea.</p>
+            </div>
+
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Feature 1 -->
+                <div class="bg-white p-8 rounded-3xl border border-slate-200/60 shadow-sm hover:shadow-soft transition-all duration-300 fade-in-up group">
+                    <div class="w-12 h-12 rounded-2xl bg-brand-50 flex items-center justify-center text-brand-600 mb-6 group-hover:scale-110 transition-transform">
+                        <i class="fa-solid fa-camera-retro text-xl"></i>
+                    </div>
+                    <h4 class="text-lg font-bold text-slate-900 mb-2">Captura Multimodal</h4>
+                    <p class="text-sm text-slate-500 leading-relaxed font-light">Interfaz móvil intuitiva para el ingreso in situ de fotografías contextuales y descripciones textuales de las fallas.</p>
+                </div>
+
+                <!-- Feature 2 -->
+                <div class="bg-white p-8 rounded-3xl border border-slate-200/60 shadow-sm hover:shadow-soft transition-all duration-300 fade-in-up group" style="transition-delay: 0.1s;">
+                    <div class="w-12 h-12 rounded-2xl bg-brand-50 flex items-center justify-center text-brand-600 mb-6 group-hover:scale-110 transition-transform">
+                        <i class="fa-solid fa-brain text-xl"></i>
+                    </div>
+                    <h4 class="text-lg font-bold text-slate-900 mb-2">Motor de Inferencia IA</h4>
+                    <p class="text-sm text-slate-500 leading-relaxed font-light">Visión computacional entrenada para detectar patrones estructurales e identificar la causa raíz eliminando el sesgo humano.</p>
+                </div>
+
+                <!-- Feature 3 -->
+                <div class="bg-white p-8 rounded-3xl border border-slate-200/60 shadow-sm hover:shadow-soft transition-all duration-300 fade-in-up group" style="transition-delay: 0.2s;">
+                    <div class="w-12 h-12 rounded-2xl bg-brand-50 flex items-center justify-center text-brand-600 mb-6 group-hover:scale-110 transition-transform">
+                        <i class="fa-solid fa-list-check text-xl"></i>
+                    </div>
+                    <h4 class="text-lg font-bold text-slate-900 mb-2">Triple Resultado</h4>
+                    <p class="text-sm text-slate-500 leading-relaxed font-light">Emisión instantánea de tres variables críticas estructuradas: Causa, Solución Técnica precisa y Costo Directo por m².</p>
+                </div>
+
+                <!-- Feature 4 -->
+                <div class="bg-white p-8 rounded-3xl border border-slate-200/60 shadow-sm hover:shadow-soft transition-all duration-300 fade-in-up group">
+                    <div class="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center text-slate-700 mb-6 group-hover:scale-110 transition-transform">
+                        <i class="fa-solid fa-satellite-dish text-xl"></i>
+                    </div>
+                    <h4 class="text-lg font-bold text-slate-900 mb-2">Telemetría IoT</h4>
+                    <p class="text-sm text-slate-500 leading-relaxed font-light">Integración perimetral con sensores LiDAR e higrómetros para medir volúmenes y condiciones con precisión milimétrica.</p>
+                </div>
+
+                <!-- Feature 5 -->
+                <div class="bg-white p-8 rounded-3xl border border-slate-200/60 shadow-sm hover:shadow-soft transition-all duration-300 fade-in-up group" style="transition-delay: 0.1s;">
+                    <div class="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center text-slate-700 mb-6 group-hover:scale-110 transition-transform">
+                        <i class="fa-solid fa-map-location-dot text-xl"></i>
+                    </div>
+                    <h4 class="text-lg font-bold text-slate-900 mb-2">Contexto Geográfico</h4>
+                    <p class="text-sm text-slate-500 leading-relaxed font-light">Cotización inteligente cruzando la ubicación GPS de la obra vía API con catálogos de proveedores locales actualizados.</p>
+                </div>
+
+                <!-- Feature 6 -->
+                <div class="bg-white p-8 rounded-3xl border border-slate-200/60 shadow-sm hover:shadow-soft transition-all duration-300 fade-in-up group" style="transition-delay: 0.2s;">
+                    <div class="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center text-slate-700 mb-6 group-hover:scale-110 transition-transform">
+                        <i class="fa-solid fa-cubes text-xl"></i>
+                    </div>
+                    <h4 class="text-lg font-bold text-slate-900 mb-2">Cubicación BIM</h4>
+                    <p class="text-sm text-slate-500 leading-relaxed font-light">Ingesta de planimetrías (CAD/BIM) para geolocalizar patologías y generar listas de materiales exactas para abastecimiento.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Video Tutorial Section -->
+    <section id="tutorial" class="py-24 bg-white border-b border-slate-200/60">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12 fade-in-up">
+                <h2 class="text-brand-600 font-bold tracking-widest uppercase text-xs mb-3">Video Tutorial</h2>
+                <h3 class="text-3xl md:text-4xl font-extrabold text-slate-900 mb-4 tracking-tight">Mira Obrín IA en acción</h3>
+                <p class="text-lg text-slate-500 font-light max-w-2xl mx-auto">Descubre en pocos minutos cómo nuestra plataforma captura, analiza y presupuesta soluciones constructivas directamente en terreno.</p>
+            </div>
+
+            <div class="flex justify-center fade-in-up">
+                <a href="https://youtube.com/shorts/1cWU5Xq0AyM?feature=share" target="_blank" class="relative rounded-[2.5rem] overflow-hidden shadow-2xl border-[6px] border-slate-900 aspect-[9/16] w-full max-w-[300px] md:max-w-[340px] bg-slate-800 group transition-transform hover:-translate-y-1 duration-500 block">
+                    
+                    <!-- Thumbnail Image (Fetches YouTube Thumbnail automatically) -->
+                    <img src="https://img.youtube.com/vi/1cWU5Xq0AyM/maxresdefault.jpg" alt="Tutorial Obrín IA" class="absolute top-0 left-0 w-full h-full object-cover z-10 opacity-70 group-hover:opacity-90 transition-opacity duration-300" onerror="this.onerror=null; this.src='https://img.youtube.com/vi/1cWU5Xq0AyM/0.jpg';">
+                    
+                    <!-- Play Button Overlay -->
+                    <div class="absolute inset-0 flex items-center justify-center z-20">
+                        <div class="w-16 h-16 bg-red-600/90 rounded-full flex items-center justify-center text-white shadow-lg backdrop-blur-sm group-hover:scale-110 group-hover:bg-red-600 transition-all duration-300">
+                            <i class="fa-solid fa-play text-xl ml-1"></i>
+                        </div>
+                    </div>
+                    
+                    <!-- Decorative glow effect behind the phone frame -->
+                    <div class="absolute -inset-4 bg-brand-500/30 blur-2xl -z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
+                </a>
+            </div>
+            
+            <div class="text-center mt-8 fade-in-up" style="transition-delay: 0.1s;">
+                 <a href="https://youtube.com/shorts/1cWU5Xq0AyM?feature=share" target="_blank" class="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-slate-50 hover:bg-red-50 border border-slate-200 text-sm text-slate-700 hover:text-red-700 font-semibold transition-all shadow-sm hover:shadow-md">
+                     <i class="fa-brands fa-youtube text-red-600 text-lg"></i> Ver en YouTube
+                 </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Paradigm Shift (Active vs Passive) -->
+    <section id="caracteristicas" class="py-24 bg-slate-900 text-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-2xl mx-auto mb-16 fade-in-up">
+                <h2 class="text-brand-400 font-bold tracking-widest uppercase text-xs mb-3">Cambio de Paradigma</h2>
+                <h3 class="text-3xl md:text-4xl font-extrabold tracking-tight mb-4">De un registro pasivo a un asistente activo</h3>
+            </div>
+            
+            <div class="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+                <!-- Pasivo -->
+                <div class="border border-slate-700 bg-slate-800/50 p-8 rounded-3xl fade-in-up opacity-80">
+                    <div class="flex items-center justify-between mb-8 pb-4 border-b border-slate-700">
+                        <div>
+                            <h4 class="text-xl font-bold text-slate-200">Software Tradicional</h4>
+                            <p class="text-xs text-slate-500 uppercase tracking-widest font-bold mt-1">Gestión Pasiva</p>
+                        </div>
+                        <i class="fa-solid fa-folder-open text-2xl text-slate-600"></i>
+                    </div>
+                    <ul class="space-y-4 text-slate-400 text-sm font-light">
+                        <li class="flex items-start gap-3"><i class="fa-solid fa-xmark text-slate-600 mt-1 shrink-0"></i> <span>Funciona únicamente como un repositorio digital.</span></li>
+                        <li class="flex items-start gap-3"><i class="fa-solid fa-xmark text-slate-600 mt-1 shrink-0"></i> <span>El diagnóstico inicial depende 100% de la deducción visual humana.</span></li>
+                        <li class="flex items-start gap-3"><i class="fa-solid fa-xmark text-slate-600 mt-1 shrink-0"></i> <span>Presupuestos calculados a posteriori con un amplio margen de error.</span></li>
+                    </ul>
+                </div>
+                
+                <!-- Activo (Obrin IA) -->
+                <div class="border border-brand-500/30 bg-gradient-to-b from-brand-900/40 to-slate-800/80 p-8 rounded-3xl shadow-glow relative fade-in-up" style="transition-delay: 0.1s;">
+                    <div class="absolute -top-3 -right-3">
+                        <span class="flex h-6 w-6 relative">
+                          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-400 opacity-75"></span>
+                          <span class="relative inline-flex rounded-full h-6 w-6 bg-brand-500 items-center justify-center text-white text-[10px]"><i class="fa-solid fa-check"></i></span>
+                        </span>
+                    </div>
+                    <div class="flex items-center justify-between mb-8 pb-4 border-b border-brand-500/20">
+                        <div>
+                            <h4 class="text-xl font-bold text-white">Obrín IA</h4>
+                            <p class="text-xs text-brand-400 uppercase tracking-widest font-bold mt-1">Asistente Activo</p>
+                        </div>
+                        <i class="fa-solid fa-bolt text-2xl text-brand-400"></i>
+                    </div>
+                    <ul class="space-y-4 text-slate-200 text-sm font-light">
+                        <li class="flex items-start gap-3"><i class="fa-solid fa-check text-brand-400 mt-1 shrink-0"></i> <span>Procesa la evidencia y entrega un diagnóstico estructurado.</span></li>
+                        <li class="flex items-start gap-3"><i class="fa-solid fa-check text-brand-400 mt-1 shrink-0"></i> <span>Potencia la decisión profesional, mitigando el sesgo humano.</span></li>
+                        <li class="flex items-start gap-3"><i class="fa-solid fa-check text-brand-400 mt-1 shrink-0"></i> <span>Cálculo de presupuesto regionalizado instantáneo y exacto.</span></li>
+                    </ul>
+                    
+                    <div class="mt-8 pt-6 border-t border-brand-500/20 flex items-center justify-between">
+                        <div>
+                            <p class="text-[10px] text-brand-300 font-bold uppercase tracking-widest">Meta de Impacto (KPI)</p>
+                            <p class="text-sm text-white font-medium mt-1">Sobrecostos por errores iniciales.</p>
+                        </div>
+                        <div class="text-5xl font-light text-white tracking-tighter">0<span class="text-xl text-brand-400 font-bold">%</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Team Section -->
+    <section id="equipo" class="py-24 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-3xl mx-auto mb-16 fade-in-up">
+                <h3 class="text-3xl md:text-4xl font-extrabold text-slate-900 tracking-tight">Desarrollado por expertos</h3>
+            </div>
+
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8 mb-16 max-w-5xl mx-auto">
+                <!-- Team Member 1 -->
+                <div class="text-center fade-in-up">
+                    <img src="https://lh3.googleusercontent.com/pw/AP1GczPx1EJ_8fIwPO2dphbWGkNuor7vTGc9aKzSdIdvFeLuH3WCy24NLlHLs1BCK9M5qrCeB8DxVYks-46LohhaR4NA4K3pyxX7sqHCackmj7pPEiKmArQaN-v5HpnKrY5Z5MLLLSdUR3Ig6Wz5N8EnbdboLA=w449-h599-s-no-gm?authuser=0" alt="José M. Christensen" class="w-20 h-20 md:w-24 md:h-24 mx-auto rounded-full object-cover mb-4 border border-slate-200 shadow-sm">
+                    <h4 class="font-bold text-slate-900 text-sm">José M. Christensen</h4>
+                    <p class="text-slate-500 text-xs mt-1">Líder / Co-creador</p>
+                </div>
+
+                <!-- Team Member 2 -->
+                <div class="text-center fade-in-up" style="transition-delay: 0.1s;">
+                    <img src="https://lh3.googleusercontent.com/pw/AP1GczPAGbay3Va0BKkPUgiGX7SLhpD79DMBZF1xd5ccapCtq73169Pk_JQcetLv_gVSK3HfIG4txRC678ff79i6xEAe9l2pyQM_J7Q1wuh_fPuAsJDFtlAOksgQXD2-qY5LvUH5h_xJXeArENwt81PHkQW15Q=w449-h599-s-no-gm?authuser=0" alt="Clemente Del Prado" class="w-20 h-20 md:w-24 md:h-24 mx-auto rounded-full object-cover mb-4 border border-slate-200 shadow-sm">
+                    <h4 class="font-bold text-slate-900 text-sm">Clemente Del Prado</h4>
+                    <p class="text-slate-500 text-xs mt-1">Co-creador</p>
+                </div>
+
+                <!-- Team Member 3 -->
+                <div class="text-center fade-in-up" style="transition-delay: 0.2s;">
+                    <img src="https://lh3.googleusercontent.com/pw/AP1GczOO3GFraUNDJvV3ItB_TUd6WF7OITYuSV-EmuwSYLNrDhWdCzuWbRniV4RPM1HH9EBVRiMIsZEOXZS8E5WkFefU9C78xk61okykgwbjO9buY1JlMptuEVumiVw9s1HXGxPX-qJr26B-rM7uo8LP-bGmaA=w449-h599-s-no-gm?authuser=0" alt="Nicolás Maldonado" class="w-20 h-20 md:w-24 md:h-24 mx-auto rounded-full object-cover mb-4 border border-slate-200 shadow-sm">
+                    <h4 class="font-bold text-slate-900 text-sm">Nicolás Maldonado</h4>
+                    <p class="text-slate-500 text-xs mt-1">Co-creador</p>
+                </div>
+
+                <!-- Team Member 4 -->
+                <div class="text-center fade-in-up" style="transition-delay: 0.3s;">
+                    <img src="https://lh3.googleusercontent.com/pw/AP1GczMYY56vceJfy25WPxT5ToFv5rqYJuglJvjANfAQaiN1kgwH9kCvkfKkX2oN9ge7ODm2EmdUXgOGDBVHdbZr3NfO7l_ehJ2xPuDlBsR9BiToJ64zk7ZAnFpUmPOBI5Czlqa7aitzUyQogeRbXzFxbTgGZw=w400-h599-s-no-gm?authuser=0" alt="Julio Letelier Menares" class="w-20 h-20 md:w-24 md:h-24 mx-auto rounded-full object-cover mb-4 border border-slate-200 shadow-sm">
+                    <h4 class="font-bold text-slate-900 text-sm">Julio Letelier Menares</h4>
+                    <p class="text-slate-500 text-xs mt-1">Profesor Guía</p>
+                </div>
+            </div>
+
+            <!-- Academic Backing (Minimalist) -->
+            <div class="bg-slate-50 rounded-3xl p-8 border border-slate-200 max-w-4xl mx-auto flex flex-col md:flex-row items-center md:items-start gap-8 fade-in-up">
+                <img src="https://lh3.googleusercontent.com/pw/AP1GczPHYi-BQhxND0BLXkrVDsz6psd2JWK9X8DTy-p1IBCtTh7kS6AAOSIbD9vaqMPDK5xpvBq9WQ6MHxl3zN9oaa-5fvSPvqNduDK9xC97-q6BYi_ZcQH0UfM30SpNWG3_VpiYyuc3DgciR7oFU63EQEi4-g=w400-h400-s-no-gm?authuser=0" alt="Daniel Linares García" class="w-16 h-16 object-cover rounded-2xl border border-slate-200 shadow-sm shrink-0">
+                <div class="text-center md:text-left">
+                    <div class="flex flex-col md:flex-row md:items-center gap-3 mb-2">
+                        <h4 class="font-bold text-slate-900 text-lg">Daniel Linares García</h4>
+                        <span class="inline-block bg-white border border-slate-200 text-slate-600 text-[10px] uppercase tracking-widest px-2 py-1 rounded-md font-semibold shadow-sm w-max mx-auto md:mx-0">Respaldo Académico</span>
+                    </div>
+                    <p class="text-slate-500 font-medium text-sm mb-4">Vínculo institucional con la Escuela de Construcción Civil.</p>
+                    <ul class="text-sm text-slate-600 space-y-2 font-light">
+                        <li class="flex items-center justify-center md:justify-start gap-2"><i class="fa-solid fa-circle-check text-brand-500 text-[10px]"></i> Ph.D. Construcción Inteligente, Virginia Tech (2022).</li>
+                        <li class="flex items-center justify-center md:justify-start gap-2"><i class="fa-solid fa-circle-check text-brand-500 text-[10px]"></i> M.Eng. Computer Science / Ms.C. Construcción, Virginia Tech.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer id="contacto" class="bg-black pt-16 pb-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid md:grid-cols-3 gap-12 mb-16 border-b border-slate-800 pb-12">
+                <!-- Brand -->
+                <div class="col-span-1 md:col-span-2">
+                    <img src="https://lh3.googleusercontent.com/pw/AP1GczOOE3ZHICrV-_RfZdqAjRIdP5vT8mk8EUJgp83JaAa8uF1SEOlEcN5nkO410n_kUGrx1VZJU2MAD_yk6HcbPAhoW4zzYVJH3KVOOof-U3bsfH4yL6P5J2U9i8SaDuth_yZPP6_IihvtadZrNgEjzDIeUQ=w599-h599-s-no-gm?authuser=0" alt="Obrín IA Logo" class="h-10 w-auto object-contain mb-6 invert grayscale opacity-90" onerror="this.onerror=null; this.src='https://placehold.co/150x50/000000/ffffff?text=Obrin+IA';">
+                    <p class="text-slate-400 text-sm mb-6 max-w-sm font-light leading-relaxed">
+                        Sistema paramétrico de diagnóstico estructural. Protegiendo la rentabilidad de las constructoras a través de tecnología avanzada.
+                    </p>
+                </div>
+
+                <!-- Links -->
+                <div>
+                    <h4 class="text-white font-semibold mb-4 text-sm">Plataforma</h4>
+                    <ul class="space-y-3 text-sm font-light">
+                        <li><a href="#problema" class="text-slate-400 hover:text-white transition-colors nav-link">El Problema</a></li>
+                        <li><a href="#solucion" class="text-slate-400 hover:text-white transition-colors nav-link">Tecnología IA</a></li>
+                        <li><a href="#caracteristicas" class="text-slate-400 hover:text-white transition-colors nav-link">Características</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Context & Centered Logos (4x Size) -->
+            <div class="text-center mb-16">
+                <h4 class="text-white font-semibold mb-4 text-lg">Proyecto respaldado por</h4>
+                
+                <div class="flex justify-center mb-12">
+                    <img src="https://lh3.googleusercontent.com/pw/AP1GczNmLeJz99QY6S0kqA_fUkJFtds_QKXnULa7kso4yS0c3pzXPlrFeMYHOtwwWxxWbLfNgPYCFMtEXcoLn0Q993W3jv97VzgNADOYJ0IM0gBEb7aInuj15Sw8ngDrIDGfwRIITvhJ_wuiDYvtAGdtvSCZWw=w1366-h355-s-no-gm?authuser=0" alt="Escuela de Construcción Civil" class="h-20 w-auto object-contain">
+                </div>
+                <h4 class="text-white font-semibold mb-4 text-lg">Participantes en</h4>
+                <div class="flex flex-wrap justify-center items-center gap-12 md:gap-24">
+                    <img src="https://lh3.googleusercontent.com/pw/AP1GczPVsNf-1bnVmXvcy0Ukb8m-kl_nBZvZswrhZ4Bpn_PD3ajK-KllISiIqGaIfhKkdB_SvAiRv3YkCLqAYfVEoiSuEuXfe8sX4jZRTuLkSPdQVTJ2j92LF3TnwYKn4JVRbaCNolcEDbC4vvZisPYksVSKUA=w599-h599-s-no-gm?authuser=0" alt="Reto Construye Academia" class="h-32 w-auto object-contain" onerror="this.style.display='none'">
+                    <img src="https://lh3.googleusercontent.com/pw/AP1GczMWuq1iiG6f0WB5qF8kmoCY5w1NIq8B5oTsckE1Xh-1qjwOiGy3jZJPngxIpE1n_Nj_4AHPPT8cVjoWxyXcNGqtChhtWVcOgjSGJteHkNcW8BtNaY8NxmvgmP9GhDe048r-4F6MHT-Rt23Em1Iiqb2PUg=w599-h599-s-no-gm?authuser=0" alt="CChC" class="h-24 w-auto object-contain" onerror="this.style.display='none'">
+                    <img src="https://lh3.googleusercontent.com/pw/AP1GczMFIMLmx5In-6G4a7N3DtnlBJaZF5vJfL3a2zv2T9w4OIPW21WSv12EBxX_qs5toXs3tcBBlC-TamXszvJ_ofI7upfu07OlxsUL-ENIJQq9zffYHvL3qsFFd2LFJbHVhjsfh8LTEpz6TOC2zDoWUoCs6w=w599-h599-s-no-gm?authuser=0" alt="CDT" class="h-72 w-auto object-contain" onerror="this.style.display='none'">
+                </div>
+            </div>
+
+            <div class="border-t border-slate-800 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
+                <p class="text-xs text-slate-500 font-light">
+                    &copy; 2026 Obrín IA. Proyecto de Innovación.
+                </p>
+                <p class="text-xs text-slate-500 font-light">
+                    Ref: Construye2025 (2020) | Matrix Consulting (2020)
+                </p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script>
+        // Internal Navigation Handler for Google Sites compatibility
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                const targetId = this.getAttribute('href');
+                if (targetId && targetId.startsWith('#')) {
+                    e.preventDefault();
+                    const targetElement = document.querySelector(targetId);
+                    if (targetElement) {
+                        targetElement.scrollIntoView({ behavior: 'smooth' });
+                    }
+                    // If in mobile, close menu
+                    document.getElementById('mobile-menu').classList.add('hidden');
+                }
+            });
+        });
+
+        // Mobile Menu Toggle
+        const btn = document.getElementById('mobile-menu-btn');
+        const menu = document.getElementById('mobile-menu');
+
+        btn.addEventListener('click', () => {
+            menu.classList.toggle('hidden');
+        });
+
+        // Navbar Scroll Effect
+        const navbar = document.getElementById('navbar');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 10) {
+                navbar.classList.add('shadow-sm');
+                navbar.classList.replace('bg-white/70', 'bg-white/90');
+            } else {
+                navbar.classList.remove('shadow-sm');
+                navbar.classList.replace('bg-white/90', 'bg-white/70');
+            }
+        });
+
+        // Intersection Observer for Scroll Animations
+        const observerOptions = {
+            root: null,
+            rootMargin: '0px',
+            threshold: 0.1
+        };
+
+        const observer = new IntersectionObserver((entries, observer) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                    observer.unobserve(entry.target); 
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.fade-in-up').forEach(element => {
+            observer.observe(element);
+        });
+    </script>
+</body>
+</html>
