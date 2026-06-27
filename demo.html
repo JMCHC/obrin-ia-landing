@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Obrín IA | Consultoría Técnica IA</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#fff7ed', 100: '#ffedd5', 300: '#fdba74', 400: '#fb923c', 500: '#f97316', 
+                            600: '#ea580c', 700: '#c2410c', 800: '#9a3412', 900: '#0f172a',
+                        },
+                        slate: {
+                            850: '#1e293b',
+                        }
+                    },
+                    fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] }
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+    <style>
+        body { font-family: 'Inter', sans-serif; -webkit-font-smoothing: antialiased; }
+        
+        #obrin-pro-root .upload-box { 
+            border: 1px dashed #94a3b8;
+            background: #f8fafc; 
+            border-radius: 8px;
+            transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center; 
+            overflow: hidden; 
+        }
+        #obrin-pro-root .upload-box:hover { border-color: #ea580c; background: #fffbf7; }
+        #obrin-pro-root .upload-box.filled { border-style: solid; border-color: #10B981; background: #f0fdf4; }
+        
+        .scanner-line { 
+            position: absolute; top: 0; left: 0; width: 100%; height: 1px; 
+            background: #ffffff; box-shadow: 0 0 15px rgba(255,255,255,0.8); z-index: 20; 
+            display: none; 
+        }
+        
+        .scanning-active { 
+            display: block; 
+            animation: scanDown 2.5s infinite ease-in-out; 
+        }
+
+        details > summary { list-style: none; }
+        details > summary::-webkit-details-marker { display: none; }
+        
+        /* Ajuste para que el PDF renderice bien los bordes curvos */
+        .pdf-export-mode {
+            border-radius: 0 !important;
+            padding: 40px !important;
+            background: white !important;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 min-h-screen flex items-center justify-center p-4">
+
+    <div class="w-full max-w-4xl">
+        <div class="text-center mb-10">
+            <img src="https://lh3.googleusercontent.com/pw/AP1GczOsQ9BjTC3dTk0RxKlbaZtHDeSwbqF3-buuEPA6QHBnWKNK4GkHQpfHPUJkVSbHPN7QEXrwUL5qVDwk5vLhsbpcLCLP3NCezheTURsZUCAOwnL0h1NtlHKbrEHkrsdquexu32SfFSdxlqHT1c36shbDMQ=w599-h599-s-no-gm?authuser=0" alt="Logo Obrín IA" class="h-28 md:h-36 lg:h-48 mx-auto mb-6 object-contain">
+            <h2 class="text-4xl font-light text-slate-900 mb-4 tracking-tight">Evaluación Técnica</h2>
+            <p class="text-gray-500 font-light text-base max-w-lg mx-auto">Tecnología de vanguardia para el diagnóstico constructivo y valoración de proyectos residenciales de alto estándar.</p>
+        </div>
+        
+        <div id="obrin-pro-root" class="bg-white p-8 md:p-10 rounded-2xl shadow-2xl border border-gray-100 relative overflow-hidden max-w-2xl mx-auto">
+            <div class="top-0 left-0 w-full h-1 absolute bg-slate-900"></div>
+            
+            <div id="input-section" class="space-y-6">
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="upload-box h-36 group cursor-pointer" id="box1">
+                        <span class="text-3xl mb-2 text-slate-300 group-hover:text-brand-600 transition" id="icon1">📷</span>
+                        <span class="text-emerald-600 text-2xl hidden" id="check1">✓</span>
+                        <span class="text-[0.65rem] font-bold text-slate-400 uppercase tracking-widest group-hover:text-slate-600 transition">Vista General</span>
+                        <input type="file" id="file1" accept="image/*" class="absolute inset-0 opacity-0 cursor-pointer w-full h-full" onchange="window.handleFile(this, 1)">
+                    </div>
+                    <div class="upload-box h-36 group cursor-pointer" id="box2">
+                        <span class="text-3xl mb-2 text-slate-300 group-hover:text-brand-600 transition" id="icon2">🔍</span>
+                        <span class="text-emerald-600 text-2xl hidden" id="check2">✓</span>
+                        <span class="text-[0.65rem] font-bold text-slate-400 uppercase tracking-widest group-hover:text-slate-600 transition">Detalle / Macro</span>
+                        <input type="file" id="file2" accept="image/*" class="absolute inset-0 opacity-0 cursor-pointer w-full h-full" onchange="window.handleFile(this, 2)">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Entorno y Clima (Opcional)</label>
+                        
+                        <div class="flex gap-2 mb-2" id="location-input-group">
+                            <input type="text" id="userLocation" class="w-full p-3 bg-slate-50 rounded-lg border border-slate-200 text-sm focus:ring-1 focus:ring-slate-900 focus:border-slate-900 transition outline-none" placeholder="Ej: Santiago, Viña del Mar...">
+                            <button type="button" id="getLocationBtn" onclick="window.fetchLocationAndWeather()" class="bg-slate-900 text-white px-4 rounded-lg text-sm font-medium transition hover:bg-slate-800 flex items-center justify-center whitespace-nowrap shadow-sm">
+                                📍 Detectar
+                            </button>
+                        </div>
+                        
+                        <div id="locationStatus" class="hidden w-full text-xs text-slate-700 bg-emerald-50 border border-emerald-200 p-3 rounded-lg flex items-center justify-between gap-3 mb-2">
+                            <div class="flex items-center gap-3">
+                                <span class="text-emerald-600 text-xl">✓</span>
+                                <div>
+                                    <p class="font-bold text-slate-800" id="ui-city-name">Ciudad</p>
+                                    <p id="ui-weather-desc">Cargando...</p>
+                                </div>
+                            </div>
+                            <button onclick="window.resetLocation()" class="text-slate-400 hover:text-red-500 transition font-bold px-2">✕</button>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Observaciones Adicionales</label>
+                        <textarea id="userNotes" class="w-full p-4 bg-slate-50 rounded-lg border border-slate-200 text-sm focus:ring-1 focus:ring-slate-900 focus:border-slate-900 resize-none transition outline-none" rows="2" placeholder="Describa el requerimiento (ej: 'Filtración activa en losa superior')..."></textarea>
+                    </div>
+                </div>
+                
+                <button id="analyzeBtn" type="button" class="w-full bg-slate-900 text-white py-4 rounded-lg font-medium text-xs tracking-[0.15em] uppercase opacity-50 pointer-events-none transition hover:bg-slate-800 shadow-lg" onclick="window.runAnalysis()">Iniciar Análisis Técnico</button>
+            </div>
+
+            <div id="preview-box" class="hidden relative h-72 bg-slate-900 rounded-lg overflow-hidden mb-6 border border-slate-800 shadow-inner">
+                <img id="preview-main" src="" class="w-full h-full object-contain opacity-60">
+                <div id="laser" class="scanner-line"></div>
+                <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none z-30 w-full px-4">
+                    <div class="flex flex-col items-center gap-2">
+                        <div class="w-1 h-1 bg-white rounded-full animate-ping"></div>
+                        <span id="loading-msg" class="text-white text-xs font-light tracking-widest uppercase text-center">Analizando con IA...</span>
+                    </div>
+                    <button id="error-retry-btn" class="hidden mt-6 bg-white/10 backdrop-blur-md border border-white/20 text-white px-6 py-2 rounded-full text-xs font-medium hover:bg-white/20 pointer-events-auto transition" onclick="window.location.reload()">Reiniciar Sistema</button>
+                </div>
+            </div>
+
+            <div id="result-wrapper" class="hidden">
+                <div id="result" class="text-left bg-white overflow-hidden pb-4">
+                    
+                    <div id="pdf-header" class="hidden border-b-2 border-slate-900 pb-4 mb-6">
+                        <h1 class="text-2xl font-serif text-slate-900 tracking-tight">Obrín IA</h1>
+                        <p class="text-[0.65rem] uppercase tracking-widest text-slate-500 font-bold">Reporte de Evaluación Técnica</p>
+                    </div>
+
+                    <div id="user-request-summary" class="hidden mb-6 bg-slate-50 p-4 rounded-lg border border-slate-100">
+                        <p class="text-[0.6rem] font-bold text-slate-400 uppercase tracking-wider mb-3">Evidencia Proporcionada</p>
+                        <div class="flex gap-4 mb-3">
+                            <img id="summary-img1" class="hidden w-32 h-32 object-cover rounded-lg border border-slate-200 shadow-sm">
+                            <img id="summary-img2" class="hidden w-32 h-32 object-cover rounded-lg border border-slate-200 shadow-sm">
+                        </div>
+                        <div id="summary-notes-container" class="hidden">
+                            <p class="text-[0.6rem] font-bold text-slate-400 uppercase tracking-wider mb-1">Observaciones del Usuario</p>
+                            <p id="summary-notes" class="text-sm text-slate-700 italic"></p>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-between items-start border-b border-slate-100 pb-4 mb-4">
+                        <div>
+                            <p class="text-[0.6rem] text-slate-400 uppercase tracking-widest mb-1">Elemento Analizado</p>
+                            <div id="surface-type" class="font-serif text-xl text-slate-900"></div>
+                            
+                            <div id="weather-badge" class="hidden flex items-center gap-1 mt-2 text-[0.65rem] text-slate-500 bg-slate-50 border border-slate-100 py-1 px-2 rounded">
+                                <span>🌤️</span>
+                                <span class="font-medium" id="loc-val"></span>: 
+                                <span id="temp-val"></span>, <span id="hum-val"></span> humedad
+                            </div>
+                        </div>
+                        <span id="complexity-badge" class="text-[0.6rem] font-bold px-3 py-1 rounded-full uppercase tracking-wide border mt-1"></span>
+                    </div>
+
+                    <div class="space-y-6">
+                        <div class="grid grid-cols-1 gap-4">
+                            <div class="bg-slate-50 p-4 rounded-lg border border-slate-100">
+                                <p class="text-[0.6rem] font-bold text-slate-400 uppercase tracking-wider mb-2">Diagnóstico de Patología</p>
+                                <p id="damage-val" class="text-sm font-medium text-slate-800 leading-relaxed"></p>
+                            </div>
+                            
+                            <div class="bg-slate-50 p-4 rounded-lg border border-slate-100">
+                                <p class="text-[0.6rem] font-bold text-slate-400 uppercase tracking-wider mb-2">Propuesta Técnica de Intervención</p>
+                                <p id="solution-val" class="text-sm text-slate-600 leading-relaxed"></p>
+                            </div>
+                        </div>
+
+                        <div class="space-y-3 mt-4">
+                            <details id="det-materials" class="group bg-white border border-slate-200 rounded-lg open:bg-slate-50 transition-all duration-300 shadow-sm">
+                                <summary class="flex items-center justify-between p-4 cursor-pointer font-bold text-[0.65rem] uppercase tracking-wider text-slate-600 hover:text-brand-600 transition-colors">
+                                    <div class="flex items-center gap-2"><span class="text-lg">📦</span> Especificación de Materiales</div>
+                                    <span class="text-slate-400 transition-transform duration-300 group-open:-rotate-180">▼</span>
+                                </summary>
+                                <div class="p-4 pt-1">
+                                    <ul id="materials-list" class="list-disc pl-5 text-sm text-slate-600 space-y-2 marker:text-brand-500"></ul>
+                                </div>
+                            </details>
+
+                            <details id="det-steps" class="group bg-white border border-slate-200 rounded-lg open:bg-slate-50 transition-all duration-300 shadow-sm">
+                                <summary class="flex items-center justify-between p-4 cursor-pointer font-bold text-[0.65rem] uppercase tracking-wider text-slate-600 hover:text-brand-600 transition-colors">
+                                    <div class="flex items-center gap-2"><span class="text-lg">📋</span> Procedimiento Operativo</div>
+                                    <span class="text-slate-400 transition-transform duration-300 group-open:-rotate-180">▼</span>
+                                </summary>
+                                <div class="p-4 pt-1">
+                                    <ol id="steps-list" class="list-decimal pl-5 text-sm text-slate-600 space-y-3 marker:font-bold marker:text-slate-400"></ol>
+                                </div>
+                            </details>
+                        </div>
+                        
+                        <div class="bg-slate-900 p-6 rounded-xl text-white relative overflow-hidden mt-6">
+                            <div class="absolute top-0 right-0 w-32 h-32 bg-brand-600 rounded-full blur-[60px] opacity-20"></div>
+                            
+                            <div class="relative z-10 flex justify-between items-start">
+                                <div>
+                                    <p class="text-[0.6rem] text-brand-400 uppercase tracking-widest font-bold mb-1">Inversión Unitaria Referencial</p>
+                                    <p class="text-[0.6rem] text-slate-400 mb-3">Valor de Mercado Competitivo</p>
+                                </div>
+                                <span class="bg-white/10 text-white text-[0.55rem] px-2 py-0.5 rounded border border-white/10 uppercase tracking-wider">CLP</span>
+                            </div>
+                            
+                            <div class="relative z-10 mt-2">
+                                <p class="font-serif text-3xl tracking-tight leading-none text-white"><span id="price-val"></span></p>
+                                <p id="unit-val" class="text-[0.65rem] text-slate-400 font-medium mt-1 uppercase tracking-widest"></p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center justify-between pt-2">
+                            <div class="flex items-center gap-2 text-xs text-slate-500">
+                                <span class="text-lg">⏱️</span> 
+                                <span class="font-medium">Ejecución Estimada:</span>
+                                <span id="time-val"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex gap-3 mt-6">
+                    <button id="pdf-btn" onclick="window.generatePDF()" class="w-1/3 bg-slate-100 hover:bg-slate-200 text-slate-800 text-center py-4 rounded-lg font-bold text-xs uppercase tracking-widest transition shadow-sm flex items-center justify-center gap-2">
+                        📄 Reporte
+                    </button>
+                    <button id="wa-btn-pro" onclick="window.contactPro()" class="w-2/3 bg-brand-600 hover:bg-brand-500 text-white text-center py-4 rounded-lg font-bold text-xs uppercase tracking-widest transition shadow-lg hover:shadow-brand-500/20">
+                        Visita Técnica
+                    </button>
+                </div>
+                
+                <button id="resetBtn" class="w-full py-3 text-xs text-slate-400 mt-4 font-medium hover:text-slate-600 transition tracking-wide uppercase" onclick="window.resetUI()">Realizar Nueva Evaluación</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- CONFIGURACIÓN ---
+        const apiKey = ""; 
+        const MI_TEL = "56992582669";
+        
+        let proWaUrl = ""; 
+        let imgData1 = null; 
+        let imgType1 = null;
+        let imgData2 = null; 
+        let imgType2 = null;
+        
+        let weatherContextText = "";
+        let finalWeatherLoc = "";
+        let finalWeatherTemp = "";
+        let finalWeatherHum = "";
+
+        window.handleFile = function(input, n) {
+            if(input.files[0]) {
+                const r = new FileReader();
+                r.onload = e => {
+                    if(n===1) { 
+                        imgData1 = e.target.result.split(',')[1]; 
+                        imgType1 = input.files[0].type; 
+                        document.getElementById('preview-main').src = e.target.result; 
+                        document.getElementById('summary-img1').src = e.target.result;
+                        document.getElementById('summary-img1').classList.remove('hidden');
+                    } else if (n === 2) {
+                        imgData2 = e.target.result.split(',')[1]; 
+                        imgType2 = input.files[0].type; 
+                        document.getElementById('summary-img2').src = e.target.result;
+                        document.getElementById('summary-img2').classList.remove('hidden');
+                    }
+                    document.getElementById(`box${n}`).classList.add('filled');
+                    document.getElementById(`icon${n}`).classList.add('hidden');
+                    document.getElementById(`check${n}`).classList.remove('hidden');
+
+                    if(imgData1) { 
+                        const btn = document.getElementById('analyzeBtn');
+                        btn.style.opacity = '1'; 
+                        btn.style.pointerEvents = 'auto'; 
+                        btn.classList.add('bg-slate-900'); 
+                    }
+                };
+                r.readAsDataURL(input.files[0]);
+            }
+        };
+
+        window.fetchLocationAndWeather = async function() {
+            const btn = document.getElementById('getLocationBtn');
+            const inputGroup = document.getElementById('location-input-group');
+            const statusBox = document.getElementById('locationStatus');
+            const originalBtnHtml = btn.innerHTML;
+
+            btn.innerHTML = `<span class="animate-spin inline-block">⏳</span>`;
+            btn.disabled = true;
+
+            const processCoordinates = async (lat, lon, cityFallback = null) => {
+                try {
+                    let city = cityFallback;
+                    if (!city) {
+                        const geoRes = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=es`);
+                        const geoData = await geoRes.json();
+                        city = geoData.city || geoData.locality || "Ubicación detectada";
+                    }
+
+                    const weatherRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m`);
+                    const weatherData = await weatherRes.json();
+                    
+                    const temp = weatherData.current.temperature_2m + "°C";
+                    const hum = weatherData.current.relative_humidity_2m + "%";
+
+                    finalWeatherLoc = city;
+                    finalWeatherTemp = temp;
+                    finalWeatherHum = hum;
+                    weatherContextText = `Ubicación: ${city}. CLIMA ACTUAL: Temperatura ${temp}, Humedad Ambiental ${hum}. DEBES CONSIDERAR ESTO SI ES RELEVANTE para la patología.`;
+
+                    inputGroup.classList.add('hidden');
+                    statusBox.classList.remove('hidden');
+                    document.getElementById('ui-city-name').innerText = city;
+                    document.getElementById('ui-weather-desc').innerText = `${temp}, ${hum} de humedad ambiental`;
+                    
+                } catch(e) {
+                    alert("Error consultando el clima local.");
+                    btn.innerHTML = originalBtnHtml;
+                    btn.disabled = false;
+                }
+            };
+
+            const fallbackToIP = async () => {
+                try {
+                    const ipRes = await fetch('https://get.geojs.io/v1/ip/geo.json');
+                    const ipData = await ipRes.json();
+                    await processCoordinates(ipData.latitude, ipData.longitude, ipData.city);
+                } catch(e) {
+                    alert("No pudimos detectar tu ubicación. Por favor, escribe tu ciudad manualmente.");
+                    btn.innerHTML = originalBtnHtml;
+                    btn.disabled = false;
+                }
+            };
+
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (pos) => processCoordinates(pos.coords.latitude, pos.coords.longitude),
+                    (err) => { fallbackToIP(); },
+                    { timeout: 4000 }
+                );
+            } else { fallbackToIP(); }
+        };
+
+        window.resetLocation = function() {
+            finalWeatherLoc = ""; finalWeatherTemp = ""; finalWeatherHum = ""; weatherContextText = "";
+            document.getElementById('userLocation').value = "";
+            document.getElementById('locationStatus').classList.add('hidden');
+            document.getElementById('location-input-group').classList.remove('hidden');
+            const btn = document.getElementById('getLocationBtn');
+            btn.innerHTML = `📍 Detectar`;
+            btn.disabled = false;
+        };
+
+        window.resetUI = function() {
+            imgData1 = null; imgType1 = null;
+            imgData2 = null; imgType2 = null;
+            window.resetLocation();
+            
+            document.getElementById('result-wrapper').classList.add('hidden');
+            document.getElementById('preview-box').classList.add('hidden');
+            document.getElementById('input-section').classList.remove('hidden');
+            document.getElementById('weather-badge').classList.add('hidden');
+            
+            document.querySelectorAll('details').forEach(d => d.removeAttribute('open'));
+            
+            const msgEl = document.getElementById('loading-msg');
+            msgEl.innerText = "Analizando con IA...";
+            msgEl.className = "text-white text-xs font-light tracking-widest uppercase text-center";
+            document.getElementById('error-retry-btn').classList.add('hidden');
+            
+            document.getElementById('file1').value = ''; 
+            document.getElementById('file2').value = '';
+            document.getElementById('userNotes').value = '';
+            
+            document.getElementById('summary-img1').classList.add('hidden');
+            document.getElementById('summary-img1').src = '';
+            document.getElementById('summary-img2').classList.add('hidden');
+            document.getElementById('summary-img2').src = '';
+            document.getElementById('summary-notes-container').classList.add('hidden');
+            document.getElementById('summary-notes').innerText = '';
+            
+            ['1', '2'].forEach(n => { 
+                document.getElementById(`box${n}`).classList.remove('filled');
+                document.getElementById(`icon${n}`).classList.remove('hidden');
+                document.getElementById(`check${n}`).classList.add('hidden');
+            });
+            
+            const btn = document.getElementById('analyzeBtn');
+            btn.style.opacity = '0.5'; 
+            btn.style.pointerEvents = 'none'; 
+        }
+
+        window.contactPro = function() {
+            if (proWaUrl) window.open(proWaUrl, '_blank');
+        }
+
+        // --- GENERACIÓN DE PDF (UNA PLANCHA) ---
+        window.generatePDF = async function() {
+            const btn = document.getElementById('pdf-btn');
+            const originalHtml = btn.innerHTML;
+            btn.innerHTML = '⏳ Generando...';
+            btn.disabled = true;
+
+            const element = document.getElementById('result');
+            const header = document.getElementById('pdf-header');
+            const summary = document.getElementById('user-request-summary');
+            
+            // Forzar que los detalles (acordeones) estén abiertos para la foto del PDF
+            const details = element.querySelectorAll('details');
+            details.forEach(d => d.setAttribute('open', 'true'));
+            
+            // Preparar estilos para el PDF
+            header.classList.remove('hidden');
+            summary.classList.remove('hidden');
+            element.classList.add('pdf-export-mode');
+
+            try {
+                const canvas = await html2canvas(element, {
+                    scale: 2, // Alta resolución
+                    useCORS: true,
+                    backgroundColor: '#ffffff',
+                    windowWidth: 800 // Forzar un ancho consistente
+                });
+
+                const imgData = canvas.toDataURL('image/jpeg', 1.0);
+                const { jsPDF } = window.jspdf;
+                
+                // DIMENSIONES DINÁMICAS: El PDF mide exactamente lo que mide el Canvas (1 sola hoja asegurada)
+                const pdfWidth = canvas.width;
+                const pdfHeight = canvas.height;
+                
+                const pdf = new jsPDF({
+                    orientation: pdfHeight > pdfWidth ? 'portrait' : 'landscape',
+                    unit: 'px',
+                    format: [pdfWidth, pdfHeight]
+                });
+
+                pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight);
+                pdf.save('Reporte_Tecnico_Obrin_IA.pdf');
+
+            } catch (error) {
+                console.error("Error al generar el PDF:", error);
+                alert("Hubo un problema al generar el PDF.");
+            } finally {
+                // Restaurar estado visual
+                header.classList.add('hidden');
+                summary.classList.add('hidden');
+                element.classList.remove('pdf-export-mode');
+                btn.innerHTML = originalHtml;
+                btn.disabled = false;
+            }
+        };
+
+        // --- ANÁLISIS IA ---
+        window.runAnalysis = async function() {
+            document.getElementById('input-section').classList.add('hidden');
+            document.getElementById('preview-box').classList.remove('hidden');
+            
+            const laser = document.getElementById('laser');
+            laser.style.display='block'; 
+            laser.classList.add('scanning-active');
+            document.getElementById('error-retry-btn').classList.add('hidden');
+            
+            const msgEl = document.getElementById('loading-msg');
+
+            try {
+                let typedLocation = document.getElementById('userLocation').value.trim();
+                
+                if (!finalWeatherLoc && typedLocation) {
+                    msgEl.innerText = "Consultando Clima...";
+                    try {
+                        const geoRes = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(typedLocation)}&count=1&language=es&format=json`);
+                        const geoData = await geoRes.json();
+                        if (geoData.results && geoData.results.length > 0) {
+                            const lat = geoData.results[0].latitude;
+                            const lon = geoData.results[0].longitude;
+                            finalWeatherLoc = geoData.results[0].name;
+                            const weatherRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m`);
+                            const weatherData = await weatherRes.json();
+                            finalWeatherTemp = weatherData.current.temperature_2m + "°C";
+                            finalWeatherHum = weatherData.current.relative_humidity_2m + "%";
+                            weatherContextText = `Ubicación: ${finalWeatherLoc}. CLIMA ACTUAL: Temperatura ${finalWeatherTemp}, Humedad Ambiental ${finalWeatherHum}.`;
+                        }
+                    } catch(e) {}
+                }
+
+                msgEl.innerText = "Analizando con IA...";
+                const userNotes = document.getElementById('userNotes').value;
+                
+                const summaryNotes = document.getElementById('summary-notes');
+                const summaryNotesContainer = document.getElementById('summary-notes-container');
+                if (userNotes.trim()) {
+                    summaryNotes.innerText = `"${userNotes.trim()}"`;
+                    summaryNotesContainer.classList.remove('hidden');
+                } else {
+                    summaryNotesContainer.classList.add('hidden');
+                }
+
+                const climaPrompt = weatherContextText ? `INFORMACIÓN CLIMÁTICA EN TIEMPO REAL:\n${weatherContextText}` : "";
+
+                const prompt = `Actúa como Experto Técnico/Ingeniero Constructivo especializado en Mantención y Remodelaciones Domiciliarias Eficientes en CHILE (2025).
+                Analiza la imagen y las notas del usuario: "${userNotes}". 
+                
+                ${climaPrompt}
+                
+                TONO: Profesional, directo y con terminología estándar de la industria de la construcción chilena.
+
+                INSTRUCCIONES CRÍTICAS:
+                1. COSTOS: Estrictamente en Pesos Chilenos (CLP). Rango acotado (ej: "$18.000 a $22.000"). Competitivo.
+                2. MATERIALES: Nombra los materiales usando su denominación química o comercial genérica exacta. PROHIBIDO agregar adjetivos redundantes o inventados como "técnico" o "profesional" (NUNCA digas "Esmalte al agua técnico").
+                3. PASOS: Genera una lista procedimental y secuencial.
+
+                OBLIGATORIO - Responde SOLO con un JSON válido usando estrictamente esta estructura: 
+                {
+                    "superficie": "Nombre del elemento", 
+                    "nivel_dano": "LEVE / MODERADO / CRÍTICO", 
+                    "patologia": "Diagnóstico preciso", 
+                    "solucion": "Resumen de la solución técnica", 
+                    "materiales": ["Material 1", "Material 2"],
+                    "pasos": ["Paso 1: ...", "Paso 2: ..."],
+                    "tiempo": "Tiempo realista (días)", 
+                    "precio_ref": "$XX.XXX a $XX.XXX", 
+                    "unidad_ref": "por m2 (o global)"
+                }`;
+                
+                let parts = [{ text: prompt }];
+                if (imgData1) parts.push({ inline_data: { mime_type: imgType1 || 'image/jpeg', data: imgData1 } });
+                if (imgData2) parts.push({ inline_data: { mime_type: imgType2 || 'image/jpeg', data: imgData2 } });
+
+                const response = await fetch('https://obrin-ia-proxy.christensenjosemanuel.workers.dev', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ 
+                        contents: [{ parts: parts }],
+                        generationConfig: { temperature: 0.0, maxOutputTokens: 4096 },
+                        safetySettings: [
+                            { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_ONLY_HIGH" },
+                            { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_ONLY_HIGH" },
+                            { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_ONLY_HIGH" },
+                            { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_ONLY_HIGH" }
+                        ]
+                    })
+                });
+
+                const data = await response.json();
+                if (data.error) throw new Error("Error de API: " + data.error.message);
+                
+                const candidate = data.candidates?.[0];
+                const text = candidate?.content?.parts?.[0]?.text;
+                if (!text) throw new Error("El análisis fue detenido o falló.");
+
+                const cleanText = text.replace(/```json/g, '').replace(/```/g, '').trim();
+                const resultObj = JSON.parse(cleanText);
+
+                document.getElementById('surface-type').innerText = resultObj.superficie;
+                const badge = document.getElementById('complexity-badge');
+                badge.innerText = resultObj.nivel_dano;
+                
+                const d = resultObj.nivel_dano.toUpperCase();
+                let badgeClass = "border-slate-200 text-slate-500 bg-slate-50";
+                if(d.includes('CRÍTICO') || d.includes('ALTO')) badgeClass = "border-red-200 text-red-700 bg-red-50";
+                else if(d.includes('MODERADO') || d.includes('MEDIO')) badgeClass = "border-orange-200 text-orange-700 bg-orange-50";
+                else badgeClass = "border-emerald-200 text-emerald-700 bg-emerald-50";
+                badge.className = `text-[0.6rem] font-bold px-3 py-1 rounded-full uppercase tracking-wide border mt-1 ${badgeClass}`;
+                
+                if(finalWeatherLoc !== "") {
+                    const wBadge = document.getElementById('weather-badge');
+                    wBadge.classList.remove('hidden');
+                    document.getElementById('loc-val').innerText = finalWeatherLoc;
+                    document.getElementById('temp-val').innerText = finalWeatherTemp;
+                    document.getElementById('hum-val').innerText = finalWeatherHum;
+                }
+
+                document.getElementById('damage-val').innerText = resultObj.patologia;
+                document.getElementById('solution-val').innerText = resultObj.solucion;
+                
+                const materialsList = document.getElementById('materials-list');
+                materialsList.innerHTML = '';
+                if (resultObj.materiales && Array.isArray(resultObj.materiales)) {
+                    resultObj.materiales.forEach(mat => {
+                        const li = document.createElement('li');
+                        li.className = "leading-relaxed";
+                        li.innerHTML = `<span class="font-medium text-slate-700">${mat}</span>`;
+                        materialsList.appendChild(li);
+                    });
+                }
+
+                const stepsList = document.getElementById('steps-list');
+                stepsList.innerHTML = '';
+                if (resultObj.pasos && Array.isArray(resultObj.pasos)) {
+                    resultObj.pasos.forEach(paso => {
+                        const li = document.createElement('li');
+                        li.className = "leading-relaxed pl-1";
+                        const splitIdx = paso.indexOf(':');
+                        if (splitIdx > 0 && splitIdx < 40) {
+                            li.innerHTML = `<span class="font-bold text-slate-800">${paso.substring(0, splitIdx + 1)}</span>${paso.substring(splitIdx + 1)}`;
+                        } else { li.innerText = paso; }
+                        stepsList.appendChild(li);
+                    });
+                }
+
+                document.getElementById('time-val').innerText = resultObj.tiempo;
+                document.getElementById('price-val').innerText = resultObj.precio_ref || "A evaluar";
+                document.getElementById('unit-val').innerText = resultObj.unidad_ref || "";
+                
+                const wa = `Hola. Solicitud de visita técnica:\n\nUbicación: ${finalWeatherLoc || 'No especificada'}\nElemento: ${resultObj.superficie}\nDiagnóstico: ${resultObj.patologia}\nInversión Ref: ${resultObj.precio_ref} ${resultObj.unidad_ref}`;
+                proWaUrl = `https://wa.me/${MI_TEL}?text=${encodeURIComponent(wa)}`;
+                
+                laser.classList.remove('scanning-active'); 
+                laser.style.display='none';
+                document.getElementById('preview-box').classList.add('hidden');
+                document.getElementById('result-wrapper').classList.remove('hidden');
+
+            } catch(e) {
+                console.error(e);
+                laser.classList.remove('scanning-active');
+                laser.style.display='none';
+                
+                msgEl.className = "text-red-400 text-xs font-bold tracking-widest uppercase text-center";
+                msgEl.innerText = "Error: " + (e.message || "Fallo de conexión");
+                document.getElementById('error-retry-btn').classList.remove('hidden');
+            }
+        }
+    </script>
+</body>
+</html>
