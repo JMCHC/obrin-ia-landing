@@ -4,24 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Obrín IA | Asistente de Diagnóstico Constructivo</title>
-    <!-- Descripción para el snippet de Google -->
     <meta name="description" content="Obrín IA: Asistente paramétrico de diagnóstico constructivo impulsado por IA e IoT. Elimina la subjetividad, automatiza tus presupuestos y protege la rentabilidad de la obra.">
     
-    <!-- Favicon (El logo que sale en la pestaña del navegador y en Google) -->
     <link rel="icon" href="https://lh3.googleusercontent.com/pw/AP1GczOOE3ZHICrV-_RfZdqAjRIdP5vT8mk8EUJgp83JaAa8uF1SEOlEcN5nkO410n_kUGrx1VZJU2MAD_yk6HcbPAhoW4zzYVJH3KVOOof-U3bsfH4yL6P5J2U9i8SaDuth_yZPP6_IihvtadZrNgEjzDIeUQ=w599-h599-s-no-gm?authuser=0" type="image/png">
     
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     
-    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     
-    <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-    <!-- Tailwind Config -->
     <script>
         tailwind.config = {
             theme: {
@@ -98,16 +92,13 @@
 </head>
 <body class="bg-white text-slate-800 font-sans selection:bg-brand-500 selection:text-white">
 
-    <!-- Navigation -->
     <nav class="fixed w-full z-50 transition-all duration-500 bg-white/70 backdrop-blur-xl border-b border-slate-200/50" id="navbar">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-20 items-center">
-                <!-- Logo -->
                 <div class="flex-shrink-0 flex items-center cursor-pointer transition-transform hover:scale-105" onclick="window.scrollTo(0,0)">
                     <img src="https://lh3.googleusercontent.com/pw/AP1GczOOE3ZHICrV-_RfZdqAjRIdP5vT8mk8EUJgp83JaAa8uF1SEOlEcN5nkO410n_kUGrx1VZJU2MAD_yk6HcbPAhoW4zzYVJH3KVOOof-U3bsfH4yL6P5J2U9i8SaDuth_yZPP6_IihvtadZrNgEjzDIeUQ=w599-h599-s-no-gm?authuser=0" alt="Obrín IA Logo" class="h-24 w-auto object-contain" onerror="this.onerror=null; this.src='https://placehold.co/150x50/ffffff/0f2942?text=Obrin+IA';">
                 </div>
                 
-                <!-- Desktop Menu -->
                 <div class="hidden md:flex space-x-10">
                     <a href="#problema" class="text-slate-500 hover:text-brand-600 font-medium text-sm transition-colors nav-link">El Problema</a>
                     <a href="#solucion" class="text-slate-500 hover:text-brand-600 font-medium text-sm transition-colors nav-link">Solución</a>
@@ -116,14 +107,12 @@
                     <a href="#equipo" class="text-slate-500 hover:text-brand-600 font-medium text-sm transition-colors nav-link">Equipo</a>
                 </div>
 
-                <!-- CTA Button -->
                 <div class="hidden md:flex">
-                    <a href="https://gemini.google.com/share/1e193aefb8a7" target="_blank" class="bg-brand-600 hover:bg-brand-500 text-white px-6 py-2.5 rounded-full text-sm font-semibold transition-all shadow-glow hover:shadow-lg hover:-translate-y-0.5">
+                    <a href="demo.html" target="_blank" class="bg-brand-600 hover:bg-brand-500 text-white px-6 py-2.5 rounded-full text-sm font-semibold transition-all shadow-glow hover:shadow-lg hover:-translate-y-0.5">
                         Solicitar Demo
                     </a>
                 </div>
 
-                <!-- Mobile Menu Button -->
                 <div class="md:hidden flex items-center">
                     <button id="mobile-menu-btn" class="text-slate-500 hover:text-slate-900 focus:outline-none">
                         <i class="fa-solid fa-bars text-2xl"></i>
@@ -132,7 +121,6 @@
             </div>
         </div>
 
-        <!-- Mobile Menu Panel -->
         <div id="mobile-menu" class="hidden md:hidden bg-white/95 backdrop-blur-xl border-b border-slate-200 shadow-xl absolute w-full">
             <div class="px-4 pt-4 pb-8 space-y-2">
                 <a href="#problema" class="block px-4 py-3 rounded-xl text-base font-medium text-slate-600 hover:text-brand-600 hover:bg-slate-50 nav-link">El Problema</a>
@@ -140,17 +128,15 @@
                 <a href="#tutorial" class="block px-4 py-3 rounded-xl text-base font-medium text-slate-600 hover:text-brand-600 hover:bg-slate-50 nav-link">Tutorial</a>
                 <a href="#caracteristicas" class="block px-4 py-3 rounded-xl text-base font-medium text-slate-600 hover:text-brand-600 hover:bg-slate-50 nav-link">Tecnología</a>
                 <a href="#equipo" class="block px-4 py-3 rounded-xl text-base font-medium text-slate-600 hover:text-brand-600 hover:bg-slate-50 nav-link">Equipo</a>
-                <a href="https://gemini.google.com/share/1e193aefb8a7" target="_blank" class="block w-full text-center mt-6 bg-brand-600 text-white px-5 py-3 rounded-xl font-semibold shadow-md">Solicitar Demo</a>
+                <a href="demo.html" target="_blank" class="block w-full text-center mt-6 bg-brand-600 text-white px-5 py-3 rounded-xl font-semibold shadow-md">Solicitar Demo</a>
             </div>
         </div>
     </nav>
 
-    <!-- Hero Section -->
     <section class="relative pt-32 pb-20 lg:pt-48 lg:pb-32 overflow-hidden bg-mesh">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             <div class="grid lg:grid-cols-12 gap-12 lg:gap-8 items-center">
                 
-                <!-- Text Content (Left) -->
                 <div class="lg:col-span-7 fade-in-up text-center lg:text-left">
                     <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white border border-slate-200 shadow-sm text-slate-600 text-xs font-semibold mb-8 tracking-wide">
                         <span class="w-2 h-2 rounded-full bg-brand-500 animate-pulse"></span>
@@ -168,19 +154,16 @@
                     </p>
                     
                     <div class="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4">
-                        <a href="https://gemini.google.com/share/1e193aefb8a7" target="_blank" class="w-full sm:w-auto bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 px-8 py-4 rounded-full font-semibold transition-all shadow-sm hover:shadow-md text-center flex items-center justify-center gap-2">
+                        <a href="demo.html" target="_blank" class="w-full sm:w-auto bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 px-8 py-4 rounded-full font-semibold transition-all shadow-sm hover:shadow-md text-center flex items-center justify-center gap-2">
                             <i class="fa-solid fa-play text-brand-600 text-sm"></i> Solicitar Demo
                         </a>
                     </div>
                 </div>
 
-                <!-- App Mockup (Right) -->
                 <div class="lg:col-span-5 relative flex justify-center fade-in-up" style="transition-delay: 0.2s;">
                     
-                    <!-- Decorative blur -->
                     <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-72 h-72 bg-brand-400 rounded-full mix-blend-multiply filter blur-[80px] opacity-30"></div>
 
-                    <!-- Floating Card 1: Patología -->
                     <div class="absolute -left-6 md:-left-12 top-20 bg-white/80 backdrop-blur-lg border border-white/40 p-4 rounded-2xl shadow-soft z-20 float-animation w-48">
                         <div class="flex items-start gap-3">
                             <div class="w-8 h-8 rounded-full bg-brand-50 flex items-center justify-center text-brand-600 shrink-0 mt-1"><i class="fa-solid fa-microscope text-xs"></i></div>
@@ -191,7 +174,6 @@
                         </div>
                     </div>
                     
-                    <!-- Floating Card 2: Costo -->
                     <div class="absolute -right-6 md:-right-10 bottom-32 bg-slate-900/90 backdrop-blur-lg border border-slate-700 p-4 rounded-2xl shadow-xl z-20 float-animation-delayed w-44">
                         <div class="flex items-start gap-3">
                             <div class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-green-400 shrink-0 mt-1"><i class="fa-solid fa-calculator text-xs"></i></div>
@@ -202,21 +184,16 @@
                         </div>
                     </div>
 
-                    <!-- The Phone (Clean, Light Theme) -->
                     <div class="relative w-[280px] md:w-[320px] h-[600px] rounded-[3rem] sleek-phone overflow-hidden flex flex-col z-10">
-                        <!-- Top Notch -->
                         <div class="absolute top-0 inset-x-0 h-6 bg-slate-100 rounded-b-2xl w-32 mx-auto z-30"></div>
                         
-                        <!-- App Header -->
                         <div class="pt-12 pb-4 px-6 bg-white border-b border-slate-100 flex justify-between items-center z-20">
                             <i class="fa-solid fa-arrow-left text-slate-400 text-lg"></i>
                             <span class="font-bold text-slate-800 text-xs tracking-widest uppercase">Obrín IA</span>
                             <i class="fa-solid fa-ellipsis-vertical text-slate-400 text-lg"></i>
                         </div>
 
-                        <!-- App Content -->
                         <div class="flex-1 overflow-y-auto no-scrollbar p-5 bg-slate-50 space-y-4 relative">
-                            <!-- Element Header -->
                             <div class="mb-2">
                                 <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Elemento Analizado</p>
                                 <div class="flex justify-between items-start">
@@ -225,19 +202,16 @@
                                 </div>
                             </div>
 
-                            <!-- Diagnosis Card -->
                             <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-100/50">
                                 <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Diagnóstico de Patología</p>
                                 <p class="text-slate-700 text-sm leading-relaxed font-medium">Desprendimiento de material y exposición de mortero de pega por impacto.</p>
                             </div>
 
-                            <!-- Solution Card -->
                             <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-100/50">
                                 <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Propuesta Técnica</p>
                                 <p class="text-slate-700 text-sm leading-relaxed font-medium">Remoción técnica de piezas, limpieza de sustrato, adhesivo tipo AC y fraguado.</p>
                             </div>
 
-                            <!-- Cost Card -->
                             <div class="bg-gradient-to-br from-brand-600 to-brand-800 rounded-2xl p-5 text-white shadow-md relative overflow-hidden mt-6">
                                 <div class="absolute right-0 bottom-0 opacity-10 transform translate-x-4 translate-y-4">
                                     <i class="fa-solid fa-chart-pie text-7xl"></i>
@@ -260,7 +234,6 @@
         </div>
     </section>
 
-    <!-- The Problem / Stats -->
     <section id="problema" class="py-24 md:py-32 bg-white">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="grid lg:grid-cols-12 gap-16 items-start">
@@ -277,7 +250,6 @@
                 </div>
 
                 <div class="lg:col-span-7 grid sm:grid-cols-2 gap-8">
-                    <!-- Stat 1 -->
                     <div class="bg-slate-50 rounded-3xl p-8 border border-slate-100 hover:shadow-soft transition-all fade-in-up">
                         <div class="text-5xl font-light text-slate-900 mb-4 tracking-tighter">21.7<span class="text-brand-600 font-bold text-3xl">%</span></div>
                         <h4 class="text-base font-bold text-slate-900 mb-2">Retrabajos Constantes</h4>
@@ -285,7 +257,6 @@
                         <p class="text-[10px] uppercase tracking-wider text-slate-400 font-semibold">Matrix Consulting & CChC</p>
                     </div>
 
-                    <!-- Stat 2 -->
                     <div class="bg-slate-50 rounded-3xl p-8 border border-slate-100 hover:shadow-soft transition-all fade-in-up" style="transition-delay: 0.1s;">
                         <div class="text-5xl font-light text-slate-900 mb-4 tracking-tighter">71<span class="text-brand-600 font-bold text-3xl">%</span></div>
                         <h4 class="text-base font-bold text-slate-900 mb-2">Desviaciones Críticas</h4>
@@ -297,7 +268,6 @@
         </div>
     </section>
 
-    <!-- The Solution (Features) -->
     <section id="solucion" class="py-24 md:py-32 bg-slate-50 border-y border-slate-200/60">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center max-w-2xl mx-auto mb-20 fade-in-up">
@@ -307,7 +277,6 @@
             </div>
 
             <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <!-- Feature 1 -->
                 <div class="bg-white p-8 rounded-3xl border border-slate-200/60 shadow-sm hover:shadow-soft transition-all duration-300 fade-in-up group">
                     <div class="w-12 h-12 rounded-2xl bg-brand-50 flex items-center justify-center text-brand-600 mb-6 group-hover:scale-110 transition-transform">
                         <i class="fa-solid fa-camera-retro text-xl"></i>
@@ -316,7 +285,6 @@
                     <p class="text-sm text-slate-500 leading-relaxed font-light">Interfaz móvil intuitiva para el ingreso in situ de fotografías contextuales y descripciones textuales de las fallas.</p>
                 </div>
 
-                <!-- Feature 2 -->
                 <div class="bg-white p-8 rounded-3xl border border-slate-200/60 shadow-sm hover:shadow-soft transition-all duration-300 fade-in-up group" style="transition-delay: 0.1s;">
                     <div class="w-12 h-12 rounded-2xl bg-brand-50 flex items-center justify-center text-brand-600 mb-6 group-hover:scale-110 transition-transform">
                         <i class="fa-solid fa-brain text-xl"></i>
@@ -325,7 +293,6 @@
                     <p class="text-sm text-slate-500 leading-relaxed font-light">Visión computacional entrenada para detectar patrones estructurales e identificar la causa raíz eliminando el sesgo humano.</p>
                 </div>
 
-                <!-- Feature 3 -->
                 <div class="bg-white p-8 rounded-3xl border border-slate-200/60 shadow-sm hover:shadow-soft transition-all duration-300 fade-in-up group" style="transition-delay: 0.2s;">
                     <div class="w-12 h-12 rounded-2xl bg-brand-50 flex items-center justify-center text-brand-600 mb-6 group-hover:scale-110 transition-transform">
                         <i class="fa-solid fa-list-check text-xl"></i>
@@ -334,7 +301,6 @@
                     <p class="text-sm text-slate-500 leading-relaxed font-light">Emisión instantánea de tres variables críticas estructuradas: Causa, Solución Técnica precisa y Costo Directo por m².</p>
                 </div>
 
-                <!-- Feature 4 -->
                 <div class="bg-white p-8 rounded-3xl border border-slate-200/60 shadow-sm hover:shadow-soft transition-all duration-300 fade-in-up group">
                     <div class="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center text-slate-700 mb-6 group-hover:scale-110 transition-transform">
                         <i class="fa-solid fa-satellite-dish text-xl"></i>
@@ -343,7 +309,6 @@
                     <p class="text-sm text-slate-500 leading-relaxed font-light">Integración perimetral con sensores LiDAR e higrómetros para medir volúmenes y condiciones con precisión milimétrica.</p>
                 </div>
 
-                <!-- Feature 5 -->
                 <div class="bg-white p-8 rounded-3xl border border-slate-200/60 shadow-sm hover:shadow-soft transition-all duration-300 fade-in-up group" style="transition-delay: 0.1s;">
                     <div class="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center text-slate-700 mb-6 group-hover:scale-110 transition-transform">
                         <i class="fa-solid fa-map-location-dot text-xl"></i>
@@ -352,7 +317,6 @@
                     <p class="text-sm text-slate-500 leading-relaxed font-light">Cotización inteligente cruzando la ubicación GPS de la obra vía API con catálogos de proveedores locales actualizados.</p>
                 </div>
 
-                <!-- Feature 6 -->
                 <div class="bg-white p-8 rounded-3xl border border-slate-200/60 shadow-sm hover:shadow-soft transition-all duration-300 fade-in-up group" style="transition-delay: 0.2s;">
                     <div class="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center text-slate-700 mb-6 group-hover:scale-110 transition-transform">
                         <i class="fa-solid fa-cubes text-xl"></i>
@@ -364,7 +328,6 @@
         </div>
     </section>
 
-    <!-- Video Tutorial Section -->
     <section id="tutorial" class="py-24 bg-white border-b border-slate-200/60">
         <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-12 fade-in-up">
@@ -376,17 +339,14 @@
             <div class="flex justify-center fade-in-up">
                 <a href="https://youtube.com/shorts/1cWU5Xq0AyM?feature=share" target="_blank" class="relative rounded-[2.5rem] overflow-hidden shadow-2xl border-[6px] border-slate-900 aspect-[9/16] w-full max-w-[300px] md:max-w-[340px] bg-slate-800 group transition-transform hover:-translate-y-1 duration-500 block">
                     
-                    <!-- Thumbnail Image (Fetches YouTube Thumbnail automatically) -->
                     <img src="https://img.youtube.com/vi/1cWU5Xq0AyM/maxresdefault.jpg" alt="Tutorial Obrín IA" class="absolute top-0 left-0 w-full h-full object-cover z-10 opacity-70 group-hover:opacity-90 transition-opacity duration-300" onerror="this.onerror=null; this.src='https://img.youtube.com/vi/1cWU5Xq0AyM/0.jpg';">
                     
-                    <!-- Play Button Overlay -->
                     <div class="absolute inset-0 flex items-center justify-center z-20">
                         <div class="w-16 h-16 bg-red-600/90 rounded-full flex items-center justify-center text-white shadow-lg backdrop-blur-sm group-hover:scale-110 group-hover:bg-red-600 transition-all duration-300">
                             <i class="fa-solid fa-play text-xl ml-1"></i>
                         </div>
                     </div>
                     
-                    <!-- Decorative glow effect behind the phone frame -->
                     <div class="absolute -inset-4 bg-brand-500/30 blur-2xl -z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
                 </a>
             </div>
@@ -399,7 +359,6 @@
         </div>
     </section>
 
-    <!-- Paradigm Shift (Active vs Passive) -->
     <section id="caracteristicas" class="py-24 bg-slate-900 text-white">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center max-w-2xl mx-auto mb-16 fade-in-up">
@@ -408,7 +367,6 @@
             </div>
             
             <div class="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-                <!-- Pasivo -->
                 <div class="border border-slate-700 bg-slate-800/50 p-8 rounded-3xl fade-in-up opacity-80">
                     <div class="flex items-center justify-between mb-8 pb-4 border-b border-slate-700">
                         <div>
@@ -424,7 +382,6 @@
                     </ul>
                 </div>
                 
-                <!-- Activo (Obrin IA) -->
                 <div class="border border-brand-500/30 bg-gradient-to-b from-brand-900/40 to-slate-800/80 p-8 rounded-3xl shadow-glow relative fade-in-up" style="transition-delay: 0.1s;">
                     <div class="absolute -top-3 -right-3">
                         <span class="flex h-6 w-6 relative">
@@ -457,7 +414,6 @@
         </div>
     </section>
 
-    <!-- Team Section -->
     <section id="equipo" class="py-24 bg-white">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center max-w-3xl mx-auto mb-16 fade-in-up">
@@ -465,28 +421,24 @@
             </div>
 
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8 mb-16 max-w-5xl mx-auto">
-                <!-- Team Member 1 -->
                 <div class="text-center fade-in-up">
                     <img src="https://lh3.googleusercontent.com/pw/AP1GczPx1EJ_8fIwPO2dphbWGkNuor7vTGc9aKzSdIdvFeLuH3WCy24NLlHLs1BCK9M5qrCeB8DxVYks-46LohhaR4NA4K3pyxX7sqHCackmj7pPEiKmArQaN-v5HpnKrY5Z5MLLLSdUR3Ig6Wz5N8EnbdboLA=w449-h599-s-no-gm?authuser=0" alt="José M. Christensen" class="w-20 h-20 md:w-24 md:h-24 mx-auto rounded-full object-cover mb-4 border border-slate-200 shadow-sm">
                     <h4 class="font-bold text-slate-900 text-sm">José M. Christensen</h4>
                     <p class="text-slate-500 text-xs mt-1">Líder / Co-creador</p>
                 </div>
 
-                <!-- Team Member 2 -->
                 <div class="text-center fade-in-up" style="transition-delay: 0.1s;">
                     <img src="https://lh3.googleusercontent.com/pw/AP1GczPAGbay3Va0BKkPUgiGX7SLhpD79DMBZF1xd5ccapCtq73169Pk_JQcetLv_gVSK3HfIG4txRC678ff79i6xEAe9l2pyQM_J7Q1wuh_fPuAsJDFtlAOksgQXD2-qY5LvUH5h_xJXeArENwt81PHkQW15Q=w449-h599-s-no-gm?authuser=0" alt="Clemente Del Prado" class="w-20 h-20 md:w-24 md:h-24 mx-auto rounded-full object-cover mb-4 border border-slate-200 shadow-sm">
                     <h4 class="font-bold text-slate-900 text-sm">Clemente Del Prado</h4>
                     <p class="text-slate-500 text-xs mt-1">Co-creador</p>
                 </div>
 
-                <!-- Team Member 3 -->
                 <div class="text-center fade-in-up" style="transition-delay: 0.2s;">
                     <img src="https://lh3.googleusercontent.com/pw/AP1GczOO3GFraUNDJvV3ItB_TUd6WF7OITYuSV-EmuwSYLNrDhWdCzuWbRniV4RPM1HH9EBVRiMIsZEOXZS8E5WkFefU9C78xk61okykgwbjO9buY1JlMptuEVumiVw9s1HXGxPX-qJr26B-rM7uo8LP-bGmaA=w449-h599-s-no-gm?authuser=0" alt="Nicolás Maldonado" class="w-20 h-20 md:w-24 md:h-24 mx-auto rounded-full object-cover mb-4 border border-slate-200 shadow-sm">
                     <h4 class="font-bold text-slate-900 text-sm">Nicolás Maldonado</h4>
                     <p class="text-slate-500 text-xs mt-1">Co-creador</p>
                 </div>
 
-                <!-- Team Member 4 -->
                 <div class="text-center fade-in-up" style="transition-delay: 0.3s;">
                     <img src="https://lh3.googleusercontent.com/pw/AP1GczMYY56vceJfy25WPxT5ToFv5rqYJuglJvjANfAQaiN1kgwH9kCvkfKkX2oN9ge7ODm2EmdUXgOGDBVHdbZr3NfO7l_ehJ2xPuDlBsR9BiToJ64zk7ZAnFpUmPOBI5Czlqa7aitzUyQogeRbXzFxbTgGZw=w400-h599-s-no-gm?authuser=0" alt="Julio Letelier Menares" class="w-20 h-20 md:w-24 md:h-24 mx-auto rounded-full object-cover mb-4 border border-slate-200 shadow-sm">
                     <h4 class="font-bold text-slate-900 text-sm">Julio Letelier Menares</h4>
@@ -494,7 +446,6 @@
                 </div>
             </div>
 
-            <!-- Academic Backing (Minimalist) -->
             <div class="bg-slate-50 rounded-3xl p-8 border border-slate-200 max-w-4xl mx-auto flex flex-col md:flex-row items-center md:items-start gap-8 fade-in-up">
                 <img src="https://lh3.googleusercontent.com/pw/AP1GczPHYi-BQhxND0BLXkrVDsz6psd2JWK9X8DTy-p1IBCtTh7kS6AAOSIbD9vaqMPDK5xpvBq9WQ6MHxl3zN9oaa-5fvSPvqNduDK9xC97-q6BYi_ZcQH0UfM30SpNWG3_VpiYyuc3DgciR7oFU63EQEi4-g=w400-h400-s-no-gm?authuser=0" alt="Daniel Linares García" class="w-16 h-16 object-cover rounded-2xl border border-slate-200 shadow-sm shrink-0">
                 <div class="text-center md:text-left">
@@ -512,11 +463,9 @@
         </div>
     </section>
 
-    <!-- Footer -->
     <footer id="contacto" class="bg-black pt-16 pb-8">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="grid md:grid-cols-3 gap-12 mb-16 border-b border-slate-800 pb-12">
-                <!-- Brand -->
                 <div class="col-span-1 md:col-span-2">
                     <img src="https://lh3.googleusercontent.com/pw/AP1GczOOE3ZHICrV-_RfZdqAjRIdP5vT8mk8EUJgp83JaAa8uF1SEOlEcN5nkO410n_kUGrx1VZJU2MAD_yk6HcbPAhoW4zzYVJH3KVOOof-U3bsfH4yL6P5J2U9i8SaDuth_yZPP6_IihvtadZrNgEjzDIeUQ=w599-h599-s-no-gm?authuser=0" alt="Obrín IA Logo" class="h-10 w-auto object-contain mb-6 invert grayscale opacity-90" onerror="this.onerror=null; this.src='https://placehold.co/150x50/000000/ffffff?text=Obrin+IA';">
                     <p class="text-slate-400 text-sm mb-6 max-w-sm font-light leading-relaxed">
@@ -524,7 +473,6 @@
                     </p>
                 </div>
 
-                <!-- Links -->
                 <div>
                     <h4 class="text-white font-semibold mb-4 text-sm">Plataforma</h4>
                     <ul class="space-y-3 text-sm font-light">
@@ -535,7 +483,6 @@
                 </div>
             </div>
 
-            <!-- Context & Centered Logos (4x Size) -->
             <div class="text-center mb-16">
                 <h4 class="text-white font-semibold mb-4 text-lg">Proyecto respaldado por</h4>
                 
@@ -552,7 +499,7 @@
 
             <div class="border-t border-slate-800 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
                 <p class="text-xs text-slate-500 font-light">
-                    &copy; 2026 Obrín IA. Proyecto de Innovación.
+                    © 2026 Obrín IA. Proyecto de Innovación.
                 </p>
                 <p class="text-xs text-slate-500 font-light">
                     Ref: Construye2025 (2020) | Matrix Consulting (2020)
@@ -561,7 +508,6 @@
         </div>
     </footer>
 
-    <!-- Scripts -->
     <script>
         // Internal Navigation Handler for Google Sites compatibility
         document.querySelectorAll('.nav-link').forEach(link => {
