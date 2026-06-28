@@ -71,6 +71,12 @@
 </head>
 <body class="bg-slate-50 min-h-screen flex items-center justify-center p-4">
 
+    <!-- Pantalla de Carga (Splash Screen) -->
+    <div id="splash-screen" class="fixed inset-0 z-50 flex flex-col items-center justify-center bg-slate-50 transition-opacity duration-700 ease-in-out gap-6">
+        <img src="https://lh3.googleusercontent.com/pw/AP1GczOsQ9BjTC3dTk0RxKlbaZtHDeSwbqF3-buuEPA6QHBnWKNK4GkHQpfHPUJkVSbHPN7QEXrwUL5qVDwk5vLhsbpcLCLP3NCezheTURsZUCAOwnL0h1NtlHKbrEHkrsdquexu32SfFSdxlqHT1c36shbDMQ=w599-h599-s-no-gm?authuser=0" alt="Logo Obrín IA" class="h-32 md:h-48 object-contain animate-pulse">
+        <p class="text-slate-400 text-xs font-medium tracking-widest uppercase animate-pulse">Iniciando sistema...</p>
+    </div>
+
     <div class="w-full max-w-4xl">
         <div class="text-center mb-10">
             <img src="https://lh3.googleusercontent.com/pw/AP1GczOsQ9BjTC3dTk0RxKlbaZtHDeSwbqF3-buuEPA6QHBnWKNK4GkHQpfHPUJkVSbHPN7QEXrwUL5qVDwk5vLhsbpcLCLP3NCezheTURsZUCAOwnL0h1NtlHKbrEHkrsdquexu32SfFSdxlqHT1c36shbDMQ=w599-h599-s-no-gm?authuser=0" alt="Logo Obrín IA" class="h-28 md:h-36 lg:h-48 mx-auto mb-6 object-contain">
@@ -84,16 +90,18 @@
             <div id="input-section" class="space-y-6">
                 <div class="grid grid-cols-2 gap-4">
                     <div class="upload-box h-36 group cursor-pointer" id="box1">
+                        <button type="button" id="clear1" class="hidden absolute top-2 right-2 z-20 bg-white border border-slate-200 text-slate-400 hover:text-red-500 hover:border-red-200 rounded-full w-6 h-6 flex items-center justify-center text-[0.6rem] shadow-sm transition-colors" onclick="window.clearFile(event, 1)">✕</button>
                         <span class="text-3xl mb-2 text-slate-300 group-hover:text-brand-600 transition" id="icon1">📷</span>
                         <span class="text-emerald-600 text-2xl hidden" id="check1">✓</span>
                         <span class="text-[0.65rem] font-bold text-slate-400 uppercase tracking-widest group-hover:text-slate-600 transition">Vista General</span>
-                        <input type="file" id="file1" accept="image/*" class="absolute inset-0 opacity-0 cursor-pointer w-full h-full" onchange="window.handleFile(this, 1)">
+                        <input type="file" id="file1" accept="image/*" class="absolute inset-0 z-10 opacity-0 cursor-pointer w-full h-full" onchange="window.handleFile(this, 1)">
                     </div>
                     <div class="upload-box h-36 group cursor-pointer" id="box2">
+                        <button type="button" id="clear2" class="hidden absolute top-2 right-2 z-20 bg-white border border-slate-200 text-slate-400 hover:text-red-500 hover:border-red-200 rounded-full w-6 h-6 flex items-center justify-center text-[0.6rem] shadow-sm transition-colors" onclick="window.clearFile(event, 2)">✕</button>
                         <span class="text-3xl mb-2 text-slate-300 group-hover:text-brand-600 transition" id="icon2">🔍</span>
                         <span class="text-emerald-600 text-2xl hidden" id="check2">✓</span>
                         <span class="text-[0.65rem] font-bold text-slate-400 uppercase tracking-widest group-hover:text-slate-600 transition">Detalle / Macro</span>
-                        <input type="file" id="file2" accept="image/*" class="absolute inset-0 opacity-0 cursor-pointer w-full h-full" onchange="window.handleFile(this, 2)">
+                        <input type="file" id="file2" accept="image/*" class="absolute inset-0 z-10 opacity-0 cursor-pointer w-full h-full" onchange="window.handleFile(this, 2)">
                     </div>
                 </div>
 
@@ -252,6 +260,17 @@
     </div>
 
     <script>
+        // --- SPLASH SCREEN ---
+        window.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => {
+                const splash = document.getElementById('splash-screen');
+                if (splash) {
+                    splash.classList.add('opacity-0');
+                    setTimeout(() => { splash.style.display = 'none'; }, 700);
+                }
+            }, 2000); // 2000 milisegundos = 2 segundos
+        });
+
         // --- CONFIGURACIÓN ---
         const apiKey = ""; 
         const MI_TEL = "56992582669";
@@ -267,6 +286,7 @@
         let finalWeatherTemp = "";
         let finalWeatherHum = "";
 
+        // --- MANEJO DE ARCHIVOS ---
         window.handleFile = function(input, n) {
             if(input.files[0]) {
                 const r = new FileReader();
@@ -286,6 +306,7 @@
                     document.getElementById(`box${n}`).classList.add('filled');
                     document.getElementById(`icon${n}`).classList.add('hidden');
                     document.getElementById(`check${n}`).classList.remove('hidden');
+                    document.getElementById(`clear${n}`).classList.remove('hidden');
 
                     if(imgData1) { 
                         const btn = document.getElementById('analyzeBtn');
@@ -295,6 +316,36 @@
                     }
                 };
                 r.readAsDataURL(input.files[0]);
+            }
+        };
+
+        window.clearFile = function(e, n) {
+            e.stopPropagation();
+            e.preventDefault();
+            
+            document.getElementById(`file${n}`).value = '';
+            
+            document.getElementById(`box${n}`).classList.remove('filled');
+            document.getElementById(`icon${n}`).classList.remove('hidden');
+            document.getElementById(`check${n}`).classList.add('hidden');
+            document.getElementById(`clear${n}`).classList.add('hidden');
+            
+            if (n === 1) {
+                imgData1 = null;
+                imgType1 = null;
+                document.getElementById('preview-main').src = '';
+                document.getElementById('summary-img1').src = '';
+                document.getElementById('summary-img1').classList.add('hidden');
+                
+                const btn = document.getElementById('analyzeBtn');
+                btn.style.opacity = '0.5'; 
+                btn.style.pointerEvents = 'none'; 
+                btn.classList.remove('bg-slate-900');
+            } else if (n === 2) {
+                imgData2 = null;
+                imgType2 = null;
+                document.getElementById('summary-img2').src = '';
+                document.getElementById('summary-img2').classList.add('hidden');
             }
         };
 
@@ -311,9 +362,11 @@
                 try {
                     let city = cityFallback;
                     if (!city) {
-                        const geoRes = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=es`);
+                        const geoRes = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=14`);
                         const geoData = await geoRes.json();
-                        city = geoData.city || geoData.locality || "Ubicación detectada";
+                        const addr = geoData.address || {};
+                        // Priorizamos niveles más específicos (comunas/barrios) antes que la ciudad global
+                        city = addr.suburb || addr.town || addr.municipality || addr.city_district || addr.city || "Ubicación detectada";
                     }
 
                     const weatherRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m`);
@@ -402,6 +455,7 @@
                 document.getElementById(`box${n}`).classList.remove('filled');
                 document.getElementById(`icon${n}`).classList.remove('hidden');
                 document.getElementById(`check${n}`).classList.add('hidden');
+                document.getElementById(`clear${n}`).classList.add('hidden');
             });
             
             const btn = document.getElementById('analyzeBtn');
