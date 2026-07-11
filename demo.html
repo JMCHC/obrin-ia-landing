@@ -203,7 +203,7 @@
                                     <span class="text-slate-400 transition-transform duration-300 group-open:-rotate-180">▼</span>
                                 </summary>
                                 <div class="p-4 pt-1">
-                                    <ul id="materials-list" class="list-none text-sm text-slate-600 space-y-2"></ul>
+                                    <ul id="materials-list" class="list-disc pl-5 text-sm text-slate-600 space-y-2 marker:text-brand-500"></ul>
                                 </div>
                             </details>
 
@@ -571,19 +571,17 @@
 
                 const climaPrompt = weatherContextText ? `INFORMACIÓN CLIMÁTICA EN TIEMPO REAL:\n${weatherContextText}` : "";
 
-                const prompt = `Actúa como Experto Técnico/Ingeniero Constructivo especializado en Mantención y Remodelaciones Domiciliarias Eficientes en CHILE (2026).
+                const prompt = `Actúa como Experto Técnico/Ingeniero Constructivo especializado en Mantención y Remodelaciones Domiciliarias Eficientes en CHILE (2025).
                 Analiza la imagen y las notas del usuario: "${userNotes}". 
                 
                 ${climaPrompt}
                 
                 TONO: Profesional, directo y con terminología estándar de la industria de la construcción chilena.
 
-                INSTRUCCIONES CRÍTICAS DE BÚSQUEDA Y COSTOS:
-                1. UTILIZA TU HERRAMIENTA DE BÚSQUEDA EN INTERNET para encontrar los precios REALES y ACTUALES en Sodimac Chile o Easy Chile de los materiales necesarios.
-                2. MATERIALES: Nombra los materiales con su nombre comercial exacto (ej: "Impermeabilizante Igol Incoloro Sika 3L", "Pintura Hidrorepelente Kolor 1 Galón"). NO INVENTES FORMATOS.
-                3. PRECIOS: Asigna el precio real encontrado en internet a cada material.
-                4. PRECIO REFERENCIAL TOTAL: El campo "precio_ref" DEBE SER LA SUMA MATEMÁTICA EXACTA de los materiales listados. NO DES UN RANGO, da el valor exacto sumado.
-                5. PASOS: Genera una lista procedimental y secuencial.
+                INSTRUCCIONES CRÍTICAS:
+                1. COSTOS: Estrictamente en Pesos Chilenos (CLP). Rango acotado (ej: "$18.000 a $22.000"). Competitivo.
+                2. MATERIALES: Nombra los materiales usando su denominación química o comercial genérica exacta. PROHIBIDO agregar adjetivos redundantes o inventados como "técnico" o "profesional" (NUNCA digas "Esmalte al agua técnico").
+                3. PASOS: Genera una lista procedimental y secuencial.
 
                 OBLIGATORIO - Responde SOLO con un JSON válido usando estrictamente esta estructura: 
                 {
@@ -591,13 +589,11 @@
                     "nivel_dano": "LEVE / MODERADO / CRÍTICO", 
                     "patologia": "Diagnóstico preciso", 
                     "solucion": "Resumen de la solución técnica", 
-                    "materiales": [
-                        {"nombre": "Nombre Real del Producto (ej: Impermeabilizante Igol Incoloro Sika 3L)", "precio": "$XX.XXX"}
-                    ],
+                    "materiales": ["Material 1", "Material 2"],
                     "pasos": ["Paso 1: ...", "Paso 2: ..."],
                     "tiempo": "Tiempo realista (días)", 
-                    "precio_ref": "$XX.XXX", 
-                    "unidad_ref": "Total materiales"
+                    "precio_ref": "$XX.XXX a $XX.XXX", 
+                    "unidad_ref": "por m2 (o global)"
                 }`;
                 
                 let parts = [{ text: prompt }];
@@ -620,7 +616,7 @@
                 });
 
                 const data = await response.json();
-                if (data.error) throw new Error("Error de API: " + (data.error.message || JSON.stringify(data.error)));
+                if (data.error) throw new Error("Error de API: " + data.error.message);
                 
                 const candidate = data.candidates?.[0];
                 const text = candidate?.content?.parts?.[0]?.text;
@@ -656,15 +652,8 @@
                 if (resultObj.materiales && Array.isArray(resultObj.materiales)) {
                     resultObj.materiales.forEach(mat => {
                         const li = document.createElement('li');
-                        li.className = "flex justify-between items-center py-2 border-b border-slate-100 last:border-0";
-                        if (typeof mat === 'string') {
-                             li.innerHTML = `<span class="font-medium text-slate-700">${mat}</span>`;
-                        } else {
-                            li.innerHTML = `
-                                <span class="font-medium text-slate-700">${mat.nombre}</span>
-                                <span class="text-xs font-bold text-slate-700 bg-slate-100 px-2 py-1 rounded">${mat.precio || 'Consultar'}</span>
-                            `;
-                        }
+                        li.className = "leading-relaxed";
+                        li.innerHTML = `<span class="font-medium text-slate-700">${mat}</span>`;
                         materialsList.appendChild(li);
                     });
                 }
