@@ -571,19 +571,18 @@
 
                 const climaPrompt = weatherContextText ? `INFORMACIÓN CLIMÁTICA EN TIEMPO REAL:\n${weatherContextText}` : "";
 
-                const prompt = `Actúa como Experto Técnico/Ingeniero Constructivo especializado en Mantención y Remodelaciones Domiciliarias Eficientes en CHILE (2025).
+                const prompt = `Actúa como Experto Técnico/Ingeniero Constructivo especializado en Mantención y Remodelaciones Domiciliarias Eficientes en CHILE (2026).
                 Analiza la imagen y las notas del usuario: "${userNotes}". 
                 
                 ${climaPrompt}
                 
                 TONO: Profesional, directo y con terminología estándar de la industria de la construcción chilena.
 
-                INSTRUCCIONES CRÍTICAS:
-                1. COSTOS: Estrictamente en Pesos Chilenos (CLP).
-                2. MATERIALES EXISTENTES EN SODIMAC/EASY CHILE: Solo puedes sugerir productos reales con formatos reales. NO INVENTES FORMATOS que no existen. 
-                Ejemplos válidos: "Pintura Hidrorepelente 1 galón", "Impermeabilizante Igol Incoloro Sika 3L", "Sellador acrílico 1 galón", "Silicona neutra 300ml", "Bloqueador de humedad 1 galón". 
-                3. PRECIOS: Estima el precio unitario de cada material basándote en los precios reales actuales de Sodimac (Ej: Pintura hidrorepelente galón ~$50.000, Igol incoloro 3L ~$24.000, Sellador silicona ~$4.000).
-                4. PRECIO REFERENCIAL TOTAL: El campo "precio_ref" DEBE SER EXACTAMENTE LA SUMA MATEMÁTICA de los precios de los materiales que listaste.
+                INSTRUCCIONES CRÍTICAS DE BÚSQUEDA Y COSTOS:
+                1. UTILIZA TU HERRAMIENTA DE BÚSQUEDA EN INTERNET para encontrar los precios REALES y ACTUALES en Sodimac Chile o Easy Chile de los materiales necesarios.
+                2. MATERIALES: Nombra los materiales con su nombre comercial exacto (ej: "Impermeabilizante Igol Incoloro Sika 3L", "Pintura Hidrorepelente Kolor 1 Galón"). NO INVENTES FORMATOS.
+                3. PRECIOS: Asigna el precio real encontrado en internet a cada material.
+                4. PRECIO REFERENCIAL TOTAL: El campo "precio_ref" DEBE SER LA SUMA MATEMÁTICA EXACTA de los materiales listados. NO DES UN RANGO, da el valor exacto sumado.
                 5. PASOS: Genera una lista procedimental y secuencial.
 
                 OBLIGATORIO - Responde SOLO con un JSON válido usando estrictamente esta estructura: 
@@ -593,7 +592,7 @@
                     "patologia": "Diagnóstico preciso", 
                     "solucion": "Resumen de la solución técnica", 
                     "materiales": [
-                        {"nombre": "Nombre Real del Producto (ej: Pintura Hidrorepelente 1 Galón)", "precio": "$XX.XXX"}
+                        {"nombre": "Nombre Real del Producto (ej: Impermeabilizante Igol Incoloro Sika 3L)", "precio": "$XX.XXX"}
                     ],
                     "pasos": ["Paso 1: ...", "Paso 2: ..."],
                     "tiempo": "Tiempo realista (días)", 
@@ -610,6 +609,7 @@
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({ 
                         contents: [{ parts: parts }],
+                        tools: [{ googleSearch: {} }],
                         generationConfig: { temperature: 0.0, maxOutputTokens: 4096 },
                         safetySettings: [
                             { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_ONLY_HIGH" },
@@ -621,7 +621,7 @@
                 });
 
                 const data = await response.json();
-                if (data.error) throw new Error("Error de API: " + data.error.message);
+                if (data.error) throw new Error("Error de API: " + (data.error.message || JSON.stringify(data.error)));
                 
                 const candidate = data.candidates?.[0];
                 const text = candidate?.content?.parts?.[0]?.text;
