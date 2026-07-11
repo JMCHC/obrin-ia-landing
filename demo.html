@@ -609,7 +609,6 @@
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({ 
                         contents: [{ parts: parts }],
-                        tools: [{ googleSearch: {} }],
                         generationConfig: { temperature: 0.0, maxOutputTokens: 4096 },
                         safetySettings: [
                             { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_ONLY_HIGH" },
