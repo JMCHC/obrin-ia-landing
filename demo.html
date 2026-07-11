@@ -203,7 +203,7 @@
                                     <span class="text-slate-400 transition-transform duration-300 group-open:-rotate-180">▼</span>
                                 </summary>
                                 <div class="p-4 pt-1">
-                                    <ul id="materials-list" class="list-disc pl-5 text-sm text-slate-600 space-y-2 marker:text-brand-500"></ul>
+                                    <ul id="materials-list" class="list-none text-sm text-slate-600 space-y-2"></ul>
                                 </div>
                             </details>
 
@@ -579,10 +579,12 @@
                 TONO: Profesional, directo y con terminología estándar de la industria de la construcción chilena.
 
                 INSTRUCCIONES CRÍTICAS:
-                1. COSTOS: Estrictamente en Pesos Chilenos (CLP). Rango acotado (ej: "$18.000 a $22.000"). Competitivo.
-                2. MATERIALES: Nombra los materiales usando su denominación química o comercial genérica exacta. PROHIBIDO agregar adjetivos redundantes o inventados como "técnico" o "profesional".
-                3. PRECIOS MATERIALES: Usa tu conocimiento experto del mercado retail de construcción chileno (Sodimac, Easy) para estimar un precio realista actual a cada material.
-                4. PASOS: Genera una lista procedimental y secuencial.
+                1. COSTOS: Estrictamente en Pesos Chilenos (CLP).
+                2. MATERIALES EXISTENTES EN SODIMAC/EASY CHILE: Solo puedes sugerir productos reales con formatos reales. NO INVENTES FORMATOS que no existen. 
+                Ejemplos válidos: "Pintura Hidrorepelente 1 galón", "Impermeabilizante Igol Incoloro Sika 3L", "Sellador acrílico 1 galón", "Silicona neutra 300ml", "Bloqueador de humedad 1 galón". 
+                3. PRECIOS: Estima el precio unitario de cada material basándote en los precios reales actuales de Sodimac (Ej: Pintura hidrorepelente galón ~$50.000, Igol incoloro 3L ~$24.000, Sellador silicona ~$4.000).
+                4. PRECIO REFERENCIAL TOTAL: El campo "precio_ref" DEBE SER EXACTAMENTE LA SUMA MATEMÁTICA de los precios de los materiales que listaste.
+                5. PASOS: Genera una lista procedimental y secuencial.
 
                 OBLIGATORIO - Responde SOLO con un JSON válido usando estrictamente esta estructura: 
                 {
@@ -590,11 +592,13 @@
                     "nivel_dano": "LEVE / MODERADO / CRÍTICO", 
                     "patologia": "Diagnóstico preciso", 
                     "solucion": "Resumen de la solución técnica", 
-                    "materiales": [{"nombre": "Material 1", "precio": "$X.XXX"}, {"nombre": "Material 2", "precio": "$X.XXX"}],
+                    "materiales": [
+                        {"nombre": "Nombre Real del Producto (ej: Pintura Hidrorepelente 1 Galón)", "precio": "$XX.XXX"}
+                    ],
                     "pasos": ["Paso 1: ...", "Paso 2: ..."],
                     "tiempo": "Tiempo realista (días)", 
-                    "precio_ref": "$XX.XXX a $XX.XXX", 
-                    "unidad_ref": "por m2 (o global)"
+                    "precio_ref": "$XX.XXX", 
+                    "unidad_ref": "Total materiales"
                 }`;
                 
                 let parts = [{ text: prompt }];
@@ -606,7 +610,6 @@
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({ 
                         contents: [{ parts: parts }],
-                        // Hemos quitado "tools" para evitar el error con tu proxy
                         generationConfig: { temperature: 0.0, maxOutputTokens: 4096 },
                         safetySettings: [
                             { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_ONLY_HIGH" },
@@ -654,15 +657,13 @@
                 if (resultObj.materiales && Array.isArray(resultObj.materiales)) {
                     resultObj.materiales.forEach(mat => {
                         const li = document.createElement('li');
-                        li.className = "leading-relaxed flex justify-between items-end border-b border-slate-100 pb-1 mb-1";
-                        
-                        // Permite que siga funcionando incluso si la IA responde con strings viejos por error
+                        li.className = "flex justify-between items-center py-2 border-b border-slate-100 last:border-0";
                         if (typeof mat === 'string') {
-                            li.innerHTML = `<span class="font-medium text-slate-700">${mat}</span>`;
+                             li.innerHTML = `<span class="font-medium text-slate-700">${mat}</span>`;
                         } else {
                             li.innerHTML = `
                                 <span class="font-medium text-slate-700">${mat.nombre}</span>
-                                <span class="text-xs font-bold text-brand-600 bg-brand-50 px-2 py-0.5 rounded">${mat.precio || 'Consultar'}</span>
+                                <span class="text-xs font-bold text-slate-700 bg-slate-100 px-2 py-1 rounded">${mat.precio || 'Consultar'}</span>
                             `;
                         }
                         materialsList.appendChild(li);
