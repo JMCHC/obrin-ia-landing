@@ -9,11 +9,9 @@
     <link rel="icon" href="https://lh3.googleusercontent.com/pw/AP1GczOOE3ZHICrV-_RfZdqAjRIdP5vT8mk8EUJgp83JaAa8uF1SEOlEcN5nkO410n_kUGrx1VZJU2MAD_yk6HcbPAhoW4zzYVJH3KVOOof-U3bsfH4yL6P5J2U9i8SaDuth_yZPP6_IihvtadZrNgEjzDIeUQ=w599-h599-s-no-gm?authuser=0" type="image/png">
     
     <script src="https://cdn.tailwindcss.com"></script>
-    
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <script>
@@ -29,8 +27,8 @@
                             100: '#e0f2fe',
                             400: '#38bdf8',
                             500: '#0ea5e9',
-                            600: '#0284c7', // Primary Blue
-                            900: '#0f2942', // PUC Navy
+                            600: '#0284c7',
+                            900: '#0f2942',
                         }
                     },
                     boxShadow: {
@@ -46,9 +44,13 @@
         body {
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
+            overflow-x: hidden;
+            background-color: #000; /* Fondo base negro global */
         }
 
-        /* Fluid animations */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
         .fade-in-up {
             opacity: 0;
             transform: translateY(30px);
@@ -59,52 +61,93 @@
             transform: translateY(0);
         }
 
-        .float-animation {
-            animation: float 6s ease-in-out infinite;
-        }
-        .float-animation-delayed {
-            animation: float 6s ease-in-out 3s infinite;
+        /* --- ESTILOS IPHONE 3D CON EXTRUSIÓN --- */
+        #hero-phone-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10; /* Fondo de todo */
+            pointer-events: none;
+            transform-style: preserve-3d;
+            will-change: transform, opacity;
+            transform: perspective(1200px) scale(0.6) rotateY(-40deg);
         }
 
-        @keyframes float {
-            0% { transform: translateY(0px); }
-            50% { transform: translateY(-15px); }
-            100% { transform: translateY(0px); }
+        .phone-container {
+            position: relative;
+            width: 400px;
+            height: 700px;
+            transform-style: preserve-3d;
         }
-        
-        /* Modern Phone Bezel */
-        .sleek-phone {
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15), inset 0 0 0 6px #e2e8f0;
-            border: 1px solid #cbd5e1;
-            background-color: #ffffff;
-        }
-        
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-        /* Subtle mesh background */
-        .bg-mesh {
-            background-image: 
-                radial-gradient(at 0% 0%, hsla(210, 100%, 95%, 1) 0px, transparent 50%),
-                radial-gradient(at 100% 0%, hsla(200, 100%, 95%, 1) 0px, transparent 50%);
+        .phone-volume-layer {
+            position: absolute;
+            left: 40px;
+            top: 25px;
+            width: 320px;
+            height: 650px;
+            border-radius: 45px;
+            background-color: #2c2c2e;
+            border: 1px solid #4a4a4c;
+            pointer-events: none;
+        }
+
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            display: block;
+            width: 100%;
+            height: 100%;
+            z-index: 2;
+            pointer-events: none;
+            transform: translateZ(2px);
+        }
+
+        #screen-wrapper {
+            position: absolute;
+            z-index: 1;
+            overflow: hidden;
+            background-color: #000;
+            pointer-events: none;
+            transform: translateZ(1px);
+        }
+
+        #screen-iframe {
+            border: none;
+            background-color: #fff;
+            transform-origin: top left;
+            pointer-events: none;
+            user-select: none;
+            scrollbar-width: none;
+        }
+
+        #screen-iframe::-webkit-scrollbar {
+            display: none;
         }
     </style>
 </head>
-<body class="bg-white text-slate-800 font-sans selection:bg-brand-500 selection:text-white">
+<body class="text-slate-800 font-sans selection:bg-brand-500 selection:text-white">
 
-    <nav class="fixed w-full z-50 transition-all duration-500 bg-white/70 backdrop-blur-xl border-b border-slate-200/50" id="navbar">
+    <!-- NAVBAR PREMIUM OSCURO -->
+    <nav class="fixed w-full z-50 transition-all duration-500 bg-black/60 backdrop-blur-xl border-b border-white/10" id="navbar">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-20 items-center">
                 <div class="flex-shrink-0 flex items-center cursor-pointer transition-transform hover:scale-105" onclick="window.scrollTo(0,0)">
-                    <img src="https://lh3.googleusercontent.com/pw/AP1GczOOE3ZHICrV-_RfZdqAjRIdP5vT8mk8EUJgp83JaAa8uF1SEOlEcN5nkO410n_kUGrx1VZJU2MAD_yk6HcbPAhoW4zzYVJH3KVOOof-U3bsfH4yL6P5J2U9i8SaDuth_yZPP6_IihvtadZrNgEjzDIeUQ=w599-h599-s-no-gm?authuser=0" alt="Obrín IA Logo" class="h-24 w-auto object-contain" onerror="this.onerror=null; this.src='https://placehold.co/150x50/ffffff/0f2942?text=Obrin+IA';">
+                    <img src="https://lh3.googleusercontent.com/pw/AP1GczOOE3ZHICrV-_RfZdqAjRIdP5vT8mk8EUJgp83JaAa8uF1SEOlEcN5nkO410n_kUGrx1VZJU2MAD_yk6HcbPAhoW4zzYVJH3KVOOof-U3bsfH4yL6P5J2U9i8SaDuth_yZPP6_IihvtadZrNgEjzDIeUQ=w599-h599-s-no-gm?authuser=0" alt="Obrín IA Logo" class="h-16 w-auto object-contain invert brightness-0" onerror="this.onerror=null; this.src='https://placehold.co/150x50/ffffff/0f2942?text=Obrin+IA';">
                 </div>
                 
                 <div class="hidden md:flex space-x-10">
-                    <a href="#problema" class="text-slate-500 hover:text-brand-600 font-medium text-sm transition-colors nav-link">El Problema</a>
-                    <a href="#solucion" class="text-slate-500 hover:text-brand-600 font-medium text-sm transition-colors nav-link">Solución</a>
-                    <a href="#tutorial" class="text-slate-500 hover:text-brand-600 font-medium text-sm transition-colors nav-link">Tutorial</a>
-                    <a href="#caracteristicas" class="text-slate-500 hover:text-brand-600 font-medium text-sm transition-colors nav-link">Tecnología</a>
-                    <a href="#equipo" class="text-slate-500 hover:text-brand-600 font-medium text-sm transition-colors nav-link">Equipo</a>
+                    <a href="#problema" class="text-slate-400 hover:text-white font-medium text-sm transition-colors nav-link">El Problema</a>
+                    <a href="#solucion" class="text-slate-400 hover:text-white font-medium text-sm transition-colors nav-link">Solución</a>
+                    <a href="#tutorial" class="text-slate-400 hover:text-white font-medium text-sm transition-colors nav-link">Tutorial</a>
+                    <a href="#caracteristicas" class="text-slate-400 hover:text-white font-medium text-sm transition-colors nav-link">Tecnología</a>
+                    <a href="#equipo" class="text-slate-400 hover:text-white font-medium text-sm transition-colors nav-link">Equipo</a>
                 </div>
 
                 <div class="hidden md:flex">
@@ -114,221 +157,170 @@
                 </div>
 
                 <div class="md:hidden flex items-center">
-                    <button id="mobile-menu-btn" class="text-slate-500 hover:text-slate-900 focus:outline-none">
+                    <button id="mobile-menu-btn" class="text-slate-400 hover:text-white focus:outline-none">
                         <i class="fa-solid fa-bars text-2xl"></i>
                     </button>
                 </div>
             </div>
         </div>
-
-        <div id="mobile-menu" class="hidden md:hidden bg-white/95 backdrop-blur-xl border-b border-slate-200 shadow-xl absolute w-full">
-            <div class="px-4 pt-4 pb-8 space-y-2">
-                <a href="#problema" class="block px-4 py-3 rounded-xl text-base font-medium text-slate-600 hover:text-brand-600 hover:bg-slate-50 nav-link">El Problema</a>
-                <a href="#solucion" class="block px-4 py-3 rounded-xl text-base font-medium text-slate-600 hover:text-brand-600 hover:bg-slate-50 nav-link">Solución</a>
-                <a href="#tutorial" class="block px-4 py-3 rounded-xl text-base font-medium text-slate-600 hover:text-brand-600 hover:bg-slate-50 nav-link">Tutorial</a>
-                <a href="#caracteristicas" class="block px-4 py-3 rounded-xl text-base font-medium text-slate-600 hover:text-brand-600 hover:bg-slate-50 nav-link">Tecnología</a>
-                <a href="#equipo" class="block px-4 py-3 rounded-xl text-base font-medium text-slate-600 hover:text-brand-600 hover:bg-slate-50 nav-link">Equipo</a>
-                <a href="demo.html" target="_blank" class="block w-full text-center mt-6 bg-brand-600 text-white px-5 py-3 rounded-xl font-semibold shadow-md">Solicitar Demo</a>
-            </div>
-        </div>
     </nav>
 
-    <section class="relative pt-32 pb-20 lg:pt-48 lg:pb-32 overflow-hidden bg-mesh">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-            <div class="grid lg:grid-cols-12 gap-12 lg:gap-8 items-center">
-                
-                <div class="lg:col-span-7 fade-in-up text-center lg:text-left">
-                    <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white border border-slate-200 shadow-sm text-slate-600 text-xs font-semibold mb-8 tracking-wide">
-                        <span class="w-2 h-2 rounded-full bg-brand-500 animate-pulse"></span>
-                        Reto Construye Academia CChC
-                    </div>
-                    
-                    <h1 class="text-4xl md:text-6xl lg:text-7xl font-extrabold text-slate-900 tracking-tight leading-[1.1] mb-6">
-                        La inspección visual <br class="hidden md:block" />
-                        transformada en <br class="hidden md:block" />
-                        <span class="text-transparent bg-clip-text bg-gradient-to-r from-brand-600 to-blue-400">datos exactos.</span>
-                    </h1>
-                    
-                    <p class="text-lg md:text-xl text-slate-500 mb-10 max-w-2xl mx-auto lg:mx-0 leading-relaxed font-light">
-                        Asistente de diagnóstico en terreno impulsado por <strong class="font-semibold text-slate-700">IA e IoT</strong>. Elimina la subjetividad, automatiza tus presupuestos y protege la rentabilidad de la obra.
-                    </p>
-                    
-                    <div class="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4">
-                        <a href="demo.html" target="_blank" class="w-full sm:w-auto bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 px-8 py-4 rounded-full font-semibold transition-all shadow-sm hover:shadow-md text-center flex items-center justify-center gap-2">
-                            <i class="fa-solid fa-play text-brand-600 text-sm"></i> Solicitar Demo
-                        </a>
-                    </div>
-                </div>
-
-                <div class="lg:col-span-5 relative flex justify-center fade-in-up" style="transition-delay: 0.2s;">
-                    
-                    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-72 h-72 bg-brand-400 rounded-full mix-blend-multiply filter blur-[80px] opacity-30"></div>
-
-                    <div class="absolute -left-6 md:-left-12 top-20 bg-white/80 backdrop-blur-lg border border-white/40 p-4 rounded-2xl shadow-soft z-20 float-animation w-48">
-                        <div class="flex items-start gap-3">
-                            <div class="w-8 h-8 rounded-full bg-brand-50 flex items-center justify-center text-brand-600 shrink-0 mt-1"><i class="fa-solid fa-microscope text-xs"></i></div>
-                            <div>
-                                <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-0.5">IA Detecta</p>
-                                <p class="font-semibold text-slate-800 text-sm leading-tight">Fractura por impacto</p>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="absolute -right-6 md:-right-10 bottom-32 bg-slate-900/90 backdrop-blur-lg border border-slate-700 p-4 rounded-2xl shadow-xl z-20 float-animation-delayed w-44">
-                        <div class="flex items-start gap-3">
-                            <div class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-green-400 shrink-0 mt-1"><i class="fa-solid fa-calculator text-xs"></i></div>
-                            <div>
-                                <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-0.5">Costo / m²</p>
-                                <p class="font-bold text-white text-base leading-tight">$22.000</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="relative w-[280px] md:w-[320px] h-[600px] rounded-[3rem] sleek-phone overflow-hidden flex flex-col z-10">
-                        <div class="absolute top-0 inset-x-0 h-6 bg-slate-100 rounded-b-2xl w-32 mx-auto z-30"></div>
-                        
-                        <div class="pt-12 pb-4 px-6 bg-white border-b border-slate-100 flex justify-between items-center z-20">
-                            <i class="fa-solid fa-arrow-left text-slate-400 text-lg"></i>
-                            <span class="font-bold text-slate-800 text-xs tracking-widest uppercase">Obrín IA</span>
-                            <i class="fa-solid fa-ellipsis-vertical text-slate-400 text-lg"></i>
-                        </div>
-
-                        <div class="flex-1 overflow-y-auto no-scrollbar p-5 bg-slate-50 space-y-4 relative">
-                            <div class="mb-2">
-                                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Elemento Analizado</p>
-                                <div class="flex justify-between items-start">
-                                    <h3 class="text-xl font-bold text-slate-900 leading-tight">Pavimento<br>Cerámico</h3>
-                                    <span class="bg-amber-100 text-amber-700 text-[9px] font-bold px-2 py-1 rounded-full uppercase">Moderado</span>
-                                </div>
-                            </div>
-
-                            <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-100/50">
-                                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Diagnóstico de Patología</p>
-                                <p class="text-slate-700 text-sm leading-relaxed font-medium">Desprendimiento de material y exposición de mortero de pega por impacto.</p>
-                            </div>
-
-                            <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-100/50">
-                                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Propuesta Técnica</p>
-                                <p class="text-slate-700 text-sm leading-relaxed font-medium">Remoción técnica de piezas, limpieza de sustrato, adhesivo tipo AC y fraguado.</p>
-                            </div>
-
-                            <div class="bg-gradient-to-br from-brand-600 to-brand-800 rounded-2xl p-5 text-white shadow-md relative overflow-hidden mt-6">
-                                <div class="absolute right-0 bottom-0 opacity-10 transform translate-x-4 translate-y-4">
-                                    <i class="fa-solid fa-chart-pie text-7xl"></i>
-                                </div>
-                                <p class="text-[10px] font-bold text-brand-200 uppercase tracking-wider mb-1">Inversión Unitaria Ref.</p>
-                                <div class="flex items-end gap-1">
-                                    <p class="text-3xl font-bold tracking-tight">$22.000</p>
-                                    <p class="text-xs text-brand-200 mb-1.5 font-medium">CLP/m²</p>
-                                </div>
-                                <div class="mt-3 pt-3 border-t border-white/20 flex justify-between items-center">
-                                    <span class="text-[10px] text-brand-100">Región: Metropolitana</span>
-                                    <i class="fa-solid fa-location-dot text-[10px] text-brand-200"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
+    <!-- CELULAR 3D GLOBAL FIJO -->
+    <!-- Se extrae de las secciones para que flote y sirva de fondo a toda la página -->
+    <div id="hero-phone-container">
+        <div class="phone-container pointer-events-auto">
+            <div id="screen-wrapper">
+                <iframe id="screen-iframe" src="https://obrinia.cl/demo.html" title="Pantalla del iPhone" scrolling="no"></iframe>
             </div>
+            <canvas id="phoneCanvas"></canvas>
+        </div>
+    </div>
+
+    <!-- --- SECCIÓN HERO TIPO APPLE --- -->
+    <!-- Sin bg-black para que el celular se vea detrás -->
+    <section id="hero-section" class="relative z-20" style="height: 120vh;">
+        <div class="sticky top-0 h-screen w-full flex items-center justify-center overflow-hidden z-20">
+            
+            <!-- Texto (Z-index alto para estar encima del celular) -->
+            <div id="hero-text-container" class="absolute z-20 text-center pointer-events-none w-full px-4 flex flex-col items-center mt-[15vh] md:mt-[25vh]">
+                <h1 class="text-[14vw] md:text-[9vw] font-black text-white tracking-tighter leading-[0.9] drop-shadow-2xl [text-shadow:0_10px_30px_rgba(0,0,0,0.8)]">
+                    NO ES SOLO<br />
+                    <span class="text-white">UN DATO.</span>
+                </h1>
+                <p class="mt-8 text-xs md:text-sm text-white font-bold tracking-[0.2em] uppercase max-w-lg [text-shadow:0_2px_4px_rgba(0,0,0,1),_0_4px_10px_rgba(0,0,0,1),_0_0_25px_rgba(0,0,0,1)]">
+                    Es el resultado de avances en IA e IoT sin precedentes en la industria.
+                </p>
+                <div class="mt-12 pointer-events-auto">
+                    <a href="demo.html" target="_blank" class="inline-block bg-white text-black px-10 py-4 rounded-full font-bold transition-all hover:scale-105 shadow-[0_0_40px_rgba(255,255,255,0.3)]">
+                        Descubrir Obrín IA
+                    </a>
+                </div>
+            </div>
+            
         </div>
     </section>
 
-    <section id="problema" class="py-24 md:py-32 bg-white">
+    <!-- SECCIÓN PROBLEMA: Integrada visualmente, sin bg-black -->
+    <section id="problema" class="py-24 md:py-32 relative z-20">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="grid lg:grid-cols-12 gap-16 items-start">
                 
                 <div class="lg:col-span-5 fade-in-up">
-                    <h2 class="text-brand-600 font-bold tracking-widest uppercase text-xs mb-3">El Problema de la Industria</h2>
-                    <h3 class="text-3xl md:text-4xl font-extrabold text-slate-900 mb-6 tracking-tight leading-tight">El costo oculto de la evaluación visual.</h3>
-                    <p class="text-lg text-slate-500 leading-relaxed mb-6 font-light">
+                    <div id="problema-text-container" style="transform-origin: left center; will-change: transform, filter, opacity;">
+                        <h2 class="text-brand-400 font-bold tracking-widest uppercase text-xs mb-3 [text-shadow:0_2px_4px_rgba(0,0,0,1),_0_0_15px_rgba(0,0,0,1)]">El Problema de la Industria</h2>
+                        <h3 class="text-3xl md:text-4xl font-extrabold text-white mb-6 tracking-tight leading-tight [text-shadow:0_2px_4px_rgba(0,0,0,1),_0_0_20px_rgba(0,0,0,1),_0_0_40px_rgba(0,0,0,1),_0_0_80px_rgba(0,0,0,1)]">El costo oculto de la evaluación visual.</h3>
+                    </div>
+                    <p class="text-lg text-white leading-relaxed mb-6 font-medium [text-shadow:0_2px_4px_rgba(0,0,0,1),_0_0_15px_rgba(0,0,0,1),_0_0_30px_rgba(0,0,0,1),_0_0_60px_rgba(0,0,0,1)]">
                         La construcción transita hacia la industrialización, pero la captura de datos sigue siendo análoga. El levantamiento de fallas depende del ojo humano, generando diagnósticos subjetivos.
                     </p>
-                    <p class="text-lg text-slate-500 leading-relaxed font-light">
-                        Estas desviaciones tempranas y correcciones mal diagnosticadas <strong class="text-slate-800 font-semibold">destruyen silenciosamente los márgenes de utilidad</strong> en los contratos "llave en mano".
+                    <p class="text-lg text-white leading-relaxed font-medium [text-shadow:0_2px_4px_rgba(0,0,0,1),_0_0_15px_rgba(0,0,0,1),_0_0_30px_rgba(0,0,0,1),_0_0_60px_rgba(0,0,0,1)]">
+                        Estas desviaciones tempranas y correcciones mal diagnosticadas <strong class="text-white font-extrabold">destruyen silenciosamente los márgenes de utilidad</strong> en los contratos "llave en mano".
                     </p>
                 </div>
 
                 <div class="lg:col-span-7 grid sm:grid-cols-2 gap-8">
-                    <div class="bg-slate-50 rounded-3xl p-8 border border-slate-100 hover:shadow-soft transition-all fade-in-up">
-                        <div class="text-5xl font-light text-slate-900 mb-4 tracking-tighter">21.7<span class="text-brand-600 font-bold text-3xl">%</span></div>
-                        <h4 class="text-base font-bold text-slate-900 mb-2">Retrabajos Constantes</h4>
-                        <p class="text-sm text-slate-500 leading-relaxed mb-4">De las partidas presentan observaciones tempranas. Corregirlas consume hasta un 6% del presupuesto total.</p>
-                        <p class="text-[10px] uppercase tracking-wider text-slate-400 font-semibold">Matrix Consulting & CChC</p>
+                    <div class="bg-[#0a0a0a] rounded-3xl p-8 border border-slate-800 hover:border-brand-500/50 hover:shadow-[0_0_30px_rgba(2,132,199,0.15)] transition-all fade-in-up">
+                        <div class="text-5xl font-light text-white mb-4 tracking-tighter">21.7<span class="text-brand-500 font-bold text-3xl">%</span></div>
+                        <h4 class="text-base font-bold text-white mb-2">Retrabajos Constantes</h4>
+                        <p class="text-sm text-slate-400 leading-relaxed mb-4">De las partidas presentan observaciones tempranas. Corregirlas consume hasta un 6% del presupuesto total.</p>
+                        <p class="text-[10px] uppercase tracking-wider text-slate-500 font-semibold">Matrix Consulting & CChC</p>
                     </div>
 
-                    <div class="bg-slate-50 rounded-3xl p-8 border border-slate-100 hover:shadow-soft transition-all fade-in-up" style="transition-delay: 0.1s;">
-                        <div class="text-5xl font-light text-slate-900 mb-4 tracking-tighter">71<span class="text-brand-600 font-bold text-3xl">%</span></div>
-                        <h4 class="text-base font-bold text-slate-900 mb-2">Desviaciones Críticas</h4>
-                        <p class="text-sm text-slate-500 leading-relaxed mb-4">Obras que no se entregan a tiempo en Chile, promediando un atraso de 4 meses por reprocesos.</p>
-                        <p class="text-[10px] uppercase tracking-wider text-slate-400 font-semibold">Matrix Consulting & CChC</p>
+                    <div class="bg-[#0a0a0a] rounded-3xl p-8 border border-slate-800 hover:border-brand-500/50 hover:shadow-[0_0_30px_rgba(2,132,199,0.15)] transition-all fade-in-up" style="transition-delay: 0.1s;">
+                        <div class="text-5xl font-light text-white mb-4 tracking-tighter">71<span class="text-brand-500 font-bold text-3xl">%</span></div>
+                        <h4 class="text-base font-bold text-white mb-2">Desviaciones Críticas</h4>
+                        <p class="text-sm text-slate-400 leading-relaxed mb-4">Obras que no se entregan a tiempo en Chile, promediando un atraso de 4 meses por reprocesos.</p>
+                        <p class="text-[10px] uppercase tracking-wider text-slate-500 font-semibold">Matrix Consulting & CChC</p>
                     </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <section id="solucion" class="py-24 md:py-32 bg-slate-50 border-y border-slate-200/60">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center max-w-2xl mx-auto mb-20 fade-in-up">
-                <h2 class="text-brand-600 font-bold tracking-widest uppercase text-xs mb-3">Plataforma paramétrica</h2>
-                <h3 class="text-3xl md:text-4xl font-extrabold text-slate-900 mb-4 tracking-tight">Estandarización impulsada por IA + IoT</h3>
-                <p class="text-lg text-slate-500 font-light">Un ecosistema tecnológico diseñado para emitir prescripciones técnicas exactas de forma instantánea.</p>
+    <!-- --- SECCIÓN SCROLL HORIZONTAL (SCROLLJACKING) --- -->
+    <section id="solucion" class="relative bg-black border-t border-slate-800" style="height: 400vh; z-index: 30;">
+        <!-- El contenedor sticky atrapa la vista del usuario mientras hace scroll -->
+        <div class="sticky top-0 h-screen w-full overflow-hidden flex items-center">
+            
+            <!-- Título Fijo a la Izquierda -->
+            <div class="absolute left-0 top-0 h-full w-full md:w-[40%] flex flex-col justify-center px-6 md:px-12 z-30 bg-gradient-to-r from-black via-black/90 to-transparent pointer-events-none">
+                <h2 class="text-brand-500 font-bold tracking-widest uppercase text-xs mb-4">Plataforma Paramétrica</h2>
+                <h3 class="text-4xl md:text-5xl font-extrabold text-white mb-6 tracking-tighter leading-[1.1]">
+                    Análisis<br>Integral
+                </h3>
+                <p class="text-base text-slate-400 font-light max-w-sm leading-relaxed">
+                    Estandarización impulsada por IA + IoT. Emisión instantánea de prescripciones técnicas exactas.
+                </p>
             </div>
 
-            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <div class="bg-white p-8 rounded-3xl border border-slate-200/60 shadow-sm hover:shadow-soft transition-all duration-300 fade-in-up group">
-                    <div class="w-12 h-12 rounded-2xl bg-brand-50 flex items-center justify-center text-brand-600 mb-6 group-hover:scale-110 transition-transform">
+            <!-- Contenedor Deslizante (Track) -->
+            <div id="solucion-track" class="flex gap-6 md:gap-8 pl-[100vw] pr-[50vw] items-center h-full w-max will-change-transform z-20">
+                
+                <!-- Tarjeta 1 -->
+                <div class="solucion-card w-[260px] md:w-[320px] h-[340px] md:h-[380px] shrink-0 bg-[#0a0a0a] border-[2px] border-brand-500 rounded-[2rem] p-6 md:p-8 flex flex-col justify-center relative overflow-hidden shadow-2xl transition-transform hover:scale-[1.02] duration-300">
+                    <div class="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-brand-900/40 flex items-center justify-center text-brand-400 mb-4 border border-brand-500/30">
                         <i class="fa-solid fa-camera-retro text-xl"></i>
                     </div>
-                    <h4 class="text-lg font-bold text-slate-900 mb-2">Captura multimodal</h4>
-                    <p class="text-sm text-slate-500 leading-relaxed font-light">Interfaz móvil intuitiva para el ingreso in situ de fotografías contextuales y descripciones textuales de las fallas.</p>
+                    <h4 class="text-2xl md:text-3xl font-extrabold text-white mb-3 tracking-tight leading-tight">Captura<br>multimodal</h4>
+                    <p class="text-xs md:text-sm text-slate-400 leading-relaxed font-light">Interfaz móvil intuitiva para el ingreso in situ de fotografías contextuales y descripciones textuales de las fallas.</p>
+                    <div class="card-number absolute bottom-2 right-4 text-brand-500/10 font-extrabold text-6xl md:text-7xl tracking-tighter opacity-0 translate-y-10 transition-all duration-700 ease-out z-0">01</div>
                 </div>
 
-                <div class="bg-white p-8 rounded-3xl border border-slate-200/60 shadow-sm hover:shadow-soft transition-all duration-300 fade-in-up group" style="transition-delay: 0.1s;">
-                    <div class="w-12 h-12 rounded-2xl bg-brand-50 flex items-center justify-center text-brand-600 mb-6 group-hover:scale-110 transition-transform">
+                <!-- Tarjeta 2 -->
+                <div class="solucion-card w-[260px] md:w-[320px] h-[340px] md:h-[380px] shrink-0 bg-[#0a0a0a] border border-slate-800 hover:border-brand-500 hover:border-[2px] rounded-[2rem] p-6 md:p-8 flex flex-col justify-center relative overflow-hidden group transition-all duration-300">
+                    <div class="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-slate-900 flex items-center justify-center text-slate-400 mb-4 border border-slate-800 group-hover:bg-brand-900/40 group-hover:text-brand-400 group-hover:border-brand-500/30 transition-colors">
                         <i class="fa-solid fa-brain text-xl"></i>
                     </div>
-                    <h4 class="text-lg font-bold text-slate-900 mb-2">Motor de inferencia IA</h4>
-                    <p class="text-sm text-slate-500 leading-relaxed font-light">Visión computacional entrenada para detectar patrones estructurales e identificar la causa raíz eliminando el sesgo humano.</p>
+                    <h4 class="text-2xl md:text-3xl font-extrabold text-white mb-3 tracking-tight leading-tight">Motor de<br>inferencia IA</h4>
+                    <p class="text-xs md:text-sm text-slate-400 leading-relaxed font-light">Visión computacional entrenada para detectar patrones estructurales e identificar la causa raíz eliminando el sesgo humano.</p>
+                    <div class="card-number absolute bottom-2 right-4 text-brand-500/10 font-extrabold text-6xl md:text-7xl tracking-tighter opacity-0 translate-y-10 transition-all duration-700 ease-out z-0">02</div>
                 </div>
 
-                <div class="bg-white p-8 rounded-3xl border border-slate-200/60 shadow-sm hover:shadow-soft transition-all duration-300 fade-in-up group" style="transition-delay: 0.2s;">
-                    <div class="w-12 h-12 rounded-2xl bg-brand-50 flex items-center justify-center text-brand-600 mb-6 group-hover:scale-110 transition-transform">
+                <!-- Tarjeta 3 -->
+                <div class="solucion-card w-[260px] md:w-[320px] h-[340px] md:h-[380px] shrink-0 bg-[#0a0a0a] border border-slate-800 hover:border-brand-500 hover:border-[2px] rounded-[2rem] p-6 md:p-8 flex flex-col justify-center relative overflow-hidden group transition-all duration-300">
+                    <div class="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-slate-900 flex items-center justify-center text-slate-400 mb-4 border border-slate-800 group-hover:bg-brand-900/40 group-hover:text-brand-400 group-hover:border-brand-500/30 transition-colors">
                         <i class="fa-solid fa-list-check text-xl"></i>
                     </div>
-                    <h4 class="text-lg font-bold text-slate-900 mb-2">Resultado paramétrico integral</h4>
-                    <p class="text-sm text-slate-500 leading-relaxed font-light">Emisión inmediata de un reporte técnico dinámico, capaz de diagnosticar patologías y definir soluciones precisas, insumos, protocolos climáticos y costos directos de reparación por metro cuadrado.</p>
+                    <h4 class="text-2xl md:text-3xl font-extrabold text-white mb-3 tracking-tight leading-tight">Resultado<br>paramétrico</h4>
+                    <p class="text-xs md:text-sm text-slate-400 leading-relaxed font-light">Emisión inmediata de un reporte capaz de diagnosticar patologías y definir soluciones, insumos, protocolos y costos por m².</p>
+                    <div class="card-number absolute bottom-2 right-4 text-brand-500/10 font-extrabold text-6xl md:text-7xl tracking-tighter opacity-0 translate-y-10 transition-all duration-700 ease-out z-0">03</div>
                 </div>
 
-                <div class="bg-white p-8 rounded-3xl border border-slate-200/60 shadow-sm hover:shadow-soft transition-all duration-300 fade-in-up group">
-                    <div class="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center text-slate-700 mb-6 group-hover:scale-110 transition-transform">
+                <!-- Tarjeta 4 -->
+                <div class="solucion-card w-[260px] md:w-[320px] h-[340px] md:h-[380px] shrink-0 bg-[#0a0a0a] border border-slate-800 hover:border-brand-500 hover:border-[2px] rounded-[2rem] p-6 md:p-8 flex flex-col justify-center relative overflow-hidden group transition-all duration-300">
+                    <div class="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-slate-900 flex items-center justify-center text-slate-400 mb-4 border border-slate-800 group-hover:bg-brand-900/40 group-hover:text-brand-400 group-hover:border-brand-500/30 transition-colors">
                         <i class="fa-solid fa-satellite-dish text-xl"></i>
                     </div>
-                    <h4 class="text-lg font-bold text-slate-900 mb-2">Telemetría IoT</h4>
-                    <p class="text-sm text-slate-500 leading-relaxed font-light">Integración perimetral con sensores LiDAR e higrómetros para medir volúmenes y condiciones con precisión milimétrica.</p>
+                    <h4 class="text-2xl md:text-3xl font-extrabold text-white mb-3 tracking-tight leading-tight">Telemetría<br>IoT</h4>
+                    <p class="text-xs md:text-sm text-slate-400 leading-relaxed font-light">Integración perimetral con sensores LiDAR e higrómetros para medir volúmenes y condiciones con precisión milimétrica.</p>
+                    <div class="card-number absolute bottom-2 right-4 text-brand-500/10 font-extrabold text-6xl md:text-7xl tracking-tighter opacity-0 translate-y-10 transition-all duration-700 ease-out z-0">04</div>
                 </div>
 
-                <div class="bg-white p-8 rounded-3xl border border-slate-200/60 shadow-sm hover:shadow-soft transition-all duration-300 fade-in-up group" style="transition-delay: 0.1s;">
-                    <div class="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center text-slate-700 mb-6 group-hover:scale-110 transition-transform">
+                <!-- Tarjeta 5 -->
+                <div class="solucion-card w-[260px] md:w-[320px] h-[340px] md:h-[380px] shrink-0 bg-[#0a0a0a] border border-slate-800 hover:border-brand-500 hover:border-[2px] rounded-[2rem] p-6 md:p-8 flex flex-col justify-center relative overflow-hidden group transition-all duration-300">
+                    <div class="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-slate-900 flex items-center justify-center text-slate-400 mb-4 border border-slate-800 group-hover:bg-brand-900/40 group-hover:text-brand-400 group-hover:border-brand-500/30 transition-colors">
                         <i class="fa-solid fa-map-location-dot text-xl"></i>
                     </div>
-                    <h4 class="text-lg font-bold text-slate-900 mb-2">Contexto geográfico</h4>
-                    <p class="text-sm text-slate-500 leading-relaxed font-light">Cotización inteligente cruzando la ubicación GPS de la obra vía API con catálogos de proveedores locales actualizados.</p>
+                    <h4 class="text-2xl md:text-3xl font-extrabold text-white mb-3 tracking-tight leading-tight">Contexto<br>geográfico</h4>
+                    <p class="text-xs md:text-sm text-slate-400 leading-relaxed font-light">Cotización inteligente cruzando la ubicación GPS de la obra vía API con catálogos de proveedores locales actualizados.</p>
+                    <div class="card-number absolute bottom-2 right-4 text-brand-500/10 font-extrabold text-6xl md:text-7xl tracking-tighter opacity-0 translate-y-10 transition-all duration-700 ease-out z-0">05</div>
                 </div>
 
-                <div class="bg-white p-8 rounded-3xl border border-slate-200/60 shadow-sm hover:shadow-soft transition-all duration-300 fade-in-up group" style="transition-delay: 0.2s;">
-                    <div class="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center text-slate-700 mb-6 group-hover:scale-110 transition-transform">
+                <!-- Tarjeta 6 -->
+                <div class="solucion-card w-[260px] md:w-[320px] h-[340px] md:h-[380px] shrink-0 bg-[#0a0a0a] border border-slate-800 hover:border-brand-500 hover:border-[2px] rounded-[2rem] p-6 md:p-8 flex flex-col justify-center relative overflow-hidden group transition-all duration-300">
+                    <div class="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-slate-900 flex items-center justify-center text-slate-400 mb-4 border border-slate-800 group-hover:bg-brand-900/40 group-hover:text-brand-400 group-hover:border-brand-500/30 transition-colors">
                         <i class="fa-solid fa-cubes text-xl"></i>
                     </div>
-                    <h4 class="text-lg font-bold text-slate-900 mb-2">Cubicación BIM</h4>
-                    <p class="text-sm text-slate-500 leading-relaxed font-light">Ingesta de planimetrías (CAD/BIM) para geolocalizar patologías y generar listas de materiales exactas para abastecimiento.</p>
+                    <h4 class="text-2xl md:text-3xl font-extrabold text-white mb-3 tracking-tight leading-tight">Cubicación<br>BIM</h4>
+                    <p class="text-xs md:text-sm text-slate-400 leading-relaxed font-light">Ingesta de planimetrías (CAD/BIM) para geolocalizar patologías y generar listas de materiales exactas para abastecimiento.</p>
+                    <div class="card-number absolute bottom-2 right-4 text-brand-500/10 font-extrabold text-6xl md:text-7xl tracking-tighter opacity-0 translate-y-10 transition-all duration-700 ease-out z-0">06</div>
                 </div>
+
             </div>
         </div>
     </section>
 
-    <section id="tutorial" class="py-24 bg-white border-b border-slate-200/60">
+    <section id="tutorial" class="py-24 bg-white border-b border-slate-200/60 relative z-40">
         <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-12 fade-in-up">
                 <h2 class="text-brand-600 font-bold tracking-widest uppercase text-xs mb-3">Video Tutorial</h2>
@@ -338,15 +330,12 @@
 
             <div class="flex justify-center fade-in-up">
                 <a href="https://youtube.com/shorts/1cWU5Xq0AyM?feature=share" target="_blank" class="relative rounded-[2.5rem] overflow-hidden shadow-2xl border-[6px] border-slate-900 aspect-[9/16] w-full max-w-[300px] md:max-w-[340px] bg-slate-800 group transition-transform hover:-translate-y-1 duration-500 block">
-                    
                     <img src="https://img.youtube.com/vi/1cWU5Xq0AyM/maxresdefault.jpg" alt="Tutorial Obrín IA" class="absolute top-0 left-0 w-full h-full object-cover z-10 opacity-70 group-hover:opacity-90 transition-opacity duration-300" onerror="this.onerror=null; this.src='https://img.youtube.com/vi/1cWU5Xq0AyM/0.jpg';">
-                    
                     <div class="absolute inset-0 flex items-center justify-center z-20">
                         <div class="w-16 h-16 bg-red-600/90 rounded-full flex items-center justify-center text-white shadow-lg backdrop-blur-sm group-hover:scale-110 group-hover:bg-red-600 transition-all duration-300">
                             <i class="fa-solid fa-play text-xl ml-1"></i>
                         </div>
                     </div>
-                    
                     <div class="absolute -inset-4 bg-brand-500/30 blur-2xl -z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
                 </a>
             </div>
@@ -359,7 +348,7 @@
         </div>
     </section>
 
-    <section id="caracteristicas" class="py-24 bg-slate-900 text-white">
+    <section id="caracteristicas" class="py-24 bg-slate-900 text-white relative z-40">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center max-w-2xl mx-auto mb-16 fade-in-up">
                 <h2 class="text-brand-400 font-bold tracking-widest uppercase text-xs mb-3">Cambio de Paradigma</h2>
@@ -414,71 +403,66 @@
         </div>
     </section>
 
-    <section id="equipo" class="py-24 bg-white">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="text-center max-w-3xl mx-auto mb-16 fade-in-up">
-            <h3 class="text-3xl md:text-4xl font-extrabold text-slate-900 tracking-tight">Desarrollado por expertos</h3>
-        </div>
-
-        <!-- ESTE ES EL CONTENEDOR QUE FALTABA -->
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8 mb-16 max-w-5xl mx-auto">
-            
-            <!-- José M. Christensen -->
-            <div class="text-center fade-in-up">
-                <img src="https://lh3.googleusercontent.com/pw/AP1GczPx1EJ_8fIwPO2dphbWGkNuor7vTGc9aKzSdIdvFeLuH3WCy24NLlHLs1BCK9M5qrCeB8DxVYks-46LohhaR4NA4K3pyxX7sqHCackmj7pPEiKmArQaN-v5HpnKrY5Z5MLLLSdUR3Ig6Wz5N8EnbdboLA=w449-h599-s-no-gm?authuser=0" alt="José M. Christensen" class="w-20 h-20 md:w-24 md:h-24 mx-auto rounded-full object-cover mb-4 border border-slate-200 shadow-sm">
-                <h4 class="font-bold text-slate-900 text-sm">José M. Christensen</h4>
-                <p class="text-slate-500 text-xs mt-1">Líder / Co-creador</p>
-                <a href="https://www.linkedin.com/in/jmchristensenc/" target="_blank" rel="noopener noreferrer" class="inline-block mt-2 text-brand-600 hover:text-blue-800 transition-colors">
-                    <i class="fa-brands fa-linkedin text-xl"></i>
-                </a>
+    <section id="equipo" class="py-24 bg-white relative z-40">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-3xl mx-auto mb-16 fade-in-up">
+                <h3 class="text-3xl md:text-4xl font-extrabold text-slate-900 tracking-tight">Desarrollado por expertos</h3>
             </div>
 
-            <!-- Clemente Del Prado -->
-            <div class="text-center fade-in-up" style="transition-delay: 0.1s;">
-                <img src="https://lh3.googleusercontent.com/pw/AP1GczPAGbay3Va0BKkPUgiGX7SLhpD79DMBZF1xd5ccapCtq73169Pk_JQcetLv_gVSK3HfIG4txRC678ff79i6xEAe9l2pyQM_J7Q1wuh_fPuAsJDFtlAOksgQXD2-qY5LvUH5h_xJXeArENwt81PHkQW15Q=w449-h599-s-no-gm?authuser=0" alt="Clemente Del Prado" class="w-20 h-20 md:w-24 md:h-24 mx-auto rounded-full object-cover mb-4 border border-slate-200 shadow-sm">
-                <h4 class="font-bold text-slate-900 text-sm">Clemente Del Prado</h4>
-                <p class="text-slate-500 text-xs mt-1">Co-creador</p>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8 mb-16 max-w-5xl mx-auto">
+                
+                <div class="text-center fade-in-up">
+                    <img src="https://lh3.googleusercontent.com/pw/AP1GczPx1EJ_8fIwPO2dphbWGkNuor7vTGc9aKzSdIdvFeLuH3WCy24NLlHLs1BCK9M5qrCeB8DxVYks-46LohhaR4NA4K3pyxX7sqHCackmj7pPEiKmArQaN-v5HpnKrY5Z5MLLLSdUR3Ig6Wz5N8EnbdboLA=w449-h599-s-no-gm?authuser=0" alt="José M. Christensen" class="w-20 h-20 md:w-24 md:h-24 mx-auto rounded-full object-cover mb-4 border border-slate-200 shadow-sm">
+                    <h4 class="font-bold text-slate-900 text-sm">José M. Christensen</h4>
+                    <p class="text-slate-500 text-xs mt-1">Líder / Co-creador</p>
+                    <a href="https://www.linkedin.com/in/jmchristensenc/" target="_blank" rel="noopener noreferrer" class="inline-block mt-2 text-brand-600 hover:text-blue-800 transition-colors">
+                        <i class="fa-brands fa-linkedin text-xl"></i>
+                    </a>
+                </div>
+
+                <div class="text-center fade-in-up" style="transition-delay: 0.1s;">
+                    <img src="https://lh3.googleusercontent.com/pw/AP1GczPAGbay3Va0BKkPUgiGX7SLhpD79DMBZF1xd5ccapCtq73169Pk_JQcetLv_gVSK3HfIG4txRC678ff79i6xEAe9l2pyQM_J7Q1wuh_fPuAsJDFtlAOksgQXD2-qY5LvUH5h_xJXeArENwt81PHkQW15Q=w449-h599-s-no-gm?authuser=0" alt="Clemente Del Prado" class="w-20 h-20 md:w-24 md:h-24 mx-auto rounded-full object-cover mb-4 border border-slate-200 shadow-sm">
+                    <h4 class="font-bold text-slate-900 text-sm">Clemente Del Prado</h4>
+                    <p class="text-slate-500 text-xs mt-1">Co-creador</p>
+                </div>
+
+                <div class="text-center fade-in-up" style="transition-delay: 0.2s;">
+                    <img src="https://lh3.googleusercontent.com/pw/AP1GczOO3GFraUNDJvV3ItB_TUd6WF7OITYuSV-EmuwSYLNrDhWdCzuWbRniV4RPM1HH9EBVRiMIsZEOXZS8E5WkFefU9C78xk61okykgwbjO9buY1JlMptuEVumiVw9s1HXGxPX-qJr26B-rM7uo8LP-bGmaA=w449-h599-s-no-gm?authuser=0" alt="Nicolás Maldonado" class="w-20 h-20 md:w-24 md:h-24 mx-auto rounded-full object-cover mb-4 border border-slate-200 shadow-sm">
+                    <h4 class="font-bold text-slate-900 text-sm">Nicolás Maldonado</h4>
+                    <p class="text-slate-500 text-xs mt-1">Co-creador</p>
+                </div>
+
+                <div class="text-center fade-in-up" style="transition-delay: 0.3s;">
+                    <img src="https://lh3.googleusercontent.com/pw/AP1GczMYY56vceJfy25WPxT5ToFv5rqYJuglJvjANfAQaiN1kgwH9kCvkfKkX2oN9ge7ODm2EmdUXgOGDBVHdbZr3NfO7l_ehJ2xPuDlBsR9BiToJ64zk7ZAnFpUmPOBI5Czlqa7aitzUyQogeRbXzFxbTgGZw=w400-h599-s-no-gm?authuser=0" alt="Julio Letelier Menares" class="w-20 h-20 md:w-24 md:h-24 mx-auto rounded-full object-cover mb-4 border border-slate-200 shadow-sm">
+                    <h4 class="font-bold text-slate-900 text-sm">Julio Letelier Menares</h4>
+                    <p class="text-slate-500 text-xs mt-1">Profesor Guía</p>
+                    <a href="https://www.linkedin.com/in/julioletelier/" target="_blank" rel="noopener noreferrer" class="inline-block mt-2 text-brand-600 hover:text-blue-800 transition-colors">
+                        <i class="fa-brands fa-linkedin text-xl"></i>
+                    </a>
+                </div>
             </div>
 
-            <!-- Nicolás Maldonado -->
-            <div class="text-center fade-in-up" style="transition-delay: 0.2s;">
-                <img src="https://lh3.googleusercontent.com/pw/AP1GczOO3GFraUNDJvV3ItB_TUd6WF7OITYuSV-EmuwSYLNrDhWdCzuWbRniV4RPM1HH9EBVRiMIsZEOXZS8E5WkFefU9C78xk61okykgwbjO9buY1JlMptuEVumiVw9s1HXGxPX-qJr26B-rM7uo8LP-bGmaA=w449-h599-s-no-gm?authuser=0" alt="Nicolás Maldonado" class="w-20 h-20 md:w-24 md:h-24 mx-auto rounded-full object-cover mb-4 border border-slate-200 shadow-sm">
-                <h4 class="font-bold text-slate-900 text-sm">Nicolás Maldonado</h4>
-                <p class="text-slate-500 text-xs mt-1">Co-creador</p>
+            <div class="bg-slate-50 rounded-3xl p-8 border border-slate-200 max-w-4xl mx-auto flex flex-col md:flex-row items-center md:items-start gap-8 fade-in-up">
+                <img src="https://lh3.googleusercontent.com/pw/AP1GczPHYi-BQhxND0BLXkrVDsz6psd2JWK9X8DTy-p1IBCtTh7kS6AAOSIbD9vaqMPDK5xpvBq9WQ6MHxl3zN9oaa-5fvSPvqNduDK9xC97-q6BYi_ZcQH0UfM30SpNWG3_VpiYyuc3DgciR7oFU63EQEi4-g=w400-h400-s-no-gm?authuser=0" alt="Daniel Linares García" class="w-16 h-16 object-cover rounded-2xl border border-slate-200 shadow-sm shrink-0">
+                <div class="text-center md:text-left">
+                    <div class="flex flex-col md:flex-row md:items-center gap-3 mb-2">
+                        <h4 class="font-bold text-slate-900 text-lg">Daniel Linares García</h4>
+                        <span class="inline-block bg-white border border-slate-200 text-slate-600 text-[10px] uppercase tracking-widest px-2 py-1 rounded-md font-semibold shadow-sm w-max mx-auto md:mx-0">Respaldo Académico</span>
+                        <a href="https://www.linkedin.com/in/dlinaresphd/" target="_blank" rel="noopener noreferrer" class="text-brand-600 hover:text-blue-800 transition-colors">
+                            <i class="fa-brands fa-linkedin text-xl"></i>
+                        </a>
+                    </div>
+                    <p class="text-slate-500 font-medium text-sm mb-4">Vínculo institucional con la Escuela de Construcción Civil.</p>
+                    <ul class="text-sm text-slate-600 space-y-2 font-light">
+                        <li class="flex items-center justify-center md:justify-start gap-2"><i class="fa-solid fa-circle-check text-brand-500 text-[10px]"></i> Ph.D. Construcción Inteligente, Virginia Tech (2022).</li>
+                        <li class="flex items-center justify-center md:justify-start gap-2"><i class="fa-solid fa-circle-check text-brand-500 text-[10px]"></i> M.Eng. Computer Science / Ms.C. Construcción, Virginia Tech.</li>
+                    </ul>
+                </div>
             </div>
-
-            <!-- Julio Letelier Menares -->
-            <div class="text-center fade-in-up" style="transition-delay: 0.3s;">
-                <img src="https://lh3.googleusercontent.com/pw/AP1GczMYY56vceJfy25WPxT5ToFv5rqYJuglJvjANfAQaiN1kgwH9kCvkfKkX2oN9ge7ODm2EmdUXgOGDBVHdbZr3NfO7l_ehJ2xPuDlBsR9BiToJ64zk7ZAnFpUmPOBI5Czlqa7aitzUyQogeRbXzFxbTgGZw=w400-h599-s-no-gm?authuser=0" alt="Julio Letelier Menares" class="w-20 h-20 md:w-24 md:h-24 mx-auto rounded-full object-cover mb-4 border border-slate-200 shadow-sm">
-                <h4 class="font-bold text-slate-900 text-sm">Julio Letelier Menares</h4>
-                <p class="text-slate-500 text-xs mt-1">Profesor Guía</p>
-                <a href="https://www.linkedin.com/in/julioletelier/" target="_blank" rel="noopener noreferrer" class="inline-block mt-2 text-brand-600 hover:text-blue-800 transition-colors">
-                    <i class="fa-brands fa-linkedin text-xl"></i>
-                </a>
-            </div>
-            </div>
-
-           <div class="bg-slate-50 rounded-3xl p-8 border border-slate-200 max-w-4xl mx-auto flex flex-col md:flex-row items-center md:items-start gap-8 fade-in-up">
-    <img src="https://lh3.googleusercontent.com/pw/AP1GczPHYi-BQhxND0BLXkrVDsz6psd2JWK9X8DTy-p1IBCtTh7kS6AAOSIbD9vaqMPDK5xpvBq9WQ6MHxl3zN9oaa-5fvSPvqNduDK9xC97-q6BYi_ZcQH0UfM30SpNWG3_VpiYyuc3DgciR7oFU63EQEi4-g=w400-h400-s-no-gm?authuser=0" alt="Daniel Linares García" class="w-16 h-16 object-cover rounded-2xl border border-slate-200 shadow-sm shrink-0">
-    <div class="text-center md:text-left">
-        <div class="flex flex-col md:flex-row md:items-center gap-3 mb-2">
-            <h4 class="font-bold text-slate-900 text-lg">Daniel Linares García</h4>
-            <span class="inline-block bg-white border border-slate-200 text-slate-600 text-[10px] uppercase tracking-widest px-2 py-1 rounded-md font-semibold shadow-sm w-max mx-auto md:mx-0">Respaldo Académico</span>
-            <!-- Enlace a LinkedIn -->
-            <a href="https://www.linkedin.com/in/dlinaresphd/" target="_blank" rel="noopener noreferrer" class="text-brand-600 hover:text-blue-800 transition-colors">
-                <i class="fa-brands fa-linkedin text-xl"></i>
-            </a>
-        </div>
-        <p class="text-slate-500 font-medium text-sm mb-4">Vínculo institucional con la Escuela de Construcción Civil.</p>
-        <ul class="text-sm text-slate-600 space-y-2 font-light">
-            <li class="flex items-center justify-center md:justify-start gap-2"><i class="fa-solid fa-circle-check text-brand-500 text-[10px]"></i> Ph.D. Construcción Inteligente, Virginia Tech (2022).</li>
-            <li class="flex items-center justify-center md:justify-start gap-2"><i class="fa-solid fa-circle-check text-brand-500 text-[10px]"></i> M.Eng. Computer Science / Ms.C. Construcción, Virginia Tech.</li>
-        </ul>
-    </div>
-</div>
         </div>
     </section>
-    <section id="galeria" class="py-24 bg-white">
+
+    <section id="galeria" class="py-24 bg-white relative z-40">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center max-w-2xl mx-auto mb-16 fade-in-up">
                 <h2 class="text-brand-600 font-bold tracking-widest uppercase text-xs mb-3">Galería</h2>
@@ -495,7 +479,8 @@
             </div>
         </div>
     </section>
-    <footer id="contacto" class="bg-black pt-16 pb-8">
+
+    <footer id="contacto" class="bg-black pt-16 pb-8 relative z-40">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="grid md:grid-cols-3 gap-12 mb-16 border-b border-slate-800 pb-12">
                 <div class="col-span-1 md:col-span-2">
@@ -541,7 +526,321 @@
     </footer>
 
     <script>
-        // Internal Navigation Handler for Google Sites compatibility
+        // --- Lógica Scroll combinada ---
+        window.addEventListener('scroll', () => {
+            const scrollY = window.scrollY;
+            const winHeight = window.innerHeight;
+            
+            // 1. Lógica Hero Text (Desvanecimiento)
+            const heroSection = document.getElementById('hero-section');
+            if (heroSection) {
+                const textProgress = Math.min(scrollY / (winHeight * 0.8), 1);
+                const textContainer = document.getElementById('hero-text-container');
+                if (textContainer) {
+                    textContainer.style.opacity = 1 - (textProgress * 1.5); 
+                    textContainer.style.transform = `translateY(${textProgress * -100}px)`;
+                }
+            }
+
+            // 2. Lógica Celular 3D Global (Atraviesa secciones)
+            const phoneWrapper = document.getElementById('hero-phone-container');
+            const problemaSection = document.getElementById('problema');
+            const solucionSection = document.getElementById('solucion');
+
+            if (phoneWrapper && heroSection && problemaSection && solucionSection) {
+                // Distancia total de scroll antes de llegar a la sección 'Solución'
+                const distanceToSolucion = heroSection.offsetHeight + problemaSection.offsetHeight;
+                
+                // Progreso matemático continuo (garantiza cero saltos, siempre entre 0 y 1)
+                const movementProgress = Math.min(scrollY / distanceToSolucion, 1);
+                
+                // Variables de transformación que crecen fluidamente a medida que haces scroll
+                let scale = 0.6 + (0.6 * movementProgress); // Crece suavemente de 0.6 a 1.2
+                let rotateY = -40 + (70 * movementProgress); // Gira de -40 a 30 grados
+                let rotateX = movementProgress * 15; // Inclinación suave hacia atrás
+                let translateY = movementProgress * -80; // Sube ligeramente
+                let translateX = movementProgress * (window.innerWidth * 0.25); // Se desplaza a la derecha
+
+                let opacity = 1;
+
+                // FASE DE DESVANECIMIENTO: Cuando la 'Solución' empieza a subir por la pantalla
+                const solucionRect = solucionSection.getBoundingClientRect();
+                if (solucionRect.top < winHeight) {
+                    // Calculamos el porcentaje de entrada de la sección a la pantalla (0 a 1)
+                    const fadeProgress = Math.max(0, Math.min(1, (winHeight - solucionRect.top) / winHeight));
+                    opacity = 1 - fadeProgress;
+                    translateY -= fadeProgress * 150; // Sigue subiendo extra mientras desaparece
+                }
+
+                phoneWrapper.style.transform = `perspective(1200px) translate(${translateX}px, ${translateY}px) scale(${scale}) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+                phoneWrapper.style.opacity = opacity;
+
+                // --- EFECTO BLUR Y ZOOM-IN PARA EL TEXTO ---
+                const problemaTextContainer = document.getElementById('problema-text-container');
+                if (problemaTextContainer) {
+                    const problemaRect = problemaSection.getBoundingClientRect();
+                    
+                    if (problemaRect.top < winHeight && problemaRect.bottom > 0) {
+                        const visibilityProgress = Math.max(0, Math.min(1, (winHeight - problemaRect.top) / (winHeight * 0.7)));
+                        
+                        const currentBlur = 40 - (visibilityProgress * 40); 
+                        const currentScaleText = 4.0 - (visibilityProgress * 3.0);
+                        const currentOpacity = visibilityProgress; 
+                        
+                        problemaTextContainer.style.filter = `blur(${currentBlur}px)`;
+                        problemaTextContainer.style.transform = `scale(${currentScaleText})`;
+                        problemaTextContainer.style.opacity = currentOpacity;
+                    }
+                }
+            }
+
+            // 3. Lógica Scroll Horizontal (Sección Solución)
+            const solWrapper = document.getElementById('solucion');
+            const solTrack = document.getElementById('solucion-track');
+            
+            if (solWrapper && solTrack) {
+                const wrapperRect = solWrapper.getBoundingClientRect();
+                const wrapperTop = wrapperRect.top;
+                const wrapperHeight = solWrapper.offsetHeight;
+
+                // Verificamos si estamos dentro de la sección pineada (400vh)
+                if (wrapperTop <= 0 && wrapperTop >= -(wrapperHeight - winHeight)) {
+                    // Calculamos el porcentaje de avance dentro del wrapper
+                    const progress = Math.abs(wrapperTop) / (wrapperHeight - winHeight);
+                    // Distancia máxima que el track puede moverse a la izquierda
+                    const maxScroll = solTrack.scrollWidth - window.innerWidth;
+                    
+                    solTrack.style.transform = `translateX(-${progress * maxScroll}px)`;
+                } 
+                // Si estamos antes de llegar a la sección
+                else if (wrapperTop > 0) {
+                    solTrack.style.transform = `translateX(0px)`;
+                } 
+                // Si ya pasamos la sección
+                else {
+                    const maxScroll = solTrack.scrollWidth - window.innerWidth;
+                    solTrack.style.transform = `translateX(-${maxScroll}px)`;
+                }
+            }
+
+            // 4. Lógica de animación de los números al avanzar
+            const cards = document.querySelectorAll('.solucion-card');
+            cards.forEach(card => {
+                const rect = card.getBoundingClientRect();
+                const numberEl = card.querySelector('.card-number');
+                if (numberEl) {
+                    // Si la tarjeta está bien centrada/visible en el viewport
+                    if (rect.left < window.innerWidth * 0.9 && rect.right > window.innerWidth * 0.1) {
+                        numberEl.classList.remove('opacity-0', 'translate-y-10');
+                        numberEl.classList.add('opacity-100', 'translate-y-0');
+                    } else {
+                        // Vuelve a ocultarse si se sale de la pantalla
+                        numberEl.classList.add('opacity-0', 'translate-y-10');
+                        numberEl.classList.remove('opacity-100', 'translate-y-0');
+                    }
+                }
+            });
+        });
+
+        // --- Inicia código iPhone Mockup ---
+        const canvas = document.getElementById('phoneCanvas');
+        const ctx = canvas.getContext('2d');
+        const wrapper = document.getElementById('screen-wrapper');
+        const iframe = document.getElementById('screen-iframe');
+
+        const scale = 2; 
+        const width = 400; 
+        const height = 700; 
+        canvas.width = width * scale;
+        canvas.height = height * scale;
+        
+        ctx.scale(scale, scale);
+
+        const phoneWidth = 320;
+        const phoneHeight = 650;
+        const cornerRadius = 45;
+        const bezelWidth = 8; 
+
+        const phoneX = width / 2 - phoneWidth / 2;
+        const phoneY = height / 2 - phoneHeight / 2;
+
+        function setupIframe() {
+            const screenX = phoneX + bezelWidth;
+            const screenY = phoneY + bezelWidth;
+            const screenWidth = phoneWidth - bezelWidth * 2;
+            const screenHeight = phoneHeight - bezelWidth * 2;
+            const screenRadius = cornerRadius - 6;
+
+            wrapper.style.left = screenX + 'px';
+            wrapper.style.top = screenY + 'px';
+            wrapper.style.width = screenWidth + 'px';
+            wrapper.style.height = screenHeight + 'px';
+            wrapper.style.borderRadius = screenRadius + 'px';
+
+            const logicalWidth = 393; 
+            const scaleFactor = screenWidth / logicalWidth;
+            const logicalHeight = screenHeight / scaleFactor;
+
+            iframe.style.width = logicalWidth + 'px';
+            iframe.style.height = logicalHeight + 'px';
+            iframe.style.transform = `scale(${scaleFactor})`;
+        }
+
+        function drawRoundedRect(ctx, x, y, width, height, radius, fillStyle, strokeStyle, lineWidth) {
+            ctx.beginPath();
+            ctx.moveTo(x + radius, y);
+            ctx.lineTo(x + width - radius, y);
+            ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+            ctx.lineTo(x + width, y + height - radius);
+            ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+            ctx.lineTo(x + radius, y + height);
+            ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+            ctx.lineTo(x, y + radius);
+            ctx.quadraticCurveTo(x, y, x + radius, y);
+            ctx.closePath();
+
+            if (fillStyle) {
+                ctx.fillStyle = fillStyle;
+                ctx.fill();
+            }
+            if (strokeStyle) {
+                ctx.lineWidth = lineWidth || 1;
+                ctx.strokeStyle = strokeStyle;
+                ctx.stroke();
+            }
+        }
+
+        function drawFrontPhone() {
+            const frameGradient = ctx.createLinearGradient(phoneX, phoneY, phoneX + phoneWidth, phoneY);
+            frameGradient.addColorStop(0, '#1c1c1e'); 
+            frameGradient.addColorStop(0.05, '#4a4a4c'); 
+            frameGradient.addColorStop(0.1, '#1c1c1e');
+            frameGradient.addColorStop(0.9, '#1c1c1e');
+            frameGradient.addColorStop(0.95, '#3a3a3c'); 
+            frameGradient.addColorStop(1, '#000000');
+
+            drawRoundedRect(ctx, phoneX, phoneY, phoneWidth, phoneHeight, cornerRadius, frameGradient);
+            
+            drawRoundedRect(ctx, phoneX + phoneWidth - 1, phoneY + 180, 3, 60, 1.5, '#1c1c1e');
+            drawRoundedRect(ctx, phoneX - 2, phoneY + 150, 3, 40, 1.5, '#1c1c1e');
+            drawRoundedRect(ctx, phoneX - 2, phoneY + 200, 3, 40, 1.5, '#1c1c1e');
+
+            ctx.globalCompositeOperation = 'destination-out';
+            drawRoundedRect(ctx, phoneX + bezelWidth, phoneY + bezelWidth, 
+                            phoneWidth - bezelWidth*2, phoneHeight - bezelWidth*2, 
+                            cornerRadius - 6, 'rgba(0,0,0,1)'); 
+            
+            ctx.globalCompositeOperation = 'source-over';
+
+            drawDynamicIsland(phoneX + phoneWidth / 2, phoneY + bezelWidth + 10);
+            
+            ctx.save();
+            ctx.beginPath();
+            drawRoundedRect(ctx, phoneX + bezelWidth, phoneY + bezelWidth, 
+                            phoneWidth - bezelWidth*2, phoneHeight - bezelWidth*2, 
+                            cornerRadius - 6);
+            ctx.clip(); 
+            
+            const glossGradient = ctx.createLinearGradient(phoneX, phoneY, phoneX + phoneWidth/1.5, phoneY + phoneHeight/2);
+            glossGradient.addColorStop(0, 'rgba(255, 255, 255, 0.15)');
+            glossGradient.addColorStop(0.5, 'rgba(255, 255, 255, 0)');
+            
+            ctx.fillStyle = glossGradient;
+            ctx.beginPath();
+            ctx.moveTo(phoneX, phoneY);
+            ctx.lineTo(phoneX + phoneWidth, phoneY);
+            ctx.bezierCurveTo(phoneX + phoneWidth, phoneY + phoneHeight/3, 
+                              phoneX + phoneWidth/2, phoneY + phoneHeight/2, 
+                              phoneX, phoneY + phoneHeight);
+            ctx.closePath();
+            ctx.fill();
+            
+            ctx.restore(); 
+        }
+
+        function drawDynamicIsland(cx, y) {
+            const width = 85;
+            const height = 24;
+            const radius = height / 2;
+
+            ctx.beginPath();
+            drawRoundedRect(ctx, cx - width/2, y, width, height, radius, '#000000');
+
+            ctx.beginPath();
+            drawRoundedRect(ctx, cx - width/2 + 2, y + 2, width - 4, height/2, radius - 2);
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.05)';
+            ctx.fill();
+
+            ctx.beginPath();
+            ctx.arc(cx + width/2 - 12, y + height/2, 5, 0, Math.PI * 2);
+            ctx.fillStyle = '#080808';
+            ctx.fill();
+            
+            ctx.beginPath();
+            ctx.arc(cx + width/2 - 12, y + height/2, 2, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(0, 50, 150, 0.5)';
+            ctx.fill();
+        }
+
+        function create3DVolume() {
+            const container = document.querySelector('.phone-container');
+            const depth = 25; 
+            
+            for (let i = 1; i <= depth; i++) {
+                let layer = document.createElement('div');
+                layer.className = 'phone-volume-layer';
+                layer.style.transform = `translateZ(-${i}px)`;
+                
+                if (i === depth) {
+                    layer.style.backgroundColor = '#1c1c1e';
+                    layer.style.boxShadow = '-15px 20px 50px rgba(0,0,0,0.5)';
+                }
+                
+                if (i >= 5 && i <= 20) {
+                    let mute = document.createElement('div');
+                    mute.style.cssText = 'position:absolute; left:-2px; top:110px; width:2px; height:20px; background:#4a4a4c;';
+                    let btnVolUp = document.createElement('div');
+                    btnVolUp.style.cssText = 'position:absolute; left:-2px; top:150px; width:2px; height:40px; background:#4a4a4c;';
+                    let btnVolDown = document.createElement('div');
+                    btnVolDown.style.cssText = 'position:absolute; left:-2px; top:200px; width:2px; height:40px; background:#4a4a4c;';
+                    let btnPower = document.createElement('div');
+                    btnPower.style.cssText = 'position:absolute; right:-2px; top:180px; width:2px; height:60px; background:#4a4a4c;';
+                    
+                    if (i === 20) {
+                        mute.style.borderRadius = '2px 0 0 2px';
+                        btnVolUp.style.borderRadius = '2px 0 0 2px';
+                        btnVolDown.style.borderRadius = '2px 0 0 2px';
+                        btnPower.style.borderRadius = '0 2px 2px 0';
+                    }
+                    layer.appendChild(mute);
+                    layer.appendChild(btnVolUp);
+                    layer.appendChild(btnVolDown);
+                    layer.appendChild(btnPower);
+                }
+                container.insertBefore(layer, container.firstChild);
+            }
+        }
+
+        function renderScene() {
+            setupIframe(); 
+            ctx.clearRect(0, 0, width, height);
+            drawFrontPhone(); 
+        }
+
+        create3DVolume();
+        renderScene();
+
+        const observerOptions = { root: null, rootMargin: '0px', threshold: 0.1 };
+        const observer = new IntersectionObserver((entries, observer) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                    observer.unobserve(entry.target); 
+                }
+            });
+        }, observerOptions);
+        document.querySelectorAll('.fade-in-up').forEach(element => observer.observe(element));
+
         document.querySelectorAll('.nav-link').forEach(link => {
             link.addEventListener('click', function(e) {
                 const targetId = this.getAttribute('href');
@@ -551,51 +850,10 @@
                     if (targetElement) {
                         targetElement.scrollIntoView({ behavior: 'smooth' });
                     }
-                    // If in mobile, close menu
-                    document.getElementById('mobile-menu').classList.add('hidden');
                 }
             });
         });
 
-        // Mobile Menu Toggle
-        const btn = document.getElementById('mobile-menu-btn');
-        const menu = document.getElementById('mobile-menu');
-
-        btn.addEventListener('click', () => {
-            menu.classList.toggle('hidden');
-        });
-
-        // Navbar Scroll Effect
-        const navbar = document.getElementById('navbar');
-        window.addEventListener('scroll', () => {
-            if (window.scrollY > 10) {
-                navbar.classList.add('shadow-sm');
-                navbar.classList.replace('bg-white/70', 'bg-white/90');
-            } else {
-                navbar.classList.remove('shadow-sm');
-                navbar.classList.replace('bg-white/90', 'bg-white/70');
-            }
-        });
-
-        // Intersection Observer for Scroll Animations
-        const observerOptions = {
-            root: null,
-            rootMargin: '0px',
-            threshold: 0.1
-        };
-
-        const observer = new IntersectionObserver((entries, observer) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('visible');
-                    observer.unobserve(entry.target); 
-                }
-            });
-        }, observerOptions);
-
-        document.querySelectorAll('.fade-in-up').forEach(element => {
-            observer.observe(element);
-        });
     </script>
 </body>
 </html>
