@@ -316,43 +316,45 @@
         </div>
     </section>
 
-    <section id="tutorial" class="py-24 bg-white border-b border-slate-200/60 relative z-40">
+    <section id="tutorial" class="py-24 bg-black border-b border-slate-800 relative z-40">
         <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-12 fade-in-up">
+            <div id="tutorial-text-container" class="text-center mb-12 opacity-0" style="transform: scale(4); will-change: transform, opacity; transform-origin: center center;">
                 <h2 class="text-brand-600 font-bold tracking-widest uppercase text-xs mb-3">Video Tutorial</h2>
-                <h3 class="text-3xl md:text-4xl font-extrabold text-slate-900 mb-4 tracking-tight">Mira Obrín IA en acción</h3>
-                <p class="text-lg text-slate-500 font-light max-w-2xl mx-auto">Descubre en pocos minutos cómo nuestra plataforma captura, analiza y presupuesta soluciones constructivas directamente en terreno.</p>
+                <h3 class="text-3xl md:text-4xl font-extrabold text-white mb-4 tracking-tight">Mira Obrín IA en acción</h3>
+                <p class="text-lg text-slate-400 font-light max-w-2xl mx-auto">Descubre en pocos minutos cómo nuestra plataforma captura, analiza y presupuesta soluciones constructivas directamente en terreno.</p>
             </div>
 
             <div class="flex justify-center fade-in-up">
-                <a href="https://youtube.com/shorts/1cWU5Xq0AyM?feature=share" target="_blank" class="relative rounded-[2.5rem] overflow-hidden shadow-2xl border-[6px] border-slate-900 aspect-[9/16] w-full max-w-[300px] md:max-w-[340px] bg-slate-800 group transition-transform hover:-translate-y-1 duration-500 block">
-                    <img src="https://img.youtube.com/vi/1cWU5Xq0AyM/maxresdefault.jpg" alt="Tutorial Obrín IA" class="absolute top-0 left-0 w-full h-full object-cover z-10 opacity-70 group-hover:opacity-90 transition-opacity duration-300" onerror="this.onerror=null; this.src='https://img.youtube.com/vi/1cWU5Xq0AyM/0.jpg';">
-                    <div class="absolute inset-0 flex items-center justify-center z-20">
-                        <div class="w-16 h-16 bg-red-600/90 rounded-full flex items-center justify-center text-white shadow-lg backdrop-blur-sm group-hover:scale-110 group-hover:bg-red-600 transition-all duration-300">
-                            <i class="fa-solid fa-play text-xl ml-1"></i>
+                <div id="tutorial-video-wrapper" class="w-full flex justify-center" style="will-change: transform, filter; transform-style: preserve-3d;">
+                    <a href="https://youtube.com/shorts/1cWU5Xq0AyM?feature=share" target="_blank" class="relative rounded-[2.5rem] overflow-hidden shadow-2xl border-[6px] border-slate-900 aspect-[9/16] w-full max-w-[300px] md:max-w-[340px] bg-slate-800 group transition-transform hover:-translate-y-1 duration-500 block">
+                        <img src="https://img.youtube.com/vi/1cWU5Xq0AyM/maxresdefault.jpg" alt="Tutorial Obrín IA" class="absolute top-0 left-0 w-full h-full object-cover z-10 opacity-70 group-hover:opacity-90 transition-opacity duration-300" onerror="this.onerror=null; this.src='https://img.youtube.com/vi/1cWU5Xq0AyM/0.jpg';">
+                        <div class="absolute inset-0 flex items-center justify-center z-20">
+                            <div class="w-16 h-16 bg-red-600/90 rounded-full flex items-center justify-center text-white shadow-lg backdrop-blur-sm group-hover:scale-110 group-hover:bg-red-600 transition-all duration-300">
+                                <i class="fa-solid fa-play text-xl ml-1"></i>
+                            </div>
                         </div>
-                    </div>
-                    <div class="absolute -inset-4 bg-brand-500/30 blur-2xl -z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
-                </a>
+                        <div class="absolute -inset-4 bg-brand-500/30 blur-2xl -z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
+                    </a>
+                </div>
             </div>
             
             <div class="text-center mt-8 fade-in-up" style="transition-delay: 0.1s;">
-                 <a href="https://youtube.com/shorts/1cWU5Xq0AyM?feature=share" target="_blank" class="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-slate-50 hover:bg-red-50 border border-slate-200 text-sm text-slate-700 hover:text-red-700 font-semibold transition-all shadow-sm hover:shadow-md">
+                 <a href="https://youtube.com/shorts/1cWU5Xq0AyM?feature=share" target="_blank" class="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-[#0a0a0a] hover:bg-slate-800 border border-slate-800 text-sm text-slate-300 hover:text-white font-semibold transition-all shadow-sm hover:shadow-md">
                      <i class="fa-brands fa-youtube text-red-600 text-lg"></i> Ver en YouTube
                  </a>
             </div>
         </div>
     </section>
 
-    <section id="caracteristicas" class="py-24 bg-slate-900 text-white relative z-40">
+    <section id="caracteristicas" class="py-24 bg-black text-white relative z-40 border-b border-slate-800 overflow-hidden">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center max-w-2xl mx-auto mb-16 fade-in-up">
+            <div id="caract-text-container" class="text-center max-w-2xl mx-auto mb-16 opacity-0" style="transform: translateY(50px); will-change: transform, opacity;">
                 <h2 class="text-brand-400 font-bold tracking-widest uppercase text-xs mb-3">Cambio de Paradigma</h2>
                 <h3 class="text-3xl md:text-4xl font-extrabold tracking-tight mb-4">De un registro pasivo a un asistente activo</h3>
             </div>
             
             <div class="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-                <div class="border border-slate-700 bg-slate-800/50 p-8 rounded-3xl fade-in-up opacity-80">
+                <div id="caract-card-1" class="border border-slate-700 bg-slate-800/50 p-8 rounded-3xl opacity-0" style="transform: translateX(-50px); will-change: transform, opacity;">
                     <div class="flex items-center justify-between mb-8 pb-4 border-b border-slate-700">
                         <div>
                             <h4 class="text-xl font-bold text-slate-200">Software Tradicional</h4>
@@ -367,11 +369,11 @@
                     </ul>
                 </div>
                 
-                <div class="border border-brand-500/30 bg-gradient-to-b from-brand-900/40 to-slate-800/80 p-8 rounded-3xl shadow-glow relative fade-in-up" style="transition-delay: 0.1s;">
-                    <div class="absolute -top-3 -right-3">
+                <div id="caract-card-2" class="border border-brand-500/30 bg-gradient-to-b from-brand-900/40 to-slate-800/80 p-8 rounded-3xl shadow-glow relative opacity-0" style="transform: translateX(50px); will-change: transform, opacity;">
+                    <div class="absolute -top-3 -right-3 pointer-events-auto">
                         <span class="flex h-6 w-6 relative">
-                          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-400 opacity-75"></span>
-                          <span class="relative inline-flex rounded-full h-6 w-6 bg-brand-500 items-center justify-center text-white text-[10px]"><i class="fa-solid fa-check"></i></span>
+                              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-400 opacity-75"></span>
+                              <span class="relative inline-flex rounded-full h-6 w-6 bg-brand-500 items-center justify-center text-white text-[10px]"><i class="fa-solid fa-check"></i></span>
                         </span>
                     </div>
                     <div class="flex items-center justify-between mb-8 pb-4 border-b border-brand-500/20">
@@ -399,57 +401,57 @@
         </div>
     </section>
 
-    <section id="equipo" class="py-24 bg-white relative z-40">
+    <section id="equipo" class="py-24 bg-black relative z-40 border-b border-slate-800">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center max-w-3xl mx-auto mb-16 fade-in-up">
-                <h3 class="text-3xl md:text-4xl font-extrabold text-slate-900 tracking-tight">Desarrollado por expertos</h3>
+                <h3 class="text-3xl md:text-4xl font-extrabold text-white tracking-tight">Desarrollado por expertos</h3>
             </div>
 
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8 mb-16 max-w-5xl mx-auto">
                 
                 <div class="text-center fade-in-up">
-                    <img src="https://lh3.googleusercontent.com/pw/AP1GczPx1EJ_8fIwPO2dphbWGkNuor7vTGc9aKzSdIdvFeLuH3WCy24NLlHLs1BCK9M5qrCeB8DxVYks-46LohhaR4NA4K3pyxX7sqHCackmj7pPEiKmArQaN-v5HpnKrY5Z5MLLLSdUR3Ig6Wz5N8EnbdboLA=w449-h599-s-no-gm?authuser=0" alt="José M. Christensen" class="w-20 h-20 md:w-24 md:h-24 mx-auto rounded-full object-cover mb-4 border border-slate-200 shadow-sm">
-                    <h4 class="font-bold text-slate-900 text-sm">José M. Christensen</h4>
-                    <p class="text-slate-500 text-xs mt-1">Líder / Co-creador</p>
-                    <a href="https://www.linkedin.com/in/jmchristensenc/" target="_blank" rel="noopener noreferrer" class="inline-block mt-2 text-brand-600 hover:text-blue-800 transition-colors">
+                    <img src="https://lh3.googleusercontent.com/pw/AP1GczPx1EJ_8fIwPO2dphbWGkNuor7vTGc9aKzSdIdvFeLuH3WCy24NLlHLs1BCK9M5qrCeB8DxVYks-46LohhaR4NA4K3pyxX7sqHCackmj7pPEiKmArQaN-v5HpnKrY5Z5MLLLSdUR3Ig6Wz5N8EnbdboLA=w449-h599-s-no-gm?authuser=0" alt="José M. Christensen" class="w-20 h-20 md:w-24 md:h-24 mx-auto rounded-full object-cover mb-4 border border-slate-800 shadow-sm">
+                    <h4 class="font-bold text-white text-sm">José M. Christensen</h4>
+                    <p class="text-slate-400 text-xs mt-1">Líder / Co-creador</p>
+                    <a href="https://www.linkedin.com/in/jmchristensenc/" target="_blank" rel="noopener noreferrer" class="inline-block mt-2 text-brand-600 hover:text-brand-400 transition-colors">
                         <i class="fa-brands fa-linkedin text-xl"></i>
                     </a>
                 </div>
 
                 <div class="text-center fade-in-up" style="transition-delay: 0.1s;">
-                    <img src="https://lh3.googleusercontent.com/pw/AP1GczPAGbay3Va0BKkPUgiGX7SLhpD79DMBZF1xd5ccapCtq73169Pk_JQcetLv_gVSK3HfIG4txRC678ff79i6xEAe9l2pyQM_J7Q1wuh_fPuAsJDFtlAOksgQXD2-qY5LvUH5h_xJXeArENwt81PHkQW15Q=w449-h599-s-no-gm?authuser=0" alt="Clemente Del Prado" class="w-20 h-20 md:w-24 md:h-24 mx-auto rounded-full object-cover mb-4 border border-slate-200 shadow-sm">
-                    <h4 class="font-bold text-slate-900 text-sm">Clemente Del Prado</h4>
-                    <p class="text-slate-500 text-xs mt-1">Co-creador</p>
+                    <img src="https://lh3.googleusercontent.com/pw/AP1GczPAGbay3Va0BKkPUgiGX7SLhpD79DMBZF1xd5ccapCtq73169Pk_JQcetLv_gVSK3HfIG4txRC678ff79i6xEAe9l2pyQM_J7Q1wuh_fPuAsJDFtlAOksgQXD2-qY5LvUH5h_xJXeArENwt81PHkQW15Q=w449-h599-s-no-gm?authuser=0" alt="Clemente Del Prado" class="w-20 h-20 md:w-24 md:h-24 mx-auto rounded-full object-cover mb-4 border border-slate-800 shadow-sm">
+                    <h4 class="font-bold text-white text-sm">Clemente Del Prado</h4>
+                    <p class="text-slate-400 text-xs mt-1">Co-creador</p>
                 </div>
 
                 <div class="text-center fade-in-up" style="transition-delay: 0.2s;">
-                    <img src="https://lh3.googleusercontent.com/pw/AP1GczOO3GFraUNDJvV3ItB_TUd6WF7OITYuSV-EmuwSYLNrDhWdCzuWbRniV4RPM1HH9EBVRiMIsZEOXZS8E5WkFefU9C78xk61okykgwbjO9buY1JlMptuEVumiVw9s1HXGxPX-qJr26B-rM7uo8LP-bGmaA=w449-h599-s-no-gm?authuser=0" alt="Nicolás Maldonado" class="w-20 h-20 md:w-24 md:h-24 mx-auto rounded-full object-cover mb-4 border border-slate-200 shadow-sm">
-                    <h4 class="font-bold text-slate-900 text-sm">Nicolás Maldonado</h4>
-                    <p class="text-slate-500 text-xs mt-1">Co-creador</p>
+                    <img src="https://lh3.googleusercontent.com/pw/AP1GczOO3GFraUNDJvV3ItB_TUd6WF7OITYuSV-EmuwSYLNrDhWdCzuWbRniV4RPM1HH9EBVRiMIsZEOXZS8E5WkFefU9C78xk61okykgwbjO9buY1JlMptuEVumiVw9s1HXGxPX-qJr26B-rM7uo8LP-bGmaA=w449-h599-s-no-gm?authuser=0" alt="Nicolás Maldonado" class="w-20 h-20 md:w-24 md:h-24 mx-auto rounded-full object-cover mb-4 border border-slate-800 shadow-sm">
+                    <h4 class="font-bold text-white text-sm">Nicolás Maldonado</h4>
+                    <p class="text-slate-400 text-xs mt-1">Co-creador</p>
                 </div>
 
                 <div class="text-center fade-in-up" style="transition-delay: 0.3s;">
-                    <img src="https://lh3.googleusercontent.com/pw/AP1GczMYY56vceJfy25WPxT5ToFv5rqYJuglJvjANfAQaiN1kgwH9kCvkfKkX2oN9ge7ODm2EmdUXgOGDBVHdbZr3NfO7l_ehJ2xPuDlBsR9BiToJ64zk7ZAnFpUmPOBI5Czlqa7aitzUyQogeRbXzFxbTgGZw=w400-h599-s-no-gm?authuser=0" alt="Julio Letelier Menares" class="w-20 h-20 md:w-24 md:h-24 mx-auto rounded-full object-cover mb-4 border border-slate-200 shadow-sm">
-                    <h4 class="font-bold text-slate-900 text-sm">Julio Letelier Menares</h4>
-                    <p class="text-slate-500 text-xs mt-1">Profesor Guía</p>
-                    <a href="https://www.linkedin.com/in/julioletelier/" target="_blank" rel="noopener noreferrer" class="inline-block mt-2 text-brand-600 hover:text-blue-800 transition-colors">
+                    <img src="https://lh3.googleusercontent.com/pw/AP1GczMYY56vceJfy25WPxT5ToFv5rqYJuglJvjANfAQaiN1kgwH9kCvkfKkX2oN9ge7ODm2EmdUXgOGDBVHdbZr3NfO7l_ehJ2xPuDlBsR9BiToJ64zk7ZAnFpUmPOBI5Czlqa7aitzUyQogeRbXzFxbTgGZw=w400-h599-s-no-gm?authuser=0" alt="Julio Letelier Menares" class="w-20 h-20 md:w-24 md:h-24 mx-auto rounded-full object-cover mb-4 border border-slate-800 shadow-sm">
+                    <h4 class="font-bold text-white text-sm">Julio Letelier Menares</h4>
+                    <p class="text-slate-400 text-xs mt-1">Profesor Guía</p>
+                    <a href="https://www.linkedin.com/in/julioletelier/" target="_blank" rel="noopener noreferrer" class="inline-block mt-2 text-brand-600 hover:text-brand-400 transition-colors">
                         <i class="fa-brands fa-linkedin text-xl"></i>
                     </a>
                 </div>
             </div>
 
-            <div class="bg-slate-50 rounded-3xl p-8 border border-slate-200 max-w-4xl mx-auto flex flex-col md:flex-row items-center md:items-start gap-8 fade-in-up">
-                <img src="https://lh3.googleusercontent.com/pw/AP1GczPHYi-BQhxND0BLXkrVDsz6psd2JWK9X8DTy-p1IBCtTh7kS6AAOSIbD9vaqMPDK5xpvBq9WQ6MHxl3zN9oaa-5fvSPvqNduDK9xC97-q6BYi_ZcQH0UfM30SpNWG3_VpiYyuc3DgciR7oFU63EQEi4-g=w400-h400-s-no-gm?authuser=0" alt="Daniel Linares García" class="w-16 h-16 object-cover rounded-2xl border border-slate-200 shadow-sm shrink-0">
+            <div class="bg-[#0a0a0a] rounded-3xl p-8 border border-slate-800 max-w-4xl mx-auto flex flex-col md:flex-row items-center md:items-start gap-8 fade-in-up">
+                <img src="https://lh3.googleusercontent.com/pw/AP1GczPHYi-BQhxND0BLXkrVDsz6psd2JWK9X8DTy-p1IBCtTh7kS6AAOSIbD9vaqMPDK5xpvBq9WQ6MHxl3zN9oaa-5fvSPvqNduDK9xC97-q6BYi_ZcQH0UfM30SpNWG3_VpiYyuc3DgciR7oFU63EQEi4-g=w400-h400-s-no-gm?authuser=0" alt="Daniel Linares García" class="w-16 h-16 object-cover rounded-2xl border border-slate-800 shadow-sm shrink-0">
                 <div class="text-center md:text-left">
                     <div class="flex flex-col md:flex-row md:items-center gap-3 mb-2">
-                        <h4 class="font-bold text-slate-900 text-lg">Daniel Linares García</h4>
-                        <span class="inline-block bg-white border border-slate-200 text-slate-600 text-[10px] uppercase tracking-widest px-2 py-1 rounded-md font-semibold shadow-sm w-max mx-auto md:mx-0">Respaldo Académico</span>
-                        <a href="https://www.linkedin.com/in/dlinaresphd/" target="_blank" rel="noopener noreferrer" class="text-brand-600 hover:text-blue-800 transition-colors">
+                        <h4 class="font-bold text-white text-lg">Daniel Linares García</h4>
+                        <span class="inline-block bg-black border border-slate-800 text-slate-400 text-[10px] uppercase tracking-widest px-2 py-1 rounded-md font-semibold shadow-sm w-max mx-auto md:mx-0">Respaldo Académico</span>
+                        <a href="https://www.linkedin.com/in/dlinaresphd/" target="_blank" rel="noopener noreferrer" class="text-brand-600 hover:text-brand-400 transition-colors">
                             <i class="fa-brands fa-linkedin text-xl"></i>
                         </a>
                     </div>
-                    <p class="text-slate-500 font-medium text-sm mb-4">Vínculo institucional con la Escuela de Construcción Civil.</p>
-                    <ul class="text-sm text-slate-600 space-y-2 font-light">
+                    <p class="text-slate-400 font-medium text-sm mb-4">Vínculo institucional con la Escuela de Construcción Civil.</p>
+                    <ul class="text-sm text-slate-400 space-y-2 font-light">
                         <li class="flex items-center justify-center md:justify-start gap-2"><i class="fa-solid fa-circle-check text-brand-500 text-[10px]"></i> Ph.D. Construcción Inteligente, Virginia Tech (2022).</li>
                         <li class="flex items-center justify-center md:justify-start gap-2"><i class="fa-solid fa-circle-check text-brand-500 text-[10px]"></i> M.Eng. Computer Science / Ms.C. Construcción, Virginia Tech.</li>
                     </ul>
@@ -458,11 +460,11 @@
         </div>
     </section>
 
-    <section id="galeria" class="py-24 bg-white relative z-40">
+    <section id="galeria" class="py-24 bg-black relative z-40 border-b border-slate-800">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center max-w-2xl mx-auto mb-16 fade-in-up">
                 <h2 class="text-brand-600 font-bold tracking-widest uppercase text-xs mb-3">Galería</h2>
-                <h3 class="text-3xl md:text-4xl font-extrabold text-slate-900 tracking-tight">Obrín IA en acción</h3>
+                <h3 class="text-3xl md:text-4xl font-extrabold text-white tracking-tight">Obrín IA en acción</h3>
             </div>
 
             <div class="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
@@ -672,6 +674,86 @@
                     }
                 }
             });
+
+            // 5. Lógica Cinemática Video Tutorial (3D Tilt y Focus por scroll)
+            const tutorialSection = document.getElementById('tutorial');
+            const tutorialWrapper = document.getElementById('tutorial-video-wrapper');
+            const tutorialTextContainer = document.getElementById('tutorial-text-container');
+            
+            if (tutorialSection) {
+                const tutorialRect = tutorialSection.getBoundingClientRect();
+                
+                // Si la sección está visible en pantalla
+                if (tutorialRect.top < winHeight && tutorialRect.bottom > 0) {
+                    
+                    // --- Lógica Zoom In de Texto (x4 a x1) ---
+                    if (tutorialTextContainer) {
+                        const visibilityProgress = Math.max(0, Math.min(1, (winHeight - tutorialRect.top) / (winHeight * 0.7)));
+                        
+                        const currentScaleText = 4.0 - (visibilityProgress * 3.0);
+                        const currentOpacity = visibilityProgress; 
+                        
+                        tutorialTextContainer.style.transform = `scale(${currentScaleText})`;
+                        tutorialTextContainer.style.opacity = currentOpacity;
+                    }
+
+                    if (tutorialWrapper) {
+                        const sectionCenter = tutorialRect.top + (tutorialRect.height / 2);
+                        const screenCenter = winHeight / 2;
+                        
+                        // Calculamos distancia relativa al centro de la pantalla
+                        const distanceFromCenter = (sectionCenter - screenCenter) / (winHeight / 1.5);
+                        const clampedDistance = Math.max(-1, Math.min(1, distanceFromCenter));
+                        const absDistance = Math.abs(clampedDistance);
+                        
+                        // Efectos: Inclinación en ejes X e Y, Blur en los bordes y Escala (acercamiento)
+                        const rotateX = clampedDistance * 30; // 30 grados de inclinación max
+                        const rotateY = clampedDistance * -10; // Leve giro de 10 grados en Y
+                        const scale = 1 - (absDistance * 0.2); // Se achica a 0.8 en los extremos
+                        const blur = absDistance * 12; // Se vuelve borroso al alejarse del centro
+                        
+                        tutorialWrapper.style.transform = `perspective(1200px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(${scale})`;
+                        tutorialWrapper.style.filter = `blur(${blur}px)`;
+                    }
+                }
+            }
+
+            // 6. Lógica Scroll Características (Aparición progresiva vinculada al scroll)
+            const caractSection = document.getElementById('caracteristicas');
+            const caractText = document.getElementById('caract-text-container');
+            const caractCard1 = document.getElementById('caract-card-1');
+            const caractCard2 = document.getElementById('caract-card-2');
+            
+            if (caractSection) {
+                const caractRect = caractSection.getBoundingClientRect();
+                
+                // Si la sección entra a la pantalla
+                if (caractRect.top < winHeight && caractRect.bottom > 0) {
+                    // Progreso del 0 al 1 de la sección
+                    const progress = Math.max(0, Math.min(1, (winHeight - caractRect.top) / (winHeight * 0.8)));
+                    
+                    if (caractText) {
+                        // Aparece un poco más rápido (desde abajo)
+                        const textProg = Math.min(1, progress * 1.5);
+                        caractText.style.opacity = textProg;
+                        caractText.style.transform = `translateY(${50 - (textProg * 50)}px)`;
+                    }
+                    
+                    if (caractCard1) {
+                        // Card 1 desliza desde la izquierda
+                        const card1Prog = Math.max(0, Math.min(1, (progress - 0.1) * 1.5));
+                        caractCard1.style.opacity = card1Prog;
+                        caractCard1.style.transform = `translateX(${-50 + (card1Prog * 50)}px)`;
+                    }
+                    
+                    if (caractCard2) {
+                        // Card 2 desliza desde la derecha, ligeramente retrasada
+                        const card2Prog = Math.max(0, Math.min(1, (progress - 0.25) * 1.5));
+                        caractCard2.style.opacity = card2Prog;
+                        caractCard2.style.transform = `translateX(${50 - (card2Prog * 50)}px)`;
+                    }
+                }
+            }
         });
 
         // --- Inicia código iPhone Mockup ---
