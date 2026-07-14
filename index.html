@@ -132,7 +132,7 @@
         }
     </style>
 </head>
-<body class="text-slate-800 font-sans selection:bg-brand-500 selection:text-white">
+<body class="text-slate-800 font-sans selection:bg-brand-500 selection:text-white transition-colors duration-300">
 
     <!-- NAVBAR PREMIUM OSCURO -->
     <nav class="fixed w-full z-50 transition-all duration-500 bg-black/60 backdrop-blur-xl border-b border-white/10" id="navbar">
@@ -142,21 +142,21 @@
                     <img src="https://lh3.googleusercontent.com/pw/AP1GczOOE3ZHICrV-_RfZdqAjRIdP5vT8mk8EUJgp83JaAa8uF1SEOlEcN5nkO410n_kUGrx1VZJU2MAD_yk6HcbPAhoW4zzYVJH3KVOOof-U3bsfH4yL6P5J2U9i8SaDuth_yZPP6_IihvtadZrNgEjzDIeUQ=w599-h599-s-no-gm?authuser=0" alt="Obrín IA Logo" class="h-16 w-auto object-contain invert brightness-0" onerror="this.onerror=null; this.src='https://placehold.co/150x50/ffffff/0f2942?text=Obrin+IA';">
                 </div>
                 
-                <div class="hidden md:flex space-x-10">
-                    <a href="#problema" class="text-slate-400 hover:text-white font-medium text-sm transition-colors nav-link">El Problema</a>
-                    <a href="#solucion" class="text-slate-400 hover:text-white font-medium text-sm transition-colors nav-link">Solución</a>
-                    <a href="#tutorial" class="text-slate-400 hover:text-white font-medium text-sm transition-colors nav-link">Tutorial</a>
-                    <a href="#caracteristicas" class="text-slate-400 hover:text-white font-medium text-sm transition-colors nav-link">Tecnología</a>
-                    <a href="#equipo" class="text-slate-400 hover:text-white font-medium text-sm transition-colors nav-link">Equipo</a>
+                <div class="hidden lg:flex space-x-10 items-center">
+                    <a href="#problema" class="text-slate-400 hover:text-white font-medium text-sm transition-colors nav-link whitespace-nowrap" data-i18n="nav-problem">El Problema</a>
+                    <a href="#solucion" class="text-slate-400 hover:text-white font-medium text-sm transition-colors nav-link whitespace-nowrap" data-i18n="nav-solution">Solución</a>
+                    <a href="#tutorial" class="text-slate-400 hover:text-white font-medium text-sm transition-colors nav-link whitespace-nowrap" data-i18n="nav-tutorial">Tutorial</a>
+                    <a href="#caracteristicas" class="text-slate-400 hover:text-white font-medium text-sm transition-colors nav-link whitespace-nowrap" data-i18n="nav-tech">Tecnología</a>
+                    <a href="#equipo" class="text-slate-400 hover:text-white font-medium text-sm transition-colors nav-link whitespace-nowrap" data-i18n="nav-team">Equipo</a>
                 </div>
 
-                <div class="hidden md:flex">
-                    <a href="demo.html" target="_blank" class="bg-brand-600 hover:bg-brand-500 text-white px-6 py-2.5 rounded-full text-sm font-semibold transition-all shadow-glow hover:shadow-lg hover:-translate-y-0.5">
-                        Solicitar Demo
-                    </a>
+                <div class="hidden md:flex items-center gap-6">
+                    <button id="lang-toggle-desktop" class="text-slate-400 hover:text-white font-medium text-sm transition-colors flex items-center gap-2 group border border-slate-700/50 hover:border-slate-500 rounded-full px-4 py-1.5 bg-black/40">
+                        <i class="fa-solid fa-globe group-hover:animate-spin-slow text-brand-400"></i> <span id="lang-text-desktop">EN</span>
+                    </button>
                 </div>
 
-                <div class="md:hidden flex items-center">
+                <div class="md:hidden flex items-center gap-4">
                     <button id="mobile-menu-btn" class="text-slate-400 hover:text-white focus:outline-none">
                         <i class="fa-solid fa-bars text-2xl"></i>
                     </button>
@@ -167,12 +167,17 @@
         <!-- MENÚ MÓVIL (Desplegable) -->
         <div id="mobile-menu" class="hidden md:hidden bg-black/95 backdrop-blur-xl border-b border-white/10">
             <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-                <a href="#problema" class="text-slate-400 hover:text-white block px-3 py-2 rounded-md text-base font-medium transition-colors nav-link-mobile">El Problema</a>
-                <a href="#solucion" class="text-slate-400 hover:text-white block px-3 py-2 rounded-md text-base font-medium transition-colors nav-link-mobile">Solución</a>
-                <a href="#tutorial" class="text-slate-400 hover:text-white block px-3 py-2 rounded-md text-base font-medium transition-colors nav-link-mobile">Tutorial</a>
-                <a href="#caracteristicas" class="text-slate-400 hover:text-white block px-3 py-2 rounded-md text-base font-medium transition-colors nav-link-mobile">Tecnología</a>
-                <a href="#equipo" class="text-slate-400 hover:text-white block px-3 py-2 rounded-md text-base font-medium transition-colors nav-link-mobile">Equipo</a>
-                <a href="demo.html" target="_blank" class="bg-brand-600 hover:bg-brand-500 text-white block px-3 py-2 rounded-md text-base font-semibold mt-4 text-center transition-all">Solicitar Demo</a>
+                <a href="#problema" class="text-slate-400 hover:text-white block px-3 py-2 rounded-md text-base font-medium transition-colors nav-link-mobile" data-i18n="nav-problem">El Problema</a>
+                <a href="#solucion" class="text-slate-400 hover:text-white block px-3 py-2 rounded-md text-base font-medium transition-colors nav-link-mobile" data-i18n="nav-solution">Solución</a>
+                <a href="#tutorial" class="text-slate-400 hover:text-white block px-3 py-2 rounded-md text-base font-medium transition-colors nav-link-mobile" data-i18n="nav-tutorial">Tutorial</a>
+                <a href="#caracteristicas" class="text-slate-400 hover:text-white block px-3 py-2 rounded-md text-base font-medium transition-colors nav-link-mobile" data-i18n="nav-tech">Tecnología</a>
+                <a href="#equipo" class="text-slate-400 hover:text-white block px-3 py-2 rounded-md text-base font-medium transition-colors nav-link-mobile" data-i18n="nav-team">Equipo</a>
+                
+                <div class="border-t border-white/10 mt-2 pt-2 pb-2">
+                    <button id="lang-toggle-mobile" class="text-slate-400 hover:text-white w-full text-left px-3 py-2 rounded-md text-base font-medium transition-colors flex items-center gap-2">
+                        <i class="fa-solid fa-globe text-brand-400"></i> <span id="lang-text-mobile">English</span>
+                    </button>
+                </div>
             </div>
         </div>
     </nav>
@@ -192,15 +197,15 @@
         <div class="sticky top-0 h-screen w-full flex items-center justify-center overflow-hidden z-20">
             
             <div id="hero-text-container" class="absolute z-20 text-center pointer-events-none w-full px-4 flex flex-col items-center mt-[15vh] md:mt-[25vh]">
-                <h1 class="text-[14vw] md:text-[9vw] font-black text-white tracking-tighter leading-[0.9] drop-shadow-2xl [text-shadow:0_10px_30px_rgba(0,0,0,0.8)]">
+                <h1 class="text-[14vw] md:text-[9vw] font-black text-white tracking-tighter leading-[0.9] drop-shadow-2xl [text-shadow:0_10px_30px_rgba(0,0,0,0.8)]" data-i18n="hero-title">
                     NO ES SOLO<br />
                     <span class="text-white">UN DATO.</span>
                 </h1>
-                <p class="mt-8 text-xs md:text-sm text-white font-bold tracking-[0.2em] uppercase max-w-lg [text-shadow:0_2px_4px_rgba(0,0,0,1),_0_4px_10px_rgba(0,0,0,1),_0_0_25px_rgba(0,0,0,1)]">
+                <p class="mt-8 text-xs md:text-sm text-white font-bold tracking-[0.2em] uppercase max-w-lg [text-shadow:0_2px_4px_rgba(0,0,0,1),_0_4px_10px_rgba(0,0,0,1),_0_0_25px_rgba(0,0,0,1)]" data-i18n="hero-subtitle">
                     Es el resultado de avances en IA e IoT sin precedentes en la industria.
                 </p>
                 <div class="mt-12 pointer-events-auto">
-                    <a href="demo.html" target="_blank" class="inline-block bg-white text-black px-10 py-4 rounded-full font-bold transition-all hover:scale-105 shadow-[0_0_40px_rgba(255,255,255,0.3)]">
+                    <a href="demo.html" target="_blank" class="inline-block bg-white text-black px-10 py-4 rounded-full font-bold transition-all hover:scale-105 shadow-[0_0_40px_rgba(255,255,255,0.3)]" data-i18n="hero-btn">
                         Descubrir Obrín IA
                     </a>
                 </div>
@@ -216,13 +221,13 @@
                 
                 <div class="lg:col-span-5 fade-in-up">
                     <div id="problema-text-container" style="transform-origin: left center; will-change: transform, filter, opacity;">
-                        <h2 class="text-brand-400 font-bold tracking-widest uppercase text-xs mb-3 [text-shadow:0_2px_4px_rgba(0,0,0,1),_0_0_15px_rgba(0,0,0,1)]">El Problema de la Industria</h2>
-                        <h3 class="text-3xl md:text-4xl font-extrabold text-white mb-6 tracking-tight leading-tight [text-shadow:0_2px_4px_rgba(0,0,0,1),_0_0_20px_rgba(0,0,0,1),_0_0_40px_rgba(0,0,0,1),_0_0_80px_rgba(0,0,0,1)]">El costo oculto de la evaluación visual.</h3>
+                        <h2 class="text-brand-400 font-bold tracking-widest uppercase text-xs mb-3 [text-shadow:0_2px_4px_rgba(0,0,0,1),_0_0_15px_rgba(0,0,0,1)]" data-i18n="prob-subtitle">El Problema de la Industria</h2>
+                        <h3 class="text-3xl md:text-4xl font-extrabold text-white mb-6 tracking-tight leading-tight [text-shadow:0_2px_4px_rgba(0,0,0,1),_0_0_20px_rgba(0,0,0,1),_0_0_40px_rgba(0,0,0,1),_0_0_80px_rgba(0,0,0,1)]" data-i18n="prob-title">El costo oculto de la evaluación visual.</h3>
                     </div>
-                    <p class="text-lg text-white leading-relaxed mb-6 font-medium [text-shadow:0_2px_4px_rgba(0,0,0,1),_0_0_15px_rgba(0,0,0,1),_0_0_30px_rgba(0,0,0,1),_0_0_60px_rgba(0,0,0,1)]">
+                    <p class="text-lg text-white leading-relaxed mb-6 font-medium [text-shadow:0_2px_4px_rgba(0,0,0,1),_0_0_15px_rgba(0,0,0,1),_0_0_30px_rgba(0,0,0,1),_0_0_60px_rgba(0,0,0,1)]" data-i18n="prob-p1">
                         La construcción transita hacia la industrialización, pero la captura de datos sigue siendo análoga. El levantamiento de fallas depende del ojo humano, generando diagnósticos subjetivos.
                     </p>
-                    <p class="text-lg text-white leading-relaxed font-medium [text-shadow:0_2px_4px_rgba(0,0,0,1),_0_0_15px_rgba(0,0,0,1),_0_0_30px_rgba(0,0,0,1),_0_0_60px_rgba(0,0,0,1)]">
+                    <p class="text-lg text-white leading-relaxed font-medium [text-shadow:0_2px_4px_rgba(0,0,0,1),_0_0_15px_rgba(0,0,0,1),_0_0_30px_rgba(0,0,0,1),_0_0_60px_rgba(0,0,0,1)]" data-i18n="prob-p2">
                         Estas desviaciones tempranas y correcciones mal diagnosticadas <strong class="text-white font-extrabold">destruyen silenciosamente los márgenes de utilidad</strong> en los contratos "llave en mano".
                     </p>
                 </div>
@@ -230,38 +235,36 @@
                 <div class="lg:col-span-7 grid sm:grid-cols-2 gap-8">
                     <div class="bg-[#0a0a0a] rounded-3xl p-8 border border-slate-800 hover:border-brand-500/50 hover:shadow-[0_0_30px_rgba(2,132,199,0.15)] transition-all fade-in-up">
                         <div class="text-5xl font-light text-white mb-4 tracking-tighter">21.7<span class="text-brand-500 font-bold text-3xl">%</span></div>
-                        <h4 class="text-base font-bold text-white mb-2">Retrabajos Constantes</h4>
-                        <p class="text-sm text-slate-400 leading-relaxed mb-4">De las partidas presentan observaciones tempranas. Corregirlas consume hasta un 6% del presupuesto total.</p>
-                        <p class="text-[10px] uppercase tracking-wider text-slate-500 font-semibold">Matrix Consulting & CChC</p>
+                        <h4 class="text-base font-bold text-white mb-2" data-i18n="prob-stat1-title">Retrabajos Constantes</h4>
+                        <p class="text-sm text-slate-400 leading-relaxed mb-4" data-i18n="prob-stat1-desc">De las partidas presentan observaciones tempranas. Corregirlas consume hasta un 6% del presupuesto total.</p>
+                        <p class="text-[10px] uppercase tracking-wider text-slate-500 font-semibold" data-i18n="prob-source">Matrix Consulting & CChC</p>
                     </div>
 
                     <div class="bg-[#0a0a0a] rounded-3xl p-8 border border-slate-800 hover:border-brand-500/50 hover:shadow-[0_0_30px_rgba(2,132,199,0.15)] transition-all fade-in-up" style="transition-delay: 0.1s;">
                         <div class="text-5xl font-light text-white mb-4 tracking-tighter">71<span class="text-brand-500 font-bold text-3xl">%</span></div>
-                        <h4 class="text-base font-bold text-white mb-2">Desviaciones Críticas</h4>
-                        <p class="text-sm text-slate-400 leading-relaxed mb-4">Obras que no se entregan a tiempo en Chile, promediando un atraso de 4 meses por reprocesos.</p>
-                        <p class="text-[10px] uppercase tracking-wider text-slate-500 font-semibold">Matrix Consulting & CChC</p>
+                        <h4 class="text-base font-bold text-white mb-2" data-i18n="prob-stat2-title">Desviaciones Críticas</h4>
+                        <p class="text-sm text-slate-400 leading-relaxed mb-4" data-i18n="prob-stat2-desc">Obras que no se entregan a tiempo en Chile, promediando un atraso de 4 meses por reprocesos.</p>
+                        <p class="text-[10px] uppercase tracking-wider text-slate-500 font-semibold" data-i18n="prob-source">Matrix Consulting & CChC</p>
                     </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- --- SECCIÓN SCROLL HORIZONTAL (CORREGIDA PARA MÓVILES) --- -->
+    <!-- --- SECCIÓN SCROLL HORIZONTAL --- -->
     <section id="solucion" class="relative bg-black border-t border-slate-800" style="height: 400vh; z-index: 30;">
         <div class="sticky top-0 h-screen w-full overflow-hidden flex items-center">
             
-            <!-- Título Fijo a la Izquierda (Ajustado a la mitad superior en móviles) -->
             <div id="solucion-text-container" class="absolute left-0 top-0 h-[55vh] md:h-full w-full md:w-[40%] flex flex-col justify-center px-6 md:px-12 z-30 bg-gradient-to-b md:bg-gradient-to-r from-black via-black/95 to-transparent pointer-events-none pt-12 md:pt-0 transition-opacity duration-300">
-                <h2 class="text-brand-500 font-bold tracking-widest uppercase text-xs mb-3 md:mb-4">Plataforma Paramétrica</h2>
-                <h3 class="text-4xl md:text-5xl font-extrabold text-white mb-3 md:mb-6 tracking-tighter leading-[1.1]">
+                <h2 class="text-brand-500 font-bold tracking-widest uppercase text-xs mb-3 md:mb-4" data-i18n="sol-subtitle">Plataforma Paramétrica</h2>
+                <h3 class="text-4xl md:text-5xl font-extrabold text-white mb-3 md:mb-6 tracking-tighter leading-[1.1]" data-i18n="sol-title">
                     Análisis<br>Integral
                 </h3>
-                <p class="text-sm md:text-base text-slate-400 font-light max-w-sm leading-relaxed">
+                <p class="text-sm md:text-base text-slate-400 font-light max-w-sm leading-relaxed" data-i18n="sol-desc">
                     Estandarización impulsada por IA + IoT. Emisión instantánea de prescripciones técnicas exactas.
                 </p>
             </div>
 
-            <!-- Contenedor Deslizante (Track - Ajustado al fondo en móviles) -->
             <div id="solucion-track" class="flex gap-4 sm:gap-6 md:gap-8 pl-[100vw] pr-[50vw] items-end pb-[10vh] md:pb-0 md:items-center h-full w-max will-change-transform z-20">
                 
                 <!-- Tarjeta 1 -->
@@ -269,8 +272,8 @@
                     <div class="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-brand-900/40 flex items-center justify-center text-brand-400 mb-3 md:mb-4 border border-brand-500/30">
                         <i class="fa-solid fa-camera-retro text-lg md:text-xl"></i>
                     </div>
-                    <h4 class="text-xl sm:text-2xl md:text-3xl font-extrabold text-white mb-2 md:mb-3 tracking-tight leading-tight">Captura<br>multimodal</h4>
-                    <p class="text-[11px] sm:text-xs md:text-sm text-slate-400 leading-relaxed font-light">Interfaz móvil intuitiva para el ingreso in situ de fotografías contextuales y descripciones textuales de las fallas.</p>
+                    <h4 class="text-xl sm:text-2xl md:text-3xl font-extrabold text-white mb-2 md:mb-3 tracking-tight leading-tight" data-i18n="card1-title">Captura<br>multimodal</h4>
+                    <p class="text-[11px] sm:text-xs md:text-sm text-slate-400 leading-relaxed font-light" data-i18n="card1-desc">Interfaz móvil intuitiva para el ingreso in situ de fotografías contextuales y descripciones textuales de las fallas.</p>
                     <div class="card-number absolute bottom-2 right-4 text-brand-500/10 font-extrabold text-5xl sm:text-6xl md:text-7xl tracking-tighter opacity-0 translate-y-10 transition-all duration-700 ease-out z-0">01</div>
                 </div>
 
@@ -279,8 +282,8 @@
                     <div class="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-slate-900 flex items-center justify-center text-slate-400 mb-3 md:mb-4 border border-slate-800 group-hover:bg-brand-900/40 group-hover:text-brand-400 group-hover:border-brand-500/30 transition-colors">
                         <i class="fa-solid fa-brain text-lg md:text-xl"></i>
                     </div>
-                    <h4 class="text-xl sm:text-2xl md:text-3xl font-extrabold text-white mb-2 md:mb-3 tracking-tight leading-tight">Motor de<br>inferencia IA</h4>
-                    <p class="text-[11px] sm:text-xs md:text-sm text-slate-400 leading-relaxed font-light">Visión computacional entrenada para detectar patrones estructurales e identificar la causa raíz eliminando el sesgo humano.</p>
+                    <h4 class="text-xl sm:text-2xl md:text-3xl font-extrabold text-white mb-2 md:mb-3 tracking-tight leading-tight" data-i18n="card2-title">Motor de<br>inferencia IA</h4>
+                    <p class="text-[11px] sm:text-xs md:text-sm text-slate-400 leading-relaxed font-light" data-i18n="card2-desc">Visión computacional entrenada para detectar patrones estructurales e identificar la causa raíz eliminando el sesgo humano.</p>
                     <div class="card-number absolute bottom-2 right-4 text-brand-500/10 font-extrabold text-5xl sm:text-6xl md:text-7xl tracking-tighter opacity-0 translate-y-10 transition-all duration-700 ease-out z-0">02</div>
                 </div>
 
@@ -289,8 +292,8 @@
                     <div class="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-slate-900 flex items-center justify-center text-slate-400 mb-3 md:mb-4 border border-slate-800 group-hover:bg-brand-900/40 group-hover:text-brand-400 group-hover:border-brand-500/30 transition-colors">
                         <i class="fa-solid fa-list-check text-lg md:text-xl"></i>
                     </div>
-                    <h4 class="text-xl sm:text-2xl md:text-3xl font-extrabold text-white mb-2 md:mb-3 tracking-tight leading-tight">Resultado<br>paramétrico</h4>
-                    <p class="text-[11px] sm:text-xs md:text-sm text-slate-400 leading-relaxed font-light">Emisión inmediata de un reporte capaz de diagnosticar patologías y definir soluciones, insumos, protocolos y costos por m².</p>
+                    <h4 class="text-xl sm:text-2xl md:text-3xl font-extrabold text-white mb-2 md:mb-3 tracking-tight leading-tight" data-i18n="card3-title">Resultado<br>paramétrico</h4>
+                    <p class="text-[11px] sm:text-xs md:text-sm text-slate-400 leading-relaxed font-light" data-i18n="card3-desc">Emisión inmediata de un reporte capaz de diagnosticar patologías y definir soluciones, insumos, protocolos y costos por m².</p>
                     <div class="card-number absolute bottom-2 right-4 text-brand-500/10 font-extrabold text-5xl sm:text-6xl md:text-7xl tracking-tighter opacity-0 translate-y-10 transition-all duration-700 ease-out z-0">03</div>
                 </div>
 
@@ -299,8 +302,8 @@
                     <div class="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-slate-900 flex items-center justify-center text-slate-400 mb-3 md:mb-4 border border-slate-800 group-hover:bg-brand-900/40 group-hover:text-brand-400 group-hover:border-brand-500/30 transition-colors">
                         <i class="fa-solid fa-satellite-dish text-lg md:text-xl"></i>
                     </div>
-                    <h4 class="text-xl sm:text-2xl md:text-3xl font-extrabold text-white mb-2 md:mb-3 tracking-tight leading-tight">Telemetría<br>IoT</h4>
-                    <p class="text-[11px] sm:text-xs md:text-sm text-slate-400 leading-relaxed font-light">Integración perimetral con sensores LiDAR e higrómetros para medir volúmenes y condiciones con precisión milimétrica.</p>
+                    <h4 class="text-xl sm:text-2xl md:text-3xl font-extrabold text-white mb-2 md:mb-3 tracking-tight leading-tight" data-i18n="card4-title">Telemetría<br>IoT</h4>
+                    <p class="text-[11px] sm:text-xs md:text-sm text-slate-400 leading-relaxed font-light" data-i18n="card4-desc">Integración perimetral con sensores LiDAR e higrómetros para medir volúmenes y condiciones con precisión milimétrica.</p>
                     <div class="card-number absolute bottom-2 right-4 text-brand-500/10 font-extrabold text-5xl sm:text-6xl md:text-7xl tracking-tighter opacity-0 translate-y-10 transition-all duration-700 ease-out z-0">04</div>
                 </div>
 
@@ -309,8 +312,8 @@
                     <div class="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-slate-900 flex items-center justify-center text-slate-400 mb-3 md:mb-4 border border-slate-800 group-hover:bg-brand-900/40 group-hover:text-brand-400 group-hover:border-brand-500/30 transition-colors">
                         <i class="fa-solid fa-map-location-dot text-lg md:text-xl"></i>
                     </div>
-                    <h4 class="text-xl sm:text-2xl md:text-3xl font-extrabold text-white mb-2 md:mb-3 tracking-tight leading-tight">Contexto<br>geográfico</h4>
-                    <p class="text-[11px] sm:text-xs md:text-sm text-slate-400 leading-relaxed font-light">Cotización inteligente cruzando la ubicación GPS de la obra vía API con catálogos de proveedores locales actualizados.</p>
+                    <h4 class="text-xl sm:text-2xl md:text-3xl font-extrabold text-white mb-2 md:mb-3 tracking-tight leading-tight" data-i18n="card5-title">Contexto<br>geográfico</h4>
+                    <p class="text-[11px] sm:text-xs md:text-sm text-slate-400 leading-relaxed font-light" data-i18n="card5-desc">Cotización inteligente cruzando la ubicación GPS de la obra vía API con catálogos de proveedores locales actualizados.</p>
                     <div class="card-number absolute bottom-2 right-4 text-brand-500/10 font-extrabold text-5xl sm:text-6xl md:text-7xl tracking-tighter opacity-0 translate-y-10 transition-all duration-700 ease-out z-0">05</div>
                 </div>
 
@@ -319,8 +322,8 @@
                     <div class="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-slate-900 flex items-center justify-center text-slate-400 mb-3 md:mb-4 border border-slate-800 group-hover:bg-brand-900/40 group-hover:text-brand-400 group-hover:border-brand-500/30 transition-colors">
                         <i class="fa-solid fa-cubes text-lg md:text-xl"></i>
                     </div>
-                    <h4 class="text-xl sm:text-2xl md:text-3xl font-extrabold text-white mb-2 md:mb-3 tracking-tight leading-tight">Cubicación<br>BIM</h4>
-                    <p class="text-[11px] sm:text-xs md:text-sm text-slate-400 leading-relaxed font-light">Ingesta de planimetrías (CAD/BIM) para geolocalizar patologías y generar listas de materiales exactas para abastecimiento.</p>
+                    <h4 class="text-xl sm:text-2xl md:text-3xl font-extrabold text-white mb-2 md:mb-3 tracking-tight leading-tight" data-i18n="card6-title">Cubicación<br>BIM</h4>
+                    <p class="text-[11px] sm:text-xs md:text-sm text-slate-400 leading-relaxed font-light" data-i18n="card6-desc">Ingesta de planimetrías (CAD/BIM) para geolocalizar patologías y generar listas de materiales exactas para abastecimiento.</p>
                     <div class="card-number absolute bottom-2 right-4 text-brand-500/10 font-extrabold text-5xl sm:text-6xl md:text-7xl tracking-tighter opacity-0 translate-y-10 transition-all duration-700 ease-out z-0">06</div>
                 </div>
 
@@ -331,9 +334,9 @@
     <section id="tutorial" class="py-24 bg-black border-b border-slate-800 relative z-40">
         <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
             <div id="tutorial-text-container" class="text-center mb-12 opacity-0" style="transform: scale(4); will-change: transform, opacity; transform-origin: center center;">
-                <h2 class="text-brand-600 font-bold tracking-widest uppercase text-xs mb-3">Video Tutorial</h2>
-                <h3 class="text-3xl md:text-4xl font-extrabold text-white mb-4 tracking-tight">Mira Obrín IA en acción</h3>
-                <p class="text-lg text-slate-400 font-light max-w-2xl mx-auto">Descubre en pocos minutos cómo nuestra plataforma captura, analiza y presupuesta soluciones constructivas directamente en terreno.</p>
+                <h2 class="text-brand-600 font-bold tracking-widest uppercase text-xs mb-3" data-i18n="tut-subtitle">Video Tutorial</h2>
+                <h3 class="text-3xl md:text-4xl font-extrabold text-white mb-4 tracking-tight" data-i18n="tut-title">Mira Obrín IA en acción</h3>
+                <p class="text-lg text-slate-400 font-light max-w-2xl mx-auto" data-i18n="tut-desc">Descubre en pocos minutos cómo nuestra plataforma captura, analiza y presupuesta soluciones constructivas directamente en terreno.</p>
             </div>
 
             <div class="flex justify-center fade-in-up">
@@ -351,7 +354,7 @@
             </div>
             
             <div class="text-center mt-8 fade-in-up" style="transition-delay: 0.1s;">
-                 <a href="https://youtube.com/shorts/1cWU5Xq0AyM?feature=share" target="_blank" class="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-[#0a0a0a] hover:bg-slate-800 border border-slate-800 text-sm text-slate-300 hover:text-white font-semibold transition-all shadow-sm hover:shadow-md">
+                 <a href="https://youtube.com/shorts/1cWU5Xq0AyM?feature=share" target="_blank" class="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-[#0a0a0a] hover:bg-slate-800 border border-slate-800 text-sm text-slate-300 hover:text-white font-semibold transition-all shadow-sm hover:shadow-md" data-i18n="tut-btn">
                      <i class="fa-brands fa-youtube text-red-600 text-lg"></i> Ver en YouTube
                  </a>
             </div>
@@ -361,23 +364,23 @@
     <section id="caracteristicas" class="py-24 bg-black text-white relative z-40 border-b border-slate-800 overflow-hidden">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div id="caract-text-container" class="text-center max-w-2xl mx-auto mb-16 opacity-0" style="transform: translateY(150px); will-change: transform, opacity;">
-                <h2 class="text-brand-400 font-bold tracking-widest uppercase text-xs mb-3">Cambio de Paradigma</h2>
-                <h3 class="text-3xl md:text-4xl font-extrabold tracking-tight mb-4">De un registro pasivo a un asistente activo</h3>
+                <h2 class="text-brand-400 font-bold tracking-widest uppercase text-xs mb-3" data-i18n="feat-subtitle">Cambio de Paradigma</h2>
+                <h3 class="text-3xl md:text-4xl font-extrabold tracking-tight mb-4" data-i18n="feat-title">De un registro pasivo a un asistente activo</h3>
             </div>
             
             <div class="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
                 <div id="caract-card-1" class="border border-slate-700 bg-slate-800/50 p-8 rounded-3xl opacity-0" style="transform: translateX(-400px); will-change: transform, opacity;">
                     <div class="flex items-center justify-between mb-8 pb-4 border-b border-slate-700">
                         <div>
-                            <h4 class="text-xl font-bold text-slate-200">Software Tradicional</h4>
-                            <p class="text-xs text-slate-500 uppercase tracking-widest font-bold mt-1">Gestión Pasiva</p>
+                            <h4 class="text-xl font-bold text-slate-200" data-i18n="feat-trad-title">Software Tradicional</h4>
+                            <p class="text-xs text-slate-500 uppercase tracking-widest font-bold mt-1" data-i18n="feat-trad-sub">Gestión Pasiva</p>
                         </div>
                         <i class="fa-solid fa-folder-open text-2xl text-slate-600"></i>
                     </div>
                     <ul class="space-y-4 text-slate-400 text-sm font-light">
-                        <li class="flex items-start gap-3"><i class="fa-solid fa-xmark text-slate-600 mt-1 shrink-0"></i> <span>Funciona únicamente como un repositorio digital.</span></li>
-                        <li class="flex items-start gap-3"><i class="fa-solid fa-xmark text-slate-600 mt-1 shrink-0"></i> <span>El diagnóstico inicial depende 100% de la deducción visual humana.</span></li>
-                        <li class="flex items-start gap-3"><i class="fa-solid fa-xmark text-slate-600 mt-1 shrink-0"></i> <span>Presupuestos calculados a posteriori con un amplio margen de error.</span></li>
+                        <li class="flex items-start gap-3"><i class="fa-solid fa-xmark text-slate-600 mt-1 shrink-0"></i> <span data-i18n="feat-trad-1">Funciona únicamente como un repositorio digital.</span></li>
+                        <li class="flex items-start gap-3"><i class="fa-solid fa-xmark text-slate-600 mt-1 shrink-0"></i> <span data-i18n="feat-trad-2">El diagnóstico inicial depende 100% de la deducción visual humana.</span></li>
+                        <li class="flex items-start gap-3"><i class="fa-solid fa-xmark text-slate-600 mt-1 shrink-0"></i> <span data-i18n="feat-trad-3">Presupuestos calculados a posteriori con un amplio margen de error.</span></li>
                     </ul>
                 </div>
                 
@@ -391,20 +394,20 @@
                     <div class="flex items-center justify-between mb-8 pb-4 border-b border-brand-500/20">
                         <div>
                             <h4 class="text-xl font-bold text-white">Obrín IA</h4>
-                            <p class="text-xs text-brand-400 uppercase tracking-widest font-bold mt-1">Asistente Activo</p>
+                            <p class="text-xs text-brand-400 uppercase tracking-widest font-bold mt-1" data-i18n="feat-obrin-sub">Asistente Activo</p>
                         </div>
                         <i class="fa-solid fa-bolt text-2xl text-brand-400"></i>
                     </div>
                     <ul class="space-y-4 text-slate-200 text-sm font-light">
-                        <li class="flex items-start gap-3"><i class="fa-solid fa-check text-brand-400 mt-1 shrink-0"></i> <span>Procesa la evidencia y entrega un diagnóstico estructurado.</span></li>
-                        <li class="flex items-start gap-3"><i class="fa-solid fa-check text-brand-400 mt-1 shrink-0"></i> <span>Potencia la decisión profesional, mitigando el sesgo humano.</span></li>
-                        <li class="flex items-start gap-3"><i class="fa-solid fa-check text-brand-400 mt-1 shrink-0"></i> <span>Cálculo de presupuesto regionalizado instantáneo y exacto.</span></li>
+                        <li class="flex items-start gap-3"><i class="fa-solid fa-check text-brand-400 mt-1 shrink-0"></i> <span data-i18n="feat-obrin-1">Procesa la evidencia y entrega un diagnóstico estructurado.</span></li>
+                        <li class="flex items-start gap-3"><i class="fa-solid fa-check text-brand-400 mt-1 shrink-0"></i> <span data-i18n="feat-obrin-2">Potencia la decisión profesional, mitigando el sesgo humano.</span></li>
+                        <li class="flex items-start gap-3"><i class="fa-solid fa-check text-brand-400 mt-1 shrink-0"></i> <span data-i18n="feat-obrin-3">Cálculo de presupuesto regionalizado instantáneo y exacto.</span></li>
                     </ul>
                     
                     <div class="mt-8 pt-6 border-t border-brand-500/20 flex items-center justify-between">
                         <div>
-                            <p class="text-[10px] text-brand-300 font-bold uppercase tracking-widest">Meta de Impacto (KPI)</p>
-                            <p class="text-sm text-white font-medium mt-1">Sobrecostos por errores iniciales.</p>
+                            <p class="text-[10px] text-brand-300 font-bold uppercase tracking-widest" data-i18n="feat-kpi-title">Meta de Impacto (KPI)</p>
+                            <p class="text-sm text-white font-medium mt-1" data-i18n="feat-kpi-desc">Sobrecostos por errores iniciales.</p>
                         </div>
                         <div class="text-5xl font-light text-white tracking-tighter">0<span class="text-xl text-brand-400 font-bold">%</span></div>
                     </div>
@@ -416,7 +419,7 @@
     <section id="equipo" class="py-24 bg-black relative z-40 border-b border-slate-800">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center max-w-3xl mx-auto mb-16 fade-in-up">
-                <h3 class="text-3xl md:text-4xl font-extrabold text-white tracking-tight">Desarrollado por expertos</h3>
+                <h3 class="text-3xl md:text-4xl font-extrabold text-white tracking-tight" data-i18n="team-title">Desarrollado por expertos</h3>
             </div>
 
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8 mb-16 max-w-5xl mx-auto">
@@ -424,7 +427,7 @@
                 <div class="text-center fade-in-up">
                     <img src="https://lh3.googleusercontent.com/pw/AP1GczPx1EJ_8fIwPO2dphbWGkNuor7vTGc9aKzSdIdvFeLuH3WCy24NLlHLs1BCK9M5qrCeB8DxVYks-46LohhaR4NA4K3pyxX7sqHCackmj7pPEiKmArQaN-v5HpnKrY5Z5MLLLSdUR3Ig6Wz5N8EnbdboLA=w449-h599-s-no-gm?authuser=0" alt="José M. Christensen" class="w-20 h-20 md:w-24 md:h-24 mx-auto rounded-full object-cover mb-4 border border-slate-800 shadow-sm">
                     <h4 class="font-bold text-white text-sm">José M. Christensen</h4>
-                    <p class="text-slate-400 text-xs mt-1">Líder / Co-creador</p>
+                    <p class="text-slate-400 text-xs mt-1" data-i18n="team-role1">Líder / Co-creador</p>
                     <a href="https://www.linkedin.com/in/jmchristensenc/" target="_blank" rel="noopener noreferrer" class="inline-block mt-2 text-brand-600 hover:text-brand-400 transition-colors">
                         <i class="fa-brands fa-linkedin text-xl"></i>
                     </a>
@@ -433,19 +436,19 @@
                 <div class="text-center fade-in-up" style="transition-delay: 0.1s;">
                     <img src="https://lh3.googleusercontent.com/pw/AP1GczPAGbay3Va0BKkPUgiGX7SLhpD79DMBZF1xd5ccapCtq73169Pk_JQcetLv_gVSK3HfIG4txRC678ff79i6xEAe9l2pyQM_J7Q1wuh_fPuAsJDFtlAOksgQXD2-qY5LvUH5h_xJXeArENwt81PHkQW15Q=w449-h599-s-no-gm?authuser=0" alt="Clemente Del Prado" class="w-20 h-20 md:w-24 md:h-24 mx-auto rounded-full object-cover mb-4 border border-slate-800 shadow-sm">
                     <h4 class="font-bold text-white text-sm">Clemente Del Prado</h4>
-                    <p class="text-slate-400 text-xs mt-1">Co-creador</p>
+                    <p class="text-slate-400 text-xs mt-1" data-i18n="team-role2">Co-creador</p>
                 </div>
 
                 <div class="text-center fade-in-up" style="transition-delay: 0.2s;">
                     <img src="https://lh3.googleusercontent.com/pw/AP1GczOO3GFraUNDJvV3ItB_TUd6WF7OITYuSV-EmuwSYLNrDhWdCzuWbRniV4RPM1HH9EBVRiMIsZEOXZS8E5WkFefU9C78xk61okykgwbjO9buY1JlMptuEVumiVw9s1HXGxPX-qJr26B-rM7uo8LP-bGmaA=w449-h599-s-no-gm?authuser=0" alt="Nicolás Maldonado" class="w-20 h-20 md:w-24 md:h-24 mx-auto rounded-full object-cover mb-4 border border-slate-800 shadow-sm">
                     <h4 class="font-bold text-white text-sm">Nicolás Maldonado</h4>
-                    <p class="text-slate-400 text-xs mt-1">Co-creador</p>
+                    <p class="text-slate-400 text-xs mt-1" data-i18n="team-role3">Co-creador</p>
                 </div>
 
                 <div class="text-center fade-in-up" style="transition-delay: 0.3s;">
                     <img src="https://lh3.googleusercontent.com/pw/AP1GczMYY56vceJfy25WPxT5ToFv5rqYJuglJvjANfAQaiN1kgwH9kCvkfKkX2oN9ge7ODm2EmdUXgOGDBVHdbZr3NfO7l_ehJ2xPuDlBsR9BiToJ64zk7ZAnFpUmPOBI5Czlqa7aitzUyQogeRbXzFxbTgGZw=w400-h599-s-no-gm?authuser=0" alt="Julio Letelier Menares" class="w-20 h-20 md:w-24 md:h-24 mx-auto rounded-full object-cover mb-4 border border-slate-800 shadow-sm">
                     <h4 class="font-bold text-white text-sm">Julio Letelier Menares</h4>
-                    <p class="text-slate-400 text-xs mt-1">Profesor Guía</p>
+                    <p class="text-slate-400 text-xs mt-1" data-i18n="team-role4">Profesor Guía</p>
                     <a href="https://www.linkedin.com/in/julioletelier/" target="_blank" rel="noopener noreferrer" class="inline-block mt-2 text-brand-600 hover:text-brand-400 transition-colors">
                         <i class="fa-brands fa-linkedin text-xl"></i>
                     </a>
@@ -457,15 +460,15 @@
                 <div class="text-center md:text-left">
                     <div class="flex flex-col md:flex-row md:items-center gap-3 mb-2">
                         <h4 class="font-bold text-white text-lg">Daniel Linares García</h4>
-                        <span class="inline-block bg-black border border-slate-800 text-slate-400 text-[10px] uppercase tracking-widest px-2 py-1 rounded-md font-semibold shadow-sm w-max mx-auto md:mx-0">Respaldo Académico</span>
+                        <span class="inline-block bg-black border border-slate-800 text-slate-400 text-[10px] uppercase tracking-widest px-2 py-1 rounded-md font-semibold shadow-sm w-max mx-auto md:mx-0" data-i18n="team-acad-badge">Respaldo Académico</span>
                         <a href="https://www.linkedin.com/in/dlinaresphd/" target="_blank" rel="noopener noreferrer" class="text-brand-600 hover:text-brand-400 transition-colors">
                             <i class="fa-brands fa-linkedin text-xl"></i>
                         </a>
                     </div>
-                    <p class="text-slate-400 font-medium text-sm mb-4">Vínculo institucional con la Escuela de Construcción Civil.</p>
+                    <p class="text-slate-400 font-medium text-sm mb-4" data-i18n="team-acad-desc">Vínculo institucional con la Escuela de Construcción Civil.</p>
                     <ul class="text-sm text-slate-400 space-y-2 font-light">
-                        <li class="flex items-center justify-center md:justify-start gap-2"><i class="fa-solid fa-circle-check text-brand-500 text-[10px]"></i> Ph.D. Construcción Inteligente, Virginia Tech (2022).</li>
-                        <li class="flex items-center justify-center md:justify-start gap-2"><i class="fa-solid fa-circle-check text-brand-500 text-[10px]"></i> M.Eng. Computer Science / Ms.C. Construcción, Virginia Tech.</li>
+                        <li class="flex items-center justify-center md:justify-start gap-2"><i class="fa-solid fa-circle-check text-brand-500 text-[10px]"></i> <span data-i18n="team-acad-p1">Ph.D. Construcción Inteligente, Virginia Tech (2022).</span></li>
+                        <li class="flex items-center justify-center md:justify-start gap-2"><i class="fa-solid fa-circle-check text-brand-500 text-[10px]"></i> <span data-i18n="team-acad-p2">M.Eng. Computer Science / Ms.C. Construcción, Virginia Tech.</span></li>
                     </ul>
                 </div>
             </div>
@@ -475,8 +478,8 @@
     <section id="galeria" class="py-24 bg-black relative z-40 border-b border-slate-800">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center max-w-2xl mx-auto mb-16 fade-in-up">
-                <h2 class="text-brand-600 font-bold tracking-widest uppercase text-xs mb-3">Galería</h2>
-                <h3 class="text-3xl md:text-4xl font-extrabold text-white tracking-tight">Obrín IA en acción</h3>
+                <h2 class="text-brand-600 font-bold tracking-widest uppercase text-xs mb-3" data-i18n="gal-subtitle">Galería</h2>
+                <h3 class="text-3xl md:text-4xl font-extrabold text-white tracking-tight" data-i18n="gal-title">Obrín IA en acción</h3>
             </div>
 
             <div class="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
@@ -495,28 +498,28 @@
             <div class="grid md:grid-cols-3 gap-12 mb-16 border-b border-slate-800 pb-12">
                 <div class="col-span-1 md:col-span-2">
                     <img src="https://lh3.googleusercontent.com/pw/AP1GczOOE3ZHICrV-_RfZdqAjRIdP5vT8mk8EUJgp83JaAa8uF1SEOlEcN5nkO410n_kUGrx1VZJU2MAD_yk6HcbPAhoW4zzYVJH3KVOOof-U3bsfH4yL6P5J2U9i8SaDuth_yZPP6_IihvtadZrNgEjzDIeUQ=w599-h599-s-no-gm?authuser=0" alt="Obrín IA Logo" class="h-10 w-auto object-contain mb-6 invert grayscale opacity-90" onerror="this.onerror=null; this.src='https://placehold.co/150x50/000000/ffffff?text=Obrin+IA';">
-                    <p class="text-slate-400 text-sm mb-6 max-w-sm font-light leading-relaxed">
+                    <p class="text-slate-400 text-sm mb-6 max-w-sm font-light leading-relaxed" data-i18n="foot-desc">
                         Sistema paramétrico de diagnóstico estructural. Protegiendo la rentabilidad de las constructoras a través de tecnología avanzada.
                     </p>
                 </div>
 
                 <div>
-                    <h4 class="text-white font-semibold mb-4 text-sm">Plataforma</h4>
+                    <h4 class="text-white font-semibold mb-4 text-sm" data-i18n="foot-plat">Plataforma</h4>
                     <ul class="space-y-3 text-sm font-light">
-                        <li><a href="#problema" class="text-slate-400 hover:text-white transition-colors nav-link">El Problema</a></li>
-                        <li><a href="#solucion" class="text-slate-400 hover:text-white transition-colors nav-link">Tecnología IA</a></li>
-                        <li><a href="#caracteristicas" class="text-slate-400 hover:text-white transition-colors nav-link">Características</a></li>
+                        <li><a href="#problema" class="text-slate-400 hover:text-white transition-colors nav-link" data-i18n="nav-problem">El Problema</a></li>
+                        <li><a href="#solucion" class="text-slate-400 hover:text-white transition-colors nav-link" data-i18n="nav-solution">Tecnología IA</a></li>
+                        <li><a href="#caracteristicas" class="text-slate-400 hover:text-white transition-colors nav-link" data-i18n="nav-tech">Características</a></li>
                     </ul>
                 </div>
             </div>
 
             <div class="text-center mb-16">
-                <h4 class="text-white font-semibold mb-4 text-lg">Proyecto respaldado por</h4>
+                <h4 class="text-white font-semibold mb-4 text-lg" data-i18n="foot-backed">Proyecto respaldado por</h4>
                 
                 <div class="flex justify-center mb-12">
                     <img src="https://lh3.googleusercontent.com/pw/AP1GczNmLeJz99QY6S0kqA_fUkJFtds_QKXnULa7kso4yS0c3pzXPlrFeMYHOtwwWxxWbLfNgPYCFMtEXcoLn0Q993W3jv97VzgNADOYJ0IM0gBEb7aInuj15Sw8ngDrIDGfwRIITvhJ_wuiDYvtAGdtvSCZWw=w1366-h355-s-no-gm?authuser=0" alt="Escuela de Construcción Civil" class="h-20 w-auto object-contain">
                 </div>
-                <h4 class="text-white font-semibold mb-4 text-lg">Participantes en</h4>
+                <h4 class="text-white font-semibold mb-4 text-lg" data-i18n="foot-part">Participantes en</h4>
                 <div class="flex flex-wrap justify-center items-center gap-12 md:gap-24">
                     <img src="https://lh3.googleusercontent.com/pw/AP1GczPVsNf-1bnVmXvcy0Ukb8m-kl_nBZvZswrhZ4Bpn_PD3ajK-KllISiIqGaIfhKkdB_SvAiRv3YkCLqAYfVEoiSuEuXfe8sX4jZRTuLkSPdQVTJ2j92LF3TnwYKn4JVRbaCNolcEDbC4vvZisPYksVSKUA=w599-h599-s-no-gm?authuser=0" alt="Reto Construye Academia" class="h-32 w-auto object-contain" onerror="this.style.display='none'">
                     <img src="https://lh3.googleusercontent.com/pw/AP1GczMWuq1iiG6f0WB5qF8kmoCY5w1NIq8B5oTsckE1Xh-1qjwOiGy3jZJPngxIpE1n_Nj_4AHPPT8cVjoWxyXcNGqtChhtWVcOgjSGJteHkNcW8BtNaY8NxmvgmP9GhDe048r-4F6MHT-Rt23Em1Iiqb2PUg=w599-h599-s-no-gm?authuser=0" alt="CChC" class="h-24 w-auto object-contain" onerror="this.style.display='none'">
@@ -525,7 +528,7 @@
             </div>
 
             <div class="border-t border-slate-800 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
-                <p class="text-xs text-slate-500 font-light">
+                <p class="text-xs text-slate-500 font-light" data-i18n="foot-copy">
                     © 2026 Obrín IA. Proyecto de Innovación.
                 </p>
                 <p class="text-xs text-slate-500 font-light">
@@ -536,6 +539,169 @@
     </footer>
 
     <script>
+        // --- SISTEMA DE TRADUCCIÓN (i18n) ---
+        const translations = {
+            es: {
+                "nav-problem": "El Problema",
+                "nav-solution": "Solución",
+                "nav-tutorial": "Tutorial",
+                "nav-tech": "Tecnología",
+                "nav-team": "Equipo",
+                "nav-demo": "Solicitar Demo",
+                "hero-title": "NO ES SOLO<br /><span class=\"text-white\">UN DATO.</span>",
+                "hero-subtitle": "Es el resultado de avances en IA e IoT sin precedentes en la industria.",
+                "hero-btn": "Descubrir Obrín IA",
+                "prob-subtitle": "El Problema de la Industria",
+                "prob-title": "El costo oculto de la evaluación visual.",
+                "prob-p1": "La construcción transita hacia la industrialización, pero la captura de datos sigue siendo análoga. El levantamiento de fallas depende del ojo humano, generando diagnósticos subjetivos.",
+                "prob-p2": "Estas desviaciones tempranas y correcciones mal diagnosticadas <strong class=\"text-white font-extrabold\">destruyen silenciosamente los márgenes de utilidad</strong> en los contratos \"llave en mano\".",
+                "prob-stat1-title": "Retrabajos Constantes",
+                "prob-stat1-desc": "De las partidas presentan observaciones tempranas. Corregirlas consume hasta un 6% del presupuesto total.",
+                "prob-source": "Matrix Consulting & CChC",
+                "prob-stat2-title": "Desviaciones Críticas",
+                "prob-stat2-desc": "Obras que no se entregan a tiempo en Chile, promediando un atraso de 4 meses por reprocesos.",
+                "sol-subtitle": "Plataforma Paramétrica",
+                "sol-title": "Análisis<br>Integral",
+                "sol-desc": "Estandarización impulsada por IA + IoT. Emisión instantánea de prescripciones técnicas exactas.",
+                "card1-title": "Captura<br>multimodal",
+                "card1-desc": "Interfaz móvil intuitiva para el ingreso in situ de fotografías contextuales y descripciones textuales de las fallas.",
+                "card2-title": "Motor de<br>inferencia IA",
+                "card2-desc": "Visión computacional entrenada para detectar patrones estructurales e identificar la causa raíz eliminando el sesgo humano.",
+                "card3-title": "Resultado<br>paramétrico",
+                "card3-desc": "Emisión inmediata de un reporte capaz de diagnosticar patologías y definir soluciones, insumos, protocolos y costos por m².",
+                "card4-title": "Telemetría<br>IoT",
+                "card4-desc": "Integración perimetral con sensores LiDAR e higrómetros para medir volúmenes y condiciones con precisión milimétrica.",
+                "card5-title": "Contexto<br>geográfico",
+                "card5-desc": "Cotización inteligente cruzando la ubicación GPS de la obra vía API con catálogos de proveedores locales actualizados.",
+                "card6-title": "Cubicación<br>BIM",
+                "card6-desc": "Ingesta de planimetrías (CAD/BIM) para geolocalizar patologías y generar listas de materiales exactas para abastecimiento.",
+                "tut-subtitle": "Video Tutorial",
+                "tut-title": "Mira Obrín IA en acción",
+                "tut-desc": "Descubre en pocos minutos cómo nuestra plataforma captura, analiza y presupuesta soluciones constructivas directamente en terreno.",
+                "tut-btn": "<i class=\"fa-brands fa-youtube text-red-600 text-lg\"></i> Ver en YouTube",
+                "feat-subtitle": "Cambio de Paradigma",
+                "feat-title": "De un registro pasivo a un asistente activo",
+                "feat-trad-title": "Software Tradicional",
+                "feat-trad-sub": "Gestión Pasiva",
+                "feat-trad-1": "Funciona únicamente como un repositorio digital.",
+                "feat-trad-2": "El diagnóstico inicial depende 100% de la deducción visual humana.",
+                "feat-trad-3": "Presupuestos calculados a posteriori con un amplio margen de error.",
+                "feat-obrin-sub": "Asistente Activo",
+                "feat-obrin-1": "Procesa la evidencia y entrega un diagnóstico estructurado.",
+                "feat-obrin-2": "Potencia la decisión profesional, mitigando el sesgo humano.",
+                "feat-obrin-3": "Cálculo de presupuesto regionalizado instantáneo y exacto.",
+                "feat-kpi-title": "Meta de Impacto (KPI)",
+                "feat-kpi-desc": "Sobrecostos por errores iniciales.",
+                "team-title": "Desarrollado por expertos",
+                "team-role1": "Líder / Co-creador",
+                "team-role2": "Co-creador",
+                "team-role3": "Co-creador",
+                "team-role4": "Profesor Guía",
+                "team-acad-badge": "Respaldo Académico",
+                "team-acad-desc": "Vínculo institucional con la Escuela de Construcción Civil.",
+                "team-acad-p1": "Ph.D. Construcción Inteligente, Virginia Tech (2022).",
+                "team-acad-p2": "M.Eng. Computer Science / Ms.C. Construcción, Virginia Tech.",
+                "gal-subtitle": "Galería",
+                "gal-title": "Obrín IA en acción",
+                "foot-desc": "Sistema paramétrico de diagnóstico estructural. Protegiendo la rentabilidad de las constructoras a través de tecnología avanzada.",
+                "foot-plat": "Plataforma",
+                "foot-backed": "Proyecto respaldado por",
+                "foot-part": "Participantes en",
+                "foot-copy": "© 2026 Obrín IA. Proyecto de Innovación."
+            },
+            en: {
+                "nav-problem": "The Problem",
+                "nav-solution": "Solution",
+                "nav-tutorial": "Tutorial",
+                "nav-tech": "Technology",
+                "nav-team": "Team",
+                "nav-demo": "Request Demo",
+                "hero-title": "IT'S NOT JUST<br /><span class=\"text-white\">DATA.</span>",
+                "hero-subtitle": "It is the result of unprecedented AI and IoT advancements in the industry.",
+                "hero-btn": "Discover Obrín IA",
+                "prob-subtitle": "The Industry Problem",
+                "prob-title": "The hidden cost of visual assessment.",
+                "prob-p1": "Construction is moving towards industrialization, but data capture remains analog. Defect surveying depends on the human eye, generating subjective diagnostics.",
+                "prob-p2": "These early deviations and poorly diagnosed corrections <strong class=\"text-white font-extrabold\">silently destroy profit margins</strong> in turnkey contracts.",
+                "prob-stat1-title": "Constant Rework",
+                "prob-stat1-desc": "Of the tasks present early observations. Correcting them consumes up to 6% of the total budget.",
+                "prob-source": "Matrix Consulting & CChC",
+                "prob-stat2-title": "Critical Deviations",
+                "prob-stat2-desc": "Projects in Chile that are not delivered on time, averaging a 4-month delay due to rework.",
+                "sol-subtitle": "Parametric Platform",
+                "sol-title": "Comprehensive<br>Analysis",
+                "sol-desc": "Standardization driven by AI + IoT. Instant issuance of exact technical prescriptions.",
+                "card1-title": "Multimodal<br>Capture",
+                "card1-desc": "Intuitive mobile interface for on-site input of contextual photographs and textual descriptions of defects.",
+                "card2-title": "AI Inference<br>Engine",
+                "card2-desc": "Computer vision trained to detect structural patterns and identify the root cause, eliminating human bias.",
+                "card3-title": "Parametric<br>Result",
+                "card3-desc": "Immediate issuance of a report capable of diagnosing pathologies and defining solutions, inputs, protocols, and costs per sqm.",
+                "card4-title": "IoT<br>Telemetry",
+                "card4-desc": "Perimeter integration with LiDAR sensors and hygrometers to measure volumes and conditions with millimeter precision.",
+                "card5-title": "Geographical<br>Context",
+                "card5-desc": "Smart quoting by cross-referencing the site's GPS location via API with updated local supplier catalogs.",
+                "card6-title": "BIM<br>Takeoff",
+                "card6-desc": "Ingestion of planimetries (CAD/BIM) to geolocate pathologies and generate exact material lists for procurement.",
+                "tut-subtitle": "Video Tutorial",
+                "tut-title": "Watch Obrín IA in action",
+                "tut-desc": "Discover in just a few minutes how our platform captures, analyzes, and budgets construction solutions directly on-site.",
+                "tut-btn": "<i class=\"fa-brands fa-youtube text-red-600 text-lg\"></i> Watch on YouTube",
+                "feat-subtitle": "Paradigm Shift",
+                "feat-title": "From a passive record to an active assistant",
+                "feat-trad-title": "Traditional Software",
+                "feat-trad-sub": "Passive Management",
+                "feat-trad-1": "Functions solely as a digital repository.",
+                "feat-trad-2": "Initial diagnosis depends 100% on human visual deduction.",
+                "feat-trad-3": "Budgets calculated a posteriori with a wide margin of error.",
+                "feat-obrin-sub": "Active Assistant",
+                "feat-obrin-1": "Processes the evidence and delivers a structured diagnosis.",
+                "feat-obrin-2": "Empowers professional decision-making, mitigating human bias.",
+                "feat-obrin-3": "Instant and exact regionalized budget calculation.",
+                "feat-kpi-title": "Impact Goal (KPI)",
+                "feat-kpi-desc": "Cost overruns due to initial errors.",
+                "team-title": "Developed by experts",
+                "team-role1": "Leader / Co-creator",
+                "team-role2": "Co-creator",
+                "team-role3": "Co-creator",
+                "team-role4": "Guiding Professor",
+                "team-acad-badge": "Academic Backing",
+                "team-acad-desc": "Institutional link with the School of Civil Construction.",
+                "team-acad-p1": "Ph.D. Smart Construction, Virginia Tech (2022).",
+                "team-acad-p2": "M.Eng. Computer Science / Ms.C. Construction, Virginia Tech.",
+                "gal-subtitle": "Gallery",
+                "gal-title": "Obrín IA in action",
+                "foot-desc": "Parametric structural diagnosis system. Protecting construction companies' profitability through advanced technology.",
+                "foot-plat": "Platform",
+                "foot-backed": "Project backed by",
+                "foot-part": "Participants in",
+                "foot-copy": "© 2026 Obrín IA. Innovation Project."
+            }
+        };
+
+        let currentLang = 'es';
+
+        function toggleLanguage() {
+            currentLang = currentLang === 'es' ? 'en' : 'es';
+            document.documentElement.lang = currentLang;
+            
+            // Cambiar textos de los botones
+            document.getElementById('lang-text-desktop').innerText = currentLang === 'es' ? 'EN' : 'ES';
+            document.getElementById('lang-text-mobile').innerText = currentLang === 'es' ? 'English' : 'Español';
+
+            // Traducir todos los elementos marcados
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (translations[currentLang][key]) {
+                    el.innerHTML = translations[currentLang][key];
+                }
+            });
+        }
+
+        document.getElementById('lang-toggle-desktop').addEventListener('click', toggleLanguage);
+        document.getElementById('lang-toggle-mobile').addEventListener('click', toggleLanguage);
+
+
         // --- Lógica Scroll combinada ---
         window.addEventListener('scroll', () => {
             const scrollY = window.scrollY;
@@ -625,8 +791,8 @@
 
                     // Lógica para desvanecer el título de Solución
                     if (solTextContainer) {
-                        // Queremos que empiece a desvanecerse rápido (ej. al 10% del scroll)
-                        // y desaparezca por completo pronto (ej. al 30% del scroll)
+                        // Queremos que empiece a desvanecerse rápido (ej. al 5% del scroll)
+                        // y desaparezca por completo pronto (ej. al 25% del scroll)
                         const fadeStart = 0.05;
                         const fadeEnd = 0.25;
                         
@@ -731,42 +897,40 @@
             }
 
             // 6. Lógica Scroll Características (Aparición progresiva vinculada al scroll)
-        const caractSection = document.getElementById('caracteristicas');
-        const caractText = document.getElementById('caract-text-container');
-        const caractCard1 = document.getElementById('caract-card-1');
-        const caractCard2 = document.getElementById('caract-card-2');
-        
-        if (caractSection) {
-            const caractRect = caractSection.getBoundingClientRect();
+            const caractSection = document.getElementById('caracteristicas');
+            const caractText = document.getElementById('caract-text-container');
+            const caractCard1 = document.getElementById('caract-card-1');
+            const caractCard2 = document.getElementById('caract-card-2');
             
-            // Si la sección entra a la pantalla
-            if (caractRect.top < winHeight && caractRect.bottom > 0) {
-                // Progreso del 0 al 1 de la sección. Ajustado para que el progreso empiece antes
-                const progress = Math.max(0, Math.min(1, (winHeight - caractRect.top) / (winHeight * 1.2)));
+            if (caractSection) {
+                const caractRect = caractSection.getBoundingClientRect();
                 
-                if (caractText) {
-                    // Aparece un poco más rápido (desde abajo)
-                    const textProg = Math.min(1, progress * 1.5);
-                    caractText.style.opacity = textProg;
-                    caractText.style.transform = `translateY(${150 - (textProg * 150)}px)`;
-                }
-                
-                if (caractCard1) {
-                    // Card 1 desliza desde la izquierda. Empieza en -400px y termina en 0px (centro)
-                    // Ajustamos el inicio de la animación para que coincida con su aparición visual
-                    const cardsProg = Math.max(0, Math.min(1, (progress - 0.2) * 1.5));
-                    caractCard1.style.opacity = cardsProg;
-                    caractCard1.style.transform = `translateX(${-400 + (cardsProg * 400)}px)`;
-                }
-                
-                if (caractCard2) {
-                    // Card 2 desliza desde la derecha, en espejo exacto a la primera. Empieza en 400px y termina en 0px (centro)
-                    const cardsProg = Math.max(0, Math.min(1, (progress - 0.2) * 1.5));
-                    caractCard2.style.opacity = cardsProg;
-                    caractCard2.style.transform = `translateX(${400 - (cardsProg * 400)}px)`;
+                // Si la sección entra a la pantalla
+                if (caractRect.top < winHeight && caractRect.bottom > 0) {
+                    // Calculamos progreso tomando en cuenta cuándo inicia la sección desde abajo
+                    const progress = Math.max(0, Math.min(1, (winHeight - caractRect.top) / (winHeight * 1.2)));
+                    
+                    if (caractText) {
+                        const textProg = Math.min(1, progress * 1.5);
+                        caractText.style.opacity = textProg;
+                        caractText.style.transform = `translateY(${150 - (textProg * 150)}px)`;
+                    }
+                    
+                    if (caractCard1) {
+                        // Empieza la animación un poco más tarde (progress - 0.2)
+                        const cardsProg = Math.max(0, Math.min(1, (progress - 0.2) * 1.5));
+                        caractCard1.style.opacity = cardsProg;
+                        caractCard1.style.transform = `translateX(${-400 + (cardsProg * 400)}px)`;
+                    }
+                    
+                    if (caractCard2) {
+                        // Sincronizado idéntico a Card 1 para efecto espejo
+                        const cardsProg = Math.max(0, Math.min(1, (progress - 0.2) * 1.5));
+                        caractCard2.style.opacity = cardsProg;
+                        caractCard2.style.transform = `translateX(${400 - (cardsProg * 400)}px)`;
+                    }
                 }
             }
-        }
         });
 
         // --- Inicia código iPhone Mockup ---
