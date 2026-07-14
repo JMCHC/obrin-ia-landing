@@ -163,6 +163,18 @@
                 </div>
             </div>
         </div>
+
+        <!-- MENÚ MÓVIL (Desplegable) -->
+        <div id="mobile-menu" class="hidden md:hidden bg-black/95 backdrop-blur-xl border-b border-white/10">
+            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                <a href="#problema" class="text-slate-400 hover:text-white block px-3 py-2 rounded-md text-base font-medium transition-colors nav-link-mobile">El Problema</a>
+                <a href="#solucion" class="text-slate-400 hover:text-white block px-3 py-2 rounded-md text-base font-medium transition-colors nav-link-mobile">Solución</a>
+                <a href="#tutorial" class="text-slate-400 hover:text-white block px-3 py-2 rounded-md text-base font-medium transition-colors nav-link-mobile">Tutorial</a>
+                <a href="#caracteristicas" class="text-slate-400 hover:text-white block px-3 py-2 rounded-md text-base font-medium transition-colors nav-link-mobile">Tecnología</a>
+                <a href="#equipo" class="text-slate-400 hover:text-white block px-3 py-2 rounded-md text-base font-medium transition-colors nav-link-mobile">Equipo</a>
+                <a href="demo.html" target="_blank" class="bg-brand-600 hover:bg-brand-500 text-white block px-3 py-2 rounded-md text-base font-semibold mt-4 text-center transition-all">Solicitar Demo</a>
+            </div>
+        </div>
     </nav>
 
     <!-- CELULAR 3D GLOBAL FIJO -->
@@ -348,13 +360,13 @@
 
     <section id="caracteristicas" class="py-24 bg-black text-white relative z-40 border-b border-slate-800 overflow-hidden">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div id="caract-text-container" class="text-center max-w-2xl mx-auto mb-16 opacity-0" style="transform: translateY(50px); will-change: transform, opacity;">
+            <div id="caract-text-container" class="text-center max-w-2xl mx-auto mb-16 opacity-0" style="transform: translateY(150px); will-change: transform, opacity;">
                 <h2 class="text-brand-400 font-bold tracking-widest uppercase text-xs mb-3">Cambio de Paradigma</h2>
                 <h3 class="text-3xl md:text-4xl font-extrabold tracking-tight mb-4">De un registro pasivo a un asistente activo</h3>
             </div>
             
             <div class="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-                <div id="caract-card-1" class="border border-slate-700 bg-slate-800/50 p-8 rounded-3xl opacity-0" style="transform: translateX(-50px); will-change: transform, opacity;">
+                <div id="caract-card-1" class="border border-slate-700 bg-slate-800/50 p-8 rounded-3xl opacity-0" style="transform: translateX(-400px); will-change: transform, opacity;">
                     <div class="flex items-center justify-between mb-8 pb-4 border-b border-slate-700">
                         <div>
                             <h4 class="text-xl font-bold text-slate-200">Software Tradicional</h4>
@@ -369,7 +381,7 @@
                     </ul>
                 </div>
                 
-                <div id="caract-card-2" class="border border-brand-500/30 bg-gradient-to-b from-brand-900/40 to-slate-800/80 p-8 rounded-3xl shadow-glow relative opacity-0" style="transform: translateX(50px); will-change: transform, opacity;">
+                <div id="caract-card-2" class="border border-brand-500/30 bg-gradient-to-b from-brand-900/40 to-slate-800/80 p-8 rounded-3xl shadow-glow relative opacity-0" style="transform: translateX(400px); will-change: transform, opacity;">
                     <div class="absolute -top-3 -right-3 pointer-events-auto">
                         <span class="flex h-6 w-6 relative">
                               <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-400 opacity-75"></span>
@@ -719,41 +731,42 @@
             }
 
             // 6. Lógica Scroll Características (Aparición progresiva vinculada al scroll)
-            const caractSection = document.getElementById('caracteristicas');
-            const caractText = document.getElementById('caract-text-container');
-            const caractCard1 = document.getElementById('caract-card-1');
-            const caractCard2 = document.getElementById('caract-card-2');
+        const caractSection = document.getElementById('caracteristicas');
+        const caractText = document.getElementById('caract-text-container');
+        const caractCard1 = document.getElementById('caract-card-1');
+        const caractCard2 = document.getElementById('caract-card-2');
+        
+        if (caractSection) {
+            const caractRect = caractSection.getBoundingClientRect();
             
-            if (caractSection) {
-                const caractRect = caractSection.getBoundingClientRect();
+            // Si la sección entra a la pantalla
+            if (caractRect.top < winHeight && caractRect.bottom > 0) {
+                // Progreso del 0 al 1 de la sección. Ajustado para que el progreso empiece antes
+                const progress = Math.max(0, Math.min(1, (winHeight - caractRect.top) / (winHeight * 1.2)));
                 
-                // Si la sección entra a la pantalla
-                if (caractRect.top < winHeight && caractRect.bottom > 0) {
-                    // Progreso del 0 al 1 de la sección
-                    const progress = Math.max(0, Math.min(1, (winHeight - caractRect.top) / (winHeight * 0.8)));
-                    
-                    if (caractText) {
-                        // Aparece un poco más rápido (desde abajo)
-                        const textProg = Math.min(1, progress * 1.5);
-                        caractText.style.opacity = textProg;
-                        caractText.style.transform = `translateY(${50 - (textProg * 50)}px)`;
-                    }
-                    
-                    if (caractCard1) {
-                        // Card 1 desliza desde la izquierda
-                        const card1Prog = Math.max(0, Math.min(1, (progress - 0.1) * 1.5));
-                        caractCard1.style.opacity = card1Prog;
-                        caractCard1.style.transform = `translateX(${-50 + (card1Prog * 50)}px)`;
-                    }
-                    
-                    if (caractCard2) {
-                        // Card 2 desliza desde la derecha, ligeramente retrasada
-                        const card2Prog = Math.max(0, Math.min(1, (progress - 0.25) * 1.5));
-                        caractCard2.style.opacity = card2Prog;
-                        caractCard2.style.transform = `translateX(${50 - (card2Prog * 50)}px)`;
-                    }
+                if (caractText) {
+                    // Aparece un poco más rápido (desde abajo)
+                    const textProg = Math.min(1, progress * 1.5);
+                    caractText.style.opacity = textProg;
+                    caractText.style.transform = `translateY(${150 - (textProg * 150)}px)`;
+                }
+                
+                if (caractCard1) {
+                    // Card 1 desliza desde la izquierda. Empieza en -400px y termina en 0px (centro)
+                    // Ajustamos el inicio de la animación para que coincida con su aparición visual
+                    const cardsProg = Math.max(0, Math.min(1, (progress - 0.2) * 1.5));
+                    caractCard1.style.opacity = cardsProg;
+                    caractCard1.style.transform = `translateX(${-400 + (cardsProg * 400)}px)`;
+                }
+                
+                if (caractCard2) {
+                    // Card 2 desliza desde la derecha, en espejo exacto a la primera. Empieza en 400px y termina en 0px (centro)
+                    const cardsProg = Math.max(0, Math.min(1, (progress - 0.2) * 1.5));
+                    caractCard2.style.opacity = cardsProg;
+                    caractCard2.style.transform = `translateX(${400 - (cardsProg * 400)}px)`;
                 }
             }
+        }
         });
 
         // --- Inicia código iPhone Mockup ---
@@ -967,6 +980,32 @@
                 }
             });
         });
+
+        // --- Lógica Menú Móvil ---
+        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
+        const mobileNavLinks = document.querySelectorAll('.nav-link-mobile');
+
+        if (mobileMenuBtn && mobileMenu) {
+            mobileMenuBtn.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+            });
+
+            // Cerrar menú al hacer clic en un enlace
+            mobileNavLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    const targetId = this.getAttribute('href');
+                    if (targetId && targetId.startsWith('#')) {
+                        e.preventDefault();
+                        mobileMenu.classList.add('hidden'); // Oculta el menú
+                        const targetElement = document.querySelector(targetId);
+                        if (targetElement) {
+                            targetElement.scrollIntoView({ behavior: 'smooth' });
+                        }
+                    }
+                });
+            });
+        }
 
     </script>
 </body>
