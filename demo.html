@@ -32,7 +32,7 @@
     <script type="module">
         // Importar Firebase SDKs (Versión modular 10+)
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
-        import { getAuth, signInWithPopup, GoogleAuthProvider, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, updateProfile } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
+        import { getAuth, signInWithPopup, GoogleAuthProvider, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, updateProfile, signOut } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
 
         // CONFIGURACIÓN REAL DE FIREBASE DEL USUARIO
         const firebaseConfig = {
@@ -60,6 +60,10 @@
                 document.getElementById('auth-screen').classList.add('hidden');
                 document.getElementById('main-app-container').classList.remove('hidden');
                 console.log("Usuario actual:", user.email);
+            } else {
+                // Ningún usuario autenticado (Muestra login, oculta app)
+                document.getElementById('auth-screen').classList.remove('hidden');
+                document.getElementById('main-app-container').classList.add('hidden');
             }
         });
 
@@ -78,6 +82,7 @@
                 console.error(error);
                 let errorMsg = "Error al iniciar con Google.";
                 if(error.code === 'auth/popup-closed-by-user') errorMsg = "Cerraste la ventana antes de terminar.";
+                if(error.code === 'auth/unauthorized-domain') errorMsg = "Debes autorizar este dominio en Firebase.";
                 
                 window.showNotification(errorMsg, "error");
                 btn.innerHTML = originalContent;
@@ -85,46 +90,15 @@
             }
         };
 
-        window.submitEmailAuth = async function() {
-            const btn = document.getElementById('btn-email');
-            const email = document.getElementById('auth-email').value;
-            const password = document.getElementById('auth-password').value;
-            
-            if (!email || !password) {
-                window.showNotification("Por favor ingresa correo y contraseña.", "error");
-                return;
-            }
-
-            const originalContent = btn.innerHTML;
-            btn.innerHTML = `<span class="animate-spin inline-block mr-2">⏳</span> Procesando...`;
-            btn.disabled = true;
-
+        // Función para Cerrar Sesión
+        window.logoutUser = async function() {
             try {
-                if (window.isLoginMode) {
-                    // INICIAR SESIÓN
-                    await signInWithEmailAndPassword(auth, email, password);
-                    window.showNotification("Sesión iniciada correctamente", "success");
-                } else {
-                    // REGISTRAR NUEVO USUARIO
-                    const name = document.getElementById('auth-name').value;
-                    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-                    
-                    if (name) {
-                        await updateProfile(userCredential.user, { displayName: name });
-                    }
-                    window.showNotification("Cuenta creada exitosamente", "success");
-                }
+                await signOut(auth);
+                window.resetUI(); // Limpia los archivos subidos para que no los vea el próximo
+                window.showNotification("Sesión cerrada correctamente", "info");
             } catch (error) {
                 console.error(error);
-                let errorMsg = "Error de autenticación.";
-                if(error.code === 'auth/email-already-in-use') errorMsg = "El correo ya está registrado.";
-                if(error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') errorMsg = "Credenciales incorrectas.";
-                if(error.code === 'auth/weak-password') errorMsg = "La contraseña debe tener al menos 6 caracteres.";
-                if(error.code === 'auth/invalid-email') errorMsg = "El formato del correo es inválido.";
-                
-                window.showNotification(errorMsg, "error");
-                btn.innerHTML = originalContent;
-                btn.disabled = false;
+                window.showNotification("Error al cerrar sesión", "error");
             }
         };
     </script>
@@ -256,6 +230,14 @@
 
     <!-- Contenedor Principal de la App (Oculto inicialmente) -->
     <div id="main-app-container" class="w-full max-w-4xl hidden">
+        
+        <!-- BOTÓN DE CERRAR SESIÓN -->
+        <div class="flex justify-end mb-4 pr-4 md:pr-0">
+            <button onclick="window.logoutUser()" class="text-[0.65rem] font-bold text-slate-500 hover:text-red-500 transition flex items-center gap-2 bg-white px-4 py-2 rounded-full shadow-sm border border-slate-200 uppercase tracking-wider">
+                <span>🚪</span> Cerrar Sesión
+            </button>
+        </div>
+
         <div class="text-center mb-10">
             <img src="https://lh3.googleusercontent.com/pw/AP1GczOsQ9BjTC3dTk0RxKlbaZtHDeSwbqF3-buuEPA6QHBnWKNK4GkHQpfHPUJkVSbHPN7QEXrwUL5qVDwk5vLhsbpcLCLP3NCezheTURsZUCAOwnL0h1NtlHKbrEHkrsdquexu32SfFSdxlqHT1c36shbDMQ=w599-h599-s-no-gm?authuser=0" alt="Logo Obrín IA" class="h-28 md:h-36 lg:h-48 mx-auto mb-6 object-contain">
             <h2 class="text-4xl font-light text-slate-900 mb-4 tracking-tight">Evaluación Técnica</h2>
