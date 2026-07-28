@@ -32,7 +32,7 @@
     <script type="module">
         // Importar Firebase SDKs (Versión modular 10+)
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
-        import { getAuth, signInWithPopup, GoogleAuthProvider, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, updateProfile, signOut } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
+        import { getAuth, signInWithPopup, GoogleAuthProvider, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, updateProfile, signOut, setPersistence, browserSessionPersistence } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
 
         // CONFIGURACIÓN REAL DE FIREBASE DEL USUARIO
         const firebaseConfig = {
@@ -53,21 +53,77 @@
         // Variable global para controlar el modo del formulario
         window.isLoginMode = true;
 
-        // Escuchar el estado de autenticación (si el usuario ya hizo login antes, entra directo)
+        // Escuchar el estado de autenticación
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 // Usuario autenticado
                 document.getElementById('auth-screen').classList.add('hidden');
                 document.getElementById('main-app-container').classList.remove('hidden');
-                console.log("Usuario actual:", user.email);
             } else {
-                // Ningún usuario autenticado (Muestra login, oculta app)
+                // Ningún usuario autenticado
                 document.getElementById('auth-screen').classList.remove('hidden');
                 document.getElementById('main-app-container').classList.add('hidden');
             }
         });
 
         // Hacer las funciones de Firebase globales para que el HTML pueda llamarlas
+        
+        // 1. FUNCIÓN DE CORREO Y CONTRASEÑA (LA QUE FALTABA)
+        window.submitEmailAuth = async function() {
+            const email = document.getElementById('auth-email').value.trim();
+            const password = document.getElementById('auth-password').value;
+            const name = document.getElementById('auth-name').value.trim();
+            const btn = document.getElementById('btn-email');
+            const originalText = document.getElementById('auth-btn-text').innerText;
+
+            if (!email || !password) {
+                window.showNotification("Por favor ingresa correo y contraseña.", "error");
+                return;
+            }
+
+            if (!window.isLoginMode && !name) {
+                window.showNotification("Por favor ingresa tu nombre completo.", "error");
+                return;
+            }
+
+            btn.innerHTML = `<span class="animate-spin inline-block mr-2">⏳</span> Procesando...`;
+            btn.disabled = true;
+
+            try {
+                // Forzar que la sesión se cierre al cerrar la pestaña
+                await setPersistence(auth, browserSessionPersistence);
+                
+                if (window.isLoginMode) {
+                    // MODO LOGIN
+                    await signInWithEmailAndPassword(auth, email, password);
+                    window.showNotification("Sesión iniciada correctamente", "success");
+                } else {
+                    // MODO REGISTRO
+                    const result = await createUserWithEmailAndPassword(auth, email, password);
+                    // Guardar el nombre en el perfil del usuario de Firebase
+                    await updateProfile(result.user, { displayName: name });
+                    window.showNotification("Cuenta creada exitosamente", "success");
+                }
+            } catch (error) {
+                console.error("Error Auth:", error);
+                let errorMsg = "Error de autenticación.";
+                
+                // Manejar errores comunes de Firebase y ponerlos en español
+                if (error.code === 'auth/email-already-in-use') errorMsg = "Este correo ya está registrado.";
+                if (error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') errorMsg = "Correo o contraseña incorrectos.";
+                if (error.code === 'auth/weak-password') errorMsg = "La contraseña debe tener al menos 6 caracteres.";
+                if (error.code === 'auth/user-not-found') errorMsg = "No existe una cuenta con este correo.";
+                if (error.code === 'auth/invalid-email') errorMsg = "El formato del correo no es válido.";
+                
+                window.showNotification(errorMsg, "error");
+                
+                // Restaurar el botón en caso de error
+                btn.innerHTML = `<span id="auth-btn-text">${originalText}</span>`;
+                btn.disabled = false;
+            }
+        };
+
+        // 2. FUNCIÓN DE GOOGLE ACTUALIZADA (con cierre al cerrar pestaña)
         window.loginWithGoogle = async function() {
             const btn = document.getElementById('btn-google');
             const originalContent = btn.innerHTML;
@@ -75,14 +131,14 @@
             btn.disabled = true;
 
             try {
+                // Forzar que la sesión se cierre al cerrar la pestaña
+                await setPersistence(auth, browserSessionPersistence);
                 const result = await signInWithPopup(auth, googleProvider);
                 window.showNotification(`¡Bienvenido ${result.user.displayName || result.user.email}!`, "success");
-                // La UI cambiará automáticamente por el onAuthStateChanged
             } catch (error) {
                 console.error(error);
                 let errorMsg = "Error al iniciar con Google.";
                 if(error.code === 'auth/popup-closed-by-user') errorMsg = "Cerraste la ventana antes de terminar.";
-                if(error.code === 'auth/unauthorized-domain') errorMsg = "Debes autorizar este dominio en Firebase.";
                 
                 window.showNotification(errorMsg, "error");
                 btn.innerHTML = originalContent;
