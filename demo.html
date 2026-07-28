@@ -29,6 +29,106 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
+    <script type="module">
+        // Importar Firebase SDKs (Versión modular 10+)
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
+        import { getAuth, signInWithPopup, GoogleAuthProvider, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, updateProfile } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
+
+        // CONFIGURACIÓN REAL DE FIREBASE DEL USUARIO
+        const firebaseConfig = {
+            apiKey: "AIzaSyB4fSP-4BiJyVJN9MTzYpWyWDMD82DuKD8",
+            authDomain: "obrinia.firebaseapp.com",
+            projectId: "obrinia",
+            storageBucket: "obrinia.firebasestorage.app",
+            messagingSenderId: "195639774552",
+            appId: "1:195639774552:web:3052be5fd239be9807292d",
+            measurementId: "G-PX7628BHRX"
+        };
+
+        // Inicializar Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const googleProvider = new GoogleAuthProvider();
+
+        // Variable global para controlar el modo del formulario
+        window.isLoginMode = true;
+
+        // Escuchar el estado de autenticación (si el usuario ya hizo login antes, entra directo)
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                // Usuario autenticado
+                document.getElementById('auth-screen').classList.add('hidden');
+                document.getElementById('main-app-container').classList.remove('hidden');
+                console.log("Usuario actual:", user.email);
+            }
+        });
+
+        // Hacer las funciones de Firebase globales para que el HTML pueda llamarlas
+        window.loginWithGoogle = async function() {
+            const btn = document.getElementById('btn-google');
+            const originalContent = btn.innerHTML;
+            btn.innerHTML = `<span class="animate-spin inline-block mr-2">⏳</span> Conectando con Google...`;
+            btn.disabled = true;
+
+            try {
+                const result = await signInWithPopup(auth, googleProvider);
+                window.showNotification(`¡Bienvenido ${result.user.displayName || result.user.email}!`, "success");
+                // La UI cambiará automáticamente por el onAuthStateChanged
+            } catch (error) {
+                console.error(error);
+                let errorMsg = "Error al iniciar con Google.";
+                if(error.code === 'auth/popup-closed-by-user') errorMsg = "Cerraste la ventana antes de terminar.";
+                
+                window.showNotification(errorMsg, "error");
+                btn.innerHTML = originalContent;
+                btn.disabled = false;
+            }
+        };
+
+        window.submitEmailAuth = async function() {
+            const btn = document.getElementById('btn-email');
+            const email = document.getElementById('auth-email').value;
+            const password = document.getElementById('auth-password').value;
+            
+            if (!email || !password) {
+                window.showNotification("Por favor ingresa correo y contraseña.", "error");
+                return;
+            }
+
+            const originalContent = btn.innerHTML;
+            btn.innerHTML = `<span class="animate-spin inline-block mr-2">⏳</span> Procesando...`;
+            btn.disabled = true;
+
+            try {
+                if (window.isLoginMode) {
+                    // INICIAR SESIÓN
+                    await signInWithEmailAndPassword(auth, email, password);
+                    window.showNotification("Sesión iniciada correctamente", "success");
+                } else {
+                    // REGISTRAR NUEVO USUARIO
+                    const name = document.getElementById('auth-name').value;
+                    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                    
+                    if (name) {
+                        await updateProfile(userCredential.user, { displayName: name });
+                    }
+                    window.showNotification("Cuenta creada exitosamente", "success");
+                }
+            } catch (error) {
+                console.error(error);
+                let errorMsg = "Error de autenticación.";
+                if(error.code === 'auth/email-already-in-use') errorMsg = "El correo ya está registrado.";
+                if(error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') errorMsg = "Credenciales incorrectas.";
+                if(error.code === 'auth/weak-password') errorMsg = "La contraseña debe tener al menos 6 caracteres.";
+                if(error.code === 'auth/invalid-email') errorMsg = "El formato del correo es inválido.";
+                
+                window.showNotification(errorMsg, "error");
+                btn.innerHTML = originalContent;
+                btn.disabled = false;
+            }
+        };
+    </script>
+
     <style>
         body { font-family: 'Inter', sans-serif; -webkit-font-smoothing: antialiased; }
         
@@ -67,6 +167,21 @@
             padding: 40px !important;
             background: white !important;
         }
+
+        .auth-input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            transition: all 0.2s;
+            outline: none;
+        }
+        .auth-input:focus {
+            border-color: #0f172a;
+            box-shadow: 0 0 0 1px #0f172a;
+        }
     </style>
 </head>
 <body class="bg-slate-50 min-h-screen flex items-center justify-center p-4">
@@ -77,7 +192,70 @@
         <p class="text-slate-400 text-xs font-medium tracking-widest uppercase animate-pulse">Iniciando sistema...</p>
     </div>
 
-    <div class="w-full max-w-4xl">
+    <!-- Pantalla de Autenticación (Login / Registro) -->
+    <div id="auth-screen" class="w-full max-w-md bg-white p-8 md:p-10 rounded-2xl shadow-2xl border border-gray-100 relative overflow-hidden mx-auto">
+        <div class="top-0 left-0 w-full h-1 absolute bg-slate-900"></div>
+        
+        <div class="text-center mb-8">
+            <img src="https://lh3.googleusercontent.com/pw/AP1GczOsQ9BjTC3dTk0RxKlbaZtHDeSwbqF3-buuEPA6QHBnWKNK4GkHQpfHPUJkVSbHPN7QEXrwUL5qVDwk5vLhsbpcLCLP3NCezheTURsZUCAOwnL0h1NtlHKbrEHkrsdquexu32SfFSdxlqHT1c36shbDMQ=w599-h599-s-no-gm?authuser=0" alt="Logo Obrín IA" class="h-16 mx-auto mb-4 object-contain">
+            <h2 id="auth-title" class="text-2xl font-light text-slate-900 tracking-tight">Bienvenido a Obrín IA</h2>
+            <p id="auth-subtitle" class="text-gray-500 font-light text-sm mt-2">Inicia sesión para comenzar tu evaluación</p>
+        </div>
+
+        <div class="space-y-4">
+            <!-- Botón de Google -->
+            <button id="btn-google" onclick="window.loginWithGoogle()" class="w-full bg-white border border-slate-200 text-slate-700 py-3 px-4 rounded-lg font-medium text-sm transition hover:bg-slate-50 shadow-sm flex items-center justify-center gap-3">
+                <svg viewBox="0 0 24 24" class="w-5 h-5" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                    <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                    <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+                    <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+                </svg>
+                Continuar con Google
+            </button>
+
+            <div class="relative flex items-center py-2">
+                <div class="flex-grow border-t border-slate-200"></div>
+                <span class="flex-shrink-0 mx-4 text-slate-400 text-xs uppercase tracking-wider">O usa tu correo</span>
+                <div class="flex-grow border-t border-slate-200"></div>
+            </div>
+
+            <!-- Formulario Tradicional -->
+            <div id="register-fields" class="hidden space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Nombre Completo</label>
+                    <input type="text" id="auth-name" class="auth-input" placeholder="Ej: Juan Pérez">
+                </div>
+            </div>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Correo Electrónico</label>
+                    <input type="email" id="auth-email" class="auth-input" placeholder="tu@correo.com">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Contraseña</label>
+                    <input type="password" id="auth-password" class="auth-input" placeholder="••••••••">
+                </div>
+            </div>
+
+            <button id="btn-email" onclick="window.submitEmailAuth()" class="w-full bg-slate-900 text-white py-3 rounded-lg font-medium text-sm transition hover:bg-slate-800 shadow-lg mt-2">
+                <span id="auth-btn-text">Iniciar Sesión</span>
+            </button>
+        </div>
+
+        <div class="mt-6 text-center">
+            <p class="text-sm text-slate-500">
+                <span id="auth-toggle-text">¿No tienes cuenta?</span> 
+                <button onclick="window.toggleAuthMode()" class="text-brand-600 font-semibold hover:underline transition">
+                    <span id="auth-toggle-link">Regístrate aquí</span>
+                </button>
+            </p>
+        </div>
+    </div>
+
+    <!-- Contenedor Principal de la App (Oculto inicialmente) -->
+    <div id="main-app-container" class="w-full max-w-4xl hidden">
         <div class="text-center mb-10">
             <img src="https://lh3.googleusercontent.com/pw/AP1GczOsQ9BjTC3dTk0RxKlbaZtHDeSwbqF3-buuEPA6QHBnWKNK4GkHQpfHPUJkVSbHPN7QEXrwUL5qVDwk5vLhsbpcLCLP3NCezheTURsZUCAOwnL0h1NtlHKbrEHkrsdquexu32SfFSdxlqHT1c36shbDMQ=w599-h599-s-no-gm?authuser=0" alt="Logo Obrín IA" class="h-28 md:h-36 lg:h-48 mx-auto mb-6 object-contain">
             <h2 class="text-4xl font-light text-slate-900 mb-4 tracking-tight">Evaluación Técnica</h2>
@@ -259,7 +437,72 @@
         </div>
     </div>
 
+    <!-- Contenedor para Notificaciones UI -->
+    <div id="ui-notification" class="fixed bottom-4 right-4 bg-slate-900 text-white px-6 py-3 rounded-lg shadow-xl transform translate-y-20 opacity-0 transition-all duration-300 z-50 pointer-events-none flex items-center gap-3">
+        <span id="ui-notification-icon">ℹ️</span>
+        <span id="ui-notification-text" class="text-sm font-medium"></span>
+    </div>
+
     <script>
+        // --- UTILIDADES UI ---
+        window.showNotification = function(message, type = 'info') {
+            const notif = document.getElementById('ui-notification');
+            const text = document.getElementById('ui-notification-text');
+            const icon = document.getElementById('ui-notification-icon');
+            
+            text.innerText = message;
+            
+            if (type === 'error') {
+                notif.classList.replace('bg-slate-900', 'bg-red-600');
+                icon.innerText = '⚠️';
+            } else if (type === 'success') {
+                notif.classList.replace('bg-slate-900', 'bg-emerald-600');
+                icon.innerText = '✓';
+            } else {
+                notif.classList.replace('bg-red-600', 'bg-slate-900');
+                notif.classList.replace('bg-emerald-600', 'bg-slate-900');
+                icon.innerText = 'ℹ️';
+            }
+
+            notif.classList.remove('translate-y-20', 'opacity-0');
+            
+            setTimeout(() => {
+                notif.classList.add('translate-y-20', 'opacity-0');
+            }, 4000);
+        };
+
+        // --- AUTH LOGIC (UI Toggles) ---
+        window.isLoginMode = true; // Hecho global para leerlo desde el módulo de Firebase
+
+        window.toggleAuthMode = function() {
+            window.isLoginMode = !window.isLoginMode;
+            
+            const title = document.getElementById('auth-title');
+            const subtitle = document.getElementById('auth-subtitle');
+            const nameFields = document.getElementById('register-fields');
+            const btnText = document.getElementById('auth-btn-text');
+            const toggleText = document.getElementById('auth-toggle-text');
+            const toggleLink = document.getElementById('auth-toggle-link');
+
+            if (window.isLoginMode) {
+                title.innerText = "Bienvenido a Obrín IA";
+                subtitle.innerText = "Inicia sesión para comenzar tu evaluación";
+                nameFields.classList.add('hidden');
+                btnText.innerText = "Iniciar Sesión";
+                toggleText.innerText = "¿No tienes cuenta?";
+                toggleLink.innerText = "Regístrate aquí";
+            } else {
+                title.innerText = "Crear Cuenta";
+                subtitle.innerText = "Regístrate para usar el evaluador técnico";
+                nameFields.classList.remove('hidden');
+                btnText.innerText = "Crear Cuenta";
+                toggleText.innerText = "¿Ya tienes cuenta?";
+                toggleLink.innerText = "Inicia sesión";
+            }
+        };
+
+        // NOTA: window.simulateLogin ha sido eliminado, ahora se maneja en el script de módulo en el <head>
+
         // --- SPLASH SCREEN ---
         window.addEventListener('DOMContentLoaded', () => {
             setTimeout(() => {
@@ -386,7 +629,7 @@
                     document.getElementById('ui-weather-desc').innerText = `${temp}, ${hum} de humedad ambiental`;
                     
                 } catch(e) {
-                    alert("Error consultando el clima local.");
+                    window.showNotification("Error consultando el clima local.", "error");
                     btn.innerHTML = originalBtnHtml;
                     btn.disabled = false;
                 }
@@ -398,7 +641,7 @@
                     const ipData = await ipRes.json();
                     await processCoordinates(ipData.latitude, ipData.longitude, ipData.city);
                 } catch(e) {
-                    alert("No pudimos detectar tu ubicación. Por favor, escribe tu ciudad manualmente.");
+                    window.showNotification("No pudimos detectar tu ubicación. Escribe tu ciudad manualmente.", "error");
                     btn.innerHTML = originalBtnHtml;
                     btn.disabled = false;
                 }
@@ -510,10 +753,12 @@
 
                 pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight);
                 pdf.save('Reporte_Tecnico_Obrin_IA.pdf');
+                
+                window.showNotification("Reporte PDF generado exitosamente", "success");
 
             } catch (error) {
                 console.error("Error al generar el PDF:", error);
-                alert("Hubo un problema al generar el PDF.");
+                window.showNotification("Hubo un problema al generar el PDF.", "error");
             } finally {
                 // Restaurar estado visual
                 header.classList.add('hidden');
