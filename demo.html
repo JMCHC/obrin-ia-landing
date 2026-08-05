@@ -569,25 +569,51 @@
                     summaryNotesContainer.classList.add('hidden');
                 }
 
-                // ----------------------------------------------------
-                // AQUÍ ESTÁ EL CAMBIO: Enviamos solo los datos crudos.
-                // Todo el prompt fue eliminado de este archivo.
-                // ----------------------------------------------------
-                const payload = {
-                    userNotes: userNotes,
-                    weatherContextText: weatherContextText,
-                    imgData1: imgData1,
-                    imgType1: imgType1,
-                    imgData2: imgData2,
-                    imgType2: imgType2
-                };
+                const climaPrompt = weatherContextText ? `INFORMACIÓN CLIMÁTICA EN TIEMPO REAL:\n${weatherContextText}` : "";
+
+                const prompt = `Actúa como Experto Técnico/Ingeniero Constructivo especializado en Mantención y Remodelaciones Domiciliarias Eficientes en CHILE (2025).
+                Analiza la imagen y las notas del usuario: "${userNotes}". 
+                
+                ${climaPrompt}
+                
+                TONO: Profesional, directo y con terminología estándar de la industria de la construcción chilena.
+
+                INSTRUCCIONES CRÍTICAS:
+                1. COSTOS: Estrictamente en Pesos Chilenos (CLP). Rango acotado (ej: "$18.000 a $22.000"). Competitivo.
+                2. MATERIALES: Nombra los materiales usando su denominación química o comercial genérica exacta. PROHIBIDO agregar adjetivos redundantes o inventados como "técnico" o "profesional" (NUNCA digas "Esmalte al agua técnico").
+                3. PASOS: Genera una lista procedimental y secuencial.
+
+                OBLIGATORIO - Responde SOLO con un JSON válido usando estrictamente esta estructura: 
+                {
+                    "superficie": "Nombre del elemento", 
+                    "nivel_dano": "LEVE / MODERADO / CRÍTICO", 
+                    "patologia": "Diagnóstico preciso", 
+                    "solucion": "Resumen de la solución técnica", 
+                    "materiales": ["Material 1", "Material 2"],
+                    "pasos": ["Paso 1: ...", "Paso 2: ..."],
+                    "tiempo": "Tiempo realista (días)", 
+                    "precio_ref": "$XX.XXX a $XX.XXX", 
+                    "unidad_ref": "por m2 (o global)"
+                }`;
+                
+                let parts = [{ text: prompt }];
+                if (imgData1) parts.push({ inline_data: { mime_type: imgType1 || 'image/jpeg', data: imgData1 } });
+                if (imgData2) parts.push({ inline_data: { mime_type: imgType2 || 'image/jpeg', data: imgData2 } });
 
                 const response = await fetch('https://obrin-ia-proxy.christensenjosemanuel.workers.dev', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify(payload)
+                    body: JSON.stringify({ 
+                        contents: [{ parts: parts }],
+                        generationConfig: { temperature: 0.0, maxOutputTokens: 4096 },
+                        safetySettings: [
+                            { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_ONLY_HIGH" },
+                            { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_ONLY_HIGH" },
+                            { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_ONLY_HIGH" },
+                            { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_ONLY_HIGH" }
+                        ]
+                    })
                 });
-                // ----------------------------------------------------
 
                 const data = await response.json();
                 if (data.error) throw new Error("Error de API: " + data.error.message);
