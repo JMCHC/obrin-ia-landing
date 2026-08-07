@@ -11,7 +11,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <script>
@@ -20,20 +20,26 @@
                 extend: {
                     fontFamily: {
                         sans: ['Inter', 'sans-serif'],
+                        display: ['Space Grotesk', 'sans-serif'],
+                        mono: ['IBM Plex Mono', 'monospace'],
                     },
                     colors: {
                         brand: {
-                            50: '#f0f9ff',
-                            100: '#e0f2fe',
-                            400: '#38bdf8',
-                            500: '#0ea5e9',
-                            600: '#0284c7',
-                            900: '#0f2942',
+                            50: '#fff4ee',
+                            100: '#ffe4d6',
+                            200: '#ffc7ad',
+                            300: '#ffa47d',
+                            400: '#ff8a5c',
+                            500: '#FF6B35',
+                            600: '#e85a2a',
+                            700: '#c2461f',
+                            800: '#8f3216',
+                            900: '#3a1509',
                         }
                     },
                     boxShadow: {
                         'soft': '0 10px 40px -10px rgba(0,0,0,0.08)',
-                        'glow': '0 0 40px -10px rgba(2, 132, 199, 0.3)',
+                        'glow': '0 0 40px -10px rgba(255, 107, 53, 0.35)',
                     }
                 }
             }
@@ -50,6 +56,22 @@
 
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        /* --- SISTEMA TIPOGRÁFICO DE MARCA --- */
+        /* Titulares: Space Grotesk (misma familia usada en carrusel, videos y flyer) */
+        h1, h2, h3, h4 {
+            font-family: 'Space Grotesk', sans-serif;
+        }
+        /* Etiquetas técnicas / eyebrows / citas de fuente: IBM Plex Mono */
+        .tracking-widest.uppercase,
+        .tracking-\[0\.2em\].uppercase,
+        .tracking-wider.uppercase {
+            font-family: 'IBM Plex Mono', monospace;
+        }
+        /* Cifras grandes (stats): IBM Plex Mono, como en el resto de la campaña */
+        .stat-figure {
+            font-family: 'IBM Plex Mono', monospace;
+        }
 
         .fade-in-up {
             opacity: 0;
@@ -150,10 +172,11 @@
                     <a href="#equipo" class="text-slate-400 hover:text-white font-medium text-sm transition-colors nav-link whitespace-nowrap" data-i18n="nav-team">Equipo</a>
                 </div>
 
-                <div class="hidden md:flex items-center gap-6">
+                <div class="hidden md:flex items-center gap-4">
                     <button id="lang-toggle-desktop" class="text-slate-400 hover:text-white font-medium text-sm transition-colors flex items-center gap-2 group border border-slate-700/50 hover:border-slate-500 rounded-full px-4 py-1.5 bg-black/40">
                         <i class="fa-solid fa-globe group-hover:animate-spin-slow text-brand-400"></i> <span id="lang-text-desktop">EN</span>
                     </button>
+                    <a href="demo.html" target="_blank" class="bg-brand-500 hover:bg-brand-600 text-black font-bold text-sm rounded-full px-5 py-2 transition-all hover:scale-105 whitespace-nowrap" data-i18n="nav-demo">Solicitar Demo</a>
                 </div>
 
                 <div class="md:hidden flex items-center gap-4">
@@ -173,10 +196,11 @@
                 <a href="#caracteristicas" class="text-slate-400 hover:text-white block px-3 py-2 rounded-md text-base font-medium transition-colors nav-link-mobile" data-i18n="nav-tech">Tecnología</a>
                 <a href="#equipo" class="text-slate-400 hover:text-white block px-3 py-2 rounded-md text-base font-medium transition-colors nav-link-mobile" data-i18n="nav-team">Equipo</a>
                 
-                <div class="border-t border-white/10 mt-2 pt-2 pb-2">
+                <div class="border-t border-white/10 mt-2 pt-2 pb-2 space-y-1">
                     <button id="lang-toggle-mobile" class="text-slate-400 hover:text-white w-full text-left px-3 py-2 rounded-md text-base font-medium transition-colors flex items-center gap-2">
                         <i class="fa-solid fa-globe text-brand-400"></i> <span id="lang-text-mobile">English</span>
                     </button>
+                    <a href="demo.html" target="_blank" class="bg-brand-500 text-black font-bold text-center block px-3 py-2.5 rounded-md text-base transition-colors" data-i18n="nav-demo">Solicitar Demo</a>
                 </div>
             </div>
         </div>
@@ -232,18 +256,26 @@
                     </p>
                 </div>
 
-                <div class="lg:col-span-7 grid sm:grid-cols-2 gap-8">
-                    <div class="bg-[#0a0a0a] rounded-3xl p-8 border border-slate-800 hover:border-brand-500/50 hover:shadow-[0_0_30px_rgba(2,132,199,0.15)] transition-all fade-in-up">
-                        <div class="text-5xl font-light text-white mb-4 tracking-tighter">21.7<span class="text-brand-500 font-bold text-3xl">%</span></div>
+                <div class="lg:col-span-7 grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div class="bg-[#0a0a0a] rounded-3xl p-6 md:p-8 border border-slate-800 hover:border-brand-500/50 hover:shadow-[0_0_30px_rgba(255,107,53,0.15)] transition-all fade-in-up">
+                        <div class="stat-figure text-5xl font-semibold text-white mb-4 tracking-tighter">21.7<span class="text-brand-500 font-bold text-3xl">%</span></div>
                         <h4 class="text-base font-bold text-white mb-2" data-i18n="prob-stat1-title">Retrabajos Constantes</h4>
                         <p class="text-sm text-slate-400 leading-relaxed mb-4" data-i18n="prob-stat1-desc">De las partidas presentan observaciones tempranas. Corregirlas consume hasta un 6% del presupuesto total.</p>
                         <p class="text-[10px] uppercase tracking-wider text-slate-500 font-semibold" data-i18n="prob-source">Matrix Consulting & CChC</p>
                     </div>
 
-                    <div class="bg-[#0a0a0a] rounded-3xl p-8 border border-slate-800 hover:border-brand-500/50 hover:shadow-[0_0_30px_rgba(2,132,199,0.15)] transition-all fade-in-up" style="transition-delay: 0.1s;">
-                        <div class="text-5xl font-light text-white mb-4 tracking-tighter">71<span class="text-brand-500 font-bold text-3xl">%</span></div>
+                    <div class="bg-[#0a0a0a] rounded-3xl p-6 md:p-8 border border-slate-800 hover:border-brand-500/50 hover:shadow-[0_0_30px_rgba(255,107,53,0.15)] transition-all fade-in-up" style="transition-delay: 0.1s;">
+                        <div class="stat-figure text-5xl font-semibold text-white mb-4 tracking-tighter">71<span class="text-brand-500 font-bold text-3xl">%</span></div>
                         <h4 class="text-base font-bold text-white mb-2" data-i18n="prob-stat2-title">Desviaciones Críticas</h4>
                         <p class="text-sm text-slate-400 leading-relaxed mb-4" data-i18n="prob-stat2-desc">Obras que no se entregan a tiempo en Chile, promediando un atraso de 4 meses por reprocesos.</p>
+                        <p class="text-[10px] uppercase tracking-wider text-slate-500 font-semibold" data-i18n="prob-source">Matrix Consulting & CChC</p>
+                    </div>
+
+                    <div class="bg-[#0a0a0a] rounded-3xl p-6 md:p-8 border border-slate-800 hover:border-brand-500/50 hover:shadow-[0_0_30px_rgba(255,107,53,0.15)] transition-all fade-in-up sm:col-span-2 lg:col-span-1" style="transition-delay: 0.2s;">
+                        <div class="stat-figure text-5xl font-semibold text-white mb-4 tracking-tighter">6<span class="text-brand-500 font-bold text-3xl">%</span></div>
+                        <h4 class="text-base font-bold text-white mb-2" data-i18n="prob-stat3-title">Presupuesto en Riesgo</h4>
+                        <p class="text-sm text-slate-400 leading-relaxed mb-4" data-i18n="prob-stat3-desc">Del presupuesto total de la obra se puede perder corrigiendo partidas mal evaluadas desde el inicio.</p>
+                        <!-- data-i18n ya vinculado arriba -->
                         <p class="text-[10px] uppercase tracking-wider text-slate-500 font-semibold" data-i18n="prob-source">Matrix Consulting & CChC</p>
                     </div>
                 </div>
@@ -456,7 +488,7 @@
             </div>
 
             <div class="bg-[#0a0a0a] rounded-3xl p-8 border border-slate-800 max-w-4xl mx-auto flex flex-col md:flex-row items-center md:items-start gap-8 fade-in-up">
-                <img src="https://lh3.googleusercontent.com/pw/AP1GczPHYi-BQhxND0BLXkrVDsz6psd2JWK9X8DTy-p1IBCtTh7kS6AAOSIbD9vaqMPDK5xpvBq9WQ6MHxl3zN9oaa-5fvSPvqNduDK9xC97-q6BYi_ZcQH0UfM30SpNWG3_VpiYyuc3DgciR7oFU63EQEi4-g=w400-h400-s-no-gm?authuser=0" alt="Daniel Linares García" class="w-16 h-16 object-cover rounded-2xl border border-slate-800 shadow-sm shrink-0">
+                <img src="https://lh3.googleusercontent.com/pw/AP1GczPHYi-BQhxND0BLXkrVDsz6psd2JWK9X8DTy-p1IBCtTh7kS6AAOSIbD9vaqMPDK5xpvBq9WQ6MHxl3zN9oaa-5fvSPvqNduDK9xC97-q6BYi_ZQH0UfM30SpNWG3_VpiYyuc3DgciR7oFU63EQEi4-g=w400-h400-s-no-gm?authuser=0" alt="Daniel Linares García" class="w-16 h-16 object-cover rounded-2xl border border-slate-800 shadow-sm shrink-0">
                 <div class="text-center md:text-left">
                     <div class="flex flex-col md:flex-row md:items-center gap-3 mb-2">
                         <h4 class="font-bold text-white text-lg">Daniel Linares García</h4>
@@ -560,6 +592,8 @@
                 "prob-source": "Matrix Consulting & CChC",
                 "prob-stat2-title": "Desviaciones Críticas",
                 "prob-stat2-desc": "Obras que no se entregan a tiempo en Chile, promediando un atraso de 4 meses por reprocesos.",
+                "prob-stat3-title": "Presupuesto en Riesgo",
+                "prob-stat3-desc": "Del presupuesto total de la obra se puede perder corrigiendo partidas mal evaluadas desde el inicio.",
                 "sol-subtitle": "Plataforma Paramétrica",
                 "sol-title": "Análisis<br>Integral",
                 "sol-desc": "Estandarización impulsada por IA + IoT. Emisión instantánea de prescripciones técnicas exactas.",
@@ -628,6 +662,8 @@
                 "prob-source": "Matrix Consulting & CChC",
                 "prob-stat2-title": "Critical Deviations",
                 "prob-stat2-desc": "Projects in Chile that are not delivered on time, averaging a 4-month delay due to rework.",
+                "prob-stat3-title": "Budget at Risk",
+                "prob-stat3-desc": "Of the total project budget can be lost correcting poorly assessed items from the start.",
                 "sol-subtitle": "Parametric Platform",
                 "sol-title": "Comprehensive<br>Analysis",
                 "sol-desc": "Standardization driven by AI + IoT. Instant issuance of exact technical prescriptions.",
