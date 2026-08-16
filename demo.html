@@ -95,7 +95,7 @@
                 <span id="user-email" class="text-xs font-semibold text-slate-700"></span>
                 <button id="sign-out-btn" class="text-xs text-red-500 hover:text-red-700 font-bold transition-colors ml-2 border-l border-slate-200 pl-3">Salir</button>
             </div>
-            <button id="auth-btn" class="bg-slate-900 hover:bg-slate-800 text-white text-[0.65rem] font-bold py-2.5 px-5 rounded-full shadow transition-colors flex items-center gap-2 tracking-widest uppercase">
+            <button id="auth-btn" class="hidden bg-slate-900 hover:bg-slate-800 text-white text-[0.65rem] font-bold py-2.5 px-5 rounded-full shadow transition-colors flex items-center gap-2 tracking-widest uppercase">
                 <i class="fas fa-sign-in-alt"></i> Acceder
             </button>
         </div>
@@ -168,7 +168,6 @@
                 <button id="analyzeBtn" type="button" class="w-full bg-slate-900 text-white py-4 rounded-lg font-medium text-xs tracking-[0.15em] uppercase opacity-50 pointer-events-none transition hover:bg-slate-800 shadow-lg" onclick="window.runAnalysis()">Iniciar Análisis Técnico</button>
             </div>
 
-            <!-- Resto del visor de análisis y resultados... -->
             <div id="preview-box" class="hidden relative h-72 bg-slate-900 rounded-lg overflow-hidden mb-6 border border-slate-800 shadow-inner">
                 <img id="preview-main" src="" class="w-full h-full object-contain opacity-60">
                 <div id="laser" class="scanner-line"></div>
@@ -277,6 +276,20 @@
                     </div>
                 </div>
 
+                <!-- SECCIÓN DE CALIFICACIÓN -->
+                <div id="rating-section" class="mt-6 bg-slate-50 p-5 rounded-xl border border-slate-200 shadow-sm">
+                    <p class="text-xs font-bold text-slate-600 uppercase tracking-wider mb-3 text-center">Califica este diagnóstico</p>
+                    <div class="flex justify-center gap-2 mb-4" id="star-container">
+                        <button class="star-btn text-4xl text-slate-300 hover:text-yellow-400 transition drop-shadow-sm" data-val="1">★</button>
+                        <button class="star-btn text-4xl text-slate-300 hover:text-yellow-400 transition drop-shadow-sm" data-val="2">★</button>
+                        <button class="star-btn text-4xl text-slate-300 hover:text-yellow-400 transition drop-shadow-sm" data-val="3">★</button>
+                        <button class="star-btn text-4xl text-slate-300 hover:text-yellow-400 transition drop-shadow-sm" data-val="4">★</button>
+                        <button class="star-btn text-4xl text-slate-300 hover:text-yellow-400 transition drop-shadow-sm" data-val="5">★</button>
+                    </div>
+                    <textarea id="rating-comment" class="w-full p-3 bg-white rounded-lg border border-slate-200 text-sm focus:ring-1 focus:ring-slate-900 outline-none resize-none mb-3" rows="2" placeholder="Opcional: Deja un comentario sobre el resultado..."></textarea>
+                    <button id="submit-rating-btn" onclick="window.submitFeedbackAndSave()" class="w-full bg-slate-900 text-white py-3 rounded-lg text-xs font-bold uppercase tracking-widest hover:bg-slate-800 transition shadow-md">Enviar y Guardar en Historial</button>
+                </div>
+
                 <div class="flex gap-3 mt-6">
                     <button id="pdf-btn" onclick="window.generatePDF()" class="w-1/3 bg-slate-100 hover:bg-slate-200 text-slate-800 text-center py-4 rounded-lg font-bold text-xs uppercase tracking-widest transition shadow-sm flex items-center justify-center gap-2">
                         📄 Reporte
@@ -291,17 +304,13 @@
         </div>
     </div>
 
-    <!-- Authentication Modal -->
-    <div id="auth-modal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[100] hidden flex items-center justify-center p-4">
+    <!-- Authentication Modal (Mandatory) -->
+    <div id="auth-modal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden relative border border-slate-100" id="auth-modal-content">
             
-            <!-- Botón Cerrar (Oculto para hacer obligatorio el inicio de sesión) -->
-            <button id="close-modal-btn" class="hidden absolute top-4 right-4 text-slate-400 hover:text-slate-800 transition-colors w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-100">
-                <i class="fas fa-times text-sm"></i>
-            </button>
-
             <div class="p-8">
                 <div class="text-center mb-8">
+                    <!-- Logo Actualizado según indicación -->
                     <img src="https://lh3.googleusercontent.com/pw/AP1GczOsQ9BjTC3dTk0RxKlbaZtHDeSwbqF3-buuEPA6QHBnWKNK4GkHQpfHPUJkVSbHPN7QEXrwUL5qVDwk5vLhsbpcLCLP3NCezheTURsZUCAOwnL0h1NtlHKbrEHkrsdquexu32SfFSdxlqHT1c36shbDMQ=w599-h599-s-no-gm?authuser=0" alt="Logo Obrín IA" class="h-16 mx-auto mb-4 object-contain">
                     <h2 id="auth-title" class="text-xl font-bold text-slate-900 mb-1 tracking-tight">Iniciar Sesión</h2>
                     <p id="auth-subtitle" class="text-slate-500 text-xs">Accede para guardar tus reportes.</p>
@@ -324,6 +333,7 @@
 
                 <!-- Formulario Correo/Contraseña -->
                 <form id="email-auth-form" class="space-y-4">
+                    <!-- Nuevo Campo Nombre Completo -->
                     <div id="name-input-group" class="hidden">
                         <label for="fullname" class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Nombre y Apellido</label>
                         <input type="text" id="fullname" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-slate-900 focus:border-slate-900 outline-none transition-all text-sm" placeholder="Ej: Juan Pérez">
@@ -351,6 +361,21 @@
     </div>
 
     <script>
+        // Funcionalidad de notificaciones custom (Reemplazo de alert)
+        function showNotification(msg, isError = false) {
+            const toast = document.createElement('div');
+            toast.className = `fixed bottom-4 left-1/2 -translate-x-1/2 px-6 py-3 rounded-full text-white text-xs font-bold tracking-wide shadow-2xl z-[100] transition-all duration-300 transform translate-y-10 opacity-0 ${isError ? 'bg-red-600' : 'bg-slate-900'}`;
+            toast.innerText = msg;
+            document.body.appendChild(toast);
+            requestAnimationFrame(() => {
+                toast.classList.remove('translate-y-10', 'opacity-0');
+            });
+            setTimeout(() => {
+                toast.classList.add('translate-y-10', 'opacity-0');
+                setTimeout(() => toast.remove(), 300);
+            }, 3500);
+        }
+
         // --- SPLASH SCREEN ---
         window.addEventListener('DOMContentLoaded', () => {
             setTimeout(() => {
@@ -363,6 +388,7 @@
         });
 
         // --- CONFIGURACIÓN ---
+        const apiKey = ""; 
         const MI_TEL = "56992582669";
         
         let proWaUrl = ""; 
@@ -375,6 +401,27 @@
         let finalWeatherLoc = "";
         let finalWeatherTemp = "";
         let finalWeatherHum = "";
+        
+        let currentRating = 0;
+
+        // --- INTERACCIÓN DE ESTRELLAS ---
+        window.addEventListener('DOMContentLoaded', () => {
+            const stars = document.querySelectorAll('.star-btn');
+            stars.forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    currentRating = parseInt(e.target.getAttribute('data-val'));
+                    stars.forEach(s => {
+                        if (parseInt(s.getAttribute('data-val')) <= currentRating) {
+                            s.classList.remove('text-slate-300');
+                            s.classList.add('text-yellow-400');
+                        } else {
+                            s.classList.add('text-slate-300');
+                            s.classList.remove('text-yellow-400');
+                        }
+                    });
+                });
+            });
+        });
 
         // --- MANEJO DE ARCHIVOS ---
         window.handleFile = function(input, n) {
@@ -475,7 +522,7 @@
                     document.getElementById('ui-weather-desc').innerText = `${temp}, ${hum} de humedad ambiental`;
                     
                 } catch(e) {
-                    alert("Error consultando el clima local.");
+                    showNotification("Error consultando el clima local.", true);
                     btn.innerHTML = originalBtnHtml;
                     btn.disabled = false;
                 }
@@ -487,7 +534,7 @@
                     const ipData = await ipRes.json();
                     await processCoordinates(ipData.latitude, ipData.longitude, ipData.city);
                 } catch(e) {
-                    alert("No pudimos detectar tu ubicación. Por favor, escribe tu ciudad manualmente.");
+                    showNotification("No pudimos detectar tu ubicación. Escribe tu ciudad manualmente.", true);
                     btn.innerHTML = originalBtnHtml;
                     btn.disabled = false;
                 }
@@ -533,6 +580,22 @@
             document.getElementById('file2').value = '';
             document.getElementById('userNotes').value = '';
             
+            // Restablecer sección de calificación
+            currentRating = 0;
+            document.querySelectorAll('.star-btn').forEach(s => {
+                s.classList.add('text-slate-300');
+                s.classList.remove('text-yellow-400');
+            });
+            document.getElementById('rating-comment').value = '';
+            const rateBtn = document.getElementById('submit-rating-btn');
+            if (rateBtn) {
+                rateBtn.innerHTML = 'Enviar y Guardar en Historial';
+                rateBtn.disabled = false;
+                rateBtn.classList.replace('bg-emerald-600', 'bg-slate-900');
+                rateBtn.classList.replace('hover:bg-emerald-500', 'hover:bg-slate-800');
+            }
+            document.getElementById('rating-section').classList.remove('hidden');
+
             document.getElementById('summary-img1').classList.add('hidden');
             document.getElementById('summary-img1').src = '';
             document.getElementById('summary-img2').classList.add('hidden');
@@ -565,6 +628,7 @@
             const element = document.getElementById('result');
             const header = document.getElementById('pdf-header');
             const summary = document.getElementById('user-request-summary');
+            const ratingSec = document.getElementById('rating-section');
             
             const details = element.querySelectorAll('details');
             details.forEach(d => d.setAttribute('open', 'true'));
@@ -572,6 +636,7 @@
             header.classList.remove('hidden');
             summary.classList.remove('hidden');
             element.classList.add('pdf-export-mode');
+            if(ratingSec) ratingSec.classList.add('hidden');
 
             try {
                 const canvas = await html2canvas(element, {
@@ -598,11 +663,12 @@
 
             } catch (error) {
                 console.error("Error al generar el PDF:", error);
-                alert("Hubo un problema al generar el PDF.");
+                showNotification("Hubo un problema al generar el PDF local.", true);
             } finally {
                 header.classList.add('hidden');
                 summary.classList.add('hidden');
                 element.classList.remove('pdf-export-mode');
+                if(ratingSec) ratingSec.classList.remove('hidden');
                 btn.innerHTML = originalHtml;
                 btn.disabled = false;
             }
@@ -736,6 +802,11 @@
                 document.getElementById('preview-box').classList.add('hidden');
                 document.getElementById('result-wrapper').classList.remove('hidden');
 
+                // Si todo sale bien, llamamos a la base de datos para sumar +1 al contador global del usuario
+                if (window.saveAnalysisCountToFirestore) {
+                    window.saveAnalysisCountToFirestore();
+                }
+
             } catch(e) {
                 console.error(e);
                 laser.classList.remove('scanning-active');
@@ -762,71 +833,153 @@
             setPersistence,
             browserSessionPersistence
         } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        
+        import { 
+            getFirestore, 
+            doc, 
+            setDoc, 
+            collection,
+            addDoc,
+            increment 
+        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // =========================================================================
-        // ⚠️ INSTRUCCIONES: PEGA AQUÍ TU CONFIGURACIÓN DE FIREBASE
-        // Reemplaza los valores vacíos con los datos de tu consola de Firebase.
-        // =========================================================================
+        // Configuración real de tu proyecto Firebase (ObrinIA)
         const firebaseConfig = {
             apiKey: "AIzaSyB4fSP-4BiJyVJN9MTzYpWyWDMD82DuKD8",
             authDomain: "obrinia.firebaseapp.com",
             projectId: "obrinia",
             storageBucket: "obrinia.firebasestorage.app",
             messagingSenderId: "195639774552",
-            appId: "1:195639774552:web:3052be5fd239be9807292d",
-            measurementId: "G-PX7628BHRX"
+            appId: "1:195639774552:web:3052be5fd239be9807292d"
         };
-        // =========================================================================
+
+        // Identificador general de app (requerido por las reglas de Firestore)
+        const globalAppId = typeof __app_id !== 'undefined' ? __app_id : 'obrinia';
 
         // Inicializar Firebase
         let app;
         let auth;
+        let db;
+
         try {
-            // Intentar usar la configuración harcodeada primero (para pruebas)
-            if (firebaseConfig.apiKey && firebaseConfig.apiKey !== "TU_API_KEY_AQUI") {
-                 app = initializeApp(firebaseConfig);
-                 auth = getAuth(app);
-                 // Establecer la persistencia de la sesión SOLO para la pestaña actual
-                 setPersistence(auth, browserSessionPersistence)
-                    .then(() => {
-                        console.log("Persistencia de sesión configurada a pestaña actual.");
-                    })
-                    .catch((error) => {
-                        console.error("Error al configurar la persistencia:", error);
-                    });
-                 console.log("Firebase inicializado con configuración manual.");
-            } else {
-                 // Si no hay configuración manual, intentar leer la inyectada por el servidor (producción)
-                 const serverConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
-                 if (serverConfig.apiKey) {
-                     app = initializeApp(serverConfig);
-                     auth = getAuth(app);
-                     // Establecer la persistencia de la sesión SOLO para la pestaña actual
-                     setPersistence(auth, browserSessionPersistence)
-                        .then(() => {
-                            console.log("Persistencia de sesión configurada a pestaña actual.");
-                        })
-                        .catch((error) => {
-                            console.error("Error al configurar la persistencia:", error);
-                        });
-                     console.log("Firebase inicializado con configuración del servidor.");
-                 } else {
-                     console.warn("No se encontró configuración de Firebase. La autenticación no funcionará.");
-                 }
-            }
+            app = initializeApp(firebaseConfig);
+            auth = getAuth(app);
+            db = getFirestore(app);
+            
+            // Establecer la persistencia de la sesión SOLO para la pestaña actual
+            setPersistence(auth, browserSessionPersistence)
+                .catch((error) => { console.error("Error al configurar la persistencia:", error); });
         } catch (e) {
             console.error("Error al inicializar Firebase:", e);
         }
 
-        // DOM Elements - Header
+        // --- FUNCIÓN PARA GUARDAR EL CONTEO DE DIAGNÓSTICOS ---
+        window.saveAnalysisCountToFirestore = async function() {
+            if (!auth || !auth.currentUser || !db) return;
+            try {
+                const userId = auth.currentUser.uid;
+                // Usando rutas de artefactos recomendadas para seguridad
+                const userRef = doc(db, 'artifacts', globalAppId, 'users', userId);
+
+                // Incrementar contador y guardar perfil básico
+                await setDoc(userRef, {
+                    email: auth.currentUser.email,
+                    name: auth.currentUser.displayName || "Usuario",
+                    diagnosticCount: increment(1),
+                    lastDiagnosticAt: new Date()
+                }, { merge: true });
+                
+                console.log("Conteo de diagnóstico actualizado.");
+            } catch (error) {
+                console.error("Error al guardar conteo:", error);
+            }
+        };
+
+        // --- FUNCIÓN PARA ENVIAR FEEDBACK Y GUARDAR PDF EN STORAGE ---
+        window.submitFeedbackAndSave = async function() {
+            if (currentRating === 0) {
+                showNotification("Por favor, selecciona una calificación antes de enviar.", true);
+                return;
+            }
+
+            const btn = document.getElementById('submit-rating-btn');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '⏳ Generando y Guardando...';
+            btn.disabled = true;
+
+            try {
+                // 1. Preparar HTML para foto
+                const element = document.getElementById('result');
+                const header = document.getElementById('pdf-header');
+                const summary = document.getElementById('user-request-summary');
+                const ratingSec = document.getElementById('rating-section');
+                
+                element.querySelectorAll('details').forEach(d => d.setAttribute('open', 'true'));
+                header.classList.remove('hidden');
+                summary.classList.remove('hidden');
+                element.classList.add('pdf-export-mode');
+                ratingSec.classList.add('hidden'); // Ocultamos las estrellas en el PDF
+
+                // 2. Crear PDF en Memoria (no descargarlo todavía)
+                const canvas = await html2canvas(element, { scale: 2, useCORS: true, backgroundColor: '#ffffff', windowWidth: 800 });
+                const { jsPDF } = window.jspdf;
+                const pdfWidth = canvas.width;
+                const pdfHeight = canvas.height;
+                const pdf = new jsPDF({ orientation: pdfHeight > pdfWidth ? 'portrait' : 'landscape', unit: 'px', format: [pdfWidth, pdfHeight] });
+                
+                pdf.addImage(canvas.toDataURL('image/jpeg', 1.0), 'JPEG', 0, 0, pdfWidth, pdfHeight);
+                const pdfDataUri = pdf.output('datauristring'); // Convertir a base64 string
+                
+                // Restauramos la vista del usuario
+                header.classList.add('hidden');
+                summary.classList.add('hidden');
+                element.classList.remove('pdf-export-mode');
+                ratingSec.classList.remove('hidden');
+
+                // 3. Guardar el Base64 directamente en Firestore
+                if (!auth || !auth.currentUser) throw new Error("Debes iniciar sesión para guardar.");
+                if (!db) throw new Error("Base de datos no inicializada.");
+
+                const userId = auth.currentUser.uid;
+                const comment = document.getElementById('rating-comment').value;
+                const timestamp = new Date().getTime();
+                const fileName = `diagnostico_${timestamp}.pdf`;
+                
+                // Guardar registro de la evaluación en la subcolección del usuario
+                const userRef = doc(db, 'artifacts', globalAppId, 'users', userId);
+                const evaluacionesRef = collection(userRef, 'evaluaciones');
+                
+                await addDoc(evaluacionesRef, {
+                    pdfBase64: pdfDataUri, // Guardamos el texto base64 del PDF directamente aquí
+                    fileName: fileName,
+                    rating: currentRating,
+                    comment: comment,
+                    createdAt: new Date()
+                });
+
+                // Éxito
+                btn.innerHTML = '✅ ¡Guardado Exitosamente!';
+                btn.classList.replace('bg-slate-900', 'bg-emerald-600');
+                btn.classList.replace('hover:bg-slate-800', 'hover:bg-emerald-500');
+
+                // Ocultar caja después de un tiempo
+                setTimeout(() => { ratingSec.classList.add('hidden'); }, 2500);
+
+            } catch (error) {
+                console.error("Error al guardar en Firebase:", error);
+                showNotification("Hubo un problema al guardar. Revisa tu conexión.", true);
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        };
+
+        // DOM Elements
         const authBtnHeader = document.getElementById('auth-btn');
         const userInfoContainer = document.getElementById('user-info');
         const userEmailDisplay = document.getElementById('user-email');
         const signOutBtn = document.getElementById('sign-out-btn');
 
-        // DOM Elements - Modal
         const authModal = document.getElementById('auth-modal');
-        const closeModalBtn = document.getElementById('close-modal-btn');
         const authTitle = document.getElementById('auth-title');
         const authSubtitle = document.getElementById('auth-subtitle');
         const authError = document.getElementById('auth-error');
@@ -839,10 +992,8 @@
         const submitAuthBtn = document.getElementById('submit-auth-btn');
         const authToggleText = document.getElementById('auth-toggle-text');
         const toggleAuthModeBtn = document.getElementById('toggle-auth-mode-btn');
-        
         const mainAppContainer = document.getElementById('main-app-container');
 
-        // Estado
         let isSignUpMode = false;
 
         // Listener del estado de Autenticación
@@ -853,9 +1004,7 @@
                     userInfoContainer.classList.remove('hidden');
                     userInfoContainer.classList.add('flex');
                     
-                    // Mostrar Nombre (prioridad) o Email o "Usuario"
                     userEmailDisplay.textContent = user.displayName || user.email || 'Usuario';
-                    
                     mainAppContainer.classList.remove('hidden');
                     closeAuthModal();
                 } else {
@@ -863,13 +1012,12 @@
                     userInfoContainer.classList.add('hidden');
                     userInfoContainer.classList.remove('flex');
                     userEmailDisplay.textContent = '';
-                    mainAppContainer.classList.add('hidden'); // Ocultar la app
-                    openAuthModal(); // Forzar el modal
+                    mainAppContainer.classList.add('hidden'); // Bloqueo de App
+                    openAuthModal(); // Forzar bloqueo
                 }
             });
         }
 
-        // Funciones del Modal
         function openAuthModal() {
             authModal.classList.remove('hidden');
             setTimeout(() => {
@@ -930,23 +1078,14 @@
             authError.classList.add('hidden');
         }
 
-        // Event Listeners
         authBtnHeader.addEventListener('click', openAuthModal);
-        closeModalBtn.addEventListener('click', closeAuthModal);
         toggleAuthModeBtn.addEventListener('click', toggleAuthMode);
 
-        // Desactivado para evitar que el usuario cierre el modal haciendo clic afuera
-        // authModal.addEventListener('click', (e) => {
-        //     if (e.target === authModal) closeAuthModal();
-        // });
-
-        // Cerrar Sesión
         signOutBtn.addEventListener('click', async () => {
             try { await signOut(auth); } 
             catch (error) { console.error("Error al salir:", error); }
         });
 
-        // Autenticación con Google
         googleAuthBtn.addEventListener('click', async () => {
             if (!auth) return showError("Servicio de autenticación no disponible.");
             resetAuthError();
@@ -958,17 +1097,16 @@
             }
         });
 
-        // Formulario Correo/Contraseña
         emailAuthForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            if (!auth) return showError("Servicio de autenticación no disponible.");
+            if (!auth) return showError("Servicio no disponible.");
             
             const email = emailInput.value.trim();
             const password = passwordInput.value;
             const fullname = fullnameInput.value.trim();
             
             if (!email || !password) return showError("Ingresa correo y contraseña.");
-            if (isSignUpMode && !fullname) return showError("Por favor, ingresa tu nombre y apellido.");
+            if (isSignUpMode && !fullname) return showError("Ingresa tu nombre y apellido.");
             
             submitAuthBtn.disabled = true;
             submitAuthBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> PROCESANDO...';
@@ -977,13 +1115,7 @@
             try {
                 if (isSignUpMode) {
                     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-                    // Actualizar el perfil con el nombre inmediatamente después de crear la cuenta
-                    await updateProfile(userCredential.user, {
-                        displayName: fullname
-                    });
-                    
-                    // Forzar la actualización visual en la UI porque onAuthStateChanged 
-                    // se dispara antes de que updateProfile termine
+                    await updateProfile(userCredential.user, { displayName: fullname });
                     userEmailDisplay.textContent = fullname; 
                 } else {
                     await signInWithEmailAndPassword(auth, email, password);
@@ -996,7 +1128,6 @@
             }
         });
 
-        // Traductor de Errores de Firebase a Español
         function getReadableAuthError(errorCode) {
             switch (errorCode) {
                 case 'auth/invalid-email': return 'Formato de correo inválido.';
