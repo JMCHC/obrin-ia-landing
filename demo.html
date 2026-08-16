@@ -758,7 +758,9 @@
             signInWithEmailAndPassword,
             createUserWithEmailAndPassword,
             updateProfile,
-            signOut
+            signOut,
+            setPersistence,
+            browserSessionPersistence
         } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 
         // =========================================================================
@@ -784,6 +786,14 @@
             if (firebaseConfig.apiKey && firebaseConfig.apiKey !== "TU_API_KEY_AQUI") {
                  app = initializeApp(firebaseConfig);
                  auth = getAuth(app);
+                 // Establecer la persistencia de la sesión SOLO para la pestaña actual
+                 setPersistence(auth, browserSessionPersistence)
+                    .then(() => {
+                        console.log("Persistencia de sesión configurada a pestaña actual.");
+                    })
+                    .catch((error) => {
+                        console.error("Error al configurar la persistencia:", error);
+                    });
                  console.log("Firebase inicializado con configuración manual.");
             } else {
                  // Si no hay configuración manual, intentar leer la inyectada por el servidor (producción)
@@ -791,6 +801,14 @@
                  if (serverConfig.apiKey) {
                      app = initializeApp(serverConfig);
                      auth = getAuth(app);
+                     // Establecer la persistencia de la sesión SOLO para la pestaña actual
+                     setPersistence(auth, browserSessionPersistence)
+                        .then(() => {
+                            console.log("Persistencia de sesión configurada a pestaña actual.");
+                        })
+                        .catch((error) => {
+                            console.error("Error al configurar la persistencia:", error);
+                        });
                      console.log("Firebase inicializado con configuración del servidor.");
                  } else {
                      console.warn("No se encontró configuración de Firebase. La autenticación no funcionará.");
