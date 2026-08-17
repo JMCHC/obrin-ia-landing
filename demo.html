@@ -250,7 +250,7 @@
                                     <span class="text-slate-400 transition-transform duration-300 group-open:-rotate-180">▼</span>
                                 </summary>
                                 <div class="p-4 pt-1">
-                                    <ul id="materials-list" class="list-disc pl-5 text-sm text-slate-600 space-y-2 marker:text-brand-500"></ul>
+                                    <ul id="materials-list" class="list-none pl-1 text-sm text-slate-600 space-y-2"></ul>
                                 </div>
                             </details>
 
@@ -271,7 +271,7 @@
                             <div class="relative z-10 flex justify-between items-start">
                                 <div>
                                     <p class="text-[0.6rem] text-brand-400 uppercase tracking-widest font-bold mb-1">Inversión Unitaria Referencial</p>
-                                    <p class="text-[0.6rem] text-slate-400 mb-3">Valor de Mercado Competitivo</p>
+                                    <p id="price-subtitle" class="text-[0.6rem] text-slate-400 mb-3">Valor de Mercado Competitivo</p>
                                 </div>
                                 <span class="bg-white/10 text-white text-[0.55rem] px-2 py-0.5 rounded border border-white/10 uppercase tracking-wider">CLP</span>
                             </div>
@@ -587,6 +587,9 @@
             document.getElementById('error-retry-btn').classList.add('hidden');
             document.getElementById('edit-hint').classList.add('hidden');
             
+            const priceSubtitle = document.getElementById('price-subtitle');
+            if (priceSubtitle) priceSubtitle.innerText = "Valor de Mercado Competitivo";
+            
             document.getElementById('file1').value = ''; 
             document.getElementById('file2').value = '';
             document.getElementById('userNotes').value = '';
@@ -762,12 +765,43 @@
                 
                 const materialsList = document.getElementById('materials-list');
                 materialsList.innerHTML = '';
+                
+                let sumaMateriales = 0;
+                let tienePrecios = false;
+
                 if (resultObj.materiales && Array.isArray(resultObj.materiales)) {
                     resultObj.materiales.forEach(mat => {
                         const li = document.createElement('li');
-                        li.className = "leading-relaxed outline-none hover:bg-slate-50 focus:bg-white focus:ring-1 focus:ring-slate-200 rounded transition px-1 my-0.5";
+                        li.className = "leading-relaxed outline-none hover:bg-slate-50 focus:bg-white focus:ring-1 focus:ring-slate-200 rounded transition px-1 my-1";
                         li.setAttribute('contenteditable', 'true');
-                        li.innerHTML = `<span class="font-medium text-slate-700">${mat}</span>`;
+                        
+                        // Extraemos las partes si la IA devuelve el formato de D1 (Ej: "MURIATICO [Valor Ref: $1.990 en Imperial]")
+                        const matchFormat = mat.match(/^(.*?) \[Valor Ref:\s*\$([\d.]+)\s*en\s*(.*?)\]/i);
+                        
+                        if (matchFormat) {
+                            const nombre = matchFormat[1].trim();
+                            const precioStr = matchFormat[2].trim();
+                            const tienda = matchFormat[3].replace(/\]$/, '').trim();
+                            
+                            const valorNumerico = parseInt(precioStr.replace(/\./g, ''), 10);
+                            if (!isNaN(valorNumerico)) {
+                                sumaMateriales += valorNumerico;
+                                tienePrecios = true;
+                            }
+                            
+                            // Reconstruimos la fila con flexbox y badges elegantes
+                            li.innerHTML = `
+                                <div class="flex flex-wrap justify-between items-center w-full gap-2">
+                                    <span class="font-medium text-slate-700">${nombre}</span>
+                                    <div class="flex items-center gap-2">
+                                        <span class="font-bold text-slate-900">$${precioStr}</span>
+                                        <span class="text-[0.55rem] bg-brand-100 text-brand-700 px-2 py-0.5 rounded uppercase tracking-widest font-bold">${tienda}</span>
+                                    </div>
+                                </div>
+                            `;
+                        } else {
+                            li.innerHTML = `<span class="font-medium text-slate-700">${mat}</span>`;
+                        }
                         materialsList.appendChild(li);
                     });
                 }
@@ -788,10 +822,22 @@
                 }
 
                 document.getElementById('time-val').innerText = resultObj.tiempo;
-                document.getElementById('price-val').innerText = resultObj.precio_ref || "A evaluar";
-                document.getElementById('unit-val').innerText = resultObj.unidad_ref || "";
                 
-                const wa = `Hola. Solicitud de visita técnica:\n\nUbicación: ${finalWeatherLoc || 'No especificada'}\nElemento: ${resultObj.superficie}\nDiagnóstico: ${resultObj.patologia}\nInversión Ref: ${resultObj.precio_ref} ${resultObj.unidad_ref}`;
+                const priceSubtitle = document.getElementById('price-subtitle');
+                if (tienePrecios) {
+                    document.getElementById('price-val').innerText = "$" + sumaMateriales.toLocaleString('es-CL');
+                    document.getElementById('unit-val').innerText = "Total Materiales";
+                    if (priceSubtitle) priceSubtitle.innerText = "Costo de 1 unidad de cada producto listado";
+                } else {
+                    document.getElementById('price-val').innerText = resultObj.precio_ref || "A evaluar";
+                    document.getElementById('unit-val').innerText = resultObj.unidad_ref || "";
+                    if (priceSubtitle) priceSubtitle.innerText = "Valor de Mercado Competitivo";
+                }
+                
+                const finalPrice = document.getElementById('price-val').innerText;
+                const finalUnit = document.getElementById('unit-val').innerText;
+                
+                const wa = `Hola. Solicitud de visita técnica:\n\nUbicación: ${finalWeatherLoc || 'No especificada'}\nElemento: ${resultObj.superficie}\nDiagnóstico: ${resultObj.patologia}\nInversión Ref: ${finalPrice} ${finalUnit}`;
                 proWaUrl = `https://wa.me/${MI_TEL}?text=${encodeURIComponent(wa)}`;
                 
                 laser.classList.remove('scanning-active'); laser.style.display='none';
@@ -917,8 +963,8 @@
                     precio_ref: document.getElementById('price-val').innerText,
                     unidad_ref: document.getElementById('unit-val').innerText,
                     tiempo: document.getElementById('time-val').innerText,
-                    materiales: Array.from(document.getElementById('materials-list').children).map(li => li.innerText),
-                    pasos: Array.from(document.getElementById('steps-list').children).map(li => li.innerText),
+                    materiales: Array.from(document.getElementById('materials-list').children).map(li => li.innerHTML),
+                    pasos: Array.from(document.getElementById('steps-list').children).map(li => li.innerHTML),
                     userNotes: document.getElementById('summary-notes').innerText,
                     location: finalWeatherLoc,
                     temp: finalWeatherTemp,
@@ -1112,14 +1158,23 @@
             document.getElementById('price-val').innerText = data.precio_ref || '';
             document.getElementById('unit-val').innerText = data.unidad_ref || '';
             
+            const priceSubtitle = document.getElementById('price-subtitle');
+            if (priceSubtitle) {
+                if ((data.unidad_ref || '').includes('Total')) {
+                    priceSubtitle.innerText = 'Costo de 1 unidad de cada producto listado';
+                } else {
+                    priceSubtitle.innerText = 'Valor de Mercado Competitivo';
+                }
+            }
+            
             const materialsList = document.getElementById('materials-list');
             materialsList.innerHTML = '';
             if (data.materiales && Array.isArray(data.materiales)) {
                 data.materiales.forEach(mat => {
                     const li = document.createElement('li');
-                    li.className = "leading-relaxed outline-none hover:bg-slate-50 focus:bg-white rounded transition px-1 my-0.5";
+                    li.className = "leading-relaxed outline-none hover:bg-slate-50 focus:bg-white rounded transition px-1 my-1";
                     li.setAttribute('contenteditable', 'true');
-                    li.innerText = mat;
+                    li.innerHTML = mat;
                     materialsList.appendChild(li);
                 });
             }
@@ -1131,7 +1186,7 @@
                     const li = document.createElement('li');
                     li.className = "leading-relaxed pl-1 outline-none hover:bg-slate-50 focus:bg-white rounded transition px-1 my-0.5";
                     li.setAttribute('contenteditable', 'true');
-                    li.innerText = paso;
+                    li.innerHTML = paso;
                     stepsList.appendChild(li);
                 });
             }
