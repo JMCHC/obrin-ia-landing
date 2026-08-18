@@ -99,9 +99,13 @@
                     <p id="dropdown-user-name" class="text-xs font-semibold text-slate-800 truncate"></p>
                 </div>
                 <button onclick="window.openHistory()" class="w-full text-left px-4 py-3 text-xs text-slate-700 hover:bg-slate-50 hover:text-brand-600 font-medium transition-colors flex items-center justify-between">
-                    <span class="flex items-center gap-2"><i class="fas fa-history w-4"></i> Proyectos</span>
-                    <span id="history-count-badge" class="bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full text-[10px] font-bold">0</span>
+                    <span class="flex items-center gap-2"><i class="fas fa-folder-open w-4"></i> Proyectos</span>
+                    <span id="history-count-badge" class="bg-brand-50 text-brand-600 px-2 py-0.5 rounded-full text-[10px] font-bold border border-brand-100">0</span>
                 </button>
+                <div class="w-full text-left px-4 py-2.5 text-xs text-slate-500 bg-slate-50 flex items-center justify-between border-t border-slate-100">
+                    <span class="flex items-center gap-2"><i class="fas fa-file-invoice w-4"></i> Evaluaciones</span>
+                    <span id="total-evals-badge" class="font-bold text-slate-700">0</span>
+                </div>
                 <button id="sign-out-btn" class="w-full text-left px-4 py-3 text-xs text-red-500 hover:bg-red-50 font-bold transition-colors flex items-center gap-2 border-t border-slate-100">
                     <i class="fas fa-sign-out-alt w-4"></i> Cerrar Sesión
                 </button>
@@ -976,6 +980,7 @@
                 await window.loadProjects();
                 document.getElementById('project-select').value = newDoc.id;
                 showNotification("Proyecto creado exitosamente");
+                window.updateHistoryBadgeCount();
             } catch(e) {
                 console.error(e);
                 showNotification("Error al crear proyecto", true);
@@ -1139,11 +1144,19 @@
             if (!auth || !auth.currentUser || !db) return;
             try {
                 const userId = auth.currentUser.uid;
-                const evaluacionesRef = collection(db, 'artifacts', globalAppId, 'users', userId, 'proyectos');
-                const querySnapshot = await getDocs(evaluacionesRef);
-                const count = querySnapshot.size;
-                const badge = document.getElementById('history-count-badge');
-                if (badge) badge.innerText = count;
+                
+                // 1. Conteo de Proyectos
+                const proyectosRef = collection(db, 'artifacts', globalAppId, 'users', userId, 'proyectos');
+                const proyectosSnap = await getDocs(proyectosRef);
+                const badgeProyectos = document.getElementById('history-count-badge');
+                if (badgeProyectos) badgeProyectos.innerText = proyectosSnap.size;
+
+                // 2. Conteo de Evaluaciones Totales
+                const evaluacionesRef = collection(db, 'artifacts', globalAppId, 'users', userId, 'evaluaciones');
+                const evalSnap = await getDocs(evaluacionesRef);
+                const badgeEvals = document.getElementById('total-evals-badge');
+                if (badgeEvals) badgeEvals.innerText = evalSnap.size;
+
             } catch (e) { console.error("Error updating badge count:", e); }
         };
 
@@ -1423,8 +1436,8 @@
                     
                     mainAppContainer.classList.remove('hidden');
                     closeAuthModal();
-                    window.updateHistoryBadgeCount();
                     await window.loadProjects(); 
+                    window.updateHistoryBadgeCount();
                 } else {
                     authBtnHeader.classList.remove('hidden');
                     userMenuBtn.classList.add('hidden'); userMenuBtn.classList.remove('flex');
