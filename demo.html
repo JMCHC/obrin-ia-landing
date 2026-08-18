@@ -250,7 +250,7 @@
                                     <span class="text-slate-400 transition-transform duration-300 group-open:-rotate-180">▼</span>
                                 </summary>
                                 <div class="p-4 pt-1">
-                                    <ul id="materials-list" class="list-none space-y-2"></ul>
+                                    <ul id="materials-list" class="list-none pl-1 text-sm text-slate-600 space-y-2"></ul>
                                 </div>
                             </details>
 
@@ -292,7 +292,6 @@
                     </div>
                 </div>
 
-                <!-- SECCIÓN DE CALIFICACIÓN -->
                 <div id="rating-section" class="mt-6 bg-slate-50 p-5 rounded-xl border border-slate-200 shadow-sm">
                     <p class="text-xs font-bold text-slate-600 uppercase tracking-wider mb-3 text-center">Califica este diagnóstico</p>
                     <div class="flex justify-center gap-2 mb-4" id="star-container">
@@ -663,7 +662,26 @@
                 const pdfHeight = canvas.height;
                 const pdf = new jsPDF({ orientation: pdfHeight > pdfWidth ? 'portrait' : 'landscape', unit: 'px', format: [pdfWidth, pdfHeight] });
                 pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight);
-                pdf.save('Reporte_Tecnico_Obrin_IA.pdf');
+                
+                // Mobile Blob Fix
+                const blobBase64 = pdf.output('datauristring');
+                const arr = blobBase64.split(',');
+                const mime = arr[0].match(/:(.*?);/)[1];
+                const bstr = atob(arr[1]);
+                let n = bstr.length;
+                const u8arr = new Uint8Array(n);
+                while(n--){ u8arr[n] = bstr.charCodeAt(n); }
+                const blob = new Blob([u8arr], {type: mime});
+                const blobUrl = window.URL.createObjectURL(blob);
+                
+                const link = document.createElement('a');
+                link.href = blobUrl;
+                link.download = 'Reporte_Tecnico_Obrin_IA.pdf';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                setTimeout(() => { window.URL.revokeObjectURL(blobUrl); }, 1000);
             } catch (error) {
                 showNotification("Hubo un problema al generar el PDF.", true);
             } finally {
@@ -772,7 +790,7 @@
                 if (resultObj.materiales && Array.isArray(resultObj.materiales)) {
                     resultObj.materiales.forEach(mat => {
                         const li = document.createElement('li');
-                        li.className = "outline-none hover:bg-slate-50 focus:bg-white rounded-lg transition p-3 border border-slate-200 bg-white shadow-sm flex flex-wrap justify-between items-center gap-3 w-full my-1";
+                        li.className = "leading-relaxed outline-none hover:bg-slate-50 focus:bg-white focus:ring-1 focus:ring-slate-200 rounded transition px-1 my-1";
                         li.setAttribute('contenteditable', 'true');
                         
                         // Extraemos las partes si la IA devuelve el formato de D1 (Ej: "MURIATICO [Valor Ref: $1.990 en Imperial]")
@@ -791,7 +809,7 @@
                             
                             // Reconstruimos la fila con flexbox y badges elegantes
                             li.innerHTML = `
-                                <div class="flex flex-1 justify-between items-center w-full gap-2">
+                                <div class="flex flex-wrap justify-between items-center w-full gap-2">
                                     <span class="font-medium text-slate-700">${nombre}</span>
                                     <div class="flex items-center gap-2">
                                         <span class="font-bold text-slate-900">$${precioStr}</span>
@@ -827,7 +845,7 @@
                 if (tienePrecios) {
                     document.getElementById('price-val').innerText = "$" + sumaMateriales.toLocaleString('es-CL');
                     document.getElementById('unit-val').innerText = "Total Materiales";
-                    if (priceSubtitle) priceSubtitle.innerText = "Costo de 1 unidad de cada producto listado";
+                    if (priceSubtitle) priceSubtitle.innerText = "Suma del costo de los materiales listados arriba (1 unidad c/u)";
                 } else {
                     document.getElementById('price-val').innerText = resultObj.precio_ref || "A evaluar";
                     document.getElementById('unit-val').innerText = resultObj.unidad_ref || "";
@@ -1161,7 +1179,7 @@
             const priceSubtitle = document.getElementById('price-subtitle');
             if (priceSubtitle) {
                 if ((data.unidad_ref || '').includes('Total')) {
-                    priceSubtitle.innerText = 'Costo de 1 unidad de cada producto listado';
+                    priceSubtitle.innerText = 'Suma del costo de los materiales listados arriba (1 unidad c/u)';
                 } else {
                     priceSubtitle.innerText = 'Valor de Mercado Competitivo';
                 }
@@ -1170,11 +1188,11 @@
             const materialsList = document.getElementById('materials-list');
             materialsList.innerHTML = '';
             if (data.materiales && Array.isArray(data.materiales)) {
-                data.materiales.forEach(matHtml => {
+                data.materiales.forEach(mat => {
                     const li = document.createElement('li');
-                    li.className = "outline-none hover:bg-slate-50 focus:bg-white rounded-lg transition p-3 border border-slate-200 bg-white shadow-sm flex flex-wrap justify-between items-center gap-3 w-full my-1";
+                    li.className = "leading-relaxed outline-none hover:bg-slate-50 focus:bg-white rounded transition px-1 my-1";
                     li.setAttribute('contenteditable', 'true');
-                    li.innerHTML = matHtml;
+                    li.innerHTML = mat;
                     materialsList.appendChild(li);
                 });
             }
@@ -1182,11 +1200,11 @@
             const stepsList = document.getElementById('steps-list');
             stepsList.innerHTML = '';
             if (data.pasos && Array.isArray(data.pasos)) {
-                data.pasos.forEach(pasoHtml => {
+                data.pasos.forEach(paso => {
                     const li = document.createElement('li');
                     li.className = "leading-relaxed pl-1 outline-none hover:bg-slate-50 focus:bg-white rounded transition px-1 my-0.5";
                     li.setAttribute('contenteditable', 'true');
-                    li.innerHTML = pasoHtml;
+                    li.innerHTML = paso;
                     stepsList.appendChild(li);
                 });
             }
