@@ -250,7 +250,7 @@
                                     <span class="text-slate-400 transition-transform duration-300 group-open:-rotate-180">▼</span>
                                 </summary>
                                 <div class="p-4 pt-1">
-                                    <ul id="materials-list" class="list-none pl-1 text-sm text-slate-600 space-y-2"></ul>
+                                    <ul id="materials-list" class="list-none space-y-2"></ul>
                                 </div>
                             </details>
 
@@ -772,7 +772,7 @@
                 if (resultObj.materiales && Array.isArray(resultObj.materiales)) {
                     resultObj.materiales.forEach(mat => {
                         const li = document.createElement('li');
-                        li.className = "leading-relaxed outline-none hover:bg-slate-50 focus:bg-white focus:ring-1 focus:ring-slate-200 rounded transition px-1 my-1";
+                        li.className = "outline-none hover:bg-slate-50 focus:bg-white rounded-lg transition p-3 border border-slate-200 bg-white shadow-sm flex flex-wrap justify-between items-center gap-3 w-full my-1";
                         li.setAttribute('contenteditable', 'true');
                         
                         // Extraemos las partes si la IA devuelve el formato de D1 (Ej: "MURIATICO [Valor Ref: $1.990 en Imperial]")
@@ -791,7 +791,7 @@
                             
                             // Reconstruimos la fila con flexbox y badges elegantes
                             li.innerHTML = `
-                                <div class="flex flex-wrap justify-between items-center w-full gap-2">
+                                <div class="flex flex-1 justify-between items-center w-full gap-2">
                                     <span class="font-medium text-slate-700">${nombre}</span>
                                     <div class="flex items-center gap-2">
                                         <span class="font-bold text-slate-900">$${precioStr}</span>
@@ -1170,11 +1170,11 @@
             const materialsList = document.getElementById('materials-list');
             materialsList.innerHTML = '';
             if (data.materiales && Array.isArray(data.materiales)) {
-                data.materiales.forEach(mat => {
+                data.materiales.forEach(matHtml => {
                     const li = document.createElement('li');
-                    li.className = "leading-relaxed outline-none hover:bg-slate-50 focus:bg-white rounded transition px-1 my-1";
+                    li.className = "outline-none hover:bg-slate-50 focus:bg-white rounded-lg transition p-3 border border-slate-200 bg-white shadow-sm flex flex-wrap justify-between items-center gap-3 w-full my-1";
                     li.setAttribute('contenteditable', 'true');
-                    li.innerHTML = mat;
+                    li.innerHTML = matHtml;
                     materialsList.appendChild(li);
                 });
             }
@@ -1182,11 +1182,11 @@
             const stepsList = document.getElementById('steps-list');
             stepsList.innerHTML = '';
             if (data.pasos && Array.isArray(data.pasos)) {
-                data.pasos.forEach(paso => {
+                data.pasos.forEach(pasoHtml => {
                     const li = document.createElement('li');
                     li.className = "leading-relaxed pl-1 outline-none hover:bg-slate-50 focus:bg-white rounded transition px-1 my-0.5";
                     li.setAttribute('contenteditable', 'true');
-                    li.innerHTML = paso;
+                    li.innerHTML = pasoHtml;
                     stepsList.appendChild(li);
                 });
             }
