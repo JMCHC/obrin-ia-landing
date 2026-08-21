@@ -51,7 +51,7 @@
         #obrin-pro-root .upload-box.filled { border-style: solid; border-color: #10B981; background: #f0fdf4; }
         
         .scanner-line { 
-            position: absolute top: 0; left: 0; width: 100%; height: 1px; 
+            position: absolute; top: 0; left: 0; width: 100%; height: 1px; 
             background: #ffffff; box-shadow: 0 0 15px rgba(255,255,255,0.8); z-index: 20; 
             display: none; 
         }
@@ -184,7 +184,7 @@
                         <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Entorno y Clima (Opcional)</label>
                         
                         <div class="flex gap-2 mb-2" id="location-input-group">
-                            <input type="text" id="userLocation" class="w-full p-3 bg-slate-50 rounded-lg border border-slate-200 text-sm focus:ring-1 focus:ring-slate-900 focus:border-slate-900 transition outline-none" placeholder="Ej: Santiago, Viña del Mar...">
+                            <input type="text" id="userLocation" class="w-full p-3 bg-slate-50 rounded-lg border border-slate-200 text-sm focus:ring-1 focus:ring-slate-900 focus:border-slate-900 transition outline-none" placeholder="Ej: Santiago, Viña del Mar..." oninput="window.toggleLocationBtn(this.value)" onkeypress="if(event.key === 'Enter') { event.preventDefault(); window.fetchLocationAndWeather(); }">
                             <button type="button" id="getLocationBtn" onclick="window.fetchLocationAndWeather()" class="bg-slate-900 text-white px-4 rounded-lg text-sm font-medium transition hover:bg-slate-800 flex items-center justify-center whitespace-nowrap shadow-sm">
                                 📍 Detectar
                             </button>
@@ -350,6 +350,7 @@
         </div>
     </div>
 
+    <!-- PANEL DE HISTORIAL -->
     <div id="history-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] hidden items-center justify-center p-4 opacity-0 transition-opacity duration-300">
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden relative border border-slate-100 flex flex-col h-[85vh] transform scale-95 transition-transform duration-300" id="history-modal-content">
             <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50" id="history-header">
@@ -578,10 +579,20 @@
             }
         };
 
+        window.toggleLocationBtn = function(val) {
+            const btn = document.getElementById('getLocationBtn');
+            if(val.trim().length > 0) {
+                btn.innerHTML = '🔍 Buscar';
+            } else {
+                btn.innerHTML = '📍 Detectar';
+            }
+        };
+
         window.fetchLocationAndWeather = async function() {
             const btn = document.getElementById('getLocationBtn');
             const inputGroup = document.getElementById('location-input-group');
             const statusBox = document.getElementById('locationStatus');
+            const typedLocation = document.getElementById('userLocation').value.trim();
             const originalBtnHtml = btn.innerHTML;
 
             btn.innerHTML = `<span class="animate-spin inline-block">⏳</span>`;
@@ -627,13 +638,33 @@
                 }
             };
 
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(
-                    (pos) => processCoordinates(pos.coords.latitude, pos.coords.longitude),
-                    (err) => { fallbackToIP(); },
-                    { timeout: 4000 }
-                );
-            } else { fallbackToIP(); }
+            // BÚSQUEDA MANUAL SI HAY TEXTO
+            if (typedLocation) {
+                try {
+                    const geoRes = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(typedLocation)}&count=1&language=es&format=json`);
+                    const geoData = await geoRes.json();
+                    if (geoData.results && geoData.results.length > 0) {
+                        const lat = geoData.results[0].latitude;
+                        const lon = geoData.results[0].longitude;
+                        await processCoordinates(lat, lon, geoData.results[0].name);
+                    } else {
+                        showNotification("No se encontró la ciudad ingresada.", true);
+                        btn.innerHTML = originalBtnHtml; btn.disabled = false;
+                    }
+                } catch(e) {
+                    showNotification("Error buscando la ciudad.", true);
+                    btn.innerHTML = originalBtnHtml; btn.disabled = false;
+                }
+            } else {
+                // DETECCIÓN AUTOMÁTICA (GPS/IP)
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(
+                        (pos) => processCoordinates(pos.coords.latitude, pos.coords.longitude),
+                        (err) => { fallbackToIP(); },
+                        { timeout: 4000 }
+                    );
+                } else { fallbackToIP(); }
+            }
         };
 
         window.resetLocation = function() {
@@ -764,6 +795,7 @@
             const msgEl = document.getElementById('loading-msg');
 
             try {
+                // Si el usuario escribió una ciudad pero NO presionó Buscar/Detectar, la resolvemos igual de forma silenciosa
                 let typedLocation = document.getElementById('userLocation').value.trim();
                 if (!finalWeatherLoc && typedLocation) {
                     msgEl.innerText = "Consultando Clima...";
