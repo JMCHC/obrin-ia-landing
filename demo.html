@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Obrín IA | Gestor de Proyectos Técnicos</title>
+    <title>Obrín IA | Consultoría Técnica IA</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -29,6 +29,8 @@
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <!-- LIBRERÍA DE GRÁFICOS PARA PANEL ADMIN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
         body { font-family: 'Inter', sans-serif; -webkit-font-smoothing: antialiased; }
@@ -93,19 +95,30 @@
                 <i class="fas fa-bars text-slate-400 ml-1 text-xs"></i>
             </button>
 
-            <div id="user-dropdown" class="hidden absolute top-full right-0 mt-2 w-52 bg-white rounded-xl shadow-xl border border-slate-100 overflow-hidden z-50">
+            <!-- Menú Desplegable -->
+            <div id="user-dropdown" class="hidden absolute top-full right-0 mt-2 w-56 bg-white rounded-xl shadow-xl border border-slate-100 overflow-hidden z-50">
                 <div class="p-3 border-b border-slate-100 bg-slate-50">
                     <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Conectado como</p>
                     <p id="dropdown-user-name" class="text-xs font-semibold text-slate-800 truncate"></p>
                 </div>
                 <button onclick="window.openHistory()" class="w-full text-left px-4 py-3 text-xs text-slate-700 hover:bg-slate-50 hover:text-brand-600 font-medium transition-colors flex items-center justify-between">
-                    <span class="flex items-center gap-2"><i class="fas fa-folder-open w-4"></i> Proyectos</span>
-                    <span id="history-count-badge" class="bg-brand-50 text-brand-600 px-2 py-0.5 rounded-full text-[10px] font-bold border border-brand-100">0</span>
+                    <span class="flex items-center gap-2"><i class="fas fa-history w-4"></i> Mi Historial</span>
+                    <i class="fas fa-chevron-right text-[10px] text-slate-300"></i>
                 </button>
                 <div class="w-full text-left px-4 py-2.5 text-xs text-slate-500 bg-slate-50 flex items-center justify-between border-t border-slate-100">
-                    <span class="flex items-center gap-2"><i class="fas fa-file-invoice w-4"></i> Evaluaciones</span>
+                    <span class="flex items-center gap-2"><i class="fas fa-folder w-4"></i> Proyectos</span>
+                    <span id="projects-count-badge" class="font-bold text-slate-700">0</span>
+                </div>
+                <div class="w-full text-left px-4 py-2.5 text-xs text-slate-500 bg-slate-50 flex items-center justify-between border-t border-slate-100">
+                    <span class="flex items-center gap-2"><i class="fas fa-file-invoice w-4"></i> Evaluaciones Totales</span>
                     <span id="total-evals-badge" class="font-bold text-slate-700">0</span>
                 </div>
+                
+                <!-- BOTÓN PANEL MAESTRO (Oculto por defecto) -->
+                <button id="admin-dashboard-btn" onclick="window.openAdminDashboard()" class="hidden w-full text-left px-4 py-3 text-xs text-brand-600 hover:bg-brand-50 font-bold transition-colors flex items-center gap-2 border-t border-slate-100">
+                    <i class="fas fa-shield-alt w-4"></i> Panel de Administración
+                </button>
+
                 <button id="sign-out-btn" class="w-full text-left px-4 py-3 text-xs text-red-500 hover:bg-red-50 font-bold transition-colors flex items-center gap-2 border-t border-slate-100">
                     <i class="fas fa-sign-out-alt w-4"></i> Cerrar Sesión
                 </button>
@@ -119,7 +132,7 @@
 
     <div id="splash-screen" class="fixed inset-0 z-50 flex flex-col items-center justify-center bg-slate-50 transition-opacity duration-700 ease-in-out gap-6">
         <img src="https://lh3.googleusercontent.com/pw/AP1GczOsQ9BjTC3dTk0RxKlbaZtHDeSwbqF3-buuEPA6QHBnWKNK4GkHQpfHPUJkVSbHPN7QEXrwUL5qVDwk5vLhsbpcLCLP3NCezheTURsZUCAOwnL0h1NtlHKbrEHkrsdquexu32SfFSdxlqHT1c36shbDMQ=w599-h599-s-no-gm?authuser=0" alt="Logo Obrín IA" class="h-32 md:h-48 object-contain animate-pulse">
-        <p class="text-slate-400 text-xs font-medium tracking-widest uppercase animate-pulse">Iniciando Gestor...</p>
+        <p class="text-slate-400 text-xs font-medium tracking-widest uppercase animate-pulse">Iniciando sistema...</p>
     </div>
 
     <div id="main-app-container" class="hidden w-full max-w-4xl mt-12 md:mt-0">
@@ -133,21 +146,12 @@
             <div class="top-0 left-0 w-full h-1 absolute bg-slate-900"></div>
             
             <div id="input-section" class="space-y-6">
-                <!-- SELECCIÓN DE PROYECTO NUEVO -->
-                <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
-                    <label class="block text-[0.65rem] font-bold text-brand-600 uppercase tracking-wider mb-2 flex items-center gap-2">
-                        <i class="fas fa-folder-open"></i> Proyecto / Carpeta de Trabajo
-                    </label>
-                    <div id="project-dropdown-container">
-                        <select id="project-select" onchange="window.handleProjectChange()" class="w-full p-3 bg-white rounded-lg border border-slate-200 text-sm outline-none focus:border-slate-400 focus:ring-1 focus:ring-slate-400 cursor-pointer font-medium shadow-sm transition">
-                            <option value="" disabled selected>Cargando proyectos...</option>
-                        </select>
-                    </div>
-                    <div id="new-project-container" class="hidden gap-2">
-                        <input type="text" id="new-project-input" placeholder="Nombre del proyecto (Ej: Casa Viña)..." class="w-full p-3 bg-white rounded-lg border border-brand-300 focus:border-brand-500 focus:ring-1 focus:ring-brand-500 text-sm outline-none transition shadow-inner">
-                        <button type="button" onclick="window.saveNewProject()" class="bg-brand-600 hover:bg-brand-500 text-white px-5 rounded-lg text-sm font-bold transition shadow-md whitespace-nowrap">Crear</button>
-                        <button type="button" onclick="window.cancelNewProject()" class="bg-slate-200 hover:bg-slate-300 text-slate-600 px-4 rounded-lg font-bold transition">✕</button>
-                    </div>
+                <!-- Selector de Proyecto -->
+                <div class="bg-slate-50 border border-slate-200 rounded-lg p-4 mb-2">
+                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2"><i class="fas fa-folder text-brand-500 mr-1"></i> Carpeta de Proyecto Activa</label>
+                    <select id="project-selector" class="w-full p-2.5 bg-white border border-slate-300 rounded text-sm font-semibold text-slate-800 outline-none focus:ring-2 focus:ring-brand-500 transition-shadow appearance-none cursor-pointer">
+                        <option value="">Cargando proyectos...</option>
+                    </select>
                 </div>
 
                 <div class="grid grid-cols-2 gap-4">
@@ -170,12 +174,14 @@
                 <div class="grid grid-cols-1 gap-4">
                     <div>
                         <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Entorno y Clima (Opcional)</label>
+                        
                         <div class="flex gap-2 mb-2" id="location-input-group">
                             <input type="text" id="userLocation" class="w-full p-3 bg-slate-50 rounded-lg border border-slate-200 text-sm focus:ring-1 focus:ring-slate-900 focus:border-slate-900 transition outline-none" placeholder="Ej: Santiago, Viña del Mar...">
                             <button type="button" id="getLocationBtn" onclick="window.fetchLocationAndWeather()" class="bg-slate-900 text-white px-4 rounded-lg text-sm font-medium transition hover:bg-slate-800 flex items-center justify-center whitespace-nowrap shadow-sm">
                                 📍 Detectar
                             </button>
                         </div>
+                        
                         <div id="locationStatus" class="hidden w-full text-xs text-slate-700 bg-emerald-50 border border-emerald-200 p-3 rounded-lg flex items-center justify-between gap-3 mb-2">
                             <div class="flex items-center gap-3">
                                 <span class="text-emerald-600 text-xl">✓</span>
@@ -211,14 +217,14 @@
 
             <div id="result-wrapper" class="hidden">
                 <div id="result" class="text-left bg-white overflow-hidden pb-4 relative">
-                    <div id="edit-hint" class="hidden bg-blue-50 text-blue-600 text-[0.65rem] font-bold uppercase tracking-widest p-2 rounded text-center mb-4 border border-blue-100">
-                        <i class="fas fa-edit"></i> Puedes hacer clic en los textos para modificarlos
+                    
+                    <div id="edit-hint" class="hidden bg-blue-50 text-blue-600 text-[0.65rem] font-bold uppercase tracking-widest p-2 rounded text-center mb-4 border border-blue-100 shadow-sm">
+                        <i class="fas fa-edit"></i> Puedes hacer clic en los textos para modificarlos a mano
                     </div>
 
                     <div id="pdf-header" class="hidden border-b-2 border-slate-900 pb-4 mb-6">
                         <h1 class="text-2xl font-serif text-slate-900 tracking-tight">Obrín IA</h1>
                         <p class="text-[0.65rem] uppercase tracking-widest text-slate-500 font-bold">Reporte de Evaluación Técnica</p>
-                        <p id="pdf-project-name" class="text-xs font-bold text-brand-600 mt-2"></p>
                     </div>
 
                     <div id="user-request-summary" class="hidden mb-6 bg-slate-50 p-4 rounded-lg border border-slate-100">
@@ -237,6 +243,7 @@
                         <div class="w-full">
                             <p class="text-[0.6rem] text-slate-400 uppercase tracking-widest mb-1">Elemento Analizado</p>
                             <div id="surface-type" class="font-serif text-xl text-slate-900 outline-none hover:bg-slate-50 focus:bg-white focus:ring-1 focus:ring-slate-200 rounded transition p-1 -ml-1 w-full" contenteditable="true"></div>
+                            
                             <div id="weather-badge" class="hidden flex items-center gap-1 mt-2 text-[0.65rem] text-slate-500 bg-slate-50 border border-slate-100 py-1 px-2 rounded w-fit">
                                 <span>🌤️</span>
                                 <span class="font-medium" id="loc-val"></span>: 
@@ -252,6 +259,7 @@
                                 <p class="text-[0.6rem] font-bold text-slate-400 uppercase tracking-wider mb-2">Diagnóstico de Patología</p>
                                 <p id="damage-val" class="text-sm font-medium text-slate-800 leading-relaxed outline-none hover:bg-white focus:bg-white focus:ring-1 focus:ring-slate-200 rounded transition p-1" contenteditable="true"></p>
                             </div>
+                            
                             <div class="bg-slate-50 p-4 rounded-lg border border-slate-100">
                                 <p class="text-[0.6rem] font-bold text-slate-400 uppercase tracking-wider mb-2">Propuesta Técnica de Intervención</p>
                                 <p id="solution-val" class="text-sm text-slate-600 leading-relaxed outline-none hover:bg-white focus:bg-white focus:ring-1 focus:ring-slate-200 rounded transition p-1" contenteditable="true"></p>
@@ -265,7 +273,7 @@
                                     <span class="text-slate-400 transition-transform duration-300 group-open:-rotate-180">▼</span>
                                 </summary>
                                 <div class="p-4 pt-1">
-                                    <ul id="materials-list" class="flex flex-col gap-2"></ul>
+                                    <ul id="materials-list" class="list-none pl-1 text-sm text-slate-600 space-y-2"></ul>
                                 </div>
                             </details>
 
@@ -282,6 +290,7 @@
                         
                         <div class="bg-slate-900 p-6 rounded-xl text-white relative overflow-hidden mt-6">
                             <div class="absolute top-0 right-0 w-32 h-32 bg-brand-600 rounded-full blur-[60px] opacity-20"></div>
+                            
                             <div class="relative z-10 flex justify-between items-start">
                                 <div>
                                     <p class="text-[0.6rem] text-brand-400 uppercase tracking-widest font-bold mb-1">Inversión Unitaria Referencial</p>
@@ -289,6 +298,7 @@
                                 </div>
                                 <span class="bg-white/10 text-white text-[0.55rem] px-2 py-0.5 rounded border border-white/10 uppercase tracking-wider">CLP</span>
                             </div>
+                            
                             <div class="relative z-10 mt-2 flex items-baseline gap-2">
                                 <p class="font-serif text-3xl tracking-tight leading-none text-white"><span id="price-val" contenteditable="true" class="outline-none hover:bg-slate-800 focus:bg-slate-800 focus:ring-1 focus:ring-slate-500 rounded transition px-1 inline-block"></span></p>
                                 <p id="unit-val" contenteditable="true" class="text-[0.65rem] text-slate-400 font-medium uppercase tracking-widest outline-none hover:bg-slate-800 focus:bg-slate-800 focus:ring-1 focus:ring-slate-500 rounded transition px-1 inline-block"></p>
@@ -315,7 +325,7 @@
                         <button class="star-btn text-4xl text-slate-300 hover:text-yellow-400 transition drop-shadow-sm" data-val="5">★</button>
                     </div>
                     <textarea id="rating-comment" class="w-full p-3 bg-white rounded-lg border border-slate-200 text-sm focus:ring-1 focus:ring-slate-900 outline-none resize-none mb-3" rows="2" placeholder="Opcional: Deja un comentario sobre el resultado..."></textarea>
-                    <button id="submit-rating-btn" onclick="window.submitFeedbackAndSave()" class="w-full bg-slate-900 text-white py-3 rounded-lg text-xs font-bold uppercase tracking-widest hover:bg-slate-800 transition shadow-md">Enviar y Guardar en Historial</button>
+                    <button id="submit-rating-btn" onclick="window.submitFeedbackAndSave()" class="w-full bg-slate-900 text-white py-3 rounded-lg text-xs font-bold uppercase tracking-widest hover:bg-slate-800 transition shadow-md">GUARDAR CALIFICACIÓN Y CAMBIOS</button>
                 </div>
 
                 <div class="flex gap-3 mt-6">
@@ -332,25 +342,71 @@
         </div>
     </div>
 
+    <!-- PANEL DE HISTORIAL -->
     <div id="history-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] hidden items-center justify-center p-4 opacity-0 transition-opacity duration-300">
-        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden relative border border-slate-100 flex flex-col max-h-[85vh] transform scale-95 transition-transform duration-300" id="history-modal-content">
-            <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50">
-                <div class="flex items-center gap-3">
-                    <button id="history-back-btn" onclick="window.showFoldersView()" class="hidden w-8 h-8 flex items-center justify-center bg-white border border-slate-200 rounded-full text-slate-500 hover:text-brand-600 transition shadow-sm">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden relative border border-slate-100 flex flex-col h-[85vh] transform scale-95 transition-transform duration-300" id="history-modal-content">
+            <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50" id="history-header">
+                <div>
+                    <h2 class="text-xl font-bold text-slate-900 tracking-tight flex items-center gap-2" id="history-title">
+                        <i class="fas fa-folder-open text-brand-500"></i> Mis Proyectos
+                    </h2>
+                    <p class="text-slate-500 text-xs mt-1" id="history-subtitle">Administra tus carpetas y diagnósticos.</p>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button id="back-to-projects-btn" onclick="window.openHistory()" class="hidden w-8 h-8 flex items-center justify-center bg-white border border-slate-200 rounded-full text-slate-600 hover:text-brand-600 hover:border-brand-200 transition-colors shadow-sm">
                         <i class="fas fa-arrow-left"></i>
                     </button>
-                    <div>
-                        <h2 id="history-title" class="text-xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
-                            <i class="fas fa-folder-open text-brand-500"></i> Mis Proyectos
-                        </h2>
-                        <p id="history-subtitle" class="text-slate-500 text-xs mt-1">Selecciona un proyecto para ver sus diagnósticos.</p>
-                    </div>
+                    <button onclick="window.closeHistory()" class="w-8 h-8 flex items-center justify-center bg-white border border-slate-200 rounded-full text-slate-400 hover:text-red-500 hover:border-red-200 transition-colors shadow-sm">
+                        <i class="fas fa-times"></i>
+                    </button>
                 </div>
-                <button onclick="window.closeHistory()" class="w-8 h-8 flex items-center justify-center bg-white border border-slate-200 rounded-full text-slate-400 hover:text-red-500 hover:border-red-200 transition-colors shadow-sm">
+            </div>
+            
+            <div id="projects-view" class="p-6 overflow-y-auto flex-1 space-y-4 bg-slate-50/50">
+                <div class="flex gap-2 mb-4">
+                    <input type="text" id="new-project-name" placeholder="Nombre de nueva carpeta..." class="flex-1 p-3 text-sm border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-brand-500">
+                    <button onclick="window.createNewProject()" class="bg-slate-900 text-white px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-widest hover:bg-slate-800 transition shadow">Crear</button>
+                </div>
+                <div id="projects-list" class="space-y-3"></div>
+            </div>
+
+            <div id="evaluations-view" class="hidden p-6 overflow-y-auto flex-1 space-y-4 bg-slate-50/50">
+                <div id="history-list" class="space-y-4"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PANEL DE ADMINISTRACIÓN MAESTRO -->
+    <div id="admin-modal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-[110] hidden items-center justify-center p-4 opacity-0 transition-opacity duration-300">
+        <div class="bg-slate-50 rounded-2xl shadow-2xl w-full max-w-5xl overflow-hidden relative border border-slate-700 flex flex-col h-[90vh] transform scale-95 transition-transform duration-300" id="admin-modal-content">
+            <div class="p-6 border-b border-slate-200 flex justify-between items-center bg-white">
+                <div>
+                    <h2 class="text-xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
+                        <i class="fas fa-chart-pie text-brand-500"></i> Panel de Administración Global
+                    </h2>
+                    <p class="text-slate-500 text-xs mt-1">Métricas y reportes de todos los usuarios de Obrín IA.</p>
+                </div>
+                <button onclick="window.closeAdminDashboard()" class="w-8 h-8 flex items-center justify-center bg-slate-100 border border-slate-200 rounded-full text-slate-500 hover:text-red-500 hover:border-red-200 transition-colors shadow-sm">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
-            <div id="history-list" class="p-6 overflow-y-auto flex-1 space-y-4 bg-slate-50/50"></div>
+            <div class="p-6 overflow-y-auto flex-1 space-y-6">
+                <!-- Tarjetas de métricas -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4" id="admin-stats-container"></div>
+                
+                <!-- Gráfico -->
+                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm w-full h-64 relative">
+                    <canvas id="admin-chart"></canvas>
+                </div>
+
+                <!-- Lista Global -->
+                <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                    <div class="px-5 py-4 border-b border-slate-100 bg-slate-50 flex justify-between items-center">
+                        <h3 class="text-xs font-bold text-slate-700 uppercase tracking-widest"><i class="fas fa-list text-slate-400 mr-1"></i> Reportes Recientes Globales</h3>
+                    </div>
+                    <div id="admin-global-list" class="divide-y divide-slate-100 max-h-[400px] overflow-y-auto"></div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -408,7 +464,9 @@
             toast.className = `fixed bottom-4 left-1/2 -translate-x-1/2 px-6 py-3 rounded-full text-white text-xs font-bold tracking-wide shadow-2xl z-[100] transition-all duration-300 transform translate-y-10 opacity-0 ${isError ? 'bg-red-600' : 'bg-slate-900'}`;
             toast.innerText = msg;
             document.body.appendChild(toast);
-            requestAnimationFrame(() => { toast.classList.remove('translate-y-10', 'opacity-0'); });
+            requestAnimationFrame(() => {
+                toast.classList.remove('translate-y-10', 'opacity-0');
+            });
             setTimeout(() => {
                 toast.classList.add('translate-y-10', 'opacity-0');
                 setTimeout(() => toast.remove(), 300);
@@ -436,14 +494,11 @@
         let currentRating = 0;
         let currentEditingDocId = null;
         window.historyDataCache = {};
-        window.projectFoldersCache = {};
-
-        // Utilidad para extraer precios limpios (Ej: "$12.000 a $18.000" -> 12000)
-        function extractPrice(priceStr) {
-            if(!priceStr || priceStr.toLowerCase().includes('evaluar')) return 0;
-            const parts = priceStr.split('a');
-            const cleanStr = parts[0].replace(/[^0-9]/g, '');
-            return parseInt(cleanStr) || 0;
+        
+        window.extractPrice = function(priceStr) {
+            if (!priceStr) return 0;
+            const match = priceStr.replace(/\./g, '').match(/\d+/);
+            return match ? parseInt(match[0], 10) : 0;
         }
 
         window.addEventListener('DOMContentLoaded', () => {
@@ -485,7 +540,9 @@
 
                     if(imgData1) { 
                         const btn = document.getElementById('analyzeBtn');
-                        btn.style.opacity = '1'; btn.style.pointerEvents = 'auto'; btn.classList.add('bg-slate-900'); 
+                        btn.style.opacity = '1'; 
+                        btn.style.pointerEvents = 'auto'; 
+                        btn.classList.add('bg-slate-900'); 
                     }
                 };
                 r.readAsDataURL(input.files[0]);
@@ -542,7 +599,8 @@
                     finalWeatherLoc = city; finalWeatherTemp = temp; finalWeatherHum = hum;
                     weatherContextText = `Ubicación: ${city}. CLIMA ACTUAL: Temperatura ${temp}, Humedad Ambiental ${hum}.`;
 
-                    inputGroup.classList.add('hidden'); statusBox.classList.remove('hidden');
+                    inputGroup.classList.add('hidden');
+                    statusBox.classList.remove('hidden');
                     document.getElementById('ui-city-name').innerText = city;
                     document.getElementById('ui-weather-desc').innerText = `${temp}, ${hum} de humedad ambiental`;
                 } catch(e) {
@@ -581,8 +639,9 @@
         };
 
         window.resetUI = function() {
-            imgData1 = null; imgType1 = null; imgData2 = null; imgType2 = null;
-            currentEditingDocId = null; window.historyDataCache = {};
+            imgData1 = null; imgType1 = null;
+            imgData2 = null; imgType2 = null;
+            currentEditingDocId = null;
             window.resetLocation();
             
             document.getElementById('result-wrapper').classList.add('hidden');
@@ -600,7 +659,8 @@
             const priceSubtitle = document.getElementById('price-subtitle');
             if (priceSubtitle) priceSubtitle.innerText = "Valor de Mercado Competitivo";
             
-            document.getElementById('file1').value = ''; document.getElementById('file2').value = '';
+            document.getElementById('file1').value = ''; 
+            document.getElementById('file2').value = '';
             document.getElementById('userNotes').value = '';
             
             currentRating = 0;
@@ -608,9 +668,11 @@
                 s.classList.add('text-slate-300'); s.classList.remove('text-yellow-400');
             });
             document.getElementById('rating-comment').value = '';
+            
             const rateBtn = document.getElementById('submit-rating-btn');
             if (rateBtn) {
-                rateBtn.innerHTML = 'Enviar y Guardar en Historial'; rateBtn.disabled = false;
+                rateBtn.innerHTML = 'GUARDAR CALIFICACIÓN Y CAMBIOS';
+                rateBtn.disabled = false;
                 rateBtn.classList.replace('bg-emerald-600', 'bg-slate-900');
                 rateBtn.classList.replace('hover:bg-emerald-500', 'hover:bg-slate-800');
             }
@@ -618,8 +680,7 @@
 
             document.getElementById('summary-img1').classList.add('hidden'); document.getElementById('summary-img1').src = '';
             document.getElementById('summary-img2').classList.add('hidden'); document.getElementById('summary-img2').src = '';
-            document.getElementById('summary-notes-container').classList.add('hidden');
-            document.getElementById('summary-notes').innerText = '';
+            document.getElementById('summary-notes-container').classList.add('hidden'); document.getElementById('summary-notes').innerText = '';
             
             ['1', '2'].forEach(n => { 
                 document.getElementById(`box${n}`).classList.remove('filled');
@@ -630,14 +691,18 @@
             
             const btn = document.getElementById('analyzeBtn');
             btn.style.opacity = '0.5'; btn.style.pointerEvents = 'none'; 
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        window.contactPro = function() { if (proWaUrl) window.open(proWaUrl, '_blank'); }
+        window.contactPro = function() {
+            if (proWaUrl) window.open(proWaUrl, '_blank');
+        }
 
         window.generatePDF = async function() {
             const btn = document.getElementById('pdf-btn');
             const originalHtml = btn.innerHTML;
-            btn.innerHTML = '⏳ Generando...'; btn.disabled = true;
+            btn.innerHTML = '⏳ Generando...';
+            btn.disabled = true;
 
             const element = document.getElementById('result');
             const header = document.getElementById('pdf-header');
@@ -648,7 +713,8 @@
             const details = element.querySelectorAll('details');
             details.forEach(d => d.setAttribute('open', 'true'));
             
-            header.classList.remove('hidden'); summary.classList.remove('hidden');
+            header.classList.remove('hidden');
+            summary.classList.remove('hidden');
             element.classList.add('pdf-export-mode');
             if(ratingSec) ratingSec.classList.add('hidden');
             if(hint) hint.classList.add('hidden');
@@ -657,14 +723,16 @@
                 const canvas = await html2canvas(element, { scale: 2, useCORS: true, backgroundColor: '#ffffff', windowWidth: 800 });
                 const imgData = canvas.toDataURL('image/jpeg', 1.0);
                 const { jsPDF } = window.jspdf;
-                const pdfWidth = canvas.width; const pdfHeight = canvas.height;
+                const pdfWidth = canvas.width;
+                const pdfHeight = canvas.height;
                 const pdf = new jsPDF({ orientation: pdfHeight > pdfWidth ? 'portrait' : 'landscape', unit: 'px', format: [pdfWidth, pdfHeight] });
                 pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight);
                 pdf.save('Reporte_Tecnico_Obrin_IA.pdf');
             } catch (error) {
                 showNotification("Hubo un problema al generar el PDF.", true);
             } finally {
-                header.classList.add('hidden'); summary.classList.add('hidden');
+                header.classList.add('hidden');
+                summary.classList.add('hidden');
                 element.classList.remove('pdf-export-mode');
                 if(ratingSec) ratingSec.classList.remove('hidden');
                 if(hint) hint.classList.remove('hidden');
@@ -673,9 +741,9 @@
         };
 
         window.runAnalysis = async function() {
-            const select = document.getElementById('project-select');
-            if (!select || !select.value || select.value === 'NEW') {
-                showNotification("Debes seleccionar o crear un proyecto antes de analizar.", true);
+            const projSelector = document.getElementById('project-selector');
+            if(!projSelector.value) {
+                showNotification("Por favor, selecciona una Carpeta de Proyecto primero.", true);
                 return;
             }
 
@@ -696,7 +764,8 @@
                         const geoRes = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(typedLocation)}&count=1&language=es&format=json`);
                         const geoData = await geoRes.json();
                         if (geoData.results && geoData.results.length > 0) {
-                            const lat = geoData.results[0].latitude; const lon = geoData.results[0].longitude;
+                            const lat = geoData.results[0].latitude;
+                            const lon = geoData.results[0].longitude;
                             finalWeatherLoc = geoData.results[0].name;
                             const weatherRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m`);
                             const weatherData = await weatherRes.json();
@@ -719,7 +788,8 @@
                 }
 
                 const payload = {
-                    userNotes: userNotes, weatherContextText: weatherContextText,
+                    userNotes: userNotes,
+                    weatherContextText: weatherContextText,
                     imgData1: imgData1, imgType1: imgType1,
                     imgData2: imgData2, imgType2: imgType2
                 };
@@ -760,7 +830,6 @@
                 document.getElementById('damage-val').innerText = resultObj.patologia;
                 document.getElementById('solution-val').innerText = resultObj.solucion;
                 
-                // Mapeo Estructurado y Sumatoria de Materiales
                 const materialsList = document.getElementById('materials-list');
                 materialsList.innerHTML = '';
                 
@@ -770,7 +839,7 @@
                 if (resultObj.materiales && Array.isArray(resultObj.materiales)) {
                     resultObj.materiales.forEach(mat => {
                         const li = document.createElement('li');
-                        li.className = "leading-relaxed outline-none hover:bg-slate-50 focus:bg-white focus:ring-1 focus:ring-slate-200 rounded transition p-2 my-1 border border-transparent hover:border-slate-100";
+                        li.className = "leading-relaxed outline-none hover:bg-slate-50 focus:bg-white focus:ring-1 focus:ring-slate-200 rounded transition px-1 my-1";
                         li.setAttribute('contenteditable', 'true');
                         
                         const matchFormat = mat.match(/^(.*?) \[Valor Ref:\s*\$([\d.]+)\s*en\s*(.*?)\]/i);
@@ -787,7 +856,7 @@
                             }
                             
                             li.innerHTML = `
-                                <div class="flex flex-wrap justify-between items-center w-full gap-2 pointer-events-none">
+                                <div class="flex flex-wrap justify-between items-center w-full gap-2">
                                     <span class="font-medium text-slate-700">${nombre}</span>
                                     <div class="flex items-center gap-2">
                                         <span class="font-bold text-slate-900">$${precioStr}</span>
@@ -796,7 +865,7 @@
                                 </div>
                             `;
                         } else {
-                            li.innerHTML = `<span class="font-medium text-slate-700 pointer-events-none">${mat}</span>`;
+                            li.innerHTML = `<span class="font-medium text-slate-700">${mat}</span>`;
                         }
                         materialsList.appendChild(li);
                     });
@@ -811,7 +880,7 @@
                         li.setAttribute('contenteditable', 'true');
                         const splitIdx = paso.indexOf(':');
                         if (splitIdx > 0 && splitIdx < 40) {
-                            li.innerHTML = `<span class="font-bold text-slate-800 pointer-events-none">${paso.substring(0, splitIdx + 1)}</span>${paso.substring(splitIdx + 1)}`;
+                            li.innerHTML = `<span class="font-bold text-slate-800">${paso.substring(0, splitIdx + 1)}</span>${paso.substring(splitIdx + 1)}`;
                         } else { li.innerText = paso; }
                         stepsList.appendChild(li);
                     });
@@ -822,7 +891,7 @@
                 const priceSubtitle = document.getElementById('price-subtitle');
                 if (tienePrecios) {
                     document.getElementById('price-val').innerText = "$" + sumaMateriales.toLocaleString('es-CL');
-                    document.getElementById('unit-val').innerText = "TOTAL MATERIALES";
+                    document.getElementById('unit-val').innerText = "Total Materiales";
                     if (priceSubtitle) priceSubtitle.innerText = "Suma del costo de los materiales listados arriba (1 unidad c/u)";
                 } else {
                     document.getElementById('price-val').innerText = resultObj.precio_ref || "A evaluar";
@@ -833,7 +902,7 @@
                 const finalPrice = document.getElementById('price-val').innerText;
                 const finalUnit = document.getElementById('unit-val').innerText;
                 
-                const wa = `Hola. Solicitud de visita técnica:\n\nUbicación: ${finalWeatherLoc || 'No especificada'}\nElemento: ${resultObj.superficie}\nDiagnóstico: ${resultObj.patologia}\nInversión Ref: ${finalPrice} ${finalUnit}`;
+                const wa = `Hola. Solicitud de visita técnica:\n\nProyecto: ${projSelector.options[projSelector.selectedIndex].text}\nUbicación: ${finalWeatherLoc || 'No especificada'}\nElemento: ${resultObj.superficie}\nDiagnóstico: ${resultObj.patologia}\nInversión Ref: ${finalPrice} ${finalUnit}`;
                 proWaUrl = `https://wa.me/${MI_TEL}?text=${encodeURIComponent(wa)}`;
                 
                 laser.classList.remove('scanning-active'); laser.style.display='none';
@@ -841,22 +910,13 @@
                 document.getElementById('result-wrapper').classList.remove('hidden');
                 document.getElementById('edit-hint').classList.remove('hidden');
 
-                // Inyectamos el nombre del proyecto en el Header del PDF
-                const projectName = select.options[select.selectedIndex].text;
-                const pdfProjectName = document.getElementById('pdf-project-name');
-                if(pdfProjectName) {
-                    pdfProjectName.innerText = `Proyecto: ${projectName}`;
+                if (window.autoSaveEvaluation) {
+                    await window.autoSaveEvaluation();
                 }
 
                 if (window.saveAnalysisCountToFirestore) {
                     window.saveAnalysisCountToFirestore();
                 }
-
-                // Guardado silencioso Automático
-                if (window.autoSaveEvaluation) {
-                    await window.autoSaveEvaluation();
-                }
-
             } catch(e) {
                 console.error(e);
                 laser.classList.remove('scanning-active'); laser.style.display='none';
@@ -871,11 +931,12 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { 
             getAuth, onAuthStateChanged, signInWithPopup, GoogleAuthProvider,
-            signInWithEmailAndPassword, createUserWithEmailAndPassword,
-            updateProfile, signOut, setPersistence, browserSessionPersistence
+            signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile,
+            signOut, setPersistence, browserSessionPersistence
         } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        
         import { 
-            getFirestore, doc, setDoc, collection, addDoc, updateDoc, increment, getDocs, query, orderBy 
+            getFirestore, doc, setDoc, collection, addDoc, updateDoc, increment, getDocs, query, orderBy, collectionGroup 
         } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         const firebaseConfig = {
@@ -889,103 +950,63 @@
 
         const globalAppId = typeof __app_id !== 'undefined' ? __app_id : 'obrinia';
 
-        let app; let auth; let db;
+        let app, auth, db;
 
         try {
             app = initializeApp(firebaseConfig);
             auth = getAuth(app);
             db = getFirestore(app);
-            setPersistence(auth, browserSessionPersistence).catch((error) => { console.error(error); });
+            setPersistence(auth, browserSessionPersistence).catch(console.error);
         } catch (e) {
             console.error("Firebase init error:", e);
         }
 
-        window.loadProjects = async function() {
+        window.loadProjectsList = async function() {
             if (!auth || !auth.currentUser || !db) return;
-            const userId = auth.currentUser.uid;
-            const select = document.getElementById('project-select');
-
             try {
-                const q = query(collection(db, 'artifacts', globalAppId, 'users', userId, 'proyectos'), orderBy('createdAt', 'desc'));
-                const snap = await getDocs(q);
-
-                select.innerHTML = '';
-                let hasProjects = false;
-
-                snap.forEach(docSnap => {
-                    hasProjects = true;
-                    const opt = document.createElement('option');
-                    opt.value = docSnap.id;
-                    opt.innerText = docSnap.data().name;
-                    select.appendChild(opt);
-                });
-
-                if (!hasProjects) {
-                    const newDoc = await addDoc(collection(db, 'artifacts', globalAppId, 'users', userId, 'proyectos'), {
-                        name: 'Proyecto Principal',
-                        createdAt: new Date()
-                    });
-                    const opt = document.createElement('option');
-                    opt.value = newDoc.id;
-                    opt.innerText = 'Proyecto Principal';
-                    select.appendChild(opt);
+                const userId = auth.currentUser.uid;
+                const projectsRef = collection(db, 'artifacts', globalAppId, 'users', userId, 'proyectos');
+                const q = query(projectsRef, orderBy('createdAt', 'desc'));
+                const querySnapshot = await getDocs(q);
+                
+                const selector = document.getElementById('project-selector');
+                selector.innerHTML = '';
+                
+                if (querySnapshot.empty) {
+                    await addDoc(projectsRef, { name: 'Proyecto Principal', createdAt: new Date() });
+                    return window.loadProjectsList();
                 }
 
-                const createOpt = document.createElement('option');
-                createOpt.value = 'NEW';
-                createOpt.innerText = '➕ Crear nuevo proyecto...';
-                createOpt.className = 'font-bold text-brand-600';
-                select.appendChild(createOpt);
-
-            } catch(e) {
-                console.error("Error loading projects:", e);
+                querySnapshot.forEach(docSnap => {
+                    const option = document.createElement('option');
+                    option.value = docSnap.id;
+                    option.text = docSnap.data().name;
+                    selector.appendChild(option);
+                });
+                
+                window.updateCounters();
+            } catch (error) {
+                console.error("Error loading projects:", error);
             }
         };
 
-        window.handleProjectChange = function() {
-            const select = document.getElementById('project-select');
-            if (select.value === 'NEW') {
-                document.getElementById('project-dropdown-container').classList.add('hidden');
-                document.getElementById('new-project-container').classList.remove('hidden');
-                document.getElementById('new-project-container').classList.add('flex');
-                document.getElementById('new-project-input').focus();
-            }
-        };
-
-        window.cancelNewProject = function() {
-            document.getElementById('new-project-container').classList.add('hidden');
-            document.getElementById('new-project-container').classList.remove('flex');
-            document.getElementById('project-dropdown-container').classList.remove('hidden');
-            document.getElementById('project-select').selectedIndex = 0;
-            document.getElementById('new-project-input').value = '';
-        };
-
-        window.saveNewProject = async function() {
-            const input = document.getElementById('new-project-input');
+        window.createNewProject = async function() {
+            const input = document.getElementById('new-project-name');
             const name = input.value.trim();
-            if (!name) return showNotification("Ingresa un nombre para el proyecto", true);
-
-            const btn = input.nextElementSibling;
-            const origText = btn.innerText;
-            btn.innerText = '⏳'; btn.disabled = true;
+            if (!name) return showNotification("Ingresa un nombre para la carpeta", true);
+            if (!auth || !auth.currentUser || !db) return;
 
             try {
                 const userId = auth.currentUser.uid;
-                const newDoc = await addDoc(collection(db, 'artifacts', globalAppId, 'users', userId, 'proyectos'), {
-                    name: name,
-                    createdAt: new Date()
-                });
-
-                window.cancelNewProject();
-                await window.loadProjects();
-                document.getElementById('project-select').value = newDoc.id;
-                showNotification("Proyecto creado exitosamente");
-                window.updateHistoryBadgeCount();
-            } catch(e) {
-                console.error(e);
-                showNotification("Error al crear proyecto", true);
-            } finally {
-                btn.innerText = origText; btn.disabled = false;
+                const projectsRef = collection(db, 'artifacts', globalAppId, 'users', userId, 'proyectos');
+                await addDoc(projectsRef, { name: name, createdAt: new Date() });
+                input.value = '';
+                showNotification("Proyecto creado");
+                window.openHistory(); 
+                window.loadProjectsList(); 
+            } catch (error) {
+                console.error("Error creating project:", error);
+                showNotification("Error al crear", true);
             }
         };
 
@@ -1000,32 +1021,33 @@
                     diagnosticCount: increment(1),
                     lastDiagnosticAt: new Date()
                 }, { merge: true });
-                window.updateHistoryBadgeCount();
-            } catch (error) {
-                console.error("Error saving count:", error);
-            }
+                window.updateCounters();
+            } catch (error) { console.error("Error saving count:", error); }
+        };
+
+        const getCompressedBase64 = (imgId) => {
+            const imgEl = document.getElementById(imgId);
+            if (!imgEl || !imgEl.src || imgEl.classList.contains('hidden') || imgEl.src.length < 100) return null;
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            const maxW = 800;
+            const scale = Math.min(maxW / (imgEl.naturalWidth || maxW), 1);
+            canvas.width = (imgEl.naturalWidth || maxW) * scale;
+            canvas.height = (imgEl.naturalHeight || maxW) * scale;
+            ctx.drawImage(imgEl, 0, 0, canvas.width, canvas.height);
+            return canvas.toDataURL('image/jpeg', 0.7);
         };
 
         window.autoSaveEvaluation = async function() {
             if (!auth || !auth.currentUser || !db) return;
+            const projectId = document.getElementById('project-selector').value;
+            if (!projectId) return;
+
             try {
-                const getCompressedBase64 = (imgId) => {
-                    const imgEl = document.getElementById(imgId);
-                    if (!imgEl || !imgEl.src || imgEl.classList.contains('hidden') || imgEl.src.length < 100) return null;
-                    const canvas = document.createElement('canvas'); const ctx = canvas.getContext('2d');
-                    const maxW = 800; const scale = Math.min(maxW / (imgEl.naturalWidth || maxW), 1);
-                    canvas.width = (imgEl.naturalWidth || maxW) * scale; canvas.height = (imgEl.naturalHeight || maxW) * scale;
-                    ctx.drawImage(imgEl, 0, 0, canvas.width, canvas.height);
-                    return canvas.toDataURL('image/jpeg', 0.7);
-                };
-
-                const select = document.getElementById('project-select');
-                const projectId = select.value;
-                const projectName = select.options[select.selectedIndex].text;
-
+                const projSelector = document.getElementById('project-selector');
                 const diagnosticData = {
                     projectId: projectId,
-                    projectName: projectName,
+                    projectName: projSelector.options[projSelector.selectedIndex].text,
                     superficie: document.getElementById('surface-type').innerText,
                     nivel_dano: document.getElementById('complexity-badge').innerText,
                     patologia: document.getElementById('damage-val').innerText,
@@ -1038,52 +1060,30 @@
                     userNotes: document.getElementById('summary-notes').innerText,
                     location: finalWeatherLoc, temp: finalWeatherTemp, hum: finalWeatherHum,
                     img1: getCompressedBase64('summary-img1'), img2: getCompressedBase64('summary-img2'),
-                    rating: 0, comment: "", createdAt: new Date(), updatedAt: new Date()
+                    rating: currentRating, comment: document.getElementById('rating-comment').value,
+                    createdAt: new Date(), updatedAt: new Date()
                 };
 
                 const userId = auth.currentUser.uid;
                 const evaluacionesRef = collection(db, 'artifacts', globalAppId, 'users', userId, 'evaluaciones');
                 const newDoc = await addDoc(evaluacionesRef, diagnosticData);
-                
                 currentEditingDocId = newDoc.id; 
-                showNotification("Ficha anclada al proyecto exitosamente", false);
-                window.updateHistoryBadgeCount();
-                
-                const rateBtn = document.getElementById('submit-rating-btn');
-                if (rateBtn) { rateBtn.innerHTML = 'GUARDAR CALIFICACIÓN Y CAMBIOS'; }
-            } catch (error) { console.error("Error auto-saving:", error); }
+                window.updateCounters();
+            } catch (error) {
+                console.error("AutoSave Error:", error);
+            }
         };
 
         window.submitFeedbackAndSave = async function() {
-            if (currentRating === 0) {
-                showNotification("Por favor, selecciona una calificación antes de guardar.", true); return;
-            }
-
             const btn = document.getElementById('submit-rating-btn');
             const originalText = btn.innerHTML;
-            btn.innerHTML = '⏳ Guardando Ficha...'; btn.disabled = true;
+            btn.innerHTML = '⏳ Guardando...'; btn.disabled = true;
 
             try {
-                if (!auth || !auth.currentUser) throw new Error("Debes iniciar sesión para guardar.");
-                if (!db) throw new Error("Base de datos no inicializada.");
-
-                const getCompressedBase64 = (imgId) => {
-                    const imgEl = document.getElementById(imgId);
-                    if (!imgEl || !imgEl.src || imgEl.classList.contains('hidden') || imgEl.src.length < 100) return null;
-                    const canvas = document.createElement('canvas'); const ctx = canvas.getContext('2d');
-                    const maxW = 800; const scale = Math.min(maxW / (imgEl.naturalWidth || maxW), 1);
-                    canvas.width = (imgEl.naturalWidth || maxW) * scale; canvas.height = (imgEl.naturalHeight || maxW) * scale;
-                    ctx.drawImage(imgEl, 0, 0, canvas.width, canvas.height);
-                    return canvas.toDataURL('image/jpeg', 0.7);
-                };
-
-                const select = document.getElementById('project-select');
-                const projectId = select.value || 'unassigned';
-                const projectName = select.options[select.selectedIndex]?.text || 'Sin Clasificar';
+                if (!auth || !auth.currentUser || !db) throw new Error("Debes iniciar sesión.");
+                if (!currentEditingDocId) throw new Error("No hay ficha activa para actualizar.");
 
                 const diagnosticData = {
-                    projectId: projectId,
-                    projectName: projectName,
                     superficie: document.getElementById('surface-type').innerText,
                     nivel_dano: document.getElementById('complexity-badge').innerText,
                     patologia: document.getElementById('damage-val').innerText,
@@ -1093,71 +1093,37 @@
                     tiempo: document.getElementById('time-val').innerText,
                     materiales: Array.from(document.getElementById('materials-list').children).map(li => li.innerHTML),
                     pasos: Array.from(document.getElementById('steps-list').children).map(li => li.innerHTML),
-                    userNotes: document.getElementById('summary-notes').innerText,
-                    location: finalWeatherLoc, temp: finalWeatherTemp, hum: finalWeatherHum,
-                    img1: getCompressedBase64('summary-img1'), img2: getCompressedBase64('summary-img2'),
                     rating: currentRating,
                     comment: document.getElementById('rating-comment').value,
                     updatedAt: new Date()
                 };
 
                 const userId = auth.currentUser.uid;
-                
-                if (currentEditingDocId) {
-                    const docRef = doc(db, 'artifacts', globalAppId, 'users', userId, 'evaluaciones', currentEditingDocId);
-                    await updateDoc(docRef, diagnosticData);
-                } else {
-                    diagnosticData.createdAt = new Date();
-                    const evaluacionesRef = collection(db, 'artifacts', globalAppId, 'users', userId, 'evaluaciones');
-                    const newDoc = await addDoc(evaluacionesRef, diagnosticData);
-                    currentEditingDocId = newDoc.id; 
-                }
+                const docRef = doc(db, 'artifacts', globalAppId, 'users', userId, 'evaluaciones', currentEditingDocId);
+                await updateDoc(docRef, diagnosticData);
 
-                btn.innerHTML = '✅ ¡Ficha Guardada!';
+                btn.innerHTML = '✅ ¡Cambios Guardados!';
                 btn.classList.replace('bg-slate-900', 'bg-emerald-600');
                 btn.classList.replace('hover:bg-slate-800', 'hover:bg-emerald-500');
 
-                window.updateHistoryBadgeCount();
                 setTimeout(() => { document.getElementById('rating-section').classList.add('hidden'); }, 2000);
-
             } catch (error) {
-                console.error("Error saving evaluation:", error);
-                showNotification("Hubo un problema al guardar. Revisa tu conexión.", true);
+                console.error("Save Error:", error);
+                showNotification("Hubo un problema al guardar.", true);
                 btn.innerHTML = originalText; btn.disabled = false;
             }
         };
 
-        const userMenuBtn = document.getElementById('user-menu-btn');
-        const userDropdown = document.getElementById('user-dropdown');
-        
-        userMenuBtn.addEventListener('click', (e) => {
-            e.stopPropagation(); userDropdown.classList.toggle('hidden');
-        });
-
-        document.addEventListener('click', (e) => {
-            if (!userMenuBtn.contains(e.target) && !userDropdown.contains(e.target)) {
-                userDropdown.classList.add('hidden');
-            }
-        });
-
-        window.updateHistoryBadgeCount = async function() {
+        window.updateCounters = async function() {
             if (!auth || !auth.currentUser || !db) return;
             try {
                 const userId = auth.currentUser.uid;
+                const projectsSnap = await getDocs(collection(db, 'artifacts', globalAppId, 'users', userId, 'proyectos'));
+                const evalsSnap = await getDocs(collection(db, 'artifacts', globalAppId, 'users', userId, 'evaluaciones'));
                 
-                // 1. Conteo de Proyectos
-                const proyectosRef = collection(db, 'artifacts', globalAppId, 'users', userId, 'proyectos');
-                const proyectosSnap = await getDocs(proyectosRef);
-                const badgeProyectos = document.getElementById('history-count-badge');
-                if (badgeProyectos) badgeProyectos.innerText = proyectosSnap.size;
-
-                // 2. Conteo de Evaluaciones Totales
-                const evaluacionesRef = collection(db, 'artifacts', globalAppId, 'users', userId, 'evaluaciones');
-                const evalSnap = await getDocs(evaluacionesRef);
-                const badgeEvals = document.getElementById('total-evals-badge');
-                if (badgeEvals) badgeEvals.innerText = evalSnap.size;
-
-            } catch (e) { console.error("Error updating badge count:", e); }
+                if (document.getElementById('projects-count-badge')) document.getElementById('projects-count-badge').innerText = projectsSnap.size;
+                if (document.getElementById('total-evals-badge')) document.getElementById('total-evals-badge').innerText = evalsSnap.size;
+            } catch (e) { console.error("Error counters:", e); }
         };
 
         window.openHistory = async function() {
@@ -1170,118 +1136,109 @@
                 modal.classList.remove('opacity-0');
                 content.classList.remove('scale-95'); content.classList.add('scale-100');
             }, 10);
-            
-            const historyList = document.getElementById('history-list');
-            historyList.innerHTML = '<div class="text-center py-10 text-slate-400 text-xs uppercase tracking-widest font-bold"><i class="fas fa-spinner fa-spin text-3xl mb-3 text-brand-500"></i><br>Cargando Proyectos...</div>';
+
+            document.getElementById('history-title').innerHTML = '<i class="fas fa-folder-open text-brand-500"></i> Mis Proyectos';
+            document.getElementById('history-subtitle').innerText = 'Administra tus carpetas y diagnósticos.';
+            document.getElementById('projects-view').classList.remove('hidden');
+            document.getElementById('evaluations-view').classList.add('hidden');
+            document.getElementById('back-to-projects-btn').classList.add('hidden');
+
+            const projectsList = document.getElementById('projects-list');
+            projectsList.innerHTML = '<div class="text-center py-6 text-slate-400 text-xs font-bold uppercase"><i class="fas fa-spinner fa-spin mb-2"></i><br>Cargando...</div>';
 
             if (!auth || !auth.currentUser || !db) return;
 
             try {
                 const userId = auth.currentUser.uid;
-                const evaluacionesRef = collection(db, 'artifacts', globalAppId, 'users', userId, 'evaluaciones');
-                const q = query(evaluacionesRef, orderBy('createdAt', 'desc'));
+                const projectsRef = collection(db, 'artifacts', globalAppId, 'users', userId, 'proyectos');
+                const projSnap = await getDocs(query(projectsRef, orderBy('createdAt', 'desc')));
+                
+                const evalsRef = collection(db, 'artifacts', globalAppId, 'users', userId, 'evaluaciones');
+                const evalsSnap = await getDocs(evalsRef);
+                const allEvals = [];
+                evalsSnap.forEach(d => allEvals.push({ id: d.id, ...d.data() }));
+
+                projectsList.innerHTML = '';
+                projSnap.forEach(docSnap => {
+                    const data = docSnap.data();
+                    const projEvals = allEvals.filter(e => e.projectId === docSnap.id);
+                    
+                    let projTotal = 0;
+                    projEvals.forEach(e => {
+                        if (e.precio_ref) projTotal += window.extractPrice(e.precio_ref);
+                    });
+
+                    projectsList.innerHTML += `
+                        <div onclick="window.loadProjectEvals('${docSnap.id}', '${data.name}')" class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-all cursor-pointer flex justify-between items-center group">
+                            <div class="flex items-center gap-4">
+                                <div class="w-10 h-10 rounded-full bg-brand-50 text-brand-500 flex items-center justify-center text-lg group-hover:scale-110 transition-transform"><i class="fas fa-folder"></i></div>
+                                <div>
+                                    <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wide">${data.name}</h3>
+                                    <p class="text-[0.65rem] text-slate-400 font-semibold uppercase tracking-widest mt-0.5">${projEvals.length} Evaluaciones</p>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-[0.65rem] text-slate-400 uppercase tracking-widest font-bold mb-0.5">Inversión Sumada</p>
+                                <p class="text-sm font-bold text-slate-700">$${projTotal.toLocaleString('es-CL')}</p>
+                            </div>
+                        </div>
+                    `;
+                });
+
+            } catch (error) { console.error(error); projectsList.innerHTML = 'Error al cargar.'; }
+        };
+
+        window.loadProjectEvals = async function(projectId, projectName) {
+            document.getElementById('projects-view').classList.add('hidden');
+            document.getElementById('evaluations-view').classList.remove('hidden');
+            document.getElementById('back-to-projects-btn').classList.remove('hidden');
+            document.getElementById('history-title').innerHTML = `<i class="fas fa-folder text-brand-500"></i> ${projectName}`;
+            document.getElementById('history-subtitle').innerText = 'Selecciona una ficha para abrirla y editarla.';
+
+            const historyList = document.getElementById('history-list');
+            historyList.innerHTML = '<div class="text-center py-6 text-slate-400 text-xs font-bold uppercase"><i class="fas fa-spinner fa-spin mb-2"></i><br>Cargando fichas...</div>';
+
+            try {
+                const userId = auth.currentUser.uid;
+                const evalsRef = collection(db, 'artifacts', globalAppId, 'users', userId, 'evaluaciones');
+                const q = query(evalsRef, orderBy('createdAt', 'desc'));
                 const querySnapshot = await getDocs(q);
 
                 window.historyDataCache = {};
-                window.projectFoldersCache = {};
+                historyList.innerHTML = '';
                 
+                let found = false;
                 querySnapshot.forEach((docSnap) => {
                     const data = docSnap.data();
+                    if (data.projectId !== projectId) return;
+                    
+                    found = true;
                     window.historyDataCache[docSnap.id] = data; 
+                    const dateObj = data.createdAt ? new Date(data.createdAt.seconds * 1000) : new Date();
+                    const dateStr = dateObj.toLocaleDateString('es-CL', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute:'2-digit' });
+                    
+                    let starsHtml = '';
+                    const rating = data.rating || 0;
+                    for(let i=1; i<=5; i++) starsHtml += `<span class="${i <= rating ? 'text-yellow-400' : 'text-slate-200'} text-lg">★</span>`;
 
-                    const pid = data.projectId || 'unassigned';
-                    const pname = data.projectName || 'Mis Evaluaciones Generales';
-
-                    if (!window.projectFoldersCache[pid]) {
-                        window.projectFoldersCache[pid] = { name: pname, evals: [], totalCost: 0, docId: pid };
-                    }
-                    window.projectFoldersCache[pid].evals.push({id: docSnap.id, data: data});
-                    window.projectFoldersCache[pid].totalCost += window.extractPrice(data.precio_ref);
+                    historyList.innerHTML += `
+                        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm hover:border-brand-300 transition-colors flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                            <div class="flex-1 w-full overflow-hidden">
+                                <p class="text-xs font-bold text-slate-800 mb-1 truncate uppercase tracking-wider">${data.superficie || 'Evaluación Técnica'}</p>
+                                <p class="text-[0.65rem] font-bold text-brand-500 uppercase tracking-widest mb-1.5"><i class="far fa-clock"></i> ${dateStr}</p>
+                                <div class="flex items-center gap-2 mb-2"><div class="flex drop-shadow-sm -mt-1">${starsHtml}</div></div>
+                                ${data.comment ? `<div class="bg-slate-50 p-3 rounded-lg border border-slate-100 text-xs text-slate-600 italic relative w-full overflow-hidden text-ellipsis whitespace-nowrap"><i class="fas fa-quote-left text-slate-300 absolute opacity-50 text-2xl -top-1 -left-1"></i><span class="relative z-10 pl-2">"${data.comment}"</span></div>` : ''}
+                            </div>
+                            <button onclick="window.loadHistoryItem('${docSnap.id}')" class="w-full md:w-auto bg-slate-900 hover:bg-slate-800 text-white text-[0.7rem] font-bold py-3 px-5 rounded-lg transition-colors flex items-center justify-center gap-2 whitespace-nowrap shadow-sm uppercase tracking-widest">
+                                <i class="fas fa-folder-open text-brand-400"></i> Abrir Ficha
+                            </button>
+                        </div>
+                    `;
                 });
 
-                window.showFoldersView();
+                if (!found) historyList.innerHTML = '<div class="text-center py-12 text-slate-400"><p class="text-sm font-medium">No hay evaluaciones en esta carpeta.</p></div>';
 
-            } catch (error) {
-                console.error("Error loading history:", error);
-                historyList.innerHTML = '<div class="text-center py-10 text-red-400 text-xs uppercase tracking-widest font-bold"><i class="fas fa-exclamation-triangle text-3xl mb-3"></i><br>Ocurrió un problema al cargar.</div>';
-            }
-        };
-
-        window.showFoldersView = function() {
-            const list = document.getElementById('history-list');
-            list.innerHTML = '';
-            document.getElementById('history-back-btn').classList.add('hidden');
-            document.getElementById('history-title').innerHTML = '<i class="fas fa-folder-open text-brand-500"></i> Mis Proyectos';
-            document.getElementById('history-subtitle').innerText = 'Selecciona un proyecto para ver sus diagnósticos.';
-
-            const folders = Object.values(window.projectFoldersCache);
-
-            if (folders.length === 0) {
-                list.innerHTML = '<div class="text-center py-12 text-slate-400"><i class="fas fa-folder-open text-4xl mb-4 text-slate-200"></i><p class="text-sm font-medium">Aún no tienes proyectos guardados.</p></div>';
-                return;
-            }
-
-            folders.forEach(f => {
-                const costFormatted = f.totalCost > 0 ? '$' + f.totalCost.toLocaleString('es-CL') : 'A evaluar';
-                const item = document.createElement('div');
-                item.className = "bg-white p-5 rounded-xl border border-slate-200 shadow-sm hover:shadow-md hover:border-brand-300 transition-all cursor-pointer flex justify-between items-center gap-4 group";
-                item.onclick = () => window.showProjectEvals(f.docId);
-                item.innerHTML = `
-                    <div class="flex items-center gap-4 w-full overflow-hidden">
-                        <div class="w-12 h-12 bg-slate-50 rounded-xl flex items-center justify-center border border-slate-100 group-hover:bg-brand-50 transition-colors shrink-0">
-                            <i class="fas fa-folder text-2xl text-slate-300 group-hover:text-brand-500 transition-colors"></i>
-                        </div>
-                        <div class="flex-1 overflow-hidden">
-                            <p class="text-sm font-bold text-slate-800 truncate uppercase tracking-wider">${f.name}</p>
-                            <p class="text-[0.65rem] font-bold text-slate-400 uppercase tracking-widest mt-1">${f.evals.length} Evaluación(es)</p>
-                        </div>
-                    </div>
-                    <div class="text-right flex-shrink-0">
-                        <p class="text-[0.6rem] text-slate-400 uppercase tracking-widest mb-1">Inversión Total</p>
-                        <p class="text-sm font-bold text-slate-900">${costFormatted}</p>
-                    </div>
-                `;
-                list.appendChild(item);
-            });
-        };
-
-        window.showProjectEvals = function(pid) {
-            const folder = window.projectFoldersCache[pid];
-            if(!folder) return;
-
-            document.getElementById('history-back-btn').classList.remove('hidden');
-            document.getElementById('history-title').innerHTML = `<i class="fas fa-folder text-brand-500"></i> ${folder.name}`;
-            document.getElementById('history-subtitle').innerText = 'Diagnósticos guardados en este proyecto.';
-
-            const list = document.getElementById('history-list');
-            list.innerHTML = '';
-
-            folder.evals.forEach(evalObj => {
-                const data = evalObj.data;
-                const dateObj = data.createdAt ? new Date(data.createdAt.seconds * 1000) : new Date();
-                const dateStr = dateObj.toLocaleDateString('es-CL', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute:'2-digit' });
-
-                let starsHtml = '';
-                const rating = data.rating || 0;
-                for(let i=1; i<=5; i++) { starsHtml += `<span class="${i <= rating ? 'text-yellow-400' : 'text-slate-200'} text-lg">★</span>`; }
-
-                const item = document.createElement('div');
-                item.className = "bg-white p-5 rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow flex flex-col md:flex-row justify-between items-start md:items-center gap-4";
-                item.innerHTML = `
-                    <div class="flex-1 w-full overflow-hidden">
-                        <p class="text-xs font-bold text-slate-800 mb-1 truncate uppercase tracking-wider">${data.superficie || 'Evaluación Técnica'}</p>
-                        <p class="text-[0.65rem] font-bold text-brand-500 uppercase tracking-widest mb-1.5"><i class="far fa-clock"></i> ${dateStr}</p>
-                        <div class="flex items-center gap-2 mb-2">
-                            <div class="flex drop-shadow-sm -mt-1">${starsHtml}</div>
-                        </div>
-                        ${data.comment ? `<div class="bg-slate-50 p-3 rounded-lg border border-slate-100 text-xs text-slate-600 italic relative w-full overflow-hidden text-ellipsis whitespace-nowrap"><i class="fas fa-quote-left text-slate-300 absolute opacity-50 text-2xl -top-1 -left-1"></i><span class="relative z-10 pl-2">"${data.comment}"</span></div>` : ''}
-                    </div>
-                    <button onclick="window.loadHistoryItem('${evalObj.id}')" class="w-full md:w-auto bg-slate-900 hover:bg-slate-800 text-white text-[0.7rem] font-bold py-3 px-5 rounded-lg transition-colors flex items-center justify-center gap-2 whitespace-nowrap shadow-sm uppercase tracking-widest">
-                        <i class="fas fa-file-alt text-brand-400"></i> Abrir Ficha
-                    </button>
-                `;
-                list.appendChild(item);
-            });
+            } catch (error) { console.error(error); historyList.innerHTML = 'Error al cargar.'; }
         };
 
         window.loadHistoryItem = function(docId) {
@@ -1295,11 +1252,6 @@
             
             currentEditingDocId = docId; 
             document.getElementById('edit-hint').classList.remove('hidden');
-
-            const pdfProjectName = document.getElementById('pdf-project-name');
-            if(pdfProjectName) {
-                pdfProjectName.innerText = `Proyecto: ${data.projectName || 'Sin Clasificar'}`;
-            }
 
             document.getElementById('user-request-summary').classList.remove('hidden');
             if (data.img1) {
@@ -1327,7 +1279,9 @@
             else badgeClass = "border-emerald-200 text-emerald-700 bg-emerald-50";
             badge.className = `text-[0.6rem] font-bold px-3 py-1 rounded-full uppercase tracking-wide border mt-1 outline-none hover:ring-2 hover:ring-slate-300 transition cursor-text whitespace-nowrap ${badgeClass}`;
             
-            finalWeatherLoc = data.location || ''; finalWeatherTemp = data.temp || ''; finalWeatherHum = data.hum || '';
+            finalWeatherLoc = data.location || '';
+            finalWeatherTemp = data.temp || '';
+            finalWeatherHum = data.hum || '';
             if(finalWeatherLoc) {
                 const wBadge = document.getElementById('weather-badge');
                 wBadge.classList.remove('hidden');
@@ -1344,7 +1298,7 @@
             
             const priceSubtitle = document.getElementById('price-subtitle');
             if (priceSubtitle) {
-                if ((data.unidad_ref || '').includes('TOTAL')) {
+                if ((data.unidad_ref || '').includes('Total')) {
                     priceSubtitle.innerText = 'Suma del costo de los materiales listados arriba (1 unidad c/u)';
                 } else {
                     priceSubtitle.innerText = 'Valor de Mercado Competitivo';
@@ -1403,7 +1357,131 @@
             setTimeout(() => { modal.classList.add('hidden'); modal.classList.remove('flex'); }, 300);
         };
 
+        let adminChartInstance = null;
+
+        window.openAdminDashboard = async function() {
+            userDropdown.classList.add('hidden');
+            const modal = document.getElementById('admin-modal');
+            const content = document.getElementById('admin-modal-content');
+            
+            modal.classList.remove('hidden'); modal.classList.add('flex');
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+                content.classList.remove('scale-95'); content.classList.add('scale-100');
+            }, 10);
+
+            const listContainer = document.getElementById('admin-global-list');
+            const statsContainer = document.getElementById('admin-stats-container');
+            
+            listContainer.innerHTML = '<div class="p-8 text-center text-slate-400 text-xs font-bold uppercase tracking-widest"><i class="fas fa-circle-notch fa-spin text-2xl mb-2 text-brand-500"></i><br>Extrayendo datos globales...</div>';
+            
+            try {
+                // Magia de Firebase: collectionGroup busca la subcolección 'evaluaciones' en TODOS los usuarios
+                const evalsSnap = await getDocs(collectionGroup(db, 'evaluaciones'));
+                
+                let allEvals = [];
+                let totalMonto = 0;
+                let damageCounts = { 'Crítico / Alto': 0, 'Moderado / Medio': 0, 'Leve / Bajo': 0 };
+
+                evalsSnap.forEach(doc => {
+                    const data = doc.data();
+                    allEvals.push(data);
+                    
+                    if (data.precio_ref) {
+                        const priceNum = window.extractPrice(data.precio_ref);
+                        totalMonto += priceNum;
+                    }
+
+                    const dmg = (data.nivel_dano || '').toUpperCase();
+                    if (dmg.includes('CRÍTICO') || dmg.includes('ALTO')) damageCounts['Crítico / Alto']++;
+                    else if (dmg.includes('MODERADO') || dmg.includes('MEDIO')) damageCounts['Moderado / Medio']++;
+                    else damageCounts['Leve / Bajo']++;
+                });
+
+                // Ordenar cronológicamente (más nuevo a más antiguo)
+                allEvals.sort((a, b) => {
+                    const timeA = a.createdAt ? a.createdAt.seconds : 0;
+                    const timeB = b.createdAt ? b.createdAt.seconds : 0;
+                    return timeB - timeA;
+                });
+
+                statsContainer.innerHTML = `
+                    <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-full bg-brand-50 text-brand-600 flex items-center justify-center text-xl"><i class="fas fa-file-contract"></i></div>
+                        <div><p class="text-[0.65rem] text-slate-400 uppercase tracking-widest font-bold">Diagnósticos Totales</p><p class="text-2xl font-bold text-slate-800">${allEvals.length}</p></div>
+                    </div>
+                    <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl"><i class="fas fa-money-bill-wave"></i></div>
+                        <div><p class="text-[0.65rem] text-slate-400 uppercase tracking-widest font-bold">Inversión Sumada Global</p><p class="text-xl font-bold text-slate-800">$${totalMonto.toLocaleString('es-CL')}</p></div>
+                    </div>
+                    <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-full bg-red-50 text-red-500 flex items-center justify-center text-xl"><i class="fas fa-exclamation-triangle"></i></div>
+                        <div><p class="text-[0.65rem] text-slate-400 uppercase tracking-widest font-bold">Casos Críticos Detectados</p><p class="text-2xl font-bold text-slate-800">${damageCounts['Crítico / Alto']}</p></div>
+                    </div>
+                `;
+
+                const ctx = document.getElementById('admin-chart').getContext('2d');
+                if (adminChartInstance) adminChartInstance.destroy(); 
+                
+                adminChartInstance = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Crítico / Alto', 'Moderado / Medio', 'Leve / Bajo'],
+                        datasets: [{
+                            label: 'Cantidad de Diagnósticos',
+                            data: [damageCounts['Crítico / Alto'], damageCounts['Moderado / Medio'], damageCounts['Leve / Bajo']],
+                            backgroundColor: ['#ef4444', '#f97316', '#10b981'],
+                            borderRadius: 6
+                        }]
+                    },
+                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
+                });
+
+                listContainer.innerHTML = '';
+                if(allEvals.length === 0) {
+                    listContainer.innerHTML = '<div class="p-6 text-center text-slate-500 text-sm">No hay reportes en la plataforma aún.</div>';
+                } else {
+                    allEvals.slice(0, 150).forEach(evalData => {
+                        const dateObj = evalData.createdAt ? new Date(evalData.createdAt.seconds * 1000) : new Date();
+                        const dateStr = dateObj.toLocaleDateString('es-CL', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute:'2-digit' });
+                        
+                        let badgeColor = "bg-emerald-100 text-emerald-700";
+                        const lvl = (evalData.nivel_dano || '').toUpperCase();
+                        if (lvl.includes('CRÍTICO') || lvl.includes('ALTO')) badgeColor = "bg-red-100 text-red-700";
+                        else if (lvl.includes('MODERADO') || lvl.includes('MEDIO')) badgeColor = "bg-orange-100 text-orange-700";
+
+                        listContainer.innerHTML += `
+                            <div class="px-5 py-4 hover:bg-slate-50 transition-colors flex justify-between items-center">
+                                <div>
+                                    <p class="text-xs font-bold text-slate-800 uppercase tracking-wide">${evalData.projectName || 'Sin Proyecto'} <span class="text-slate-400 font-normal">| ${evalData.superficie || 'Superficie'}</span></p>
+                                    <p class="text-[0.6rem] font-bold text-slate-400 mt-1 uppercase tracking-widest"><i class="far fa-clock"></i> ${dateStr}</p>
+                                </div>
+                                <div class="text-right flex flex-col items-end">
+                                    <span class="px-2 py-0.5 rounded text-[0.6rem] font-bold uppercase tracking-wider ${badgeColor}">${evalData.nivel_dano || 'N/A'}</span>
+                                    <p class="text-xs font-bold text-slate-700 mt-1">${evalData.precio_ref || '$0'}</p>
+                                </div>
+                            </div>
+                        `;
+                    });
+                }
+                
+            } catch (error) {
+                console.error("Error cargando panel admin:", error);
+                listContainer.innerHTML = '<div class="p-6 text-center text-red-500 font-bold text-xs"><i class="fas fa-times-circle"></i> Error extrayendo métricas. Revisa los índices de Firebase.</div>';
+            }
+        };
+
+        window.closeAdminDashboard = function() {
+            const modal = document.getElementById('admin-modal');
+            const content = document.getElementById('admin-modal-content');
+            modal.classList.add('opacity-0');
+            content.classList.remove('scale-100'); content.classList.add('scale-95');
+            setTimeout(() => { modal.classList.add('hidden'); modal.classList.remove('flex'); }, 300);
+        };
+
         const authBtnHeader = document.getElementById('auth-btn');
+        const userMenuBtn = document.getElementById('user-menu-btn');
+        const userDropdown = document.getElementById('user-dropdown');
         const userEmailDisplay = document.getElementById('user-email');
         const dropdownUserName = document.getElementById('dropdown-user-name');
         const signOutBtn = document.getElementById('sign-out-btn');
@@ -1425,28 +1503,50 @@
         let isSignUpMode = false;
 
         if (auth) {
-            onAuthStateChanged(auth, async (user) => {
+            onAuthStateChanged(auth, (user) => {
                 if (user) {
                     authBtnHeader.classList.add('hidden');
-                    userMenuBtn.classList.remove('hidden'); userMenuBtn.classList.add('flex');
+                    userMenuBtn.classList.remove('hidden');
+                    userMenuBtn.classList.add('flex');
                     
                     const displayName = user.displayName || user.email || 'Usuario';
                     userEmailDisplay.textContent = displayName;
                     dropdownUserName.textContent = user.email || displayName;
                     
+                    // SEGURIDAD PANEL MAESTRO
+                    if (user.email === 'obriniacl@gmail.com') {
+                        document.getElementById('admin-dashboard-btn').classList.remove('hidden');
+                    } else {
+                        document.getElementById('admin-dashboard-btn').classList.add('hidden');
+                    }
+
                     mainAppContainer.classList.remove('hidden');
                     closeAuthModal();
-                    await window.loadProjects(); 
-                    window.updateHistoryBadgeCount();
+                    
+                    // Invertimos el orden para que cargue los proyectos antes de actualizar contadores visuales.
+                    window.loadProjectsList();
                 } else {
                     authBtnHeader.classList.remove('hidden');
-                    userMenuBtn.classList.add('hidden'); userMenuBtn.classList.remove('flex');
-                    userDropdown.classList.add('hidden'); userEmailDisplay.textContent = '';
+                    userMenuBtn.classList.add('hidden');
+                    userMenuBtn.classList.remove('flex');
+                    userDropdown.classList.add('hidden');
+                    userEmailDisplay.textContent = '';
                     mainAppContainer.classList.add('hidden');
                     openAuthModal();
                 }
             });
         }
+
+        userMenuBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            userDropdown.classList.toggle('hidden');
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!userMenuBtn.contains(e.target) && !userDropdown.contains(e.target)) {
+                userDropdown.classList.add('hidden');
+            }
+        });
 
         function openAuthModal() {
             authModal.classList.remove('hidden');
@@ -1459,10 +1559,12 @@
 
         function closeAuthModal() {
             const content = authModal.querySelector('#auth-modal-content');
-            content.classList.remove('modal-enter-active'); content.classList.add('modal-exit-active');
+            content.classList.remove('modal-enter-active');
+            content.classList.add('modal-exit-active');
             setTimeout(() => {
                 authModal.classList.add('hidden');
-                content.classList.remove('modal-exit-active'); content.classList.add('modal-enter');
+                content.classList.remove('modal-exit-active');
+                content.classList.add('modal-enter');
             }, 300);
         }
 
@@ -1470,14 +1572,20 @@
             isSignUpMode = !isSignUpMode;
             resetAuthError();
             if (isSignUpMode) {
-                authTitle.textContent = 'Crear Cuenta'; authSubtitle.textContent = 'Regístrate para guardar tu historial.';
-                submitAuthBtn.textContent = 'REGISTRARSE'; authToggleText.textContent = '¿Ya tienes cuenta?';
-                toggleAuthModeBtn.textContent = 'Ingresa'; nameInputGroup.classList.remove('hidden');
+                authTitle.textContent = 'Crear Cuenta';
+                authSubtitle.textContent = 'Regístrate para guardar tu historial.';
+                submitAuthBtn.textContent = 'REGISTRARSE';
+                authToggleText.textContent = '¿Ya tienes cuenta?';
+                toggleAuthModeBtn.textContent = 'Ingresa';
+                nameInputGroup.classList.remove('hidden');
                 fullnameInput.required = true;
             } else {
-                authTitle.textContent = 'Iniciar Sesión'; authSubtitle.textContent = 'Accede para guardar tus reportes.';
-                submitAuthBtn.textContent = 'INGRESAR'; authToggleText.textContent = '¿No tienes cuenta?';
-                toggleAuthModeBtn.textContent = 'Regístrate'; nameInputGroup.classList.add('hidden');
+                authTitle.textContent = 'Iniciar Sesión';
+                authSubtitle.textContent = 'Accede para guardar tus reportes.';
+                submitAuthBtn.textContent = 'INGRESAR';
+                authToggleText.textContent = '¿No tienes cuenta?';
+                toggleAuthModeBtn.textContent = 'Regístrate';
+                nameInputGroup.classList.add('hidden');
                 fullnameInput.required = false;
             }
         }
@@ -1496,16 +1604,13 @@
         googleAuthBtn.addEventListener('click', async () => {
             if (!auth) return showError("Servicio de autenticación no disponible.");
             resetAuthError();
-            try {
-                const provider = new GoogleAuthProvider();
-                await signInWithPopup(auth, provider);
-            } catch (error) { showError("Error al conectar con Google."); }
+            try { await signInWithPopup(auth, new GoogleAuthProvider()); } 
+            catch (error) { showError("Error al conectar con Google."); }
         });
 
         emailAuthForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             if (!auth) return showError("Servicio no disponible.");
-            
             const email = emailInput.value.trim(); const password = passwordInput.value; const fullname = fullnameInput.value.trim();
             if (!email || !password) return showError("Ingresa correo y contraseña.");
             if (isSignUpMode && !fullname) return showError("Ingresa tu nombre y apellido.");
@@ -1519,10 +1624,8 @@
                     await updateProfile(userCredential.user, { displayName: fullname });
                     userEmailDisplay.textContent = fullname;
                 } else { await signInWithEmailAndPassword(auth, email, password); }
-            } catch (error) { showError("Credenciales incorrectas o correo en uso.");
-            } finally {
-                submitAuthBtn.disabled = false; submitAuthBtn.textContent = isSignUpMode ? 'REGISTRARSE' : 'INGRESAR';
-            }
+            } catch (error) { showError("Credenciales incorrectas o correo en uso."); } 
+            finally { submitAuthBtn.disabled = false; submitAuthBtn.textContent = isSignUpMode ? 'REGISTRARSE' : 'INGRESAR'; }
         });
     </script>
 </body>
