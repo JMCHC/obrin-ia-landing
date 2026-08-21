@@ -51,7 +51,7 @@
         #obrin-pro-root .upload-box.filled { border-style: solid; border-color: #10B981; background: #f0fdf4; }
         
         .scanner-line { 
-            position: absolute; top: 0; left: 0; width: 100%; height: 1px; 
+            position: absolute top: 0; left: 0; width: 100%; height: 1px; 
             background: #ffffff; box-shadow: 0 0 15px rgba(255,255,255,0.8); z-index: 20; 
             display: none; 
         }
@@ -148,10 +148,18 @@
             <div id="input-section" class="space-y-6">
                 <!-- Selector de Proyecto -->
                 <div class="bg-slate-50 border border-slate-200 rounded-lg p-4 mb-2">
-                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2"><i class="fas fa-folder text-brand-500 mr-1"></i> Carpeta de Proyecto Activa</label>
+                    <div class="flex justify-between items-center mb-2">
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider"><i class="fas fa-folder text-brand-500 mr-1"></i> Carpeta de Proyecto Activa</label>
+                        <button type="button" id="show-new-project-btn" onclick="document.getElementById('new-project-inline').classList.remove('hidden'); document.getElementById('project-selector').classList.add('hidden'); this.classList.add('hidden'); document.getElementById('cancel-new-project-btn').classList.remove('hidden');" class="text-[0.65rem] font-bold text-brand-600 hover:text-brand-700 uppercase tracking-wider transition-colors"><i class="fas fa-plus"></i> Nueva</button>
+                        <button type="button" id="cancel-new-project-btn" onclick="document.getElementById('new-project-inline').classList.add('hidden'); document.getElementById('project-selector').classList.remove('hidden'); document.getElementById('show-new-project-btn').classList.remove('hidden'); this.classList.add('hidden');" class="hidden text-[0.65rem] font-bold text-slate-400 hover:text-slate-600 uppercase tracking-wider transition-colors"><i class="fas fa-times"></i> Cancelar</button>
+                    </div>
                     <select id="project-selector" class="w-full p-2.5 bg-white border border-slate-300 rounded text-sm font-semibold text-slate-800 outline-none focus:ring-2 focus:ring-brand-500 transition-shadow appearance-none cursor-pointer">
                         <option value="">Cargando proyectos...</option>
                     </select>
+                    <div id="new-project-inline" class="hidden flex gap-2">
+                        <input type="text" id="inline-project-name" placeholder="Nombre de la nueva carpeta..." class="flex-1 p-2.5 bg-white border border-slate-300 rounded text-sm font-semibold text-slate-800 outline-none focus:ring-2 focus:ring-brand-500 transition-shadow">
+                        <button type="button" onclick="window.createInlineProject()" class="bg-slate-900 text-white px-4 rounded text-xs font-bold uppercase tracking-widest hover:bg-slate-800 transition shadow">Crear</button>
+                    </div>
                 </div>
 
                 <div class="grid grid-cols-2 gap-4">
@@ -342,7 +350,6 @@
         </div>
     </div>
 
-    <!-- PANEL DE HISTORIAL -->
     <div id="history-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] hidden items-center justify-center p-4 opacity-0 transition-opacity duration-300">
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden relative border border-slate-100 flex flex-col h-[85vh] transform scale-95 transition-transform duration-300" id="history-modal-content">
             <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50" id="history-header">
@@ -1004,6 +1011,35 @@
                 showNotification("Proyecto creado");
                 window.openHistory(); 
                 window.loadProjectsList(); 
+            } catch (error) {
+                console.error("Error creating project:", error);
+                showNotification("Error al crear", true);
+            }
+        };
+
+        window.createInlineProject = async function() {
+            const input = document.getElementById('inline-project-name');
+            const name = input.value.trim();
+            if (!name) return showNotification("Ingresa un nombre para la carpeta", true);
+            if (!auth || !auth.currentUser || !db) return;
+
+            try {
+                const userId = auth.currentUser.uid;
+                const projectsRef = collection(db, 'artifacts', globalAppId, 'users', userId, 'proyectos');
+                const newDocRef = await addDoc(projectsRef, { name: name, createdAt: new Date() });
+                input.value = '';
+                showNotification("Carpeta creada y seleccionada");
+                
+                // Volver a la vista del select
+                document.getElementById('new-project-inline').classList.add('hidden');
+                document.getElementById('project-selector').classList.remove('hidden');
+                document.getElementById('cancel-new-project-btn').classList.add('hidden');
+                document.getElementById('show-new-project-btn').classList.remove('hidden');
+                
+                // Recargar lista y seleccionar el nuevo
+                await window.loadProjectsList();
+                document.getElementById('project-selector').value = newDocRef.id;
+
             } catch (error) {
                 console.error("Error creating project:", error);
                 showNotification("Error al crear", true);
