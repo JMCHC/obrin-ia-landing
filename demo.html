@@ -1200,6 +1200,12 @@
 
             try {
                 const userId = auth.currentUser.uid;
+                
+                // Obtener ID del primer proyecto para saber dónde mostrar las huérfanas
+                const projectsRef = collection(db, 'artifacts', globalAppId, 'users', userId, 'proyectos');
+                const projSnap = await getDocs(query(projectsRef, orderBy('createdAt', 'desc')));
+                let firstProjId = projSnap.empty ? null : projSnap.docs[0].id;
+
                 const evalsRef = collection(db, 'artifacts', globalAppId, 'users', userId, 'evaluaciones');
                 const q = query(evalsRef, orderBy('createdAt', 'desc'));
                 const querySnapshot = await getDocs(q);
@@ -1210,7 +1216,10 @@
                 let found = false;
                 querySnapshot.forEach((docSnap) => {
                     const data = docSnap.data();
-                    if (data.projectId !== projectId) return;
+                    
+                    // COMPATIBILIDAD: Mostrar si pertenece al proyecto, o si es antigua y abrimos la carpeta principal
+                    const isOrphaned = !data.projectId;
+                    if (data.projectId !== projectId && !(isOrphaned && projectId === firstProjId)) return;
                     
                     found = true;
                     window.historyDataCache[docSnap.id] = data; 
