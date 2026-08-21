@@ -1158,10 +1158,17 @@
                 const allEvals = [];
                 evalsSnap.forEach(d => allEvals.push({ id: d.id, ...d.data() }));
 
+                const firstProjId = projSnap.empty ? null : projSnap.docs[0].id;
+
                 projectsList.innerHTML = '';
                 projSnap.forEach(docSnap => {
                     const data = docSnap.data();
-                    const projEvals = allEvals.filter(e => e.projectId === docSnap.id);
+                    
+                    // COMPATIBILIDAD: Contar también las huérfanas si es el primer proyecto
+                    const projEvals = allEvals.filter(e => {
+                        const isOrphaned = !e.projectId;
+                        return e.projectId === docSnap.id || (isOrphaned && docSnap.id === firstProjId);
+                    });
                     
                     let projTotal = 0;
                     projEvals.forEach(e => {
