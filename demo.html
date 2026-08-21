@@ -826,9 +826,34 @@
                     summaryNotesContainer.classList.add('hidden');
                 }
 
+                // NUEVO: Consultar la Memoria Experta (Lista de Títulos Validados)
+                msgEl.innerText = "Buscando coincidencias previas...";
+                let expertContextText = "";
+                try {
+                    const expertRef = window.collection(window.db, 'artifacts', window.globalAppId, 'conocimiento_experto');
+                    // Extraemos hasta 60 casos para armar una base de datos de títulos amplia
+                    const qExp = window.query(expertRef, window.orderBy('updatedAt', 'desc'), window.limit(60));
+                    const snap = await window.getDocs(qExp);
+                    let validaciones = [];
+                    snap.forEach(doc => validaciones.push(doc.data()));
+                    
+                    if (validaciones.length > 0) {
+                        expertContextText = validaciones.map((v) => {
+                            // Generamos el "Título General" uniendo Superficie y Patología
+                            const titulo = `${(v.superficie || '').toUpperCase()} | ${(v.patologia || '').toUpperCase()}`;
+                            const mats = (v.materiales || []).map(m => m.replace(/<[^>]*>?/gm, '')).join('; ');
+                            const steps = (v.pasos || []).map(p => p.replace(/<[^>]*>?/gm, '')).join('; ');
+                            return `TÍTULO DEL CASO EXPERTO: [${titulo}]\n- Solución: ${v.solucion}\n- Materiales: ${mats}\n- Pasos: ${steps}`;
+                        }).join('\n\n');
+                    }
+                } catch(e) { console.error("Error leyendo memoria experta", e); }
+
+                msgEl.innerText = "Procesando Diagnóstico...";
+
                 const payload = {
                     userNotes: userNotes,
                     weatherContextText: weatherContextText,
+                    expertContext: expertContextText,
                     imgData1: imgData1, imgType1: imgType1,
                     imgData2: imgData2, imgType2: imgType2
                 };
@@ -975,7 +1000,7 @@
         } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         
         import { 
-            getFirestore, doc, setDoc, collection, addDoc, updateDoc, increment, getDocs, query, orderBy, collectionGroup 
+            getFirestore, doc, setDoc, collection, addDoc, updateDoc, increment, getDocs, query, orderBy, collectionGroup, limit
         } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         const firebaseConfig = {
@@ -996,6 +1021,15 @@
             auth = getAuth(app);
             db = getFirestore(app);
             setPersistence(auth, browserSessionPersistence).catch(console.error);
+            
+            // Exportar a window para uso en funciones no modulares
+            window.db = db;
+            window.globalAppId = globalAppId;
+            window.collection = collection;
+            window.query = query;
+            window.orderBy = orderBy;
+            window.limit = limit;
+            window.getDocs = getDocs;
         } catch (e) {
             console.error("Firebase init error:", e);
         }
@@ -1169,6 +1203,14 @@
                 const userId = auth.currentUser.uid;
                 const docRef = doc(db, 'artifacts', globalAppId, 'users', userId, 'evaluaciones', currentEditingDocId);
                 await updateDoc(docRef, diagnosticData);
+
+                // NUEVO: Guardar en la Memoria Experta Compartida (RAG)
+                try {
+                    const expertRef = doc(db, 'artifacts', globalAppId, 'conocimiento_experto', currentEditingDocId);
+                    await setDoc(expertRef, diagnosticData, { merge: true });
+                } catch (e) {
+                    console.error("Error guardando en memoria experta:", e);
+                }
 
                 btn.innerHTML = '✅ ¡Cambios Guardados!';
                 btn.classList.replace('bg-slate-900', 'bg-emerald-600');
