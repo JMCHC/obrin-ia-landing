@@ -1000,7 +1000,7 @@
         } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         
         import { 
-            getFirestore, doc, setDoc, collection, addDoc, updateDoc, increment, getDocs, query, orderBy, collectionGroup, limit
+            getFirestore, doc, setDoc, collection, addDoc, updateDoc, deleteDoc, increment, getDocs, query, orderBy, collectionGroup, limit
         } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         const firebaseConfig = {
@@ -1511,6 +1511,9 @@
 
                 evalsSnap.forEach(doc => {
                     const data = doc.data();
+                    // Capturamos el ID del documento y el ID del usuario para poder borrarlo
+                    data.docId = doc.id;
+                    data.userId = doc.ref.parent.parent.id; 
                     allEvals.push(data);
                     
                     if (data.precio_ref) {
@@ -1577,14 +1580,19 @@
                         else if (lvl.includes('MODERADO') || lvl.includes('MEDIO')) badgeColor = "bg-orange-100 text-orange-700";
 
                         listContainer.innerHTML += `
-                            <div class="px-5 py-4 hover:bg-slate-50 transition-colors flex justify-between items-center">
+                            <div class="px-5 py-4 hover:bg-slate-50 transition-colors flex justify-between items-center group">
                                 <div>
                                     <p class="text-xs font-bold text-slate-800 uppercase tracking-wide">${evalData.projectName || 'Sin Proyecto'} <span class="text-slate-400 font-normal">| ${evalData.superficie || 'Superficie'}</span></p>
                                     <p class="text-[0.6rem] font-bold text-slate-400 mt-1 uppercase tracking-widest"><i class="far fa-clock"></i> ${dateStr}</p>
                                 </div>
-                                <div class="text-right flex flex-col items-end">
-                                    <span class="px-2 py-0.5 rounded text-[0.6rem] font-bold uppercase tracking-wider ${badgeColor}">${evalData.nivel_dano || 'N/A'}</span>
-                                    <p class="text-xs font-bold text-slate-700 mt-1">${evalData.precio_ref || '$0'}</p>
+                                <div class="text-right flex items-center gap-4">
+                                    <div class="flex flex-col items-end">
+                                        <span class="px-2 py-0.5 rounded text-[0.6rem] font-bold uppercase tracking-wider ${badgeColor}">${evalData.nivel_dano || 'N/A'}</span>
+                                        <p class="text-xs font-bold text-slate-700 mt-1">${evalData.precio_ref || '$0'}</p>
+                                    </div>
+                                    <button onclick="window.deleteDiagnostic('${evalData.userId}', '${evalData.docId}')" class="w-8 h-8 flex items-center justify-center bg-white border border-slate-200 rounded-full text-slate-400 hover:bg-red-50 hover:text-red-500 hover:border-red-200 transition-all shadow-sm opacity-0 group-hover:opacity-100" title="Eliminar reporte permanentemente">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </button>
                                 </div>
                             </div>
                         `;
@@ -1594,6 +1602,20 @@
             } catch (error) {
                 console.error("Error cargando panel admin:", error);
                 listContainer.innerHTML = '<div class="p-6 text-center text-red-500 font-bold text-xs"><i class="fas fa-times-circle"></i> Error extrayendo métricas. Revisa los índices de Firebase.</div>';
+            }
+        };
+
+        window.deleteDiagnostic = async function(userId, docId) {
+            if(!confirm("⚠️ ¿Eliminar permanentemente este diagnóstico de la cuenta del usuario?")) return;
+            
+            try {
+                const docRef = doc(window.db, 'artifacts', window.globalAppId, 'users', userId, 'evaluaciones', docId);
+                await deleteDoc(docRef);
+                showNotification("Diagnóstico eliminado correctamente.");
+                window.openAdminDashboard(); // Refrescar los datos y gráficos
+            } catch (error) {
+                console.error("Error eliminando:", error);
+                showNotification("Error de permisos al eliminar.", true);
             }
         };
 
