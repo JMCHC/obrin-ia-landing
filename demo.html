@@ -1606,12 +1606,22 @@
         };
 
         window.deleteDiagnostic = async function(userId, docId) {
-            if(!confirm("⚠️ ¿Eliminar permanentemente este diagnóstico de la cuenta del usuario?")) return;
+            if(!confirm("⚠️ ¿Eliminar permanentemente este diagnóstico de la cuenta del usuario Y de la memoria de la IA?")) return;
             
             try {
+                // 1. Borrar de la cuenta del usuario (Historial normal)
                 const docRef = doc(window.db, 'artifacts', window.globalAppId, 'users', userId, 'evaluaciones', docId);
                 await deleteDoc(docRef);
-                showNotification("Diagnóstico eliminado correctamente.");
+
+                // 2. Borrar del Cerebro Experto (Memoria de la IA)
+                try {
+                    const expertRef = doc(window.db, 'artifacts', window.globalAppId, 'conocimiento_experto', docId);
+                    await deleteDoc(expertRef);
+                } catch (e) {
+                    console.warn("El documento no estaba en la memoria experta o no se pudo borrar ahí.");
+                }
+
+                showNotification("Diagnóstico eliminado de todo el sistema.");
                 window.openAdminDashboard(); // Refrescar los datos y gráficos
             } catch (error) {
                 console.error("Error eliminando:", error);
