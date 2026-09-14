@@ -81,6 +81,12 @@
         .modal-enter-active { opacity: 1; transform: scale(1); transition: opacity 300ms, transform 300ms; }
         .modal-exit { opacity: 1; transform: scale(1); }
         .modal-exit-active { opacity: 0; transform: scale(0.95); transition: opacity 300ms, transform 300ms; }
+
+        /* ESTILOS DE LA BARRA DE TOKENS GLOBAL */
+        .contenedor-barra { width: 100%; max-width: 400px; }
+        .texto-barra { display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; }
+        .fondo-barra { width: 100%; height: 8px; background-color: #e2e8f0; border-radius: 10px; overflow: hidden; }
+        .relleno-barra { height: 100%; width: 0%; background-color: #10b981; transition: width 0.5s ease-in-out, background-color 0.3s; }
     </style>
 </head>
 <body class="bg-slate-50 min-h-screen flex items-center justify-center p-4 relative">
@@ -140,6 +146,17 @@
             <img src="https://lh3.googleusercontent.com/pw/AP1GczOsQ9BjTC3dTk0RxKlbaZtHDeSwbqF3-buuEPA6QHBnWKNK4GkHQpfHPUJkVSbHPN7QEXrwUL5qVDwk5vLhsbpcLCLP3NCezheTURsZUCAOwnL0h1NtlHKbrEHkrsdquexu32SfFSdxlqHT1c36shbDMQ=w599-h599-s-no-gm?authuser=0" alt="Logo Obrín IA" class="h-28 md:h-36 lg:h-48 mx-auto mb-6 object-contain">
             <h2 class="text-4xl font-light text-slate-900 mb-4 tracking-tight">Evaluación Técnica</h2>
             <p class="text-gray-500 font-light text-base max-w-lg mx-auto">Tecnología de vanguardia para el diagnóstico constructivo y valoración de proyectos residenciales de alto estándar.</p>
+            
+            <!-- BARRA DE TOKENS GLOBAL -->
+            <div class="contenedor-barra mx-auto mt-6">
+                <div class="texto-barra text-slate-400">
+                    <span class="flex items-center gap-1"><i class="fas fa-server"></i> Capacidad de Red (Gratuita)</span>
+                    <span id="porcentaje-texto">0%</span>
+                </div>
+                <div class="fondo-barra shadow-inner">
+                    <div id="barra-progreso" class="relleno-barra shadow-sm"></div>
+                </div>
+            </div>
         </div>
         
         <div id="obrin-pro-root" class="bg-white p-8 md:p-10 rounded-2xl shadow-2xl border border-gray-100 relative overflow-hidden max-w-2xl mx-auto">
@@ -1000,7 +1017,7 @@
         } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         
         import { 
-            getFirestore, doc, setDoc, collection, addDoc, updateDoc, deleteDoc, increment, getDocs, query, orderBy, collectionGroup, limit
+            getFirestore, doc, setDoc, collection, addDoc, updateDoc, deleteDoc, increment, getDocs, query, orderBy, collectionGroup, limit, onSnapshot
         } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         const firebaseConfig = {
@@ -1030,6 +1047,39 @@
             window.orderBy = orderBy;
             window.limit = limit;
             window.getDocs = getDocs;
+
+            // --- NUEVO: LISTENER DE TOKENS GLOBALES ---
+            const apiRef = doc(db, "CONFIGURACION", "estado_api_global");
+            onSnapshot(apiRef, (docSnap) => {
+                if(docSnap.exists()) {
+                    const datos = docSnap.data();
+                    const consumidos = datos.tokens_consumidos || 0;
+                    // Límite gratuito aproximado establecido en base a peticiones / capacidad API
+                    const limite = datos.limite_tokens_diario || 3000000; 
+                    
+                    let porcentaje = 0;
+                    if (limite > 0) porcentaje = (consumidos / limite) * 100;
+                    if (porcentaje > 100) porcentaje = 100;
+
+                    const barra = document.getElementById("barra-progreso");
+                    const texto = document.getElementById("porcentaje-texto");
+                    
+                    if(barra && texto) {
+                        barra.style.width = `${porcentaje}%`;
+                        texto.innerText = `${Math.round(porcentaje)}%`;
+                        
+                        if (porcentaje < 60) {
+                            barra.style.backgroundColor = "#10b981"; // Verde
+                        } else if (porcentaje < 90) {
+                            barra.style.backgroundColor = "#f59e0b"; // Amarillo
+                        } else {
+                            barra.style.backgroundColor = "#ef4444"; // Rojo
+                        }
+                    }
+                }
+            });
+            // --- FIN NUEVO ---
+
         } catch (e) {
             console.error("Firebase init error:", e);
         }
