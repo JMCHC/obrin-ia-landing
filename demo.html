@@ -29,7 +29,6 @@
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <!-- LIBRERÍA DE GRÁFICOS PARA PANEL ADMIN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
@@ -55,12 +54,7 @@
             background: #ffffff; box-shadow: 0 0 15px rgba(255,255,255,0.8); z-index: 20; 
             display: none; 
         }
-        
-        .scanning-active { 
-            display: block; 
-            animation: scanDown 2.5s infinite ease-in-out; 
-        }
-
+        .scanning-active { display: block; animation: scanDown 2.5s infinite ease-in-out; }
         @keyframes scanDown {
             0% { top: 0; opacity: 0; }
             10% { opacity: 1; }
@@ -70,23 +64,29 @@
 
         details > summary { list-style: none; }
         details > summary::-webkit-details-marker { display: none; }
-        
-        .pdf-export-mode {
-            border-radius: 0 !important;
-            padding: 40px !important;
-            background: white !important;
-        }
-
+        .pdf-export-mode { border-radius: 0 !important; padding: 40px !important; background: white !important; }
         .modal-enter { opacity: 0; transform: scale(0.95); }
         .modal-enter-active { opacity: 1; transform: scale(1); transition: opacity 300ms, transform 300ms; }
         .modal-exit { opacity: 1; transform: scale(1); }
         .modal-exit-active { opacity: 0; transform: scale(0.95); transition: opacity 300ms, transform 300ms; }
 
-        /* ESTILOS DE LA BARRA DE TOKENS GLOBAL */
+        /* ESTILOS BARRA GLOBAL TOKENS */
         .contenedor-barra { width: 100%; max-width: 400px; }
         .texto-barra { display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; }
         .fondo-barra { width: 100%; height: 8px; background-color: #e2e8f0; border-radius: 10px; overflow: hidden; }
         .relleno-barra { height: 100%; width: 0%; background-color: #10b981; transition: width 0.5s ease-in-out, background-color 0.3s; }
+
+        /* ESTILOS DEL TRACKING / CRM (NUEVO) */
+        .stepper-container { position: relative; width: 100%; cursor: default; }
+        .stepper-line { position: absolute; top: 12px; left: 0; right: 0; height: 3px; background-color: #e2e8f0; z-index: 0; }
+        .stepper-line-fill { position: absolute; top: 12px; left: 0; height: 3px; background-color: #ea580c; z-index: 0; transition: width 0.4s ease; }
+        .stepper-line-red { background-color: #ef4444; }
+        .step-dot { width: 26px; height: 26px; border-radius: 50%; background-color: white; border: 2px solid #cbd5e1; display: flex; justify-content: center; align-items: center; cursor: pointer; transition: all 0.3s; position: relative; z-index: 10; box-shadow: 0 0 0 4px white; color: #94a3b8; }
+        .step-dot:hover { transform: scale(1.15); border-color: #fb923c; color: #fb923c; }
+        .step-dot.active { border-color: #ea580c; background-color: #ea580c; color: white; }
+        .step-dot.active:hover { border-color: #c2410c; background-color: #c2410c; }
+        .step-dot.rejected { border-color: #ef4444; background-color: #ef4444; color: white; }
+        .step-time { position: absolute; top: -18px; font-size: 0.55rem; font-weight: 700; color: #64748b; background: white; padding: 1px 5px; border-radius: 4px; border: 1px solid #e2e8f0; transform: translateX(-50%); z-index: 5; white-space: nowrap; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
     </style>
 </head>
 <body class="bg-slate-50 min-h-screen flex items-center justify-center p-4 relative">
@@ -120,7 +120,7 @@
                     <span id="total-evals-badge" class="font-bold text-slate-700">0</span>
                 </div>
                 
-                <!-- BOTÓN PANEL MAESTRO (Oculto por defecto) -->
+                <!-- BOTÓN PANEL MAESTRO -->
                 <button id="admin-dashboard-btn" onclick="window.openAdminDashboard()" class="hidden w-full text-left px-4 py-3 text-xs text-brand-600 hover:bg-brand-50 font-bold transition-colors flex items-center gap-2 border-t border-slate-100">
                     <i class="fas fa-shield-alt w-4"></i> Panel de Administración
                 </button>
@@ -147,7 +147,6 @@
             <h2 class="text-4xl font-light text-slate-900 mb-4 tracking-tight">Evaluación Técnica</h2>
             <p class="text-gray-500 font-light text-base max-w-lg mx-auto">Tecnología de vanguardia para el diagnóstico constructivo y valoración de proyectos residenciales de alto estándar.</p>
             
-            <!-- BARRA DE TOKENS GLOBAL -->
             <div class="contenedor-barra mx-auto mt-6">
                 <div class="texto-barra text-slate-400">
                     <span class="flex items-center gap-1"><i class="fas fa-server"></i> Capacidad de Red (Gratuita)</span>
@@ -163,7 +162,6 @@
             <div class="top-0 left-0 w-full h-1 absolute bg-slate-900"></div>
             
             <div id="input-section" class="space-y-6">
-                <!-- Selector de Proyecto -->
                 <div class="bg-slate-50 border border-slate-200 rounded-lg p-4 mb-2">
                     <div class="flex justify-between items-center mb-2">
                         <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider"><i class="fas fa-folder text-brand-500 mr-1"></i> Carpeta de Proyecto Activa</label>
@@ -199,7 +197,6 @@
                 <div class="grid grid-cols-1 gap-4">
                     <div>
                         <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Entorno y Clima (Opcional)</label>
-                        
                         <div class="flex gap-2 mb-2" id="location-input-group">
                             <input type="text" id="userLocation" class="w-full p-3 bg-slate-50 rounded-lg border border-slate-200 text-sm focus:ring-1 focus:ring-slate-900 focus:border-slate-900 transition outline-none" placeholder="Ej: Santiago, Viña del Mar..." oninput="window.toggleLocationBtn(this.value)" onkeypress="if(event.key === 'Enter') { event.preventDefault(); window.fetchLocationAndWeather(); }">
                             <button type="button" id="getLocationBtn" onclick="window.fetchLocationAndWeather()" class="bg-slate-900 text-white px-4 rounded-lg text-sm font-medium transition hover:bg-slate-800 flex items-center justify-center whitespace-nowrap shadow-sm">
@@ -526,6 +523,148 @@
             return match ? parseInt(match[0], 10) : 0;
         }
 
+        // NUEVO: Funciones matemáticas para la línea de tiempo del embudo
+        window.getTimeElapsed = function(start, end) {
+            if (!start || !end) return '';
+            const diff = Math.max(0, end - start);
+            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+            const minutes = Math.floor((diff / 1000 / 60) % 60);
+            
+            if (days > 0) return `⏱️ +${days}d ${hours}h`;
+            if (hours > 0) return `⏱️ +${hours}h ${minutes}m`;
+            return `⏱️ +${minutes}m`;
+        };
+
+        // NUEVO: Generador HTML de la bitácora visual
+        window.generateStepperHTML = function(docId, seguimiento, rawData) {
+            if (!seguimiento) {
+                seguimiento = {
+                    paso_actual: 1,
+                    estado_rechazado: false,
+                    fechas: { "1": (rawData.createdAt ? rawData.createdAt.seconds * 1000 : Date.now()) }
+                };
+            }
+            
+            const paso = seguimiento.paso_actual || 1;
+            const isRej = seguimiento.estado_rechazado || false;
+            const fechas = seguimiento.fechas || {};
+            
+            const labels = ["Evaluado", "Revisión", "Aprobado", "Ejecución", "Finalizado"];
+            const rejectedLabel = "Rechazado";
+
+            let html = `<div class="stepper-container w-full relative mt-8 mb-2 px-2" onclick="event.stopPropagation()">`;
+            html += `<div class="stepper-line shadow-inner"></div>`;
+            
+            let fillWidth = (paso - 1) * 25;
+            let fillClass = isRej ? 'stepper-line-fill stepper-line-red shadow-sm' : 'stepper-line-fill shadow-sm';
+            html += `<div class="${fillClass}" style="width: ${fillWidth}%;"></div>`;
+
+            // Cronómetros intermedios
+            for (let i = 2; i <= 5; i++) {
+                if (fechas[i] && fechas[i-1]) {
+                    const elapsed = window.getTimeElapsed(fechas[i-1], fechas[i]);
+                    html += `<div class="step-time" style="left: ${ (i-1)*25 - 12.5 }%;">${elapsed}</div>`;
+                }
+            }
+
+            // Nodos principales
+            html += `<div class="flex justify-between relative z-10">`;
+            for (let i = 1; i <= 5; i++) {
+                let dotClass = "step-dot";
+                let icon = '';
+                let labelText = labels[i-1];
+                
+                if (i < paso) {
+                    dotClass += " active";
+                    icon = '<i class="fas fa-check text-[10px]"></i>';
+                } else if (i === paso) {
+                    if (isRej) {
+                        dotClass += " rejected";
+                        icon = '<i class="fas fa-times text-[10px]"></i>';
+                        labelText = (i === 3) ? rejectedLabel : labelText;
+                    } else {
+                        dotClass += " active";
+                        icon = `<span class="text-[10px] font-bold">${i}</span>`;
+                    }
+                } else {
+                    icon = `<span class="text-[10px] font-bold">${i}</span>`;
+                }
+
+                let onClick = `onclick="window.updateTrackingStep('${docId}', ${i}, false, event)"`;
+                
+                // Botón de Rechazo secreto sobre el paso de Aprobación
+                let rejectBtn = '';
+                if (i === 3 && paso === 2) {
+                    rejectBtn = `<button onclick="window.updateTrackingStep('${docId}', 3, true, event)" title="Marcar presupuesto como Rechazado" class="absolute -top-8 left-1/2 -translate-x-1/2 bg-red-100 text-red-600 rounded-full w-6 h-6 flex items-center justify-center text-[10px] hover:bg-red-500 hover:text-white transition shadow-sm z-20"><i class="fas fa-times"></i></button>`;
+                }
+
+                html += `
+                    <div class="relative flex flex-col items-center group">
+                        ${rejectBtn}
+                        <div class="${dotClass}" ${onClick} title="Marcar como ${labelText}">
+                            ${icon}
+                        </div>
+                        <div class="mt-1 text-[10px] font-bold ${i<=paso ? (isRej && i===paso ? 'text-red-500' : 'text-brand-600') : 'text-slate-400'}">${labelText}</div>
+                    </div>
+                `;
+            }
+            html += `</div></div>`;
+            return html;
+        }
+
+        // NUEVO: Lógica de actualización del estado en base de datos
+        window.updateTrackingStep = async function(docId, targetStep, isRejected, event) {
+            if(event) { event.stopPropagation(); event.preventDefault(); }
+            
+            const data = window.historyDataCache[docId];
+            if (!data) return;
+            
+            let seg = data.seguimiento || { paso_actual: 1, estado_rechazado: false, fechas: { "1": (data.createdAt ? data.createdAt.seconds * 1000 : Date.now()) } };
+            
+            if (seg.estado_rechazado) return showNotification("Este presupuesto ya está cerrado como rechazado.", true);
+            if (targetStep < seg.paso_actual) return showNotification("No se puede retroceder el estado de avance.", true);
+            if (targetStep > seg.paso_actual + 1 && !isRejected) return showNotification("Debes avanzar los estados en orden.", true);
+
+            const nowMs = Date.now();
+            const nuevasFechas = { ...seg.fechas, [targetStep]: nowMs };
+            
+            const newSeguimiento = {
+                paso_actual: targetStep,
+                estado_rechazado: isRejected,
+                fechas: nuevasFechas
+            };
+
+            // Actualización optimista de interfaz
+            window.historyDataCache[docId].seguimiento = newSeguimiento;
+            const wrapper = document.getElementById(`stepper-wrapper-${docId}`);
+            if(wrapper) {
+                wrapper.innerHTML = window.generateStepperHTML(docId, newSeguimiento, data);
+            }
+
+            // Inyectar en Firebase de fondo
+            try {
+                const userId = window.currentUserId;
+                if(!userId) throw new Error("No hay usuario activo.");
+
+                const docRef = window.doc(window.db, 'artifacts', window.globalAppId, 'users', userId, 'evaluaciones', docId);
+                await window.updateDoc(docRef, { seguimiento: newSeguimiento });
+                
+                // Actualizar copia en memoria RAG
+                try {
+                     const expertRef = window.doc(window.db, 'artifacts', window.globalAppId, 'conocimiento_experto', docId);
+                     await window.setDoc(expertRef, { seguimiento: newSeguimiento }, { merge: true });
+                } catch(e) {}
+                
+                if(isRejected) showNotification("Presupuesto Rechazado y archivado", true);
+                else showNotification("Estado de obra avanzado con éxito");
+                
+            } catch (err) {
+                console.error(err);
+                showNotification("Error de conexión al actualizar", true);
+            }
+        }
+
         window.addEventListener('DOMContentLoaded', () => {
             const stars = document.querySelectorAll('.star-btn');
             stars.forEach(btn => {
@@ -655,7 +794,6 @@
                 }
             };
 
-            // BÚSQUEDA MANUAL SI HAY TEXTO
             if (typedLocation) {
                 try {
                     const geoRes = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(typedLocation)}&count=1&language=es&format=json`);
@@ -673,7 +811,6 @@
                     btn.innerHTML = originalBtnHtml; btn.disabled = false;
                 }
             } else {
-                // DETECCIÓN AUTOMÁTICA (GPS/IP)
                 if (navigator.geolocation) {
                     navigator.geolocation.getCurrentPosition(
                         (pos) => processCoordinates(pos.coords.latitude, pos.coords.longitude),
@@ -812,7 +949,6 @@
             const msgEl = document.getElementById('loading-msg');
 
             try {
-                // Si el usuario escribió una ciudad pero NO presionó Buscar/Detectar, la resolvemos igual de forma silenciosa
                 let typedLocation = document.getElementById('userLocation').value.trim();
                 if (!finalWeatherLoc && typedLocation) {
                     msgEl.innerText = "Consultando Clima...";
@@ -843,12 +979,10 @@
                     summaryNotesContainer.classList.add('hidden');
                 }
 
-                // NUEVO: Consultar la Memoria Experta (Lista de Títulos Validados)
                 msgEl.innerText = "Buscando coincidencias previas...";
                 let expertContextText = "";
                 try {
                     const expertRef = window.collection(window.db, 'artifacts', window.globalAppId, 'conocimiento_experto');
-                    // Extraemos hasta 60 casos para armar una base de datos de títulos amplia
                     const qExp = window.query(expertRef, window.orderBy('updatedAt', 'desc'), window.limit(60));
                     const snap = await window.getDocs(qExp);
                     let validaciones = [];
@@ -856,7 +990,6 @@
                     
                     if (validaciones.length > 0) {
                         expertContextText = validaciones.map((v) => {
-                            // Generamos el "Título General" uniendo Superficie y Patología
                             const titulo = `${(v.superficie || '').toUpperCase()} | ${(v.patologia || '').toUpperCase()}`;
                             const mats = (v.materiales || []).map(m => m.replace(/<[^>]*>?/gm, '')).join('; ');
                             const steps = (v.pasos || []).map(p => p.replace(/<[^>]*>?/gm, '')).join('; ');
@@ -1039,7 +1172,7 @@
             db = getFirestore(app);
             setPersistence(auth, browserSessionPersistence).catch(console.error);
             
-            // Exportar a window para uso en funciones no modulares
+            // Exportar herramientas de Firebase a window para usarlas en scripts estáticos
             window.db = db;
             window.globalAppId = globalAppId;
             window.collection = collection;
@@ -1047,14 +1180,15 @@
             window.orderBy = orderBy;
             window.limit = limit;
             window.getDocs = getDocs;
+            window.doc = doc;                 // EXPORTADO PARA EL STEPPER
+            window.updateDoc = updateDoc;     // EXPORTADO PARA EL STEPPER
+            window.setDoc = setDoc;           // EXPORTADO PARA EL STEPPER
 
-            // --- NUEVO: LISTENER DE TOKENS GLOBALES ---
             const apiRef = doc(db, "CONFIGURACION", "estado_api_global");
             onSnapshot(apiRef, (docSnap) => {
                 if(docSnap.exists()) {
                     const datos = docSnap.data();
                     const consumidos = datos.tokens_consumidos || 0;
-                    // Límite gratuito aproximado establecido en base a peticiones / capacidad API
                     const limite = datos.limite_tokens_diario || 3000000; 
                     
                     let porcentaje = 0;
@@ -1068,17 +1202,12 @@
                         barra.style.width = `${porcentaje}%`;
                         texto.innerText = `${Math.round(porcentaje)}%`;
                         
-                        if (porcentaje < 60) {
-                            barra.style.backgroundColor = "#10b981"; // Verde
-                        } else if (porcentaje < 90) {
-                            barra.style.backgroundColor = "#f59e0b"; // Amarillo
-                        } else {
-                            barra.style.backgroundColor = "#ef4444"; // Rojo
-                        }
+                        if (porcentaje < 60) barra.style.backgroundColor = "#10b981"; 
+                        else if (porcentaje < 90) barra.style.backgroundColor = "#f59e0b"; 
+                        else barra.style.backgroundColor = "#ef4444"; 
                     }
                 }
             });
-            // --- FIN NUEVO ---
 
         } catch (e) {
             console.error("Firebase init error:", e);
@@ -1146,13 +1275,11 @@
                 input.value = '';
                 showNotification("Carpeta creada y seleccionada");
                 
-                // Volver a la vista del select
                 document.getElementById('new-project-inline').classList.add('hidden');
                 document.getElementById('project-selector').classList.remove('hidden');
                 document.getElementById('cancel-new-project-btn').classList.add('hidden');
                 document.getElementById('show-new-project-btn').classList.remove('hidden');
                 
-                // Recargar lista y seleccionar el nuevo
                 await window.loadProjectsList();
                 document.getElementById('project-selector').value = newDocRef.id;
 
@@ -1213,6 +1340,12 @@
                     location: finalWeatherLoc, temp: finalWeatherTemp, hum: finalWeatherHum,
                     img1: getCompressedBase64('summary-img1'), img2: getCompressedBase64('summary-img2'),
                     rating: currentRating, comment: document.getElementById('rating-comment').value,
+                    // NUEVO: Agregando el estado de seguimiento por defecto al crear
+                    seguimiento: {
+                        paso_actual: 1,
+                        estado_rechazado: false,
+                        fechas: { "1": Date.now(), "2": null, "3": null, "4": null, "5": null }
+                    },
                     createdAt: new Date(), updatedAt: new Date()
                 };
 
@@ -1254,13 +1387,10 @@
                 const docRef = doc(db, 'artifacts', globalAppId, 'users', userId, 'evaluaciones', currentEditingDocId);
                 await updateDoc(docRef, diagnosticData);
 
-                // NUEVO: Guardar en la Memoria Experta Compartida (RAG)
                 try {
                     const expertRef = doc(db, 'artifacts', globalAppId, 'conocimiento_experto', currentEditingDocId);
                     await setDoc(expertRef, diagnosticData, { merge: true });
-                } catch (e) {
-                    console.error("Error guardando en memoria experta:", e);
-                }
+                } catch (e) {}
 
                 btn.innerHTML = '✅ ¡Cambios Guardados!';
                 btn.classList.replace('bg-slate-900', 'bg-emerald-600');
@@ -1324,7 +1454,6 @@
                 projSnap.forEach(docSnap => {
                     const data = docSnap.data();
                     
-                    // COMPATIBILIDAD: Contar también las huérfanas si es el primer proyecto
                     const projEvals = allEvals.filter(e => {
                         const isOrphaned = !e.projectId;
                         return e.projectId === docSnap.id || (isOrphaned && docSnap.id === firstProjId);
@@ -1368,7 +1497,6 @@
             try {
                 const userId = auth.currentUser.uid;
                 
-                // Obtener ID del primer proyecto para saber dónde mostrar las huérfanas
                 const projectsRef = collection(db, 'artifacts', globalAppId, 'users', userId, 'proyectos');
                 const projSnap = await getDocs(query(projectsRef, orderBy('createdAt', 'desc')));
                 let firstProjId = projSnap.empty ? null : projSnap.docs[0].id;
@@ -1384,7 +1512,6 @@
                 querySnapshot.forEach((docSnap) => {
                     const data = docSnap.data();
                     
-                    // COMPATIBILIDAD: Mostrar si pertenece al proyecto, o si es antigua y abrimos la carpeta principal
                     const isOrphaned = !data.projectId;
                     if (data.projectId !== projectId && !(isOrphaned && projectId === firstProjId)) return;
                     
@@ -1397,17 +1524,24 @@
                     const rating = data.rating || 0;
                     for(let i=1; i<=5; i++) starsHtml += `<span class="${i <= rating ? 'text-yellow-400' : 'text-slate-200'} text-lg">★</span>`;
 
+                    // MODIFICACIÓN DE TARJETA: Se incrusta el Stepper al final de la tarjeta
                     historyList.innerHTML += `
-                        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm hover:border-brand-300 transition-colors flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                            <div class="flex-1 w-full overflow-hidden">
-                                <p class="text-xs font-bold text-slate-800 mb-1 truncate uppercase tracking-wider">${data.superficie || 'Evaluación Técnica'}</p>
-                                <p class="text-[0.65rem] font-bold text-brand-500 uppercase tracking-widest mb-1.5"><i class="far fa-clock"></i> ${dateStr}</p>
-                                <div class="flex items-center gap-2 mb-2"><div class="flex drop-shadow-sm -mt-1">${starsHtml}</div></div>
-                                ${data.comment ? `<div class="bg-slate-50 p-3 rounded-lg border border-slate-100 text-xs text-slate-600 italic relative w-full overflow-hidden text-ellipsis whitespace-nowrap"><i class="fas fa-quote-left text-slate-300 absolute opacity-50 text-2xl -top-1 -left-1"></i><span class="relative z-10 pl-2">"${data.comment}"</span></div>` : ''}
+                        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm hover:border-brand-300 transition-colors flex flex-col gap-4 cursor-pointer" onclick="window.loadHistoryItem('${docSnap.id}')">
+                            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                                <div class="flex-1 w-full overflow-hidden">
+                                    <p class="text-xs font-bold text-slate-800 mb-1 truncate uppercase tracking-wider">${data.superficie || 'Evaluación Técnica'}</p>
+                                    <p class="text-[0.65rem] font-bold text-brand-500 uppercase tracking-widest mb-1.5"><i class="far fa-clock"></i> ${dateStr}</p>
+                                    <div class="flex items-center gap-2 mb-2"><div class="flex drop-shadow-sm -mt-1">${starsHtml}</div></div>
+                                    ${data.comment ? `<div class="bg-slate-50 p-3 rounded-lg border border-slate-100 text-xs text-slate-600 italic relative w-full overflow-hidden text-ellipsis whitespace-nowrap"><i class="fas fa-quote-left text-slate-300 absolute opacity-50 text-2xl -top-1 -left-1"></i><span class="relative z-10 pl-2">"${data.comment}"</span></div>` : ''}
+                                </div>
+                                <button onclick="event.stopPropagation(); window.loadHistoryItem('${docSnap.id}')" class="w-full md:w-auto bg-slate-900 hover:bg-slate-800 text-white text-[0.7rem] font-bold py-3 px-5 rounded-lg transition-colors flex items-center justify-center gap-2 whitespace-nowrap shadow-sm uppercase tracking-widest">
+                                    <i class="fas fa-folder-open text-brand-400"></i> Abrir Ficha
+                                </button>
                             </div>
-                            <button onclick="window.loadHistoryItem('${docSnap.id}')" class="w-full md:w-auto bg-slate-900 hover:bg-slate-800 text-white text-[0.7rem] font-bold py-3 px-5 rounded-lg transition-colors flex items-center justify-center gap-2 whitespace-nowrap shadow-sm uppercase tracking-widest">
-                                <i class="fas fa-folder-open text-brand-400"></i> Abrir Ficha
-                            </button>
+                            <!-- STEPPER CRM AQUI -->
+                            <div id="stepper-wrapper-${docSnap.id}" class="w-full pt-4 mt-2 border-t border-slate-100">
+                                ${window.generateStepperHTML(docSnap.id, data.seguimiento, data)}
+                            </div>
                         </div>
                     `;
                 });
@@ -1552,7 +1686,6 @@
             listContainer.innerHTML = '<div class="p-8 text-center text-slate-400 text-xs font-bold uppercase tracking-widest"><i class="fas fa-circle-notch fa-spin text-2xl mb-2 text-brand-500"></i><br>Extrayendo datos globales...</div>';
             
             try {
-                // Magia de Firebase: collectionGroup busca la subcolección 'evaluaciones' en TODOS los usuarios
                 const evalsSnap = await getDocs(collectionGroup(db, 'evaluaciones'));
                 
                 let allEvals = [];
@@ -1561,7 +1694,6 @@
 
                 evalsSnap.forEach(doc => {
                     const data = doc.data();
-                    // Capturamos el ID del documento y el ID del usuario para poder borrarlo
                     data.docId = doc.id;
                     data.userId = doc.ref.parent.parent.id; 
                     allEvals.push(data);
@@ -1577,7 +1709,6 @@
                     else damageCounts['Leve / Bajo']++;
                 });
 
-                // Ordenar cronológicamente (más nuevo a más antiguo)
                 allEvals.sort((a, b) => {
                     const timeA = a.createdAt ? a.createdAt.seconds : 0;
                     const timeB = b.createdAt ? b.createdAt.seconds : 0;
@@ -1659,11 +1790,9 @@
             if(!confirm("⚠️ ¿Eliminar permanentemente este diagnóstico de la cuenta del usuario Y de la memoria de la IA?")) return;
             
             try {
-                // 1. Borrar de la cuenta del usuario (Historial normal)
                 const docRef = doc(window.db, 'artifacts', window.globalAppId, 'users', userId, 'evaluaciones', docId);
                 await deleteDoc(docRef);
 
-                // 2. Borrar del Cerebro Experto (Memoria de la IA)
                 try {
                     const expertRef = doc(window.db, 'artifacts', window.globalAppId, 'conocimiento_experto', docId);
                     await deleteDoc(expertRef);
@@ -1672,7 +1801,7 @@
                 }
 
                 showNotification("Diagnóstico eliminado de todo el sistema.");
-                window.openAdminDashboard(); // Refrescar los datos y gráficos
+                window.openAdminDashboard(); 
             } catch (error) {
                 console.error("Error eliminando:", error);
                 showNotification("Error de permisos al eliminar.", true);
@@ -1713,6 +1842,9 @@
         if (auth) {
             onAuthStateChanged(auth, (user) => {
                 if (user) {
+                    // GUARDAR EL ID DE USUARIO GLOBALMENTE PARA EL STEPPER CRM
+                    window.currentUserId = user.uid;
+
                     authBtnHeader.classList.add('hidden');
                     userMenuBtn.classList.remove('hidden');
                     userMenuBtn.classList.add('flex');
@@ -1721,7 +1853,6 @@
                     userEmailDisplay.textContent = displayName;
                     dropdownUserName.textContent = user.email || displayName;
                     
-                    // SEGURIDAD PANEL MAESTRO
                     if (user.email === 'obriniacl@gmail.com') {
                         document.getElementById('admin-dashboard-btn').classList.remove('hidden');
                     } else {
@@ -1731,9 +1862,9 @@
                     mainAppContainer.classList.remove('hidden');
                     closeAuthModal();
                     
-                    // Invertimos el orden para que cargue los proyectos antes de actualizar contadores visuales.
                     window.loadProjectsList();
                 } else {
+                    window.currentUserId = null;
                     authBtnHeader.classList.remove('hidden');
                     userMenuBtn.classList.add('hidden');
                     userMenuBtn.classList.remove('flex');
