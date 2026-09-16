@@ -76,7 +76,7 @@
         .fondo-barra { width: 100%; height: 8px; background-color: #e2e8f0; border-radius: 10px; overflow: hidden; }
         .relleno-barra { height: 100%; width: 0%; background-color: #10b981; transition: width 0.5s ease-in-out, background-color 0.3s; }
 
-        /* ESTILOS DEL TRACKING / CRM (NUEVO) */
+        /* ESTILOS DEL TRACKING / CRM */
         .stepper-container { position: relative; width: 100%; cursor: default; }
         .stepper-line { position: absolute; top: 12px; left: 0; right: 0; height: 3px; background-color: #e2e8f0; z-index: 0; }
         .stepper-line-fill { position: absolute; top: 12px; left: 0; height: 3px; background-color: #ea580c; z-index: 0; transition: width 0.4s ease; }
@@ -523,7 +523,6 @@
             return match ? parseInt(match[0], 10) : 0;
         }
 
-        // NUEVO: Funciones matemáticas para la línea de tiempo del embudo
         window.getTimeElapsed = function(start, end) {
             if (!start || !end) return '';
             const diff = Math.max(0, end - start);
@@ -536,7 +535,6 @@
             return `⏱️ +${minutes}m`;
         };
 
-        // NUEVO: Generador HTML de la bitácora visual
         window.generateStepperHTML = function(docId, seguimiento, rawData) {
             if (!seguimiento) {
                 seguimiento = {
@@ -560,7 +558,6 @@
             let fillClass = isRej ? 'stepper-line-fill stepper-line-red shadow-sm' : 'stepper-line-fill shadow-sm';
             html += `<div class="${fillClass}" style="width: ${fillWidth}%;"></div>`;
 
-            // Cronómetros intermedios
             for (let i = 2; i <= 5; i++) {
                 if (fechas[i] && fechas[i-1]) {
                     const elapsed = window.getTimeElapsed(fechas[i-1], fechas[i]);
@@ -568,7 +565,6 @@
                 }
             }
 
-            // Nodos principales
             html += `<div class="flex justify-between relative z-10">`;
             for (let i = 1; i <= 5; i++) {
                 let dotClass = "step-dot";
@@ -593,7 +589,6 @@
 
                 let onClick = `onclick="window.updateTrackingStep('${docId}', ${i}, false, event)"`;
                 
-                // Botón de Rechazo secreto sobre el paso de Aprobación
                 let rejectBtn = '';
                 if (i === 3 && paso === 2) {
                     rejectBtn = `<button onclick="window.updateTrackingStep('${docId}', 3, true, event)" title="Marcar presupuesto como Rechazado" class="absolute -top-8 left-1/2 -translate-x-1/2 bg-red-100 text-red-600 rounded-full w-6 h-6 flex items-center justify-center text-[10px] hover:bg-red-500 hover:text-white transition shadow-sm z-20"><i class="fas fa-times"></i></button>`;
@@ -613,7 +608,6 @@
             return html;
         }
 
-        // NUEVO: Lógica de actualización del estado en base de datos
         window.updateTrackingStep = async function(docId, targetStep, isRejected, event) {
             if(event) { event.stopPropagation(); event.preventDefault(); }
             
@@ -622,27 +616,37 @@
             
             let seg = data.seguimiento || { paso_actual: 1, estado_rechazado: false, fechas: { "1": (data.createdAt ? data.createdAt.seconds * 1000 : Date.now()) } };
             
-            if (seg.estado_rechazado) return showNotification("Este presupuesto ya está cerrado como rechazado.", true);
-            if (targetStep < seg.paso_actual) return showNotification("No se puede retroceder el estado de avance.", true);
-            if (targetStep > seg.paso_actual + 1 && !isRejected) return showNotification("Debes avanzar los estados en orden.", true);
+            // LA MAGIA DE LA REVERSIBILIDAD: Solo se bloquea si el usuario intenta saltarse un paso hacia adelante. 
+            // Permite retroceder o saltar desde 'Rechazado' hacia cualquier paso anterior válido.
+            if (targetStep > seg.paso_actual + 1 && !isRejected) {
+                return showNotification("Debes avanzar los estados en orden.", true);
+            }
 
             const nowMs = Date.now();
-            const nuevasFechas = { ...seg.fechas, [targetStep]: nowMs };
+            let nuevasFechas = { ...seg.fechas };
             
+            // Asignar nueva fecha al paso seleccionado
+            nuevasFechas[targetStep] = nowMs;
+            
+            // Si el usuario está retrocediendo (o recuperando un rechazo), limpiamos las fechas futuras para reiniciar los cronómetros
+            if (targetStep < seg.paso_actual || (seg.estado_rechazado && !isRejected)) {
+                for (let i = targetStep + 1; i <= 5; i++) {
+                    nuevasFechas[i] = null;
+                }
+            }
+
             const newSeguimiento = {
                 paso_actual: targetStep,
                 estado_rechazado: isRejected,
                 fechas: nuevasFechas
             };
 
-            // Actualización optimista de interfaz
             window.historyDataCache[docId].seguimiento = newSeguimiento;
             const wrapper = document.getElementById(`stepper-wrapper-${docId}`);
             if(wrapper) {
                 wrapper.innerHTML = window.generateStepperHTML(docId, newSeguimiento, data);
             }
 
-            // Inyectar en Firebase de fondo
             try {
                 const userId = window.currentUserId;
                 if(!userId) throw new Error("No hay usuario activo.");
@@ -650,14 +654,20 @@
                 const docRef = window.doc(window.db, 'artifacts', window.globalAppId, 'users', userId, 'evaluaciones', docId);
                 await window.updateDoc(docRef, { seguimiento: newSeguimiento });
                 
-                // Actualizar copia en memoria RAG
                 try {
                      const expertRef = window.doc(window.db, 'artifacts', window.globalAppId, 'conocimiento_experto', docId);
                      await window.setDoc(expertRef, { seguimiento: newSeguimiento }, { merge: true });
                 } catch(e) {}
                 
-                if(isRejected) showNotification("Presupuesto Rechazado y archivado", true);
-                else showNotification("Estado de obra avanzado con éxito");
+                if (isRejected) {
+                    showNotification("Presupuesto Rechazado y archivado", true);
+                } else if (targetStep < seg.paso_actual) {
+                    showNotification("Estado revertido con éxito");
+                } else if (seg.estado_rechazado && !isRejected) {
+                    showNotification("Presupuesto recuperado");
+                } else {
+                    showNotification("Estado de obra avanzado con éxito");
+                }
                 
             } catch (err) {
                 console.error(err);
@@ -1180,9 +1190,9 @@
             window.orderBy = orderBy;
             window.limit = limit;
             window.getDocs = getDocs;
-            window.doc = doc;                 // EXPORTADO PARA EL STEPPER
-            window.updateDoc = updateDoc;     // EXPORTADO PARA EL STEPPER
-            window.setDoc = setDoc;           // EXPORTADO PARA EL STEPPER
+            window.doc = doc;                 
+            window.updateDoc = updateDoc;     
+            window.setDoc = setDoc;           
 
             const apiRef = doc(db, "CONFIGURACION", "estado_api_global");
             onSnapshot(apiRef, (docSnap) => {
@@ -1340,7 +1350,6 @@
                     location: finalWeatherLoc, temp: finalWeatherTemp, hum: finalWeatherHum,
                     img1: getCompressedBase64('summary-img1'), img2: getCompressedBase64('summary-img2'),
                     rating: currentRating, comment: document.getElementById('rating-comment').value,
-                    // NUEVO: Agregando el estado de seguimiento por defecto al crear
                     seguimiento: {
                         paso_actual: 1,
                         estado_rechazado: false,
@@ -1524,7 +1533,6 @@
                     const rating = data.rating || 0;
                     for(let i=1; i<=5; i++) starsHtml += `<span class="${i <= rating ? 'text-yellow-400' : 'text-slate-200'} text-lg">★</span>`;
 
-                    // MODIFICACIÓN DE TARJETA: Se incrusta el Stepper al final de la tarjeta
                     historyList.innerHTML += `
                         <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm hover:border-brand-300 transition-colors flex flex-col gap-4 cursor-pointer" onclick="window.loadHistoryItem('${docSnap.id}')">
                             <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
@@ -1842,7 +1850,6 @@
         if (auth) {
             onAuthStateChanged(auth, (user) => {
                 if (user) {
-                    // GUARDAR EL ID DE USUARIO GLOBALMENTE PARA EL STEPPER CRM
                     window.currentUserId = user.uid;
 
                     authBtnHeader.classList.add('hidden');
