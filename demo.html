@@ -114,7 +114,6 @@
                     <i class="fas fa-shield-alt w-4"></i> Panel de Administración
                 </button>
 
-                <!-- BOTÓN PWA: Ahora se forzará su visualización en móviles -->
                 <button id="install-app-btn" class="hidden w-full text-left px-4 py-3 text-xs text-emerald-600 hover:bg-emerald-50 font-bold transition-colors flex items-center gap-2 border-t border-slate-100">
                     <i class="fas fa-download w-4"></i> Instalar App
                 </button>
@@ -2090,7 +2089,11 @@
         googleAuthBtn.addEventListener('click', async () => {
             if (!auth) return showError("Servicio de autenticación no disponible.");
             resetAuthError();
-            try { await signInWithPopup(auth, new GoogleAuthProvider()); } 
+            try { 
+                const provider = new GoogleAuthProvider();
+                provider.setCustomParameters({ prompt: 'select_account' });
+                await signInWithPopup(auth, provider); 
+            } 
             catch (error) { showError("Error al conectar con Google."); }
         });
 
@@ -2143,27 +2146,21 @@
         const installBtn = document.getElementById('install-app-btn');
         let deferredPrompt;
 
-        // Detectar si es un celular o tablet (Android o iOS)
         const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
         
-        // Detectar si la app ya fue instalada y está corriendo a pantalla completa
         const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
 
-        // Atrapamos el evento oficial de Google Chrome (Android) si está disponible
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault(); 
             deferredPrompt = e;
-            // Si el evento oficial se dispara, forzamos mostrar el botón por si acaso
             if(installBtn) installBtn.classList.remove('hidden');
         });
 
-        // REGLA DE HIERRO: Si es un celular y NO está instalada, forzamos que el botón se vea SIEMPRE
         if (isMobile && !isStandalone) {
             if(installBtn) installBtn.classList.remove('hidden');
             
             installBtn.addEventListener('click', async () => {
                 if (deferredPrompt) {
-                    // Flujo mágico automático de Android
                     deferredPrompt.prompt();
                     const { outcome } = await deferredPrompt.userChoice;
                     if (outcome === 'accepted') {
@@ -2171,7 +2168,6 @@
                     }
                     deferredPrompt = null;
                 } else {
-                    // Flujo manual para iPhone (Safari) o Android bloqueado
                     alert("Para instalar Obrín IA como App nativa:\n\n📱 En IPHONE (Safari):\n1. Toca el ícono 'Compartir' (cuadro con flecha apuntando hacia arriba) en la barra inferior.\n2. Desliza hacia abajo y selecciona 'Agregar a inicio'.\n\n🤖 En ANDROID (Chrome):\n1. Toca los 3 puntitos arriba a la derecha.\n2. Selecciona 'Instalar aplicación' o 'Agregar a la pantalla principal'.");
                 }
             });
