@@ -1040,7 +1040,9 @@
                 if (!text) throw new Error("El análisis fue detenido o falló.");
 
                 const cleanText = text.replace(/```json/g, '').replace(/```/g, '').trim();
-                const resultObj = JSON.parse(cleanText);
+                const jsonMatch = cleanText.match(/\{[\s\S]*\}/);
+                if (!jsonMatch) throw new Error("Formato de respuesta inválido de la IA");
+                const resultObj = JSON.parse(jsonMatch[0]);
 
                 document.getElementById('surface-type').innerText = resultObj.superficie;
                 const badge = document.getElementById('complexity-badge');
@@ -2014,12 +2016,20 @@
             }
         });
 
-        // ÚNICO LISTENER DE CERRAR SESIÓN (Limpia memoria y recarga)
+        // ÚNICO LISTENER DE CERRAR SESIÓN (Limpia la UI sin recargar)
         signOutBtn.addEventListener('click', async () => {
             try { 
+                // 1. Reseteamos los datos de la interfaz para que no queden reportes a la vista
+                window.resetUI(); 
+                
+                // 2. Ocultamos el contenedor principal de la app
+                document.getElementById('main-app-container').classList.add('hidden');
+                
+                // 3. Cerramos sesión en Firebase (esto disparará el onAuthStateChanged automáticamente)
                 await window.signOutAuth(auth); 
-                window.location.reload(); 
-            } catch (error) { console.error("Error signing out:", error); }
+            } catch (error) { 
+                console.error("Error signing out:", error); 
+            }
         });
 
         // ÚNICO LISTENER DE GOOGLE AUTH (Obliga a seleccionar cuenta)
@@ -2028,10 +2038,14 @@
             resetAuthError();
             try { 
                 const provider = new GoogleAuthProvider();
-                provider.setCustomParameters({ prompt: 'select_account consent' });
+                // Corrección: Dejar estrictamente 'select_account' sin 'consent'
+                provider.setCustomParameters({ prompt: 'select_account' });
                 await signInWithPopup(auth, provider); 
             } 
-            catch (error) { showError("Error al conectar con Google."); }
+            catch (error) { 
+                console.error("Error Google Auth:", error);
+                showError("Error al conectar con Google."); 
+            }
         });
 
         emailAuthForm.addEventListener('submit', async (e) => {
