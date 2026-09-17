@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Obrín IA | Consultoría Técnica IA</title>
     
-    <!-- ETIQUETAS PWA OBLIGATORIAS -->
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#0f172a">
     <link rel="apple-touch-icon" href="https://lh3.googleusercontent.com/pw/AP1GczOsQ9BjTC3dTk0RxKlbaZtHDeSwbqF3-buuEPA6QHBnWKNK4GkHQpfHPUJkVSbHPN7QEXrwUL5qVDwk5vLhsbpcLCLP3NCezheTURsZUCAOwnL0h1NtlHKbrEHkrsdquexu32SfFSdxlqHT1c36shbDMQ=w599-h599-s-no-gm?authuser=0">
@@ -40,32 +39,20 @@
         body { font-family: 'Inter', sans-serif; -webkit-font-smoothing: antialiased; }
         
         #obrin-pro-root .upload-box { 
-            border: 1px dashed #94a3b8;
-            background: #f8fafc; 
-            border-radius: 8px;
-            transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            position: relative; 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            justify-content: center; 
-            overflow: hidden; 
+            border: 1px dashed #94a3b8; background: #f8fafc; border-radius: 8px;
+            transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); position: relative; 
+            display: flex; flex-direction: column; align-items: center; 
+            justify-content: center; overflow: hidden; 
         }
         #obrin-pro-root .upload-box:hover { border-color: #ea580c; background: #fffbf7; }
         #obrin-pro-root .upload-box.filled { border-style: solid; border-color: #10B981; background: #f0fdf4; }
         
         .scanner-line { 
             position: absolute; top: 0; left: 0; width: 100%; height: 1px; 
-            background: #ffffff; box-shadow: 0 0 15px rgba(255,255,255,0.8); z-index: 20; 
-            display: none; 
+            background: #ffffff; box-shadow: 0 0 15px rgba(255,255,255,0.8); z-index: 20; display: none; 
         }
         .scanning-active { display: block; animation: scanDown 2.5s infinite ease-in-out; }
-        @keyframes scanDown {
-            0% { top: 0; opacity: 0; }
-            10% { opacity: 1; }
-            90% { opacity: 1; }
-            100% { top: 100%; opacity: 0; }
-        }
+        @keyframes scanDown { 0% { top: 0; opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { top: 100%; opacity: 0; } }
 
         details > summary { list-style: none; }
         details > summary::-webkit-details-marker { display: none; }
@@ -127,7 +114,7 @@
                     <i class="fas fa-shield-alt w-4"></i> Panel de Administración
                 </button>
 
-                <!-- NUEVO: Botón PWA Oculto por defecto -->
+                <!-- BOTÓN PWA: Ahora se forzará su visualización en móviles -->
                 <button id="install-app-btn" class="hidden w-full text-left px-4 py-3 text-xs text-emerald-600 hover:bg-emerald-50 font-bold transition-colors flex items-center gap-2 border-t border-slate-100">
                     <i class="fas fa-download w-4"></i> Instalar App
                 </button>
@@ -1956,7 +1943,7 @@
                     userEmailDisplay.textContent = displayName;
                     dropdownUserName.textContent = user.email || displayName;
                     
-                    if (user.email === 'obriniacl@gmail.com') {
+                    if (user.email === 'obriniacl@gmail.com' || user.email === 'christensenjosemanuel@gmail.com') {
                         document.getElementById('admin-dashboard-btn').classList.remove('hidden');
                     } else {
                         document.getElementById('admin-dashboard-btn').classList.add('hidden');
@@ -2142,41 +2129,53 @@
         });
 
         // ==========================================
-        // NUEVO: LÓGICA DE INSTALACIÓN PWA
+        // NUEVO: LÓGICA DE INSTALACIÓN PWA (MODO FORZADO MÓVIL)
         // ==========================================
-        
-        // 1. Registro del Service Worker
+
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('sw.js')
-                .then(reg => console.log('Service Worker registrado para PWA'))
-                .catch(err => console.warn('Error al registrar SW:', err));
+                .then(reg => console.log('SW registrado'))
+                .catch(err => console.warn('Error SW:', err));
             });
         }
 
-        // 2. Interceptar el aviso de instalación y mostrar botón nativo
+        const installBtn = document.getElementById('install-app-btn');
         let deferredPrompt;
+
+        // Detectar si es un celular o tablet (Android o iOS)
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        
+        // Detectar si la app ya fue instalada y está corriendo a pantalla completa
+        const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+
+        // Atrapamos el evento oficial de Google Chrome (Android) si está disponible
         window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault(); // Evita que Chrome muestre el cartel feo por defecto
+            e.preventDefault(); 
             deferredPrompt = e;
-            
-            // Mostrar nuestro botón bonito en el menú desplegable
-            const installBtn = document.getElementById('install-app-btn');
-            if (installBtn) installBtn.classList.remove('hidden');
+            // Si el evento oficial se dispara, forzamos mostrar el botón por si acaso
+            if(installBtn) installBtn.classList.remove('hidden');
         });
 
-        // 3. Acción al presionar nuestro botón "Instalar App"
-        document.getElementById('install-app-btn')?.addEventListener('click', async () => {
-            if (deferredPrompt) {
-                deferredPrompt.prompt(); // Muestra el cuadro de diálogo oficial de iOS/Android/Chrome
-                const { outcome } = await deferredPrompt.userChoice;
-                if (outcome === 'accepted') {
-                    // Si el usuario acepta, ocultamos el botón
-                    document.getElementById('install-app-btn').classList.add('hidden');
+        // REGLA DE HIERRO: Si es un celular y NO está instalada, forzamos que el botón se vea SIEMPRE
+        if (isMobile && !isStandalone) {
+            if(installBtn) installBtn.classList.remove('hidden');
+            
+            installBtn.addEventListener('click', async () => {
+                if (deferredPrompt) {
+                    // Flujo mágico automático de Android
+                    deferredPrompt.prompt();
+                    const { outcome } = await deferredPrompt.userChoice;
+                    if (outcome === 'accepted') {
+                        installBtn.classList.add('hidden');
+                    }
+                    deferredPrompt = null;
+                } else {
+                    // Flujo manual para iPhone (Safari) o Android bloqueado
+                    alert("Para instalar Obrín IA como App nativa:\n\n📱 En IPHONE (Safari):\n1. Toca el ícono 'Compartir' (cuadro con flecha apuntando hacia arriba) en la barra inferior.\n2. Desliza hacia abajo y selecciona 'Agregar a inicio'.\n\n🤖 En ANDROID (Chrome):\n1. Toca los 3 puntitos arriba a la derecha.\n2. Selecciona 'Instalar aplicación' o 'Agregar a la pantalla principal'.");
                 }
-                deferredPrompt = null;
-            }
-        });
+            });
+        }
     </script>
 </body>
 </html>
