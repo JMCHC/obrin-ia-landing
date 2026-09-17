@@ -586,6 +586,8 @@
                     await window.signOutAuth(window.authInstance);
                     document.getElementById('tnc-modal').classList.add('hidden');
                     document.getElementById('tnc-modal').classList.remove('flex');
+                    // NUEVO: Limpia la memoria de la ventana al rechazar los términos
+                    window.location.reload(); 
                 } catch(e) { console.error(e); }
             });
         });
@@ -2082,16 +2084,21 @@
             }
         });
 
+        // NUEVO: Agregamos window.location.reload() para limpiar la memoria web
         signOutBtn.addEventListener('click', async () => {
-            try { await window.signOutAuth(auth); } catch (error) { console.error("Error signing out:", error); }
+            try { 
+                await window.signOutAuth(auth); 
+                window.location.reload(); 
+            } catch (error) { console.error("Error signing out:", error); }
         });
 
+        // NUEVO: El comando "prompt: 'select_account consent'" que obliga a Google a mostrar el panel de cuentas
         googleAuthBtn.addEventListener('click', async () => {
             if (!auth) return showError("Servicio de autenticación no disponible.");
             resetAuthError();
             try { 
                 const provider = new GoogleAuthProvider();
-                provider.setCustomParameters({ prompt: 'select_account' });
+                provider.setCustomParameters({ prompt: 'select_account consent' });
                 await signInWithPopup(auth, provider); 
             } 
             catch (error) { showError("Error al conectar con Google."); }
@@ -2130,10 +2137,6 @@
             } catch (error) { showError("Credenciales incorrectas o correo en uso."); } 
             finally { submitAuthBtn.disabled = false; submitAuthBtn.textContent = isSignUpMode ? 'REGISTRARSE' : 'INGRESAR'; }
         });
-
-        // ==========================================
-        // NUEVO: LÓGICA DE INSTALACIÓN PWA (MODO FORZADO MÓVIL)
-        // ==========================================
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
