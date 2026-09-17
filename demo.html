@@ -5,6 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Obrín IA | Consultoría Técnica IA</title>
     
+    <!-- ETIQUETAS PWA OBLIGATORIAS -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0f172a">
+    <link rel="apple-touch-icon" href="https://lh3.googleusercontent.com/pw/AP1GczOsQ9BjTC3dTk0RxKlbaZtHDeSwbqF3-buuEPA6QHBnWKNK4GkHQpfHPUJkVSbHPN7QEXrwUL5qVDwk5vLhsbpcLCLP3NCezheTURsZUCAOwnL0h1NtlHKbrEHkrsdquexu32SfFSdxlqHT1c36shbDMQ=w599-h599-s-no-gm?authuser=0">
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -120,6 +125,11 @@
                 
                 <button id="admin-dashboard-btn" onclick="window.openAdminDashboard()" class="hidden w-full text-left px-4 py-3 text-xs text-brand-600 hover:bg-brand-50 font-bold transition-colors flex items-center gap-2 border-t border-slate-100">
                     <i class="fas fa-shield-alt w-4"></i> Panel de Administración
+                </button>
+
+                <!-- NUEVO: Botón PWA Oculto por defecto -->
+                <button id="install-app-btn" class="hidden w-full text-left px-4 py-3 text-xs text-emerald-600 hover:bg-emerald-50 font-bold transition-colors flex items-center gap-2 border-t border-slate-100">
+                    <i class="fas fa-download w-4"></i> Instalar App
                 </button>
 
                 <button id="sign-out-btn" class="w-full text-left px-4 py-3 text-xs text-red-500 hover:bg-red-50 font-bold transition-colors flex items-center gap-2 border-t border-slate-100">
@@ -492,7 +502,6 @@
                         <input type="email" id="email" required class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-slate-900 focus:border-slate-900 outline-none transition-all text-sm" placeholder="correo@ejemplo.com">
                     </div>
                     <div>
-                        <!-- NUEVO: Link de recuperación de contraseña alineado a la derecha -->
                         <div class="flex justify-between items-center mb-1">
                             <label for="password" class="block text-xs font-bold text-slate-500 uppercase tracking-wider">Contraseña</label>
                             <button type="button" id="forgot-password-btn" class="text-[10px] text-brand-600 hover:text-brand-800 font-bold transition-colors">¿Olvidaste tu contraseña?</button>
@@ -2063,7 +2072,6 @@
         authBtnHeader.addEventListener('click', openAuthModal);
         toggleAuthModeBtn.addEventListener('click', toggleAuthMode);
 
-        // NUEVO: Lógica del botón Olvidé mi Contraseña
         document.getElementById('forgot-password-btn').addEventListener('click', async () => {
             const email = emailInput.value.trim();
             if (!email) {
@@ -2131,6 +2139,43 @@
                 } else { await signInWithEmailAndPassword(auth, email, password); }
             } catch (error) { showError("Credenciales incorrectas o correo en uso."); } 
             finally { submitAuthBtn.disabled = false; submitAuthBtn.textContent = isSignUpMode ? 'REGISTRARSE' : 'INGRESAR'; }
+        });
+
+        // ==========================================
+        // NUEVO: LÓGICA DE INSTALACIÓN PWA
+        // ==========================================
+        
+        // 1. Registro del Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js')
+                .then(reg => console.log('Service Worker registrado para PWA'))
+                .catch(err => console.warn('Error al registrar SW:', err));
+            });
+        }
+
+        // 2. Interceptar el aviso de instalación y mostrar botón nativo
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault(); // Evita que Chrome muestre el cartel feo por defecto
+            deferredPrompt = e;
+            
+            // Mostrar nuestro botón bonito en el menú desplegable
+            const installBtn = document.getElementById('install-app-btn');
+            if (installBtn) installBtn.classList.remove('hidden');
+        });
+
+        // 3. Acción al presionar nuestro botón "Instalar App"
+        document.getElementById('install-app-btn')?.addEventListener('click', async () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt(); // Muestra el cuadro de diálogo oficial de iOS/Android/Chrome
+                const { outcome } = await deferredPrompt.userChoice;
+                if (outcome === 'accepted') {
+                    // Si el usuario acepta, ocultamos el botón
+                    document.getElementById('install-app-btn').classList.add('hidden');
+                }
+                deferredPrompt = null;
+            }
         });
     </script>
 </body>
