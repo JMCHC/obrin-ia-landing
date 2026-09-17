@@ -1,0 +1,23 @@
+{
+  "name": "Obrín IA | Diagnóstico Técnico",
+  "short_name": "Obrín IA",
+  "start_url": "./demo.html",
+  "display": "standalone",
+  "background_color": "#f8fafc",
+  "theme_color": "#0f172a",
+  "description": "Asistente de Inteligencia Artificial para el rubro de la construcción.",
+  "icons": [
+    {
+      "src": "https://lh3.googleusercontent.com/pw/AP1GczOsQ9BjTC3dTk0RxKlbaZtHDeSwbqF3-buuEPA6QHBnWKNK4GkHQpfHPUJkVSbHPN7QEXrwUL5qVDwk5vLhsbpcLCLP3NCezheTURsZUCAOwnL0h1NtlHKbrEHkrsdquexu32SfFSdxlqHT1c36shbDMQ=w599-h599-s-no-gm?authuser=0",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "https://lh3.googleusercontent.com/pw/AP1GczOsQ9BjTC3dTk0RxKlbaZtHDeSwbqF3-buuEPA6QHBnWKNK4GkHQpfHPUJkVSbHPN7QEXrwUL5qVDwk5vLhsbpcLCLP3NCezheTURsZUCAOwnL0h1NtlHKbrEHkrsdquexu32SfFSdxlqHT1c36shbDMQ=w599-h599-s-no-gm?authuser=0",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
