@@ -70,13 +70,11 @@
         .modal-exit { opacity: 1; transform: scale(1); }
         .modal-exit-active { opacity: 0; transform: scale(0.95); transition: opacity 300ms, transform 300ms; }
 
-        /* ESTILOS BARRA GLOBAL TOKENS */
         .contenedor-barra { width: 100%; max-width: 400px; }
         .texto-barra { display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; }
         .fondo-barra { width: 100%; height: 8px; background-color: #e2e8f0; border-radius: 10px; overflow: hidden; }
         .relleno-barra { height: 100%; width: 0%; background-color: #10b981; transition: width 0.5s ease-in-out, background-color 0.3s; }
 
-        /* ESTILOS DEL TRACKING / CRM */
         .stepper-container { position: relative; width: 100%; cursor: default; }
         .stepper-line { position: absolute; top: 12px; left: 0; right: 0; height: 3px; background-color: #e2e8f0; z-index: 0; }
         .stepper-line-fill { position: absolute; top: 12px; left: 0; height: 3px; background-color: #ea580c; z-index: 0; transition: width 0.4s ease; }
@@ -120,7 +118,6 @@
                     <span id="total-evals-badge" class="font-bold text-slate-700">0</span>
                 </div>
                 
-                <!-- BOTÓN PANEL MAESTRO -->
                 <button id="admin-dashboard-btn" onclick="window.openAdminDashboard()" class="hidden w-full text-left px-4 py-3 text-xs text-brand-600 hover:bg-brand-50 font-bold transition-colors flex items-center gap-2 border-t border-slate-100">
                     <i class="fas fa-shield-alt w-4"></i> Panel de Administración
                 </button>
@@ -139,6 +136,41 @@
     <div id="splash-screen" class="fixed inset-0 z-50 flex flex-col items-center justify-center bg-slate-50 transition-opacity duration-700 ease-in-out gap-6">
         <img src="https://lh3.googleusercontent.com/pw/AP1GczOsQ9BjTC3dTk0RxKlbaZtHDeSwbqF3-buuEPA6QHBnWKNK4GkHQpfHPUJkVSbHPN7QEXrwUL5qVDwk5vLhsbpcLCLP3NCezheTURsZUCAOwnL0h1NtlHKbrEHkrsdquexu32SfFSdxlqHT1c36shbDMQ=w599-h599-s-no-gm?authuser=0" alt="Logo Obrín IA" class="h-32 md:h-48 object-contain animate-pulse">
         <p class="text-slate-400 text-xs font-medium tracking-widest uppercase animate-pulse">Iniciando sistema...</p>
+    </div>
+
+    <!-- PANEL EMERGENTE TÉRMINOS Y CONDICIONES (Para usuarios existentes o Google Auth) -->
+    <div id="tnc-modal" class="fixed inset-0 bg-slate-900/90 backdrop-blur-sm z-[200] hidden items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden relative flex flex-col max-h-[90vh]">
+            <div class="p-6 border-b border-slate-100 bg-slate-50">
+                <h2 class="text-xl font-bold text-slate-900">Términos y Condiciones</h2>
+                <p class="text-slate-500 text-xs mt-1">Por tu seguridad y cumplimiento legal, debes aceptar los términos actualizados para utilizar Obrín IA.</p>
+            </div>
+            <div class="p-6 overflow-y-auto flex-1 text-xs text-slate-600 space-y-4" style="max-height: 50vh;">
+                <p class="font-bold text-sm text-slate-800">TÉRMINOS, CONDICIONES Y POLÍTICAS DE PRIVACIDAD – OBRÍN IA</p>
+                <p>Al acceder o utilizar la plataforma Obrín IA, el usuario declara ser mayor de edad, tener capacidad legal y acepta estar legalmente vinculado por los siguientes Términos y Condiciones.</p>
+                <p class="font-bold mt-2 text-slate-800">1. NATURALEZA DEL SERVICIO Y LÍMITE DE RESPONSABILIDAD (LGUC)</p>
+                <p>Obrín IA es una herramienta de asistencia tecnológica basada en Inteligencia Artificial (IA) para el diagnóstico constructivo. Los reportes de la Plataforma son estrictamente referenciales y de apoyo. NO reemplazan el criterio, la planimetría, la supervisión ni la firma de un Profesional Competente exigido por la Ley General de Urbanismo y Construcciones (LGUC) y su Ordenanza (OGUC).</p>
+                <p>Cláusula de Indemnidad: El usuario asume la responsabilidad total frente a sus clientes finales. Obrín IA y sus creadores no se hacen responsables por daños estructurales, accidentes o fallas derivadas de obras basadas en los reportes del Software.</p>
+                <p class="font-bold mt-2 text-slate-800">2. PRECIOS DE MERCADO Y LEY DEL CONSUMIDOR (Ley N° 19.496)</p>
+                <p>Obrín IA no es un proveedor de materiales. Los valores referenciales en CLP mostrados son dinámicos y pueden diferir de los precios reales en mostrador al momento de la compra. No son vinculantes ni exigibles bajo la Ley de Protección al Consumidor.</p>
+                <p class="font-bold mt-2 text-slate-800">3. DISPONIBILIDAD DEL SERVICIO Y DEPENDENCIAS EXTERNAS</p>
+                <p>El funcionamiento depende de infraestructura de terceros (Google, Cloudflare, Webpay). La Plataforma se ofrece "tal cual". No garantizamos que el servicio sea ininterrumpido o libre de errores temporales. Obrín IA no asume responsabilidad por pérdida de oportunidades comerciales derivadas de cortes en el servicio.</p>
+                <p class="font-bold mt-2 text-slate-800">4. TRATAMIENTO DE DATOS PERSONALES Y PRIVACIDAD (Ley N° 19.628)</p>
+                <p>El usuario otorga su consentimiento expreso para el tratamiento de su información (Nombre, correo, GPS/IP) recopilada exclusivamente para determinar variables climatológicas (temperatura y humedad). El usuario puede solicitar la eliminación permanente de su cuenta y sus historiales en cualquier momento.</p>
+                <p class="font-bold mt-2 text-slate-800">5. PROPIEDAD INTELECTUAL Y ENTRENAMIENTO DEL SISTEMA (RAG)</p>
+                <p>El código y diseño de Obrín IA son propiedad intelectual exclusiva (Ley N° 17.336). Al procesar un caso, el usuario otorga a Obrín IA el derecho de utilizar las tipologías de daño y materiales para nutrir el "Cerebro Experto" de la IA. Toda esta información será procesada de forma estrictamente anonimizada.</p>
+                <p class="font-bold mt-2 text-slate-800">6. PAGOS, TOKENS Y SUSCRIPCIONES</p>
+                <p>Los pagos se procesan de forma externa. Política de No Reembolso: Una vez procesado el pago y asignados los tokens a la cuenta, no se realizarán devoluciones de dinero por tokens no utilizados debido a los costos de infraestructura computacional ya incurridos.</p>
+            </div>
+            <div class="p-6 border-t border-slate-200 bg-white">
+                <label class="flex items-start gap-3 cursor-pointer mb-4">
+                    <input type="checkbox" id="tnc-checkbox-modal" class="mt-0.5 w-4 h-4 text-brand-600 rounded border-slate-300 focus:ring-brand-500">
+                    <span class="text-xs text-slate-700 font-medium">He leído y acepto expresamente los Términos, Condiciones y Políticas de Privacidad de Obrín IA.</span>
+                </label>
+                <button id="accept-tnc-btn" class="w-full bg-slate-900 text-white py-3.5 rounded-lg text-xs font-bold uppercase tracking-widest hover:bg-slate-800 transition shadow-lg disabled:opacity-50 disabled:cursor-not-allowed" disabled>ACEPTAR Y ENTRAR A OBRÍN IA</button>
+                <button id="cancel-tnc-btn" class="w-full mt-3 text-[10px] font-bold text-slate-400 uppercase tracking-widest hover:text-red-500 transition">Cancelar y Cerrar Sesión</button>
+            </div>
+        </div>
     </div>
 
     <div id="main-app-container" class="hidden w-full max-w-4xl mt-12 md:mt-0">
@@ -366,7 +398,7 @@
 
     <!-- PANEL DE HISTORIAL -->
     <div id="history-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] hidden items-center justify-center p-4 opacity-0 transition-opacity duration-300">
-        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden relative border border-slate-100 flex flex-col h-[85vh] transform scale-95 transition-transform duration-300" id="history-modal-content">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden relative flex flex-col h-[85vh] transform scale-95 transition-transform duration-300" id="history-modal-content">
             <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50" id="history-header">
                 <div>
                     <h2 class="text-xl font-bold text-slate-900 tracking-tight flex items-center gap-2" id="history-title">
@@ -400,7 +432,7 @@
 
     <!-- PANEL DE ADMINISTRACIÓN MAESTRO -->
     <div id="admin-modal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-[110] hidden items-center justify-center p-4 opacity-0 transition-opacity duration-300">
-        <div class="bg-slate-50 rounded-2xl shadow-2xl w-full max-w-5xl overflow-hidden relative border border-slate-700 flex flex-col h-[90vh] transform scale-95 transition-transform duration-300" id="admin-modal-content">
+        <div class="bg-slate-50 rounded-2xl shadow-2xl w-full max-w-5xl overflow-hidden relative flex flex-col h-[90vh] transform scale-95 transition-transform duration-300" id="admin-modal-content">
             <div class="p-6 border-b border-slate-200 flex justify-between items-center bg-white">
                 <div>
                     <h2 class="text-xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
@@ -413,15 +445,10 @@
                 </button>
             </div>
             <div class="p-6 overflow-y-auto flex-1 space-y-6">
-                <!-- Tarjetas de métricas -->
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4" id="admin-stats-container"></div>
-                
-                <!-- Gráfico -->
                 <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm w-full h-64 relative">
                     <canvas id="admin-chart"></canvas>
                 </div>
-
-                <!-- Lista Global -->
                 <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
                     <div class="px-5 py-4 border-b border-slate-100 bg-slate-50 flex justify-between items-center">
                         <h3 class="text-xs font-bold text-slate-700 uppercase tracking-widest"><i class="fas fa-list text-slate-400 mr-1"></i> Reportes Recientes Globales</h3>
@@ -432,6 +459,7 @@
         </div>
     </div>
 
+    <!-- FORMULARIO DE ACCESO Y REGISTRO -->
     <div id="auth-modal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden relative border border-slate-100" id="auth-modal-content">
             <div class="p-8">
@@ -467,6 +495,27 @@
                         <label for="password" class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Contraseña</label>
                         <input type="password" id="password" required class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-slate-900 focus:border-slate-900 outline-none transition-all text-sm" placeholder="••••••••">
                     </div>
+                    
+                    <!-- NUEVO: CHECKBOX T&C EN FORMULARIO DE REGISTRO MANUAL -->
+                    <div id="tnc-signup-group" class="hidden mt-4">
+                        <div class="h-32 overflow-y-auto p-3 bg-slate-50 border border-slate-200 rounded-lg text-[0.65rem] text-slate-600 mb-3 space-y-2">
+                            <p class="font-bold">TÉRMINOS, CONDICIONES Y POLÍTICAS DE PRIVACIDAD – OBRÍN IA</p>
+                            <p class="font-bold mt-2">1. NATURALEZA DEL SERVICIO Y LÍMITE DE RESPONSABILIDAD (LGUC)</p>
+                            <p>Obrín IA es una herramienta de asistencia tecnológica basada en Inteligencia Artificial (IA) para el diagnóstico constructivo. Los reportes de la Plataforma son estrictamente referenciales y de apoyo. NO reemplazan el criterio, la planimetría, la supervisión ni la firma de un Profesional Competente exigido por la Ley General de Urbanismo y Construcciones (LGUC) y su Ordenanza (OGUC).</p>
+                            <p>Cláusula de Indemnidad: El usuario asume la responsabilidad total frente a sus clientes finales. Obrín IA y sus creadores no se hacen responsables por daños estructurales, accidentes o fallas derivadas de obras basadas en los reportes del Software.</p>
+                            <p class="font-bold mt-2">2. PRECIOS Y LEY DEL CONSUMIDOR</p>
+                            <p>Obrín IA no es un proveedor de materiales. Los valores referenciales en CLP mostrados son dinámicos y pueden diferir de los precios reales al momento de la compra. No son vinculantes bajo la Ley de Protección al Consumidor (Ley N° 19.496).</p>
+                            <p class="font-bold mt-2">3. DATOS Y RAG</p>
+                            <p>El usuario otorga su consentimiento expreso para el tratamiento de su información (Ley N° 19.628). El usuario otorga a Obrín IA el derecho de utilizar las tipologías de daño y materiales para nutrir la IA de forma estrictamente anonimizada.</p>
+                            <p class="font-bold mt-2">4. PAGOS</p>
+                            <p>Política de No Reembolso: Una vez procesado el pago y asignados los tokens, no se realizarán devoluciones de dinero debido a los costos de infraestructura computacional ya incurridos.</p>
+                        </div>
+                        <label class="flex items-start gap-2 cursor-pointer">
+                            <input type="checkbox" id="tnc-checkbox-signup" class="mt-0.5 w-3 h-3 text-brand-600 rounded border-slate-300 focus:ring-brand-500">
+                            <span class="text-[0.65rem] text-slate-600 leading-tight">He leído y acepto expresamente los Términos, Condiciones y Políticas de Privacidad.</span>
+                        </label>
+                    </div>
+
                     <button type="submit" id="submit-auth-btn" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-3 px-4 rounded-lg shadow-lg transition-colors mt-4 text-xs uppercase tracking-widest">
                         Ingresar
                     </button>
@@ -503,6 +552,47 @@
                     setTimeout(() => { splash.style.display = 'none'; }, 700);
                 }
             }, 2000); 
+
+            // Habilitar botón de Aceptar Modal solo si se marca el checkbox
+            document.getElementById('tnc-checkbox-modal').addEventListener('change', function(e) {
+                document.getElementById('accept-tnc-btn').disabled = !e.target.checked;
+            });
+            
+            // Función para aceptar términos desde el Modal (Guardar en Firebase)
+            document.getElementById('accept-tnc-btn').addEventListener('click', async function() {
+                const btn = this;
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> GUARDANDO...';
+                try {
+                    const user = window.authInstance.currentUser;
+                    const userRef = window.doc(window.db, 'artifacts', window.globalAppId, 'users', user.uid);
+                    await window.setDoc(userRef, {
+                        email: user.email,
+                        name: user.displayName || "Usuario",
+                        tncAccepted: true,
+                        tncAcceptedAt: new Date()
+                    }, { merge: true });
+                    
+                    document.getElementById('tnc-modal').classList.add('hidden');
+                    document.getElementById('tnc-modal').classList.remove('flex');
+                    document.getElementById('main-app-container').classList.remove('hidden');
+                    window.loadProjectsList();
+                } catch(e) {
+                    console.error(e);
+                    showNotification("Error al guardar aceptación. Revisa tu conexión.", true);
+                    btn.disabled = false;
+                    btn.innerHTML = 'ACEPTAR Y ENTRAR A OBRÍN IA';
+                }
+            });
+
+            // Función para cancelar y cerrar sesión si no quiere aceptar los términos en el Modal
+            document.getElementById('cancel-tnc-btn').addEventListener('click', async function() {
+                try {
+                    await window.signOutAuth(window.authInstance);
+                    document.getElementById('tnc-modal').classList.add('hidden');
+                    document.getElementById('tnc-modal').classList.remove('flex');
+                } catch(e) { console.error(e); }
+            });
         });
 
         const MI_TEL = "56992582669";
@@ -616,8 +706,6 @@
             
             let seg = data.seguimiento || { paso_actual: 1, estado_rechazado: false, fechas: { "1": (data.createdAt ? data.createdAt.seconds * 1000 : Date.now()) } };
             
-            // LA MAGIA DE LA REVERSIBILIDAD: Solo se bloquea si el usuario intenta saltarse un paso hacia adelante. 
-            // Permite retroceder o saltar desde 'Rechazado' hacia cualquier paso anterior válido.
             if (targetStep > seg.paso_actual + 1 && !isRejected) {
                 return showNotification("Debes avanzar los estados en orden.", true);
             }
@@ -625,10 +713,8 @@
             const nowMs = Date.now();
             let nuevasFechas = { ...seg.fechas };
             
-            // Asignar nueva fecha al paso seleccionado
             nuevasFechas[targetStep] = nowMs;
             
-            // Si el usuario está retrocediendo (o recuperando un rechazo), limpiamos las fechas futuras para reiniciar los cronómetros
             if (targetStep < seg.paso_actual || (seg.estado_rechazado && !isRejected)) {
                 for (let i = targetStep + 1; i <= 5; i++) {
                     nuevasFechas[i] = null;
@@ -1160,7 +1246,7 @@
         } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         
         import { 
-            getFirestore, doc, setDoc, collection, addDoc, updateDoc, deleteDoc, increment, getDocs, query, orderBy, collectionGroup, limit, onSnapshot
+            getFirestore, doc, setDoc, collection, addDoc, updateDoc, deleteDoc, increment, getDocs, query, orderBy, collectionGroup, limit, onSnapshot, getDoc
         } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         const firebaseConfig = {
@@ -1182,7 +1268,7 @@
             db = getFirestore(app);
             setPersistence(auth, browserSessionPersistence).catch(console.error);
             
-            // Exportar herramientas de Firebase a window para usarlas en scripts estáticos
+            // Exportar herramientas a window
             window.db = db;
             window.globalAppId = globalAppId;
             window.collection = collection;
@@ -1192,7 +1278,10 @@
             window.getDocs = getDocs;
             window.doc = doc;                 
             window.updateDoc = updateDoc;     
-            window.setDoc = setDoc;           
+            window.setDoc = setDoc; 
+            window.getDoc = getDoc;
+            window.signOutAuth = signOut;
+            window.authInstance = auth;
 
             const apiRef = doc(db, "CONFIGURACION", "estado_api_global");
             onSnapshot(apiRef, (docSnap) => {
@@ -1546,7 +1635,6 @@
                                     <i class="fas fa-folder-open text-brand-400"></i> Abrir Ficha
                                 </button>
                             </div>
-                            <!-- STEPPER CRM AQUI -->
                             <div id="stepper-wrapper-${docSnap.id}" class="w-full pt-4 mt-2 border-t border-slate-100">
                                 ${window.generateStepperHTML(docSnap.id, data.seguimiento, data)}
                             </div>
@@ -1848,7 +1936,7 @@
         let isSignUpMode = false;
 
         if (auth) {
-            onAuthStateChanged(auth, (user) => {
+            onAuthStateChanged(auth, async (user) => {
                 if (user) {
                     window.currentUserId = user.uid;
 
@@ -1866,10 +1954,31 @@
                         document.getElementById('admin-dashboard-btn').classList.add('hidden');
                     }
 
-                    mainAppContainer.classList.remove('hidden');
                     closeAuthModal();
-                    
-                    window.loadProjectsList();
+
+                    // --- SISTEMA DE VALIDACIÓN TÉRMINOS Y CONDICIONES (RAG/LEGAL) ---
+                    if (window.justSignedUpWithTNC) {
+                        mainAppContainer.classList.remove('hidden');
+                        window.loadProjectsList();
+                        window.justSignedUpWithTNC = false;
+                    } else {
+                        try {
+                            const userRef = window.doc(window.db, 'artifacts', window.globalAppId, 'users', user.uid);
+                            const userSnap = await window.getDoc(userRef);
+                            
+                            if (!userSnap.exists() || !userSnap.data().tncAccepted) {
+                                document.getElementById('tnc-modal').classList.remove('hidden');
+                                document.getElementById('tnc-modal').classList.add('flex');
+                            } else {
+                                mainAppContainer.classList.remove('hidden');
+                                window.loadProjectsList();
+                            }
+                        } catch(e) {
+                            console.error("Error al validar T&C en BD", e);
+                            document.getElementById('tnc-modal').classList.remove('hidden');
+                            document.getElementById('tnc-modal').classList.add('flex');
+                        }
+                    }
                 } else {
                     window.currentUserId = null;
                     authBtnHeader.classList.remove('hidden');
@@ -1925,6 +2034,10 @@
                 toggleAuthModeBtn.textContent = 'Ingresa';
                 nameInputGroup.classList.remove('hidden');
                 fullnameInput.required = true;
+                
+                // Mostrar checkbox en registro manual
+                document.getElementById('tnc-signup-group').classList.remove('hidden');
+                document.getElementById('tnc-checkbox-signup').required = true;
             } else {
                 authTitle.textContent = 'Iniciar Sesión';
                 authSubtitle.textContent = 'Accede para guardar tus reportes.';
@@ -1933,6 +2046,10 @@
                 toggleAuthModeBtn.textContent = 'Regístrate';
                 nameInputGroup.classList.add('hidden');
                 fullnameInput.required = false;
+                
+                // Ocultar checkbox en login manual
+                document.getElementById('tnc-signup-group').classList.add('hidden');
+                document.getElementById('tnc-checkbox-signup').required = false;
             }
         }
 
@@ -1944,7 +2061,7 @@
         toggleAuthModeBtn.addEventListener('click', toggleAuthMode);
 
         signOutBtn.addEventListener('click', async () => {
-            try { await signOut(auth); } catch (error) { console.error("Error signing out:", error); }
+            try { await window.signOutAuth(auth); } catch (error) { console.error("Error signing out:", error); }
         });
 
         googleAuthBtn.addEventListener('click', async () => {
@@ -1961,13 +2078,28 @@
             if (!email || !password) return showError("Ingresa correo y contraseña.");
             if (isSignUpMode && !fullname) return showError("Ingresa tu nombre y apellido.");
             
+            if (isSignUpMode && !document.getElementById('tnc-checkbox-signup').checked) {
+                return showError("Debes aceptar los Términos y Condiciones.");
+            }
+
             submitAuthBtn.disabled = true; submitAuthBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> PROCESANDO...';
             resetAuthError();
 
             try {
                 if (isSignUpMode) {
+                    window.justSignedUpWithTNC = true;
                     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
                     await updateProfile(userCredential.user, { displayName: fullname });
+                    
+                    // Inyectar aceptación T&C directo a la base de datos al crear cuenta manual
+                    const userRef = window.doc(window.db, 'artifacts', window.globalAppId, 'users', userCredential.user.uid);
+                    await window.setDoc(userRef, {
+                        email: userCredential.user.email,
+                        name: fullname,
+                        tncAccepted: true,
+                        tncAcceptedAt: new Date()
+                    }, { merge: true });
+
                     userEmailDisplay.textContent = fullname;
                 } else { await signInWithEmailAndPassword(auth, email, password); }
             } catch (error) { showError("Credenciales incorrectas o correo en uso."); } 
