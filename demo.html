@@ -617,12 +617,40 @@
         }
 
         window.addEventListener('DOMContentLoaded', () => {
-            // NUEVO: Lógica de pagos URL Webpay
+            // NUEVO: Lógica de pagos URL Webpay y Recarga de Tokens
             const urlParams = new URLSearchParams(window.location.search);
             const pagoStatus = urlParams.get('pago');
+            const planComprado = urlParams.get('plan');
+
             if (pagoStatus === 'exitoso') {
-                setTimeout(() => showNotification("🎉 ¡Pago Aprobado! Tokens agregados a tu cuenta."), 1500);
+                // Limpiamos la URL para que no recargue tokens de nuevo si actualiza la página
                 window.history.replaceState({}, document.title, window.location.pathname);
+
+                // Esperamos 2.5 segundos a que Firebase reconozca la sesión del usuario
+                setTimeout(async () => {
+                    if (window.authInstance && window.authInstance.currentUser) {
+                        try {
+                            let tokensASumar = 0;
+                            if (planComprado === "basico") tokensASumar = 1000000;
+                            if (planComprado === "pro") tokensASumar = 2500000;
+                            if (planComprado === "recarga") tokensASumar = 200000;
+
+                            const userRef = window.doc(window.db, 'artifacts', window.globalAppId, 'users', window.authInstance.currentUser.uid);
+                            
+                            await window.updateDoc(userRef, {
+                                tokens_disponibles: window.increment(tokensASumar),
+                                plan_activo: planComprado,
+                                fecha_vencimiento: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
+                            });
+
+                            showNotification("🎉 ¡Pago Aprobado! Tokens agregados a tu cuenta.");
+                        } catch(e) {
+                            console.error("Error sumando tokens:", e);
+                            showNotification("Pago aprobado, pero hubo un error en Firebase.", true);
+                        }
+                    }
+                }, 2500);
+
             } else if (pagoStatus === 'rechazado') {
                 setTimeout(() => showNotification("❌ Pago rechazado por el banco o sin fondos.", true), 1500);
                 window.history.replaceState({}, document.title, window.location.pathname);
