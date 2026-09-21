@@ -146,6 +146,50 @@
         <p class="text-slate-400 text-xs font-medium tracking-widest uppercase animate-pulse">Iniciando sistema...</p>
     </div>
 
+    <!-- VOUCHER MODAL (NUEVO) -->
+    <div id="voucher-modal" class="fixed inset-0 bg-slate-900/90 backdrop-blur-sm z-[250] hidden items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden relative flex flex-col">
+            <div id="voucher-content" class="p-8 bg-white relative">
+                <!-- Marca de agua sutil -->
+                <div class="absolute inset-0 flex items-center justify-center opacity-5 pointer-events-none">
+                    <i class="fas fa-shield-alt text-9xl"></i>
+                </div>
+                
+                <div class="text-center mb-6 relative z-10">
+                    <div class="w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-3 shadow-inner">
+                        <i class="fas fa-check text-2xl text-emerald-600"></i>
+                    </div>
+                    <img src="https://lh3.googleusercontent.com/pw/AP1GczOsQ9BjTC3dTk0RxKlbaZtHDeSwbqF3-buuEPA6QHBnWKNK4GkHQpfHPUJkVSbHPN7QEXrwUL5qVDwk5vLhsbpcLCLP3NCezheTURsZUCAOwnL0h1NtlHKbrEHkrsdquexu32SfFSdxlqHT1c36shbDMQ=w599-h599-s-no-gm?authuser=0" alt="Logo" class="h-8 mx-auto mb-2 object-contain">
+                    <h2 class="text-lg font-bold text-slate-900 tracking-tight">Comprobante de Pago</h2>
+                    <p class="text-[0.65rem] font-bold text-slate-400 uppercase tracking-widest mt-1">Transbank Webpay Plus</p>
+                </div>
+                
+                <div class="space-y-3 text-xs text-slate-600 border-t border-b border-dashed border-slate-200 py-5 mb-6 relative z-10">
+                    <div class="flex justify-between items-center"><span class="font-semibold text-slate-400">Comercio:</span> <span class="font-bold text-slate-800">Obrín IA SpA</span></div>
+                    <div class="flex justify-between items-center"><span class="font-semibold text-slate-400">Servicio:</span> <span id="v-plan" class="font-bold text-brand-600"></span></div>
+                    <div class="flex justify-between items-center"><span class="font-semibold text-slate-400">Monto:</span> <span id="v-monto" class="font-bold text-slate-900 text-sm"></span></div>
+                    <div class="flex justify-between items-center"><span class="font-semibold text-slate-400">Fecha:</span> <span id="v-fecha" class="font-medium"></span></div>
+                    <div class="flex justify-between items-center"><span class="font-semibold text-slate-400">Autorización:</span> <span id="v-auth" class="font-mono bg-slate-100 px-1 rounded"></span></div>
+                    <div class="flex justify-between items-center"><span class="font-semibold text-slate-400">Tarjeta:</span> <span id="v-tarjeta" class="font-medium tracking-wider"></span></div>
+                    <div class="flex justify-between items-center"><span class="font-semibold text-slate-400">Tipo de Pago:</span> <span id="v-tipo" class="font-medium"></span></div>
+                </div>
+                
+                <div class="text-center text-[0.6rem] text-slate-400 leading-relaxed relative z-10">
+                    <p>Guarde este comprobante como respaldo de su transacción.</p>
+                    <p>Este documento certifica el pago digital, no constituye boleta fiscal.</p>
+                </div>
+            </div>
+            <div class="p-5 bg-slate-50 border-t border-slate-100 flex gap-3">
+                <button onclick="window.descargarVoucher(event)" class="flex-1 bg-slate-900 text-white py-3 rounded-lg text-[0.65rem] font-bold uppercase tracking-widest hover:bg-slate-800 transition shadow-md flex items-center justify-center gap-2">
+                    <i class="fas fa-file-pdf"></i> Guardar PDF
+                </button>
+                <button onclick="window.cerrarVoucher()" class="flex-1 bg-white border border-slate-300 text-slate-700 py-3 rounded-lg text-[0.65rem] font-bold uppercase tracking-widest hover:bg-slate-50 transition shadow-sm">
+                    Continuar
+                </button>
+            </div>
+        </div>
+    </div>
+
     <div id="tnc-modal" class="fixed inset-0 bg-slate-900/90 backdrop-blur-sm z-[200] hidden items-center justify-center p-4">
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden relative flex flex-col max-h-[90vh]">
             <div class="p-6 border-b border-slate-100 bg-slate-50">
@@ -616,37 +660,89 @@
             }, 3500);
         }
 
+        window.descargarVoucher = async function(event) {
+            const btn = event.currentTarget;
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> GENERANDO...';
+            btn.disabled = true;
+
+            const element = document.getElementById('voucher-content');
+            try {
+                const canvas = await html2canvas(element, { scale: 2, backgroundColor: '#ffffff' });
+                const imgData = canvas.toDataURL('image/jpeg', 1.0);
+                const { jsPDF } = window.jspdf;
+                const pdf = new jsPDF({ orientation: 'portrait', unit: 'px', format: [canvas.width, canvas.height] });
+                pdf.addImage(imgData, 'JPEG', 0, 0, canvas.width, canvas.height);
+                pdf.save(`Voucher_ObrinIA_${document.getElementById('v-auth').innerText}.pdf`);
+            } catch (error) {
+                showNotification("Hubo un problema al generar el PDF.", true);
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        };
+
+        window.cerrarVoucher = function() {
+            document.getElementById('voucher-modal').classList.add('hidden');
+            document.getElementById('voucher-modal').classList.remove('flex');
+        };
+
         window.addEventListener('DOMContentLoaded', () => {
-            // NUEVO: Lógica de pagos URL Webpay y Recarga de Tokens
             const urlParams = new URLSearchParams(window.location.search);
             const pagoStatus = urlParams.get('pago');
             const planComprado = urlParams.get('plan');
+            const vMonto = urlParams.get('monto');
+            const vAuth = urlParams.get('auth');
+            const vTarjeta = urlParams.get('tarjeta');
+            const vFecha = urlParams.get('fecha');
+            const vTipo = urlParams.get('tipo');
 
             if (pagoStatus === 'exitoso') {
-                // Limpiamos la URL para que no recargue tokens de nuevo si actualiza la página
                 window.history.replaceState({}, document.title, window.location.pathname);
 
-                // Esperamos 2.5 segundos a que Firebase reconozca la sesión del usuario
-                setTimeout(async () => {
-                    if (window.authInstance && window.authInstance.currentUser) {
-                        try {
-                            let tokensASumar = 0;
-                            if (planComprado === "basico") tokensASumar = 1000000;
-                            if (planComprado === "pro") tokensASumar = 2500000;
-                            if (planComprado === "recarga") tokensASumar = 200000;
+                let nombrePlan = 'Recarga Express (200k Tks)';
+                if (planComprado === 'pro') nombrePlan = 'Plan Pro (2.5M Tks)';
+                if (planComprado === 'basico') nombrePlan = 'Plan Básico (1M Tks)';
 
-                            const userRef = window.doc(window.db, 'artifacts', window.globalAppId, 'users', window.authInstance.currentUser.uid);
-                            
+                document.getElementById('v-plan').innerText = nombrePlan;
+                document.getElementById('v-monto').innerText = '$' + parseInt(vMonto).toLocaleString('es-CL');
+                const dateObj = new Date(vFecha);
+                document.getElementById('v-fecha').innerText = isNaN(dateObj) ? vFecha : dateObj.toLocaleString('es-CL');
+                document.getElementById('v-auth').innerText = vAuth;
+                document.getElementById('v-tarjeta').innerText = '**** **** **** ' + vTarjeta;
+                document.getElementById('v-tipo').innerText = (vTipo === 'VD' ? 'Débito' : 'Crédito');
+
+                document.getElementById('voucher-modal').classList.remove('hidden');
+                document.getElementById('voucher-modal').classList.add('flex');
+
+                setTimeout(async () => {
+                    if (window.authInstance && window.authInstance.currentUser && window.addDoc) {
+                        try {
+                            const uid = window.authInstance.currentUser.uid;
+                            let tokensASumar = planComprado === "pro" ? 2500000 : (planComprado === "basico" ? 1000000 : 200000);
+
+                            const userRef = window.doc(window.db, 'artifacts', window.globalAppId, 'users', uid);
                             await window.updateDoc(userRef, {
                                 tokens_disponibles: window.increment(tokensASumar),
                                 plan_activo: planComprado,
                                 fecha_vencimiento: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
                             });
 
-                            showNotification("🎉 ¡Pago Aprobado! Tokens agregados a tu cuenta.");
+                            const pagosRef = window.collection(window.db, 'artifacts', window.globalAppId, 'users', uid, 'pagos');
+                            await window.addDoc(pagosRef, {
+                                plan: planComprado,
+                                monto: parseInt(vMonto),
+                                autorizacion: vAuth,
+                                tarjeta: vTarjeta,
+                                tipo_pago: vTipo,
+                                fecha_transaccion: vFecha,
+                                fecha_registro: new Date()
+                            });
+
+                            showNotification("🎉 Pago Aprobado y Guardado en Historial");
                         } catch(e) {
-                            console.error("Error sumando tokens:", e);
-                            showNotification("Pago aprobado, pero hubo un error en Firebase.", true);
+                            console.error("Error guardando voucher en BD:", e);
+                            showNotification("Tokens sumados. Error al guardar copia en BD.", true);
                         }
                     }
                 }, 2500);
@@ -1211,7 +1307,6 @@
         };
 
         window.runAnalysis = async function() {
-            // PAYWALL - Bloqueo de IA sin Tokens
             if (window.userTokensDisponibles < 5000) {
                 showNotification("⚠️ Saldo de tokens insuficiente para procesar la imagen.", true);
                 window.openWallet();
@@ -1300,7 +1395,6 @@
                 const data = await response.json();
                 if (data.error) throw new Error("Error de API: " + data.error.message);
                 
-                // Descontar tokens del cliente en Firebase
                 const tokensGastados = data.usageMetadata?.totalTokenCount || 3500;
                 const userId = window.currentUserId;
                 if (userId && window.db) {
@@ -1479,6 +1573,7 @@
             window.doc = doc;                 
             window.updateDoc = updateDoc;     
             window.setDoc = setDoc; 
+            window.addDoc = addDoc;
             window.getDoc = getDoc;
             window.signOutAuth = signOut;
             window.authInstance = auth;
@@ -2141,7 +2236,6 @@
                         try {
                             const userRef = window.doc(window.db, 'artifacts', window.globalAppId, 'users', user.uid);
                             
-                            // NUEVO: Lector en tiempo real del saldo del usuario en Firebase
                             window.onSnapshot(userRef, (docSnap) => {
                                 if (docSnap.exists()) {
                                     const data = docSnap.data();
@@ -2154,7 +2248,6 @@
                                         mainAppContainer.classList.remove('hidden');
                                     }
 
-                                    // Lógica de Tokens y Barra de Consumo
                                     window.userTokensDisponibles = data.tokens_disponibles || 0;
                                     window.userPlanActivo = data.plan_activo || null;
                                     
