@@ -168,6 +168,12 @@
                     <div class="flex justify-between items-center"><span class="font-semibold text-slate-400">Comercio:</span> <span class="font-bold text-slate-800">Obrín IA SpA</span></div>
                     <div class="flex justify-between items-center"><span class="font-semibold text-slate-400">Servicio:</span> <span id="v-plan" class="font-bold text-brand-600"></span></div>
                     <div class="flex justify-between items-center"><span class="font-semibold text-slate-400">Monto:</span> <span id="v-monto" class="font-bold text-slate-900 text-sm"></span></div>
+                    
+                    <!-- NUEVOS CAMPOS AÑADIDOS AQUÍ -->
+                    <div class="flex justify-between items-center"><span class="font-semibold text-slate-400">Orden de Compra:</span> <span id="v-orden" class="font-medium text-slate-700"></span></div>
+                    <div class="flex justify-between items-center"><span class="font-semibold text-slate-400">Token TBK:</span> <span id="v-token" class="font-mono text-[0.55rem] text-slate-400 truncate max-w-[150px]"></span></div>
+                    <!-- ========================== -->
+
                     <div class="flex justify-between items-center"><span class="font-semibold text-slate-400">Fecha:</span> <span id="v-fecha" class="font-medium"></span></div>
                     <div class="flex justify-between items-center"><span class="font-semibold text-slate-400">Autorización:</span> <span id="v-auth" class="font-mono bg-slate-100 px-1 rounded"></span></div>
                     <div class="flex justify-between items-center"><span class="font-semibold text-slate-400">Tarjeta:</span> <span id="v-tarjeta" class="font-medium tracking-wider"></span></div>
@@ -700,6 +706,9 @@
             if (pagoStatus === 'exitoso') {
                 window.history.replaceState({}, document.title, window.location.pathname);
 
+                const vOrden = urlParams.get('orden');
+                const vToken = urlParams.get('token');
+
                 let nombrePlan = 'Recarga Express (200k Tks)';
                 if (planComprado === 'pro') nombrePlan = 'Plan Pro (2.5M Tks)';
                 if (planComprado === 'basico') nombrePlan = 'Plan Básico (1M Tks)';
@@ -711,6 +720,11 @@
                 document.getElementById('v-auth').innerText = vAuth;
                 document.getElementById('v-tarjeta').innerText = '**** **** **** ' + vTarjeta;
                 document.getElementById('v-tipo').innerText = (vTipo === 'VD' ? 'Débito' : 'Crédito');
+                
+                // Imprimir Orden y Token
+                document.getElementById('v-orden').innerText = vOrden || 'N/A';
+                document.getElementById('v-token').innerText = vToken || 'N/A';
+                document.getElementById('v-token').title = vToken || '';
 
                 document.getElementById('voucher-modal').classList.remove('hidden');
                 document.getElementById('voucher-modal').classList.add('flex');
@@ -850,8 +864,6 @@
                 const data = await response.json();
                 
                 if (data.url && data.token) {
-                    prompt("Copia este Token para Transbank (Ctrl+C):", data.token);
-                    
                     const form = document.createElement('form');
                     form.method = 'POST';
                     form.action = data.url;
