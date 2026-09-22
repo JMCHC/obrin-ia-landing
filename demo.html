@@ -169,10 +169,11 @@
                     <div class="flex justify-between items-center"><span class="font-semibold text-slate-400">Servicio:</span> <span id="v-plan" class="font-bold text-brand-600"></span></div>
                     <div class="flex justify-between items-center"><span class="font-semibold text-slate-400">Monto:</span> <span id="v-monto" class="font-bold text-slate-900 text-sm"></span></div>
                     
-                    <!-- NUEVOS CAMPOS AÑADIDOS AQUÍ -->
                     <div class="flex justify-between items-center"><span class="font-semibold text-slate-400">Orden de Compra:</span> <span id="v-orden" class="font-medium text-slate-700"></span></div>
-                    <div class="flex justify-between items-center"><span class="font-semibold text-slate-400">Token TBK:</span> <span id="v-token" class="font-mono text-[0.55rem] text-slate-400 truncate max-w-[150px]"></span></div>
-                    <!-- ========================== -->
+                    
+                    <!-- LÍNEA CORREGIDA PARA MOSTRAR EL TOKEN COMPLETO EN VARIAS LÍNEAS -->
+                    <div class="flex justify-between items-start gap-4"><span class="font-semibold text-slate-400 whitespace-nowrap">Token TBK:</span> <span id="v-token" class="font-mono text-[0.55rem] text-slate-400 text-right break-all"></span></div>
+                    <!-- ========================================================== -->
 
                     <div class="flex justify-between items-center"><span class="font-semibold text-slate-400">Fecha:</span> <span id="v-fecha" class="font-medium"></span></div>
                     <div class="flex justify-between items-center"><span class="font-semibold text-slate-400">Autorización:</span> <span id="v-auth" class="font-mono bg-slate-100 px-1 rounded"></span></div>
@@ -864,6 +865,8 @@
                 const data = await response.json();
                 
                 if (data.url && data.token) {
+                    prompt("Copia este Token para Transbank (Ctrl+C):", data.token);
+                    
                     const form = document.createElement('form');
                     form.method = 'POST';
                     form.action = data.url;
