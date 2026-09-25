@@ -642,7 +642,7 @@
                 </button>
             </div>
             <div class="p-6 overflow-y-auto flex-1 space-y-6">
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-4" id="admin-stats-container"></div>
+                <div class="grid grid-cols-2 lg:grid-cols-5 gap-4" id="admin-stats-container"></div>
                 <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm w-full h-64 relative">
                     <canvas id="admin-chart"></canvas>
                 </div>
@@ -1083,13 +1083,13 @@
         };
 
         window.loadTeamMembers = async function() {
-            if (!auth || !auth.currentUser || !db) return;
+            if (!window.authInstance || !window.authInstance.currentUser || !window.db) return;
             const listContainer = document.getElementById('team-members-list');
             listContainer.innerHTML = '<div class="p-6 text-center text-slate-400 text-xs font-bold uppercase"><i class="fas fa-spinner fa-spin mb-2"></i><br>Cargando equipo...</div>';
 
             try {
-                const userId = auth.currentUser.uid;
-                const invitesRef = window.collection(db, 'artifacts', globalAppId, 'users', userId, 'equipo');
+                const userId = window.authInstance.currentUser.uid;
+                const invitesRef = window.collection(window.db, 'artifacts', window.globalAppId, 'users', userId, 'equipo');
                 const snap = await window.getDocs(window.query(invitesRef, window.orderBy('createdAt', 'desc')));
                 
                 document.getElementById('team-count').innerText = snap.size;
@@ -1137,9 +1137,9 @@
             btn.innerText = '...'; btn.disabled = true;
 
             try {
-                const userId = auth.currentUser.uid;
+                const userId = window.authInstance.currentUser.uid;
                 
-                const invitesRef = window.collection(db, 'artifacts', globalAppId, 'users', userId, 'equipo');
+                const invitesRef = window.collection(window.db, 'artifacts', window.globalAppId, 'users', userId, 'equipo');
                 const snap = await window.getDocs(invitesRef);
                 if(snap.size >= 50) throw new Error("Límite de 50 usuarios alcanzado.");
                 
@@ -1149,10 +1149,10 @@
                     createdAt: new Date()
                 });
 
-                const globalInviteRef = window.doc(db, 'artifacts', globalAppId, 'invitaciones', email);
+                const globalInviteRef = window.doc(window.db, 'artifacts', window.globalAppId, 'invitaciones', email);
                 await window.setDoc(globalInviteRef, {
                     masterId: userId,
-                    masterName: auth.currentUser.displayName || auth.currentUser.email,
+                    masterName: window.authInstance.currentUser.displayName || window.authInstance.currentUser.email,
                     createdAt: new Date()
                 });
 
@@ -1170,13 +1170,13 @@
         window.removeTeamMember = async function(docId) {
             if(!confirm("¿Seguro que deseas revocar el acceso a este usuario?")) return;
             try {
-                const userId = auth.currentUser.uid;
-                const memberRef = window.doc(db, 'artifacts', globalAppId, 'users', userId, 'equipo', docId);
+                const userId = window.authInstance.currentUser.uid;
+                const memberRef = window.doc(window.db, 'artifacts', window.globalAppId, 'users', userId, 'equipo', docId);
                 
                 const memberSnap = await window.getDoc(memberRef);
                 if(memberSnap.exists()) {
                     const memberEmail = memberSnap.data().email;
-                    const globalInviteRef = window.doc(db, 'artifacts', globalAppId, 'invitaciones', memberEmail);
+                    const globalInviteRef = window.doc(window.db, 'artifacts', window.globalAppId, 'invitaciones', memberEmail);
                     await window.deleteDoc(globalInviteRef);
                 }
                 
@@ -2380,9 +2380,16 @@
             pagosContainer.innerHTML = '<div class="p-8 text-center text-slate-400 text-xs font-bold uppercase tracking-widest"><i class="fas fa-circle-notch fa-spin text-2xl mb-2 text-emerald-500"></i><br>Cargando pagos...</div>';
             
             try {
-                // CARGAR EVALUACIONES
+                // 1. OBTENER USUARIOS PARA CRUZAR CORREOS
+                const usersSnap = await getDocs(collection(db, 'artifacts', globalAppId, 'users'));
+                let usersMap = {};
+                usersSnap.forEach(doc => {
+                    usersMap[doc.id] = doc.data().email || 'Usuario Desconocido';
+                });
+                const totalUsuarios = usersSnap.size;
+
+                // 2. CARGAR EVALUACIONES
                 const evalsSnap = await getDocs(collectionGroup(db, 'evaluaciones'));
-                
                 let allEvals = [];
                 let totalMontoObj = 0;
                 let damageCounts = { 'Crítico / Alto': 0, 'Moderado / Medio': 0, 'Leve / Bajo': 0 };
@@ -2410,13 +2417,15 @@
                     return timeB - timeA;
                 });
 
-                // CARGAR PAGOS
+                // 3. CARGAR PAGOS
                 const pagosSnap = await getDocs(collectionGroup(db, 'pagos'));
                 let allPagos = [];
                 let totalIngresosReales = 0;
 
                 pagosSnap.forEach(doc => {
                     const p = doc.data();
+                    p.docId = doc.id;
+                    p.userId = doc.ref.parent.parent.id;
                     allPagos.push(p);
                     if (p.monto) totalIngresosReales += Number(p.monto);
                 });
@@ -2427,25 +2436,32 @@
                     return timeB - timeA;
                 });
 
+                // RENDERIZAR KPIs
+                statsContainer.className = "grid grid-cols-2 md:grid-cols-5 gap-4";
                 statsContainer.innerHTML = `
-                    <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center gap-4">
-                        <div class="w-12 h-12 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl"><i class="fas fa-cash-register"></i></div>
-                        <div><p class="text-[0.6rem] text-slate-400 uppercase tracking-widest font-bold">Ingresos Reales</p><p class="text-xl font-bold text-emerald-600">$${totalIngresosReales.toLocaleString('es-CL')}</p></div>
+                    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-center items-center text-center gap-2">
+                        <div class="w-10 h-10 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center text-lg"><i class="fas fa-cash-register"></i></div>
+                        <div><p class="text-[0.6rem] text-slate-400 uppercase tracking-widest font-bold">Ingresos Reales</p><p class="text-lg font-bold text-emerald-600">$${totalIngresosReales.toLocaleString('es-CL')}</p></div>
                     </div>
-                    <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center gap-4">
-                        <div class="w-12 h-12 rounded-full bg-brand-50 text-brand-600 flex items-center justify-center text-xl"><i class="fas fa-file-contract"></i></div>
-                        <div><p class="text-[0.6rem] text-slate-400 uppercase tracking-widest font-bold">Diagnósticos Totales</p><p class="text-xl font-bold text-slate-800">${allEvals.length}</p></div>
+                    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-center items-center text-center gap-2">
+                        <div class="w-10 h-10 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center text-lg"><i class="fas fa-credit-card"></i></div>
+                        <div><p class="text-[0.6rem] text-slate-400 uppercase tracking-widest font-bold">Transacciones</p><p class="text-lg font-bold text-slate-800">${allPagos.length}</p></div>
                     </div>
-                    <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center gap-4 hidden md:flex">
-                        <div class="w-12 h-12 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center text-xl"><i class="fas fa-money-bill-wave"></i></div>
-                        <div><p class="text-[0.6rem] text-slate-400 uppercase tracking-widest font-bold">Inversión Sumada Obra</p><p class="text-lg font-bold text-slate-800">$${totalMontoObj.toLocaleString('es-CL')}</p></div>
+                    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-center items-center text-center gap-2">
+                        <div class="w-10 h-10 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center text-lg"><i class="fas fa-users"></i></div>
+                        <div><p class="text-[0.6rem] text-slate-400 uppercase tracking-widest font-bold">Usuarios Reg.</p><p class="text-lg font-bold text-slate-800">${totalUsuarios}</p></div>
                     </div>
-                    <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center gap-4">
-                        <div class="w-12 h-12 rounded-full bg-red-50 text-red-500 flex items-center justify-center text-xl"><i class="fas fa-exclamation-triangle"></i></div>
-                        <div><p class="text-[0.6rem] text-slate-400 uppercase tracking-widest font-bold">Casos Críticos</p><p class="text-xl font-bold text-slate-800">${damageCounts['Crítico / Alto']}</p></div>
+                    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-center items-center text-center gap-2">
+                        <div class="w-10 h-10 rounded-full bg-brand-50 text-brand-600 flex items-center justify-center text-lg"><i class="fas fa-file-contract"></i></div>
+                        <div><p class="text-[0.6rem] text-slate-400 uppercase tracking-widest font-bold">Diagnósticos</p><p class="text-lg font-bold text-slate-800">${allEvals.length}</p></div>
+                    </div>
+                    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-center items-center text-center gap-2">
+                        <div class="w-10 h-10 rounded-full bg-red-50 text-red-500 flex items-center justify-center text-lg"><i class="fas fa-exclamation-triangle"></i></div>
+                        <div><p class="text-[0.6rem] text-slate-400 uppercase tracking-widest font-bold">Casos Críticos</p><p class="text-lg font-bold text-slate-800">${damageCounts['Crítico / Alto']}</p></div>
                     </div>
                 `;
 
+                // CHART
                 const ctx = document.getElementById('admin-chart').getContext('2d');
                 if (adminChartInstance) adminChartInstance.destroy(); 
                 
@@ -2463,7 +2479,7 @@
                     options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
                 });
 
-                // Render Pagos
+                // RENDER PAGOS (AHORA CON MÁS INFORMACIÓN)
                 pagosContainer.innerHTML = '';
                 if(allPagos.length === 0) {
                     pagosContainer.innerHTML = '<div class="p-6 text-center text-slate-500 text-sm">No hay pagos registrados.</div>';
@@ -2477,32 +2493,36 @@
                         } else {
                             dateObj = new Date();
                         }
-                        const dateStr = dateObj.toLocaleDateString('es-CL', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute:'2-digit' });
+                        const dateStr = dateObj.toLocaleDateString('es-CL', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute:'2-digit' });
                         
                         let planName = 'Recarga Express';
-                        if (p.plan === 'pro') planName = 'Plan Pro';
+                        if (p.plan === 'pro') planName = 'Plan Pro (B2B)';
                         if (p.plan === 'plus') planName = 'Plan Plus';
                         if (p.plan === 'basico') planName = 'Plan Básico';
 
+                        const userEmail = usersMap[p.userId] || 'Usuario Desconocido';
+                        const tipoPagoFull = p.tipo_pago === 'VD' ? 'Débito' : (p.tipo_pago === 'VN' ? 'Crédito' : (p.tipo_pago || 'Webpay'));
+
                         pagosContainer.innerHTML += `
-                            <div class="px-5 py-4 hover:bg-slate-50 transition-colors flex justify-between items-center group">
-                                <div class="flex items-center gap-3">
-                                    <div class="w-8 h-8 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-xs"><i class="fas fa-receipt"></i></div>
-                                    <div>
-                                        <p class="text-xs font-bold text-slate-800 uppercase tracking-wide">${planName}</p>
-                                        <p class="text-[0.6rem] font-bold text-slate-400 mt-0.5 uppercase tracking-widest">${dateStr} | ${p.tarjeta ? '****'+p.tarjeta : 'N/A'}</p>
+                            <div class="px-5 py-4 hover:bg-slate-50 transition-colors flex justify-between items-center group border-b border-slate-100 last:border-0">
+                                <div class="flex items-center gap-3 w-2/3">
+                                    <div class="w-10 h-10 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-sm shrink-0"><i class="fas fa-receipt"></i></div>
+                                    <div class="truncate">
+                                        <p class="text-sm font-bold text-slate-800 tracking-wide truncate">${userEmail}</p>
+                                        <p class="text-[0.65rem] font-bold text-slate-500 mt-0.5 uppercase tracking-widest"><span class="text-brand-600">${planName}</span> • ${dateStr}</p>
+                                        <p class="text-[0.6rem] text-slate-400 mt-0.5 uppercase tracking-widest"><i class="fas fa-credit-card mr-1"></i> ${tipoPagoFull} ${p.tarjeta ? '****'+p.tarjeta : ''}</p>
                                     </div>
                                 </div>
-                                <div class="text-right">
-                                    <p class="text-sm font-bold text-emerald-600">$${(p.monto || 0).toLocaleString('es-CL')}</p>
-                                    <p class="text-[0.55rem] font-mono text-slate-400 mt-1 uppercase tracking-widest">Auth: ${p.autorizacion || 'N/A'}</p>
+                                <div class="text-right shrink-0">
+                                    <p class="text-base font-bold text-emerald-600">$${(p.monto || 0).toLocaleString('es-CL')}</p>
+                                    <p class="text-[0.55rem] font-mono text-slate-400 mt-1 uppercase tracking-widest bg-slate-100 px-1.5 py-0.5 rounded inline-block">Auth: ${p.autorizacion || 'N/A'}</p>
                                 </div>
                             </div>
                         `;
                     });
                 }
 
-                // Render Evaluaciones
+                // RENDER EVALUACIONES (Con correo de usuario)
                 listContainer.innerHTML = '';
                 if(allEvals.length === 0) {
                     listContainer.innerHTML = '<div class="p-6 text-center text-slate-500 text-sm">No hay reportes en la plataforma aún.</div>';
@@ -2516,13 +2536,16 @@
                         if (lvl.includes('CRÍTICO') || lvl.includes('ALTO')) badgeColor = "bg-red-100 text-red-700";
                         else if (lvl.includes('MODERADO') || lvl.includes('MEDIO')) badgeColor = "bg-orange-100 text-orange-700";
 
+                        const uEmail = usersMap[evalData.userId] || 'Usuario Desconocido';
+
                         listContainer.innerHTML += `
-                            <div class="px-5 py-4 hover:bg-slate-50 transition-colors flex justify-between items-center group">
-                                <div>
-                                    <p class="text-xs font-bold text-slate-800 uppercase tracking-wide">${evalData.projectName || 'Sin Proyecto'} <span class="text-slate-400 font-normal">| ${evalData.superficie || 'Superficie'}</span></p>
-                                    <p class="text-[0.6rem] font-bold text-slate-400 mt-1 uppercase tracking-widest"><i class="far fa-clock"></i> ${dateStr}</p>
+                            <div class="px-5 py-4 hover:bg-slate-50 transition-colors flex justify-between items-center group border-b border-slate-100 last:border-0">
+                                <div class="truncate w-2/3">
+                                    <p class="text-xs font-bold text-slate-800 uppercase tracking-wide truncate">${evalData.superficie || 'Evaluación Técnica'}</p>
+                                    <p class="text-[0.6rem] text-slate-500 truncate mb-1 lowercase"><i class="fas fa-user mr-1 text-slate-300"></i> ${uEmail}</p>
+                                    <p class="text-[0.6rem] font-bold text-slate-400 uppercase tracking-widest"><i class="far fa-clock"></i> ${dateStr}</p>
                                 </div>
-                                <div class="text-right flex items-center gap-4">
+                                <div class="text-right flex items-center gap-3 shrink-0">
                                     <div class="flex flex-col items-end">
                                         <span class="px-2 py-0.5 rounded text-[0.6rem] font-bold uppercase tracking-wider ${badgeColor}">${evalData.nivel_dano || 'N/A'}</span>
                                         <p class="text-xs font-bold text-slate-700 mt-1">${evalData.precio_ref || '$0'}</p>
