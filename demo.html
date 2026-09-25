@@ -775,7 +775,7 @@
                 else if (maxTokens === 2500000) limiteTexto = ' / 2.500.000 (Plus)';
                 else if (maxTokens === 1000000) limiteTexto = ' / 1.000.000 (Básico)';
                 
-                texto.innerText = `${tokens.toLocaleString('es-CL')}${limiteTexto} Disp.`;
+                texto.innerText = `${tokens.toLocaleString('es-CL')} Tks${limiteTexto} Disp.`;
                 
                 if (porcentaje > 50) barra.style.backgroundColor = "#10b981"; 
                 else if (porcentaje > 20) barra.style.backgroundColor = "#f59e0b"; 
@@ -1152,7 +1152,7 @@
                 const snap = await window.getDocs(invitesRef);
                 if(snap.size >= 50) throw new Error("Límite de 50 usuarios alcanzado.");
                 
-                await window.addDoc(invitesRef, {
+                const newInviteRef = await window.addDoc(invitesRef, {
                     email: email,
                     estado: 'Pendiente',
                     createdAt: new Date()
@@ -1162,6 +1162,7 @@
                 await window.setDoc(globalInviteRef, {
                     masterId: userId,
                     masterName: window.authInstance.currentUser.displayName || window.authInstance.currentUser.email,
+                    inviteId: newInviteRef.id, 
                     createdAt: new Date()
                 });
 
@@ -2682,12 +2683,17 @@
                                                     plan_activo: 'pro_member'
                                                 });
 
-                                                const memberStatusRef = window.doc(window.db, 'artifacts', window.globalAppId, 'users', inviteData.masterId, 'equipo', inviteSnap.id);
-                                                try { await window.updateDoc(memberStatusRef, { estado: 'Activo' }); } catch(e){}
+                                                if (inviteData.inviteId) {
+                                                    const memberStatusRef = window.doc(window.db, 'artifacts', window.globalAppId, 'users', inviteData.masterId, 'equipo', inviteData.inviteId);
+                                                    try { await window.updateDoc(memberStatusRef, { estado: 'Activo' }); } catch(e){}
+                                                }
                                                 
                                                 data.id_cuenta_maestra = inviteData.masterId;
                                                 data.plan_activo = 'pro_member';
-                                                showNotification(`¡Te has unido al equipo corporativo!`);
+                                                
+                                                setTimeout(() => {
+                                                    alert(`¡Bienvenido!\n\nTu cuenta ha sido enlazada exitosamente a la licencia Plan Pro de: ${inviteData.masterName}.\n\nYa puedes comenzar a utilizar el saldo compartido de la empresa.`);
+                                                }, 1000);
                                             }
                                         } catch(e) { console.error("Error check invite", e); }
                                     }
