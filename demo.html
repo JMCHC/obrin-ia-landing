@@ -226,11 +226,13 @@
                 <p class="font-bold mt-2 text-slate-800">3. DISPONIBILIDAD DEL SERVICIO Y DEPENDENCIAS EXTERNAS</p>
                 <p>El funcionamiento depende de infraestructura de terceros (Google, Cloudflare, Webpay). La Plataforma se ofrece "tal cual". No garantizamos que el servicio sea ininterrumpido o libre de errores temporales. Obrín IA no asume responsabilidad por pérdida de oportunidades comerciales derivadas de cortes en el servicio.</p>
                 <p class="font-bold mt-2 text-slate-800">4. TRATAMIENTO DE DATOS PERSONALES Y PRIVACIDAD (Ley N° 19.628)</p>
-                <p>El usuario otorga su consentimiento expreso para el tratamiento de su información (Nombre, correo, GPS/IP) recopilada exclusivamente para determinar variables climatológicas (temperatura y humedad). El usuario puede solicitar la eliminación permanente de su cuenta y sus historiales en cualquier momento.</p>
+                <p>El usuario otorga su consentimiento expreso para el tratamiento de su información (Nombre, correo, GPS/IP) recopilada exclusivamente para determinar variables climatológicas (temperatura y humedad). En el caso de planes corporativos, el Administrador de la Cuenta Maestra declara bajo su exclusiva responsabilidad contar con el consentimiento previo y explícito de los miembros de su equipo al ingresar sus correos electrónicos en la plataforma para el envío de invitaciones. El usuario puede solicitar la eliminación permanente de su cuenta y sus historiales en cualquier momento.</p>
                 <p class="font-bold mt-2 text-slate-800">5. PROPIEDAD INTELECTUAL Y ENTRENAMIENTO DEL SISTEMA (RAG)</p>
                 <p>El código y diseño de Obrín IA son propiedad intelectual exclusiva (Ley N° 17.336). Al procesar un caso, el usuario otorga a Obrín IA el derecho de utilizar las tipologías de daño y materiales para nutrir el "Cerebro Experto" de la IA. Toda esta información será procesada de forma estrictamente anonimizada.</p>
                 <p class="font-bold mt-2 text-slate-800">6. PAGOS, TOKENS Y SUSCRIPCIONES</p>
-                <p>Los pagos se procesan de forma externa. Política de No Reembolso: Una vez procesado el pago y asignados los tokens a la cuenta, no se realizarán devoluciones de dinero por tokens no utilizados debido a los costos de infraestructura computacional ya incurridos.</p>
+                <p>Los pagos se procesan de forma externa y segura mediante Transbank Webpay Plus. Política de No Reembolso: Una vez procesado el pago y asignados los tokens a la cuenta (individual o maestra), no se realizarán devoluciones de dinero por tokens no utilizados debido a los costos de infraestructura computacional de Inteligencia Artificial ya incurridos.</p>
+                <p class="font-bold mt-2 text-slate-800">7. CUENTAS CORPORATIVAS Y ADMINISTRACIÓN DE EQUIPOS (PLAN PRO)</p>
+                <p>Las suscripciones que permiten la vinculación de múltiples usuarios bajo una "Cuenta Maestra" comparten un saldo único de tokens. El usuario titular de la Cuenta Maestra es el único responsable financiero y operativo por el consumo total de tokens realizado por su equipo, así como de administrar, revocar o conceder los accesos. Obrín IA no se responsabiliza por el agotamiento acelerado del saldo causado por el uso desproporcionado de uno o más miembros del equipo invitado, ni por el uso indebido de la herramienta por parte de los trabajadores del titular.</p>
             </div>
             <div class="p-6 border-t border-slate-200 bg-white">
                 <label class="flex items-start gap-3 cursor-pointer mb-4">
@@ -715,9 +717,9 @@
                             <p class="font-bold mt-2">2. PRECIOS Y LEY DEL CONSUMIDOR</p>
                             <p>Obrín IA no es un proveedor de materiales. Los valores referenciales en CLP mostrados son dinámicos y pueden diferir de los precios reales al momento de la compra. No son vinculantes bajo la Ley de Protección al Consumidor (Ley N° 19.496).</p>
                             <p class="font-bold mt-2">3. DATOS Y RAG</p>
-                            <p>El usuario otorga su consentimiento expreso para el tratamiento de su información (Ley N° 19.628). El usuario otorga a Obrín IA el derecho de utilizar las tipologías de daño y materiales para nutrir la IA de forma estrictamente anonimizada.</p>
-                            <p class="font-bold mt-2">4. PAGOS</p>
-                            <p>Política de No Reembolso: Una vez procesado el pago y asignados los tokens, no se realizarán devoluciones de dinero debido a los costos de infraestructura computacional ya incurridos.</p>
+                            <p>El usuario otorga su consentimiento expreso para el tratamiento de su información (Ley N° 19.628). En el caso de planes corporativos, el Administrador asume la responsabilidad de contar con el consentimiento de su equipo al invitarlos. Se otorga a Obrín IA el derecho de utilizar las tipologías de daño para nutrir la IA de forma anonimizada.</p>
+                            <p class="font-bold mt-2">4. PAGOS Y CUENTAS CORPORATIVAS</p>
+                            <p>Política de No Reembolso: Una vez procesado el pago y asignados los tokens, no se realizarán devoluciones de dinero debido a los costos de infraestructura computacional ya incurridos. En Cuentas Maestras (Plan Pro), el titular es el único responsable por el consumo de tokens de los miembros de su equipo.</p>
                         </div>
                         <label class="flex items-start gap-2 cursor-pointer">
                             <input type="checkbox" id="tnc-checkbox-signup" class="mt-0.5 w-3 h-3 text-brand-600 rounded border-slate-300 focus:ring-brand-500">
@@ -773,7 +775,7 @@
                 else if (maxTokens === 2500000) limiteTexto = ' / 2.500.000 (Plus)';
                 else if (maxTokens === 1000000) limiteTexto = ' / 1.000.000 (Básico)';
                 
-                texto.innerText = `${tokens.toLocaleString('es-CL')} Tks${limiteTexto}`;
+                texto.innerText = `${tokens.toLocaleString('es-CL')}${limiteTexto} Disp.`;
                 
                 if (porcentaje > 50) barra.style.backgroundColor = "#10b981"; 
                 else if (porcentaje > 20) barra.style.backgroundColor = "#f59e0b"; 
