@@ -766,7 +766,14 @@
             
             if(barra && texto) {
                 barra.style.width = `${porcentaje}%`;
-                texto.innerText = `${tokens.toLocaleString('es-CL')} Tks`;
+                
+                // Formateo del texto para mostrar disponible / límite
+                let limiteTexto = '';
+                if (maxTokens === 15000000) limiteTexto = ' / 15.000.000 (Pro)';
+                else if (maxTokens === 2500000) limiteTexto = ' / 2.500.000 (Plus)';
+                else if (maxTokens === 1000000) limiteTexto = ' / 1.000.000 (Básico)';
+                
+                texto.innerText = `${tokens.toLocaleString('es-CL')} Tks${limiteTexto}`;
                 
                 if (porcentaje > 50) barra.style.backgroundColor = "#10b981"; 
                 else if (porcentaje > 20) barra.style.backgroundColor = "#f59e0b"; 
