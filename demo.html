@@ -133,7 +133,7 @@
                     <i class="fas fa-plus-circle text-brand-500"></i>
                 </button>
 
-                <button id="team-admin-btn" class="hidden w-full text-left px-4 py-3 text-xs text-indigo-600 hover:bg-indigo-50 font-bold transition-colors items-center gap-2 border-t border-slate-100">
+                <button id="team-admin-btn" onclick="window.openTeamManager()" class="hidden w-full text-left px-4 py-3 text-xs text-indigo-600 hover:bg-indigo-50 font-bold transition-colors items-center gap-2 border-t border-slate-100">
                     <i class="fas fa-users w-4"></i> Administrar Equipo (50)
                 </button>
                 
@@ -319,9 +319,9 @@
                     </div>
                     <div class="flex items-center gap-4 w-full md:w-auto">
                         <div class="text-right">
-                            <p class="text-lg font-bold text-slate-900">$50</p>
+                            <p class="text-lg font-bold text-slate-900">$9.990</p>
                         </div>
-                        <button onclick="window.iniciarPago('recarga', 50, event)" class="w-full md:w-auto bg-white border border-slate-300 text-slate-700 font-bold py-2.5 px-6 rounded-lg text-xs uppercase tracking-widest hover:bg-slate-50 transition shadow-sm whitespace-nowrap">Recargar</button>
+                        <button onclick="window.iniciarPago('recarga', 9990, event)" class="w-full md:w-auto bg-white border border-slate-300 text-slate-700 font-bold py-2.5 px-6 rounded-lg text-xs uppercase tracking-widest hover:bg-slate-50 transition shadow-sm whitespace-nowrap">Recargar</button>
                     </div>
                 </div>
 
@@ -329,6 +329,40 @@
                 <div class="mt-8 border-t border-slate-200 pt-8 hidden" id="payment-history-container">
                     <h3 class="text-sm font-bold text-slate-900 mb-4 flex items-center gap-2"><i class="fas fa-file-invoice-dollar text-brand-500"></i> Historial de Transacciones</h3>
                     <div id="payment-history-list" class="space-y-3 max-h-64 overflow-y-auto pr-2 custom-scrollbar">
+                        <!-- Items cargados dinámicamente -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- NUEVO: PANEL DE ADMINISTRACIÓN DE EQUIPO (B2B) -->
+    <div id="team-modal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-[110] hidden items-center justify-center p-4 opacity-0 transition-opacity duration-300">
+        <div class="bg-slate-50 rounded-2xl shadow-2xl w-full max-w-3xl overflow-hidden relative flex flex-col h-[85vh] transform scale-95 transition-transform duration-300" id="team-modal-content">
+            <div class="p-6 border-b border-slate-200 flex justify-between items-center bg-white">
+                <div>
+                    <h2 class="text-xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
+                        <i class="fas fa-users text-indigo-600"></i> Gestión de Equipo Pro
+                    </h2>
+                    <p class="text-slate-500 text-xs mt-1">Invita hasta 50 trabajadores para que compartan tu saldo de tokens.</p>
+                </div>
+                <button onclick="window.closeTeamManager()" class="w-8 h-8 flex items-center justify-center bg-slate-100 border border-slate-200 rounded-full text-slate-500 hover:text-red-500 hover:border-red-200 transition-colors shadow-sm">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="p-6 overflow-y-auto flex-1 space-y-6">
+                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+                    <h3 class="text-xs font-bold text-slate-700 uppercase tracking-widest mb-3">Enviar Invitación</h3>
+                    <div class="flex gap-2">
+                        <input type="email" id="team-invite-email" placeholder="correo.trabajador@constructora.cl" class="flex-1 p-3 text-sm border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-indigo-500">
+                        <button onclick="window.inviteTeamMember(event)" class="bg-indigo-600 text-white px-6 py-2 rounded-lg text-xs font-bold uppercase tracking-widest hover:bg-indigo-700 transition shadow whitespace-nowrap">Invitar</button>
+                    </div>
+                </div>
+                <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                    <div class="px-5 py-4 border-b border-slate-100 bg-slate-50 flex justify-between items-center">
+                        <h3 class="text-xs font-bold text-slate-700 uppercase tracking-widest">Miembros del Equipo (<span id="team-count">0</span>/50)</h3>
+                    </div>
+                    <div id="team-members-list" class="divide-y divide-slate-100 max-h-[300px] overflow-y-auto">
                         <!-- Items cargados dinámicamente -->
                     </div>
                 </div>
@@ -712,6 +746,24 @@
             }, 3500);
         }
 
+        function updateTokenUI(tokens, maxTokens) {
+            let porcentaje = 0;
+            if (maxTokens > 0) porcentaje = (tokens / maxTokens) * 100;
+            if (porcentaje > 100) porcentaje = 100;
+
+            const barra = document.getElementById("barra-progreso");
+            const texto = document.getElementById("porcentaje-texto");
+            
+            if(barra && texto) {
+                barra.style.width = `${porcentaje}%`;
+                texto.innerText = `${tokens.toLocaleString('es-CL')} Tks`;
+                
+                if (porcentaje > 50) barra.style.backgroundColor = "#10b981"; 
+                else if (porcentaje > 20) barra.style.backgroundColor = "#f59e0b"; 
+                else barra.style.backgroundColor = "#ef4444"; 
+            }
+        }
+
         window.descargarVoucher = async function(event) {
             const btn = event.currentTarget;
             const originalText = btn.innerHTML;
@@ -878,7 +930,7 @@
                 content.classList.remove('scale-95'); content.classList.add('scale-100');
             }, 10);
             
-            // NUEVO: Cargar historial de pagos
+            // Cargar historial de pagos
             if (window.authInstance && window.authInstance.currentUser && window.db) {
                 const listContainer = document.getElementById('payment-history-list');
                 const historyContainer = document.getElementById('payment-history-container');
@@ -971,8 +1023,6 @@
                 const data = await response.json();
                 
                 if (data.url && data.token) {
-                    // ELIMINADO EL PROMPT: prompt("Copia este Token para Transbank (Ctrl+C):", data.token);
-                    
                     const form = document.createElement('form');
                     form.method = 'POST';
                     form.action = data.url;
@@ -995,6 +1045,139 @@
                 btn.disabled = false;
             }
         }
+
+        // ==========================================
+        // FUNCIONES DE EQUIPO B2B (PLAN PRO)
+        // ==========================================
+        window.openTeamManager = async function() {
+            const userDropdown = document.getElementById('user-dropdown');
+            if(userDropdown) userDropdown.classList.add('hidden');
+            const modal = document.getElementById('team-modal');
+            const content = document.getElementById('team-modal-content');
+            
+            modal.classList.remove('hidden'); modal.classList.add('flex');
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+                content.classList.remove('scale-95'); content.classList.add('scale-100');
+            }, 10);
+
+            window.loadTeamMembers();
+        };
+
+        window.closeTeamManager = function() {
+            const modal = document.getElementById('team-modal');
+            const content = document.getElementById('team-modal-content');
+            modal.classList.add('opacity-0');
+            content.classList.remove('scale-100'); content.classList.add('scale-95');
+            setTimeout(() => { modal.classList.add('hidden'); modal.classList.remove('flex'); }, 300);
+        };
+
+        window.loadTeamMembers = async function() {
+            if (!auth || !auth.currentUser || !db) return;
+            const listContainer = document.getElementById('team-members-list');
+            listContainer.innerHTML = '<div class="p-6 text-center text-slate-400 text-xs font-bold uppercase"><i class="fas fa-spinner fa-spin mb-2"></i><br>Cargando equipo...</div>';
+
+            try {
+                const userId = auth.currentUser.uid;
+                const invitesRef = window.collection(db, 'artifacts', globalAppId, 'users', userId, 'equipo');
+                const snap = await window.getDocs(window.query(invitesRef, window.orderBy('createdAt', 'desc')));
+                
+                document.getElementById('team-count').innerText = snap.size;
+
+                listContainer.innerHTML = '';
+                if (snap.empty) {
+                    listContainer.innerHTML = '<div class="p-6 text-center text-slate-500 text-sm">No has invitado a nadie a tu equipo aún.</div>';
+                    return;
+                }
+
+                snap.forEach(docSnap => {
+                    const data = docSnap.data();
+                    const statusColor = data.estado === 'Activo' ? 'text-emerald-600' : 'text-amber-500';
+                    const statusIcon = data.estado === 'Activo' ? 'fa-check-circle' : 'fa-clock';
+                    
+                    listContainer.innerHTML += `
+                        <div class="px-5 py-4 hover:bg-slate-50 transition-colors flex justify-between items-center group">
+                            <div class="flex items-center gap-4">
+                                <div class="w-10 h-10 rounded-full bg-indigo-50 text-indigo-500 flex items-center justify-center text-lg"><i class="fas fa-user"></i></div>
+                                <div>
+                                    <p class="text-sm font-bold text-slate-800 tracking-wide">${data.email}</p>
+                                    <p class="text-[0.65rem] font-bold ${statusColor} mt-1 uppercase tracking-widest"><i class="fas ${statusIcon} mr-1"></i> Estado: ${data.estado}</p>
+                                </div>
+                            </div>
+                            <button onclick="window.removeTeamMember('${docSnap.id}')" class="w-8 h-8 flex items-center justify-center bg-white border border-slate-200 rounded-full text-slate-400 hover:bg-red-50 hover:text-red-500 hover:border-red-200 transition-all shadow-sm opacity-0 group-hover:opacity-100" title="Eliminar del equipo">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        </div>
+                    `;
+                });
+            } catch (error) {
+                console.error("Error cargando equipo:", error);
+                listContainer.innerHTML = '<div class="p-6 text-center text-red-500 text-xs font-bold">Error al cargar el equipo.</div>';
+            }
+        };
+
+        window.inviteTeamMember = async function(event) {
+            const input = document.getElementById('team-invite-email');
+            const email = input.value.trim().toLowerCase();
+            if (!email) return showNotification("Ingresa un correo electrónico", true);
+            if (!email.includes('@')) return showNotification("Ingresa un correo válido", true);
+            
+            const btn = event.target;
+            const orig = btn.innerText;
+            btn.innerText = '...'; btn.disabled = true;
+
+            try {
+                const userId = auth.currentUser.uid;
+                
+                const invitesRef = window.collection(db, 'artifacts', globalAppId, 'users', userId, 'equipo');
+                const snap = await window.getDocs(invitesRef);
+                if(snap.size >= 50) throw new Error("Límite de 50 usuarios alcanzado.");
+                
+                await window.addDoc(invitesRef, {
+                    email: email,
+                    estado: 'Pendiente',
+                    createdAt: new Date()
+                });
+
+                const globalInviteRef = window.doc(db, 'artifacts', globalAppId, 'invitaciones', email);
+                await window.setDoc(globalInviteRef, {
+                    masterId: userId,
+                    masterName: auth.currentUser.displayName || auth.currentUser.email,
+                    createdAt: new Date()
+                });
+
+                input.value = '';
+                showNotification("Invitación enviada correctamente.");
+                window.loadTeamMembers();
+            } catch (error) {
+                console.error(error);
+                showNotification(error.message || "Error al enviar invitación", true);
+            } finally {
+                btn.innerText = orig; btn.disabled = false;
+            }
+        };
+
+        window.removeTeamMember = async function(docId) {
+            if(!confirm("¿Seguro que deseas revocar el acceso a este usuario?")) return;
+            try {
+                const userId = auth.currentUser.uid;
+                const memberRef = window.doc(db, 'artifacts', globalAppId, 'users', userId, 'equipo', docId);
+                
+                const memberSnap = await window.getDoc(memberRef);
+                if(memberSnap.exists()) {
+                    const memberEmail = memberSnap.data().email;
+                    const globalInviteRef = window.doc(db, 'artifacts', globalAppId, 'invitaciones', memberEmail);
+                    await window.deleteDoc(globalInviteRef);
+                }
+                
+                await window.deleteDoc(memberRef);
+                showNotification("Acceso revocado.");
+                window.loadTeamMembers();
+            } catch (error) {
+                console.error(error);
+                showNotification("Error al eliminar", true);
+            }
+        };
 
         const MI_TEL = "56992582669";
         let proWaUrl = ""; 
@@ -1521,10 +1704,18 @@
                 const tokensGastados = data.usageMetadata?.totalTokenCount || 3500;
                 const userId = window.currentUserId;
                 if (userId && window.db) {
-                    const userRef = window.doc(window.db, 'artifacts', window.globalAppId, 'users', userId);
-                    window.updateDoc(userRef, {
-                        tokens_disponibles: window.increment(-tokensGastados)
-                    }).catch(e => console.error("Error descontando tokens local:", e));
+                    // Si el usuario es un miembro de equipo PRO (comparte saldo)
+                    if (window.userPlanActivo === 'pro_member' && window.idCuentaMaestra) {
+                         const masterRef = window.doc(window.db, 'artifacts', window.globalAppId, 'users', window.idCuentaMaestra);
+                         window.updateDoc(masterRef, {
+                             tokens_disponibles: window.increment(-tokensGastados)
+                         }).catch(e => console.error("Error descontando tokens maestros:", e));
+                    } else {
+                         const userRef = window.doc(window.db, 'artifacts', window.globalAppId, 'users', userId);
+                         window.updateDoc(userRef, {
+                             tokens_disponibles: window.increment(-tokensGastados)
+                         }).catch(e => console.error("Error descontando tokens local:", e));
+                    }
                 }
 
                 const candidate = data.candidates?.[0];
@@ -2359,7 +2550,7 @@
                         try {
                             const userRef = window.doc(window.db, 'artifacts', window.globalAppId, 'users', user.uid);
                             
-                            window.onSnapshot(userRef, (docSnap) => {
+                            window.onSnapshot(userRef, async (docSnap) => {
                                 if (docSnap.exists()) {
                                     const data = docSnap.data();
                                     
@@ -2371,43 +2562,61 @@
                                         mainAppContainer.classList.remove('hidden');
                                     }
 
-                                    window.userTokensDisponibles = data.tokens_disponibles || 0;
+                                    // Lógica B2B: Revisar si este usuario fue invitado
+                                    if (data.plan_activo === 'ninguno' || !data.plan_activo) {
+                                        try {
+                                            const inviteRef = window.doc(window.db, 'artifacts', window.globalAppId, 'invitaciones', user.email.toLowerCase());
+                                            const inviteSnap = await window.getDoc(inviteRef);
+                                            if (inviteSnap.exists()) {
+                                                const inviteData = inviteSnap.data();
+                                                
+                                                await window.updateDoc(userRef, {
+                                                    id_cuenta_maestra: inviteData.masterId,
+                                                    plan_activo: 'pro_member'
+                                                });
+
+                                                const memberStatusRef = window.doc(window.db, 'artifacts', window.globalAppId, 'users', inviteData.masterId, 'equipo', inviteSnap.id);
+                                                try { await window.updateDoc(memberStatusRef, { estado: 'Activo' }); } catch(e){}
+                                                
+                                                data.id_cuenta_maestra = inviteData.masterId;
+                                                data.plan_activo = 'pro_member';
+                                                showNotification(`¡Te has unido al equipo corporativo!`);
+                                            }
+                                        } catch(e) { console.error("Error check invite", e); }
+                                    }
+
                                     window.userPlanActivo = data.plan_activo || null;
+                                    window.idCuentaMaestra = data.id_cuenta_maestra || null;
+
+                                    if (window.userPlanActivo === 'pro_member' && window.idCuentaMaestra) {
+                                        try {
+                                            const masterRef = window.doc(window.db, 'artifacts', window.globalAppId, 'users', window.idCuentaMaestra);
+                                            window.onSnapshot(masterRef, (mSnap) => {
+                                                 if(mSnap.exists()) {
+                                                     window.userTokensDisponibles = mSnap.data().tokens_disponibles || 0;
+                                                     updateTokenUI(window.userTokensDisponibles, 15000000);
+                                                 }
+                                            });
+                                        } catch(e) {}
+                                    } else {
+                                        window.userTokensDisponibles = data.tokens_disponibles || 0;
+                                        updateTokenUI(window.userTokensDisponibles, (window.userPlanActivo === 'pro') ? 15000000 : (window.userPlanActivo === 'plus' ? 2500000 : 1000000));
+                                    }
                                     
-                                    // NUEVO: Mostrar el botón de administrar equipo si es plan PRO
                                     const teamBtn = document.getElementById('team-admin-btn');
                                     if (window.userPlanActivo === 'pro') {
-                                        teamBtn.classList.remove('hidden');
-                                        teamBtn.classList.add('flex');
+                                        teamBtn.classList.remove('hidden'); teamBtn.classList.add('flex');
                                     } else {
-                                        teamBtn.classList.add('hidden');
-                                        teamBtn.classList.remove('flex');
+                                        teamBtn.classList.add('hidden'); teamBtn.classList.remove('flex');
                                     }
 
                                     const recargaSec = document.getElementById('recarga-section');
                                     if (recargaSec) {
-                                        if (window.userPlanActivo && window.userPlanActivo !== 'ninguno') {
+                                        if (window.userPlanActivo && window.userPlanActivo !== 'ninguno' && window.userPlanActivo !== 'pro_member') {
                                             recargaSec.classList.remove('hidden');
                                         } else {
                                             recargaSec.classList.add('hidden');
                                         }
-                                    }
-
-                                    const maxTokens = (window.userPlanActivo === 'pro') ? 15000000 : (window.userPlanActivo === 'plus' ? 2500000 : 1000000);
-                                    let porcentaje = 0;
-                                    if (maxTokens > 0) porcentaje = (window.userTokensDisponibles / maxTokens) * 100;
-                                    if (porcentaje > 100) porcentaje = 100;
-
-                                    const barra = document.getElementById("barra-progreso");
-                                    const texto = document.getElementById("porcentaje-texto");
-                                    
-                                    if(barra && texto) {
-                                        barra.style.width = `${porcentaje}%`;
-                                        texto.innerText = `${window.userTokensDisponibles.toLocaleString('es-CL')} Tks`;
-                                        
-                                        if (porcentaje > 50) barra.style.backgroundColor = "#10b981"; 
-                                        else if (porcentaje > 20) barra.style.backgroundColor = "#f59e0b"; 
-                                        else barra.style.backgroundColor = "#ef4444"; 
                                     }
                                 } else {
                                     document.getElementById('tnc-modal').classList.remove('hidden');
