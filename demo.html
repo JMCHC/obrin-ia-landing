@@ -166,7 +166,7 @@
     </header>
 
     <div id="splash-screen" class="fixed inset-0 z-50 flex flex-col items-center justify-center bg-slate-50 transition-opacity duration-700 ease-in-out gap-6">
-        <!-- VOLVEMOS AL LOGO ORIGINAL HORIZONTAL -->
+        <!-- LOGO ORIGINAL HORIZONTAL -->
         <img src="https://lh3.googleusercontent.com/pw/AP1GczOsQ9BjTC3dTk0RxKlbaZtHDeSwbqF3-buuEPA6QHBnWKNK4GkHQpfHPUJkVSbHPN7QEXrwUL5qVDwk5vLhsbpcLCLP3NCezheTURsZUCAOwnL0h1NtlHKbrEHkrsdquexu32SfFSdxlqHT1c36shbDMQ=w599-h599-s-no-gm?authuser=0" alt="Logo Obrín IA" class="h-32 md:h-48 object-contain animate-pulse">
         <p class="text-slate-400 text-xs font-medium tracking-widest uppercase animate-pulse">Iniciando sistema...</p>
     </div>
@@ -183,7 +183,7 @@
                     <div class="w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-3 shadow-inner">
                         <i class="fas fa-check text-2xl text-emerald-600"></i>
                     </div>
-                    <!-- VOLVEMOS AL LOGO ORIGINAL HORIZONTAL -->
+                    <!-- LOGO ORIGINAL HORIZONTAL -->
                     <img src="https://lh3.googleusercontent.com/pw/AP1GczOsQ9BjTC3dTk0RxKlbaZtHDeSwbqF3-buuEPA6QHBnWKNK4GkHQpfHPUJkVSbHPN7QEXrwUL5qVDwk5vLhsbpcLCLP3NCezheTURsZUCAOwnL0h1NtlHKbrEHkrsdquexu32SfFSdxlqHT1c36shbDMQ=w599-h599-s-no-gm?authuser=0" alt="Logo" class="h-8 mx-auto mb-2 object-contain">
                     <h2 class="text-lg font-bold text-slate-900 tracking-tight">Comprobante de Pago</h2>
                     <p class="text-[0.65rem] font-bold text-slate-400 uppercase tracking-widest mt-1">Transbank Webpay Plus</p>
@@ -385,7 +385,7 @@
 
     <div id="main-app-container" class="hidden w-full max-w-4xl mt-12 md:mt-0">
         <div class="text-center mb-10">
-            <!-- VOLVEMOS AL LOGO ORIGINAL HORIZONTAL -->
+            <!-- LOGO ORIGINAL HORIZONTAL -->
             <img src="https://lh3.googleusercontent.com/pw/AP1GczOsQ9BjTC3dTk0RxKlbaZtHDeSwbqF3-buuEPA6QHBnWKNK4GkHQpfHPUJkVSbHPN7QEXrwUL5qVDwk5vLhsbpcLCLP3NCezheTURsZUCAOwnL0h1NtlHKbrEHkrsdquexu32SfFSdxlqHT1c36shbDMQ=w599-h599-s-no-gm?authuser=0" alt="Logo Obrín IA" class="h-28 md:h-36 lg:h-48 mx-auto mb-6 object-contain">
             <h2 class="text-4xl font-light text-slate-900 mb-4 tracking-tight">Evaluación Técnica</h2>
             <p class="text-gray-500 font-light text-base max-w-lg mx-auto">Tecnología de vanguardia para el diagnóstico constructivo y valoración de proyectos residenciales de alto estándar.</p>
@@ -685,7 +685,7 @@
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden relative border border-slate-100" id="auth-modal-content">
             <div class="p-8">
                 <div class="text-center mb-8">
-                    <!-- VOLVEMOS AL LOGO ORIGINAL HORIZONTAL -->
+                    <!-- LOGO ORIGINAL HORIZONTAL -->
                     <img src="https://lh3.googleusercontent.com/pw/AP1GczOsQ9BjTC3dTk0RxKlbaZtHDeSwbqF3-buuEPA6QHBnWKNK4GkHQpfHPUJkVSbHPN7QEXrwUL5qVDwk5vLhsbpcLCLP3NCezheTURsZUCAOwnL0h1NtlHKbrEHkrsdquexu32SfFSdxlqHT1c36shbDMQ=w599-h599-s-no-gm?authuser=0" alt="Logo Obrín IA" class="h-16 mx-auto mb-4 object-contain">
                     <h2 id="auth-title" class="text-xl font-bold text-slate-900 mb-1 tracking-tight">Iniciar Sesión</h2>
                     <p id="auth-subtitle" class="text-slate-500 text-xs">Accede para guardar tus reportes.</p>
@@ -753,9 +753,30 @@
         </div>
     </div>
 
+    <!-- SCRIPT PRINCIPAL: FUNCIONES GLOBALES Y CONTROL DE SPLASH SCREEN -->
     <script>
         window.userTokensDisponibles = 0;
         window.userPlanActivo = null;
+
+        // NUEVO: Control inteligente del Splash Screen
+        window.showSplashScreen = function(msg = "Cargando...") {
+            const splash = document.getElementById('splash-screen');
+            if (splash) {
+                const p = splash.querySelector('p');
+                if (p) p.innerText = msg;
+                splash.style.display = 'flex';
+                // Pequeño delay para permitir que el display:flex se aplique antes de animar
+                setTimeout(() => splash.classList.remove('opacity-0'), 10);
+            }
+        };
+
+        window.hideSplashScreen = function() {
+            const splash = document.getElementById('splash-screen');
+            if (splash && !splash.classList.contains('opacity-0')) {
+                splash.classList.add('opacity-0');
+                setTimeout(() => { splash.style.display = 'none'; }, 700);
+            }
+        };
 
         function showNotification(msg, isError = false) {
             const toast = document.createElement('div');
@@ -782,7 +803,6 @@
             if(barra && texto) {
                 barra.style.width = `${porcentaje}%`;
                 
-                // Formateo del texto para mostrar disponible / límite
                 let limiteTexto = '';
                 if (maxTokens === 15000000) limiteTexto = ' / 15.000.000 (Pro)';
                 else if (maxTokens === 2500000) limiteTexto = ' / 2.500.000 (Plus)';
@@ -852,13 +872,14 @@
                 document.getElementById('v-tarjeta').innerText = '**** **** **** ' + vTarjeta;
                 document.getElementById('v-tipo').innerText = (vTipo === 'VD' ? 'Débito' : 'Crédito');
                 
-                // Imprimir Orden y Token
                 document.getElementById('v-orden').innerText = vOrden || 'N/A';
                 document.getElementById('v-token').innerText = vToken || 'N/A';
                 document.getElementById('v-token').title = vToken || '';
 
                 document.getElementById('voucher-modal').classList.remove('hidden');
                 document.getElementById('voucher-modal').classList.add('flex');
+                
+                window.hideSplashScreen(); // Ocultamos el splash para mostrar el voucher
 
                 setTimeout(async () => {
                     if (window.authInstance && window.authInstance.currentUser && window.addDoc) {
@@ -895,21 +916,21 @@
             } else if (pagoStatus === 'rechazado') {
                 setTimeout(() => showNotification("❌ Pago rechazado por el banco o sin fondos.", true), 1500);
                 window.history.replaceState({}, document.title, window.location.pathname);
+                window.hideSplashScreen();
             } else if (pagoStatus === 'cancelado') {
                 setTimeout(() => showNotification("⚠️ Pago cancelado de forma segura.", true), 1500);
                 window.history.replaceState({}, document.title, window.location.pathname);
+                window.hideSplashScreen();
             } else if (pagoStatus === 'error') {
                 setTimeout(() => showNotification("❌ Error de comunicación con Transbank.", true), 1500);
                 window.history.replaceState({}, document.title, window.location.pathname);
+                window.hideSplashScreen();
             }
 
+            // Fallback de seguridad: Si la carga falla o Firebase es bloqueado, ocultar Splash tras 8 segundos.
             setTimeout(() => {
-                const splash = document.getElementById('splash-screen');
-                if (splash) {
-                    splash.classList.add('opacity-0');
-                    setTimeout(() => { splash.style.display = 'none'; }, 700);
-                }
-            }, 2000); 
+                window.hideSplashScreen();
+            }, 8000); 
 
             document.getElementById('tnc-checkbox-modal').addEventListener('change', function(e) {
                 document.getElementById('accept-tnc-btn').disabled = !e.target.checked;
@@ -920,6 +941,7 @@
                 btn.disabled = true;
                 btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> GUARDANDO...';
                 try {
+                    window.showSplashScreen("Configurando tu perfil...");
                     const user = window.authInstance.currentUser;
                     const userRef = window.doc(window.db, 'artifacts', window.globalAppId, 'users', user.uid);
                     await window.setDoc(userRef, {
@@ -933,20 +955,23 @@
                     document.getElementById('tnc-modal').classList.remove('flex');
                     document.getElementById('main-app-container').classList.remove('hidden');
                     window.loadProjectsList();
+                    setTimeout(() => window.hideSplashScreen(), 500);
                 } catch(e) {
                     console.error(e);
                     showNotification("Error al guardar aceptación. Revisa tu conexión.", true);
                     btn.disabled = false;
                     btn.innerHTML = 'ACEPTAR Y ENTRAR A OBRÍN IA';
+                    window.hideSplashScreen();
                 }
             });
 
             document.getElementById('cancel-tnc-btn').addEventListener('click', async function() {
                 try {
+                    window.showSplashScreen("Cancelando...");
                     await window.signOutAuth(window.authInstance);
                     document.getElementById('tnc-modal').classList.add('hidden');
                     document.getElementById('tnc-modal').classList.remove('flex');
-                } catch(e) { console.error(e); }
+                } catch(e) { console.error(e); window.hideSplashScreen(); }
             });
         });
 
@@ -962,7 +987,6 @@
                 content.classList.remove('scale-95'); content.classList.add('scale-100');
             }, 10);
             
-            // Cargar historial de pagos
             if (window.authInstance && window.authInstance.currentUser && window.db) {
                 const listContainer = document.getElementById('payment-history-list');
                 const historyContainer = document.getElementById('payment-history-container');
@@ -1737,7 +1761,6 @@
                 const tokensGastados = data.usageMetadata?.totalTokenCount || 3500;
                 const userId = window.currentUserId;
                 if (userId && window.db) {
-                    // Si el usuario es un miembro de equipo PRO (comparte saldo)
                     if (window.userPlanActivo === 'pro_member' && window.idCuentaMaestra) {
                          const masterRef = window.doc(window.db, 'artifacts', window.globalAppId, 'users', window.idCuentaMaestra);
                          window.updateDoc(masterRef, {
@@ -2668,8 +2691,10 @@
                         mainAppContainer.classList.remove('hidden');
                         window.loadProjectsList();
                         window.justSignedUpWithTNC = false;
+                        window.hideSplashScreen();
                     } else {
                         try {
+                            window.showSplashScreen("Cargando tu perfil...");
                             const userRef = window.doc(window.db, 'artifacts', window.globalAppId, 'users', user.uid);
                             
                             window.onSnapshot(userRef, async (docSnap) => {
@@ -2679,6 +2704,7 @@
                                     if (!data.tncAccepted) {
                                         document.getElementById('tnc-modal').classList.remove('hidden');
                                         document.getElementById('tnc-modal').classList.add('flex');
+                                        window.hideSplashScreen();
                                         return;
                                     } else {
                                         mainAppContainer.classList.remove('hidden');
@@ -2745,9 +2771,14 @@
                                             recargaSec.classList.add('hidden');
                                         }
                                     }
+                                    
+                                    // Retraso para evitar el pantallazo blanco
+                                    setTimeout(() => window.hideSplashScreen(), 500);
+
                                 } else {
                                     document.getElementById('tnc-modal').classList.remove('hidden');
                                     document.getElementById('tnc-modal').classList.add('flex');
+                                    window.hideSplashScreen();
                                 }
                             });
                             
@@ -2757,6 +2788,7 @@
                             console.error("Error al validar T&C en BD", e);
                             document.getElementById('tnc-modal').classList.remove('hidden');
                             document.getElementById('tnc-modal').classList.add('flex');
+                            window.hideSplashScreen();
                         }
                     }
                 } else {
@@ -2768,6 +2800,7 @@
                     userEmailDisplay.textContent = '';
                     mainAppContainer.classList.add('hidden');
                     openAuthModal();
+                    window.hideSplashScreen();
                 }
             });
         }
@@ -2871,11 +2904,13 @@
 
         signOutBtn.addEventListener('click', async () => {
             try { 
+                window.showSplashScreen("Cerrando sesión...");
                 window.resetUI(); 
                 document.getElementById('main-app-container').classList.add('hidden');
                 await window.signOutAuth(auth); 
             } catch (error) { 
                 console.error("Error signing out:", error); 
+                window.hideSplashScreen();
             }
         });
 
@@ -2883,6 +2918,7 @@
             if (!auth) return showError("Servicio de autenticación no disponible.");
             resetAuthError();
             try { 
+                window.showSplashScreen("Conectando con Google...");
                 const provider = new GoogleAuthProvider();
                 provider.setCustomParameters({ prompt: 'select_account' });
                 await signInWithPopup(auth, provider); 
@@ -2890,6 +2926,7 @@
             catch (error) { 
                 console.error("Error Google Auth:", error);
                 showError("Error al conectar con Google."); 
+                window.hideSplashScreen();
             }
         });
 
@@ -2906,6 +2943,7 @@
 
             submitAuthBtn.disabled = true; submitAuthBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> PROCESANDO...';
             resetAuthError();
+            window.showSplashScreen("Verificando credenciales...");
 
             try {
                 if (isSignUpMode) {
@@ -2925,7 +2963,10 @@
 
                     userEmailDisplay.textContent = fullname;
                 } else { await signInWithEmailAndPassword(auth, email, password); }
-            } catch (error) { showError("Credenciales incorrectas o correo en uso."); } 
+            } catch (error) { 
+                showError("Credenciales incorrectas o correo en uso."); 
+                window.hideSplashScreen();
+            } 
             finally { submitAuthBtn.disabled = false; submitAuthBtn.textContent = isSignUpMode ? 'REGISTRARSE' : 'INGRESAR'; }
         });
 
