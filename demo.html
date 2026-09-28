@@ -597,8 +597,9 @@
                     <button id="pdf-btn" onclick="window.generatePDF()" class="w-1/3 bg-slate-100 hover:bg-slate-200 text-slate-800 text-center py-4 rounded-lg font-bold text-xs uppercase tracking-widest transition shadow-sm flex items-center justify-center gap-2">
                         📄 Reporte
                     </button>
-                    <button id="wa-btn-pro" onclick="window.contactPro()" class="w-2/3 bg-brand-600 hover:bg-brand-500 text-white text-center py-4 rounded-lg font-bold text-xs uppercase tracking-widest transition shadow-lg hover:shadow-brand-500/20">
-                        Visita Técnica
+                    <!-- BOTÓN MODIFICADO: EXPORTAR A EXCEL -->
+                    <button id="excel-btn-pro" onclick="window.exportToExcel()" class="w-2/3 bg-brand-600 hover:bg-brand-500 text-white text-center py-4 rounded-lg font-bold text-xs uppercase tracking-widest transition shadow-lg hover:shadow-brand-500/20 flex items-center justify-center gap-2">
+                        <i class="fas fa-file-excel"></i> Exportar a Excel
                     </button>
                 </div>
                 
@@ -758,14 +759,78 @@
         window.userTokensDisponibles = 0;
         window.userPlanActivo = null;
 
-        // NUEVO: Control inteligente del Splash Screen
+        // NUEVO: Función para exportar el reporte actual a Excel (CSV)
+        window.exportToExcel = function() {
+            const btn = document.getElementById('excel-btn-pro');
+            const originalHtml = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Exportando...';
+            btn.disabled = true;
+
+            try {
+                const getElText = (id) => {
+                    const el = document.getElementById(id);
+                    return el ? el.innerText.replace(/"/g, '""').replace(/\n/g, ' ') : '';
+                };
+
+                const superficie = getElText('surface-type');
+                const dano = getElText('complexity-badge');
+                const patologia = getElText('damage-val');
+                const solucion = getElText('solution-val');
+                const tiempo = getElText('time-val');
+                const precio = getElText('price-val');
+                const unidad = getElText('unit-val');
+                
+                let materialesArr = [];
+                const matList = document.getElementById('materials-list');
+                if (matList) {
+                    Array.from(matList.children).forEach(li => {
+                         materialesArr.push(li.innerText.replace(/"/g, '""').replace(/\n/g, ' '));
+                    });
+                }
+                const materialesStr = materialesArr.join(' | ');
+
+                // Utilizamos el BOM de UTF-8 (\uFEFF) para que Excel (en español) lea las tildes y las "ñ" sin problemas.
+                // Separamos por punto y coma (;) para compatibilidad nativa con Excel en la región de Chile.
+                let csvContent = "\uFEFF"; 
+                csvContent += "Concepto;Detalle\n";
+                csvContent += `Elemento Analizado;"${superficie}"\n`;
+                csvContent += `Nivel de Daño;"${dano}"\n`;
+                csvContent += `Diagnóstico de Patología;"${patologia}"\n`;
+                csvContent += `Propuesta Técnica de Intervención;"${solucion}"\n`;
+                csvContent += `Especificación de Materiales;"${materialesStr}"\n`;
+                csvContent += `Ejecución Estimada;"${tiempo}"\n`;
+                csvContent += `Inversión Referencial Total;"${precio} ${unidad}"\n`;
+
+                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                const link = document.createElement("a");
+                const url = URL.createObjectURL(blob);
+                link.setAttribute("href", url);
+                
+                const safeName = superficie ? superficie.replace(/[^a-z0-9]/gi, '_').toLowerCase() : 'evaluacion';
+                link.setAttribute("download", `Presupuesto_${safeName}.csv`);
+                
+                link.style.visibility = 'hidden';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+
+                showNotification("✅ Excel exportado correctamente");
+            } catch (error) {
+                console.error(error);
+                showNotification("Hubo un problema al generar el Excel.", true);
+            } finally {
+                btn.innerHTML = originalHtml;
+                btn.disabled = false;
+            }
+        };
+
+        // Control inteligente del Splash Screen
         window.showSplashScreen = function(msg = "Cargando...") {
             const splash = document.getElementById('splash-screen');
             if (splash) {
                 const p = splash.querySelector('p');
                 if (p) p.innerText = msg;
                 splash.style.display = 'flex';
-                // Pequeño delay para permitir que el display:flex se aplique antes de animar
                 setTimeout(() => splash.classList.remove('opacity-0'), 10);
             }
         };
@@ -1623,52 +1688,6 @@
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        window.contactPro = function() {
-            if (proWaUrl) window.open(proWaUrl, '_blank');
-        }
-
-        window.generatePDF = async function() {
-            const btn = document.getElementById('pdf-btn');
-            const originalHtml = btn.innerHTML;
-            btn.innerHTML = '⏳ Generando...';
-            btn.disabled = true;
-
-            const element = document.getElementById('result');
-            const header = document.getElementById('pdf-header');
-            const summary = document.getElementById('user-request-summary');
-            const ratingSec = document.getElementById('rating-section');
-            const hint = document.getElementById('edit-hint');
-            
-            const details = element.querySelectorAll('details');
-            details.forEach(d => d.setAttribute('open', 'true'));
-            
-            header.classList.remove('hidden');
-            summary.classList.remove('hidden');
-            element.classList.add('pdf-export-mode');
-            if(ratingSec) ratingSec.classList.add('hidden');
-            if(hint) hint.classList.add('hidden');
-
-            try {
-                const canvas = await html2canvas(element, { scale: 2, useCORS: true, backgroundColor: '#ffffff', windowWidth: 800 });
-                const imgData = canvas.toDataURL('image/jpeg', 1.0);
-                const { jsPDF } = window.jspdf;
-                const pdfWidth = canvas.width;
-                const pdfHeight = canvas.height;
-                const pdf = new jsPDF({ orientation: pdfHeight > pdfWidth ? 'portrait' : 'landscape', unit: 'px', format: [pdfWidth, pdfHeight] });
-                pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight);
-                pdf.save('Reporte_Tecnico_Obrin_IA.pdf');
-            } catch (error) {
-                showNotification("Hubo un problema al generar el PDF.", true);
-            } finally {
-                header.classList.add('hidden');
-                summary.classList.add('hidden');
-                element.classList.remove('pdf-export-mode');
-                if(ratingSec) ratingSec.classList.remove('hidden');
-                if(hint) hint.classList.remove('hidden');
-                btn.innerHTML = originalHtml; btn.disabled = false;
-            }
-        };
-
         window.runAnalysis = async function() {
             if (window.userTokensDisponibles < 5000) {
                 showNotification("⚠️ Saldo de tokens insuficiente para procesar la imagen.", true);
@@ -1873,12 +1892,6 @@
                     document.getElementById('unit-val').innerText = resultObj.unidad_ref || "";
                     if (priceSubtitle) priceSubtitle.innerText = "Valor de Mercado Competitivo";
                 }
-                
-                const finalPrice = document.getElementById('price-val').innerText;
-                const finalUnit = document.getElementById('unit-val').innerText;
-                
-                const wa = `Hola. Solicitud de visita técnica:\n\nProyecto: ${projSelector.options[projSelector.selectedIndex].text}\nUbicación: ${finalWeatherLoc || 'No especificada'}\nElemento: ${resultObj.superficie}\nDiagnóstico: ${resultObj.patologia}\nInversión Ref: ${finalPrice} ${finalUnit}`;
-                proWaUrl = `https://wa.me/${MI_TEL}?text=${encodeURIComponent(wa)}`;
                 
                 laser.classList.remove('scanning-active'); laser.style.display='none';
                 document.getElementById('preview-box').classList.add('hidden');
