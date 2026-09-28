@@ -767,9 +767,10 @@
             btn.disabled = true;
 
             try {
+                // Usar textContent extrae el texto oculto (aunque el acordeón esté cerrado)
                 const getElText = (id) => {
                     const el = document.getElementById(id);
-                    return el ? el.innerText.replace(/"/g, '""').replace(/\n/g, ' ') : '';
+                    return el ? el.textContent.replace(/"/g, '""').replace(/\s+/g, ' ').trim() : '';
                 };
 
                 const superficie = getElText('surface-type');
@@ -780,23 +781,35 @@
                 const precio = getElText('price-val');
                 const unidad = getElText('unit-val');
                 
+                // Extraer y limpiar materiales en forma de lista
                 let materialesArr = [];
                 const matList = document.getElementById('materials-list');
                 if (matList) {
                     Array.from(matList.children).forEach(li => {
-                         materialesArr.push(li.innerText.replace(/"/g, '""').replace(/\n/g, ' '));
+                         let text = li.textContent.replace(/"/g, '""').replace(/\s+/g, ' ').trim();
+                         if(text) materialesArr.push("• " + text);
                     });
                 }
-                const materialesStr = materialesArr.join(' | ');
+                const materialesStr = materialesArr.join('\n'); // Salto de línea real de Excel
 
-                // Utilizamos el BOM de UTF-8 (\uFEFF) para que Excel (en español) lea las tildes y las "ñ" sin problemas.
-                // Separamos por punto y coma (;) para compatibilidad nativa con Excel en la región de Chile.
+                // Extraer el Procedimiento Operativo (Pasos)
+                let pasosArr = [];
+                const stepsList = document.getElementById('steps-list');
+                if (stepsList) {
+                    Array.from(stepsList.children).forEach((li, index) => {
+                         let text = li.textContent.replace(/"/g, '""').replace(/\s+/g, ' ').trim();
+                         if(text) pasosArr.push(`${index + 1}. ${text}`);
+                    });
+                }
+                const pasosStr = pasosArr.join('\n');
+
                 let csvContent = "\uFEFF"; 
                 csvContent += "Concepto;Detalle\n";
                 csvContent += `Elemento Analizado;"${superficie}"\n`;
                 csvContent += `Nivel de Daño;"${dano}"\n`;
                 csvContent += `Diagnóstico de Patología;"${patologia}"\n`;
                 csvContent += `Propuesta Técnica de Intervención;"${solucion}"\n`;
+                csvContent += `Procedimiento Operativo;"${pasosStr}"\n`;
                 csvContent += `Especificación de Materiales;"${materialesStr}"\n`;
                 csvContent += `Ejecución Estimada;"${tiempo}"\n`;
                 csvContent += `Inversión Referencial Total;"${precio} ${unidad}"\n`;
@@ -807,7 +820,7 @@
                 link.setAttribute("href", url);
                 
                 const safeName = superficie ? superficie.replace(/[^a-z0-9]/gi, '_').toLowerCase() : 'evaluacion';
-                link.setAttribute("download", `Presupuesto_${safeName}.csv`);
+                link.setAttribute("download", `Presupuesto_Obrin_${safeName}.csv`);
                 
                 link.style.visibility = 'hidden';
                 document.body.appendChild(link);
@@ -1688,6 +1701,52 @@
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
+        window.contactPro = function() {
+            if (proWaUrl) window.open(proWaUrl, '_blank');
+        }
+
+        window.generatePDF = async function() {
+            const btn = document.getElementById('pdf-btn');
+            const originalHtml = btn.innerHTML;
+            btn.innerHTML = '⏳ Generando...';
+            btn.disabled = true;
+
+            const element = document.getElementById('result');
+            const header = document.getElementById('pdf-header');
+            const summary = document.getElementById('user-request-summary');
+            const ratingSec = document.getElementById('rating-section');
+            const hint = document.getElementById('edit-hint');
+            
+            const details = element.querySelectorAll('details');
+            details.forEach(d => d.setAttribute('open', 'true'));
+            
+            header.classList.remove('hidden');
+            summary.classList.remove('hidden');
+            element.classList.add('pdf-export-mode');
+            if(ratingSec) ratingSec.classList.add('hidden');
+            if(hint) hint.classList.add('hidden');
+
+            try {
+                const canvas = await html2canvas(element, { scale: 2, useCORS: true, backgroundColor: '#ffffff', windowWidth: 800 });
+                const imgData = canvas.toDataURL('image/jpeg', 1.0);
+                const { jsPDF } = window.jspdf;
+                const pdfWidth = canvas.width;
+                const pdfHeight = canvas.height;
+                const pdf = new jsPDF({ orientation: pdfHeight > pdfWidth ? 'portrait' : 'landscape', unit: 'px', format: [pdfWidth, pdfHeight] });
+                pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight);
+                pdf.save('Reporte_Tecnico_Obrin_IA.pdf');
+            } catch (error) {
+                showNotification("Hubo un problema al generar el PDF.", true);
+            } finally {
+                header.classList.add('hidden');
+                summary.classList.add('hidden');
+                element.classList.remove('pdf-export-mode');
+                if(ratingSec) ratingSec.classList.remove('hidden');
+                if(hint) hint.classList.remove('hidden');
+                btn.innerHTML = originalHtml; btn.disabled = false;
+            }
+        };
+
         window.runAnalysis = async function() {
             if (window.userTokensDisponibles < 5000) {
                 showNotification("⚠️ Saldo de tokens insuficiente para procesar la imagen.", true);
@@ -1892,6 +1951,12 @@
                     document.getElementById('unit-val').innerText = resultObj.unidad_ref || "";
                     if (priceSubtitle) priceSubtitle.innerText = "Valor de Mercado Competitivo";
                 }
+                
+                const finalPrice = document.getElementById('price-val').innerText;
+                const finalUnit = document.getElementById('unit-val').innerText;
+                
+                const wa = `Hola. Solicitud de visita técnica:\n\nProyecto: ${projSelector.options[projSelector.selectedIndex].text}\nUbicación: ${finalWeatherLoc || 'No especificada'}\nElemento: ${resultObj.superficie}\nDiagnóstico: ${resultObj.patologia}\nInversión Ref: ${finalPrice} ${finalUnit}`;
+                proWaUrl = `https://wa.me/${MI_TEL}?text=${encodeURIComponent(wa)}`;
                 
                 laser.classList.remove('scanning-active'); laser.style.display='none';
                 document.getElementById('preview-box').classList.add('hidden');
