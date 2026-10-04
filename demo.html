@@ -2178,7 +2178,7 @@
             }
         };
 
-        window.submitFeedbackAndSave = async function() {
+       window.submitFeedbackAndSave = async function() {
             const btn = document.getElementById('submit-rating-btn');
             const originalText = btn.innerHTML;
             btn.innerHTML = '⏳ Guardando...'; btn.disabled = true;
@@ -2210,6 +2210,27 @@
                     const expertRef = doc(db, 'artifacts', globalAppId, 'conocimiento_experto', currentEditingDocId);
                     await setDoc(expertRef, diagnosticData, { merge: true });
                 } catch (e) {}
+
+                // --- NUEVO: ENVIAR AL CEREBRO PREDICTIVO (CLOUDFLARE WORKER) ---
+                try {
+                    // Hacemos el llamado de forma asíncrona sin bloquear la UI
+                    fetch('https://obrin-ia-proxy.christensenjosemanuel.workers.dev/api/admin/guardar-caso', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            id: currentEditingDocId,
+                            superficie: diagnosticData.superficie,
+                            nivel_dano: diagnosticData.nivel_dano,
+                            patologia: diagnosticData.patologia,
+                            solucion: diagnosticData.solucion,
+                            precio_ref: diagnosticData.precio_ref,
+                            tiempo: diagnosticData.tiempo
+                        })
+                    }).catch(e => console.warn("Vectorización en background pendiente", e));
+                } catch (workerErr) {
+                    console.warn("Fallo al iniciar sincronización con Meta-Agente:", workerErr);
+                }
+                // ---------------------------------------------------------------
 
                 btn.innerHTML = '✅ ¡Cambios Guardados!';
                 btn.classList.replace('bg-slate-900', 'bg-emerald-600');
