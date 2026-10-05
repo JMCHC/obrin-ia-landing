@@ -170,7 +170,6 @@
     </header>
 
     <div id="splash-screen" class="fixed inset-0 z-50 flex flex-col items-center justify-center bg-slate-50 transition-opacity duration-700 ease-in-out gap-6">
-        <!-- LOGO ORIGINAL HORIZONTAL -->
         <img src="https://lh3.googleusercontent.com/pw/AP1GczOsQ9BjTC3dTk0RxKlbaZtHDeSwbqF3-buuEPA6QHBnWKNK4GkHQpfHPUJkVSbHPN7QEXrwUL5qVDwk5vLhsbpcLCLP3NCezheTURsZUCAOwnL0h1NtlHKbrEHkrsdquexu32SfFSdxlqHT1c36shbDMQ=w599-h599-s-no-gm?authuser=0" alt="Logo Obrín IA" class="h-32 md:h-48 object-contain animate-pulse">
         <p class="text-slate-400 text-xs font-medium tracking-widest uppercase animate-pulse">Iniciando sistema...</p>
     </div>
@@ -187,7 +186,6 @@
                     <div class="w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-3 shadow-inner">
                         <i class="fas fa-check text-2xl text-emerald-600"></i>
                     </div>
-                    <!-- LOGO ORIGINAL HORIZONTAL -->
                     <img src="https://lh3.googleusercontent.com/pw/AP1GczOsQ9BjTC3dTk0RxKlbaZtHDeSwbqF3-buuEPA6QHBnWKNK4GkHQpfHPUJkVSbHPN7QEXrwUL5qVDwk5vLhsbpcLCLP3NCezheTURsZUCAOwnL0h1NtlHKbrEHkrsdquexu32SfFSdxlqHT1c36shbDMQ=w599-h599-s-no-gm?authuser=0" alt="Logo" class="h-8 mx-auto mb-2 object-contain">
                     <h2 class="text-lg font-bold text-slate-900 tracking-tight">Comprobante de Pago</h2>
                     <p class="text-[0.65rem] font-bold text-slate-400 uppercase tracking-widest mt-1">Transbank Webpay Plus</p>
@@ -514,7 +512,7 @@
                             <div id="surface-type" class="font-serif text-xl text-slate-900 outline-none hover:bg-slate-50 focus:bg-white focus:ring-1 focus:ring-slate-200 rounded transition p-1 -ml-1 w-full" contenteditable="true"></div>
                             
                             <div id="weather-badge" class="hidden flex items-center gap-1 mt-2 text-[0.65rem] text-slate-500 bg-slate-50 border border-slate-100 py-1 px-2 rounded w-fit">
-                                <span>🌤️️</span>
+                                <span>🌤</span>
                                 <span class="font-medium" id="loc-val"></span>: 
                                 <span id="temp-val"></span>, <span id="hum-val"></span> humedad
                             </div>
@@ -768,24 +766,20 @@
     <script>
         window.userTokensDisponibles = 0;
         window.userPlanActivo = null;
-        window.materialesData = []; // NUEVO: Almacena datos de materiales para cálculo
+        window.materialesData = []; 
 
-        // NUEVO: Función para actualizar el total de la inversión al cambiar cantidades
         window.updateMaterialTotal = function() {
             let nuevoTotal = 0;
-            let index = 0;
             
-            // Recorremos los inputs de cantidad
-            document.querySelectorAll('.mat-qty-input').forEach(input => {
-                const qty = parseInt(input.value) || 1;
+            document.querySelectorAll('#materials-list li').forEach((li, index) => {
+                const qtyInput = li.querySelector('.mat-qty-input');
+                const qty = qtyInput ? (parseInt(qtyInput.value) || 1) : 1;
                 const matInfo = window.materialesData[index];
+                
                 if (matInfo && matInfo.precio > 0) {
                     nuevoTotal += matInfo.precio * qty;
                 }
-                
-                // Actualizar la estructura guardada en memoria (para el Excel)
                 if (matInfo) matInfo.cantidad = qty;
-                index++;
             });
 
             if (nuevoTotal > 0) {
@@ -802,7 +796,6 @@
             window.updateMaterialTotal();
         };
 
-        // NUEVO: Función para exportar el reporte actual a Excel (CSV)
         window.exportToExcel = function() {
             const btn = document.getElementById('excel-btn-pro');
             const originalHtml = btn.innerHTML;
@@ -810,7 +803,6 @@
             btn.disabled = true;
 
             try {
-                // Usar textContent extrae el texto oculto (aunque el acordeón esté cerrado)
                 const getElText = (id) => {
                     const el = document.getElementById(id);
                     return el ? el.textContent.replace(/"/g, '""').replace(/\s+/g, ' ').trim() : '';
@@ -819,13 +811,12 @@
                 const superficie = getElText('surface-type');
                 const dano = getElText('complexity-badge');
                 const patologia = getElText('damage-val');
-                const riesgo = getElText('risk-val'); // Se agrega la recolección del riesgo para el Excel
+                const riesgo = getElText('risk-val'); 
                 const solucion = getElText('solution-val');
                 const tiempo = getElText('time-val');
                 const precio = getElText('price-val');
                 const unidad = getElText('unit-val');
                 
-                // Extraer materiales y cantidades
                 let materialesArr = [];
                 document.querySelectorAll('#materials-list li').forEach((li, index) => {
                     const spanMat = li.querySelector('[data-mat-name]');
@@ -835,9 +826,8 @@
                     let matName = spanMat ? spanMat.innerText.trim() : li.textContent.replace(/[\n\r]+|[\s]{2,}/g, ' ').trim();
                     if(matName) materialesArr.push(`• ${qty}x ${matName}`);
                 });
-                const materialesStr = materialesArr.join('\n'); // Salto de línea real de Excel
+                const materialesStr = materialesArr.join('\n');
 
-                // Extraer el Procedimiento Operativo (Pasos)
                 let pasosArr = [];
                 const stepsList = document.getElementById('steps-list');
                 if (stepsList) {
@@ -853,7 +843,7 @@
                 csvContent += `Elemento Analizado;"${superficie}"\n`;
                 csvContent += `Nivel de Daño;"${dano}"\n`;
                 csvContent += `Diagnóstico de Patología;"${patologia}"\n`;
-                if (riesgo) csvContent += `Proyección de Riesgo y Falla;"${riesgo}"\n`; // Nueva fila en Excel
+                if (riesgo) csvContent += `Proyección de Riesgo y Falla;"${riesgo}"\n`; 
                 csvContent += `Propuesta Técnica de Intervención;"${solucion}"\n`;
                 csvContent += `Procedimiento Operativo;"${pasosStr}"\n`;
                 csvContent += `Especificación de Materiales;"${materialesStr}"\n`;
@@ -883,7 +873,6 @@
             }
         };
 
-        // Control inteligente del Splash Screen
         window.showSplashScreen = function(msg = "Cargando...") {
             const splash = document.getElementById('splash-screen');
             if (splash) {
@@ -1003,7 +992,7 @@
                 document.getElementById('voucher-modal').classList.remove('hidden');
                 document.getElementById('voucher-modal').classList.add('flex');
                 
-                window.hideSplashScreen(); // Ocultamos el splash para mostrar el voucher
+                window.hideSplashScreen(); 
 
                 setTimeout(async () => {
                     if (window.authInstance && window.authInstance.currentUser && window.addDoc) {
@@ -1051,7 +1040,6 @@
                 window.hideSplashScreen();
             }
 
-            // Fallback de seguridad: Si la carga falla o Firebase es bloqueado, ocultar Splash tras 8 segundos.
             setTimeout(() => {
                 window.hideSplashScreen();
             }, 8000); 
@@ -1099,7 +1087,6 @@
             });
         });
 
-        // FUNCIONES DE LA BILLETERA
         window.openWallet = async function() {
             const userDropdown = document.getElementById('user-dropdown');
             if(userDropdown) userDropdown.classList.add('hidden');
@@ -1226,9 +1213,6 @@
             }
         }
 
-        // ==========================================
-        // FUNCIONES DE EQUIPO B2B (PLAN PRO)
-        // ==========================================
         window.openTeamManager = async function() {
             const userDropdown = document.getElementById('user-dropdown');
             if(userDropdown) userDropdown.classList.add('hidden');
@@ -1358,51 +1342,6 @@
                 console.error(error);
                 showNotification("Error al eliminar", true);
             }
-        };
-
-        const MI_TEL = "56992582669";
-        let proWaUrl = ""; 
-        let imgData1 = null; let imgType1 = null;
-        let imgData2 = null; let imgType2 = null;
-        let weatherContextText = "";
-        let finalWeatherLoc = "";
-        let finalWeatherTemp = "";
-        let finalWeatherHum = "";
-        let currentRating = 0;
-        let currentEditingDocId = null;
-        window.historyDataCache = {};
-        window.materialesData = []; // NUEVO: Almacena datos de materiales para cálculo
-
-        // NUEVO: Función para actualizar el total de la inversión al cambiar cantidades
-        window.updateMaterialTotal = function() {
-            let nuevoTotal = 0;
-            let index = 0;
-            
-            // Recorremos los inputs de cantidad
-            document.querySelectorAll('.mat-qty-input').forEach(input => {
-                const qty = parseInt(input.value) || 1;
-                const matInfo = window.materialesData[index];
-                if (matInfo && matInfo.precio > 0) {
-                    nuevoTotal += matInfo.precio * qty;
-                }
-                
-                // Actualizar la estructura guardada en memoria (para el Excel)
-                if (matInfo) matInfo.cantidad = qty;
-                index++;
-            });
-
-            if (nuevoTotal > 0) {
-                document.getElementById('price-val').innerText = "$" + nuevoTotal.toLocaleString('es-CL');
-            }
-        };
-
-        window.changeQty = function(index, delta) {
-            const input = document.getElementById(`qty-mat-${index}`);
-            if (!input) return;
-            let newVal = parseInt(input.value) + delta;
-            if (newVal < 1) newVal = 1;
-            input.value = newVal;
-            window.updateMaterialTotal();
         };
 
         window.extractPrice = function(priceStr) {
@@ -1742,7 +1681,6 @@
             document.getElementById('error-retry-btn').classList.add('hidden');
             document.getElementById('edit-hint').classList.add('hidden');
             
-            // NUEVO: Ocultar el recuadro de Riesgo Futuro
             document.getElementById('risk-container').classList.add('hidden');
             
             const priceSubtitle = document.getElementById('price-subtitle');
@@ -1786,48 +1724,6 @@
         window.contactPro = function() {
             if (proWaUrl) window.open(proWaUrl, '_blank');
         }
-
-        window.generatePDF = async function() {
-            const btn = document.getElementById('pdf-btn');
-            const originalHtml = btn.innerHTML;
-            btn.innerHTML = '⏳ Generando...';
-            btn.disabled = true;
-
-            const element = document.getElementById('result');
-            const header = document.getElementById('pdf-header');
-            const summary = document.getElementById('user-request-summary');
-            const ratingSec = document.getElementById('rating-section');
-            const hint = document.getElementById('edit-hint');
-            
-            const details = element.querySelectorAll('details');
-            details.forEach(d => d.setAttribute('open', 'true'));
-            
-            header.classList.remove('hidden');
-            summary.classList.remove('hidden');
-            element.classList.add('pdf-export-mode');
-            if(ratingSec) ratingSec.classList.add('hidden');
-            if(hint) hint.classList.add('hidden');
-
-            try {
-                const canvas = await html2canvas(element, { scale: 2, useCORS: true, backgroundColor: '#ffffff', windowWidth: 800 });
-                const imgData = canvas.toDataURL('image/jpeg', 1.0);
-                const { jsPDF } = window.jspdf;
-                const pdfWidth = canvas.width;
-                const pdfHeight = canvas.height;
-                const pdf = new jsPDF({ orientation: pdfHeight > pdfWidth ? 'portrait' : 'landscape', unit: 'px', format: [pdfWidth, pdfHeight] });
-                pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight);
-                pdf.save('Reporte_Tecnico_Obrin_IA.pdf');
-            } catch (error) {
-                showNotification("Hubo un problema al generar el PDF.", true);
-            } finally {
-                header.classList.add('hidden');
-                summary.classList.add('hidden');
-                element.classList.remove('pdf-export-mode');
-                if(ratingSec) ratingSec.classList.remove('hidden');
-                if(hint) hint.classList.remove('hidden');
-                btn.innerHTML = originalHtml; btn.disabled = false;
-            }
-        };
 
         window.runAnalysis = async function() {
             if (window.userTokensDisponibles < 5000) {
@@ -1976,7 +1872,7 @@
                 
                 let sumaMateriales = 0;
                 let tienePrecios = false;
-                window.materialesData = []; // Resetear arreglo
+                window.materialesData = []; 
 
                 if (resultObj.materiales && Array.isArray(resultObj.materiales)) {
                     resultObj.materiales.forEach((mat, index) => {
@@ -1984,14 +1880,14 @@
                         li.className = "leading-relaxed transition my-2 border-b border-slate-100 pb-2 last:border-0";
                         
                         const matchFormat = mat.match(/^(.*?) \[Valor Ref:\s*\$([\d.]+)\s*en\s*(.*?)\]/i);
-                        let nombreReal = mat; // El nombre base que se guardará en RAG
+                        let nombreReal = mat; 
                         let matObj = { originalText: mat, precio: 0, cantidad: 1 };
 
                         if (matchFormat) {
                             const nombre = matchFormat[1].trim();
                             const precioStr = matchFormat[2].trim();
                             const tienda = matchFormat[3].replace(/\]$/, '').trim();
-                            nombreReal = nombre; // Solo guardamos el nombre para RAG
+                            nombreReal = nombre; 
                             
                             const valorNumerico = parseInt(precioStr.replace(/\./g, ''), 10);
                             if (!isNaN(valorNumerico)) {
@@ -2001,29 +1897,31 @@
                             }
                             
                             li.innerHTML = `
-                                <div class="flex flex-wrap justify-between items-center w-full gap-2">
-                                    <span class="font-medium text-slate-700 w-full sm:w-auto flex-1 outline-none focus:bg-white focus:ring-1 focus:ring-slate-200 rounded" contenteditable="true" data-mat-name>${nombre}</span>
-                                    <div class="flex items-center gap-3 shrink-0">
-                                        <div class="flex items-center bg-slate-100 rounded border border-slate-200 overflow-hidden">
-                                            <button type="button" class="px-2 py-0.5 text-slate-500 hover:bg-slate-200 hover:text-slate-700 transition" onclick="window.changeQty(${index}, -1)">-</button>
-                                            <input type="number" id="qty-mat-${index}" class="mat-qty-input w-8 text-center bg-transparent border-x border-slate-200 text-xs font-bold text-slate-800 outline-none p-0 hide-arrows" value="1" min="1" onchange="window.updateMaterialTotal()">
-                                            <button type="button" class="px-2 py-0.5 text-slate-500 hover:bg-slate-200 hover:text-slate-700 transition" onclick="window.changeQty(${index}, 1)">+</button>
+                                <div class="flex flex-col w-full gap-1.5">
+                                    <span class="font-medium text-slate-700 w-full outline-none focus:bg-white focus:ring-1 focus:ring-slate-200 rounded" contenteditable="true" data-mat-name>${nombre}</span>
+                                    <div class="flex justify-between items-end w-full mt-1">
+                                        <div class="flex items-center bg-slate-100 rounded border border-slate-200 overflow-hidden shrink-0">
+                                            <button type="button" class="px-3 py-1 text-slate-500 hover:bg-slate-200 hover:text-slate-700 transition active:bg-slate-300" onclick="window.changeQty(${index}, -1)">-</button>
+                                            <input type="number" id="qty-mat-${index}" class="mat-qty-input w-10 text-center bg-transparent border-x border-slate-200 text-sm font-bold text-slate-800 outline-none p-0 hide-arrows" value="1" min="1" onchange="window.updateMaterialTotal()">
+                                            <button type="button" class="px-3 py-1 text-slate-500 hover:bg-slate-200 hover:text-slate-700 transition active:bg-slate-300" onclick="window.changeQty(${index}, 1)">+</button>
                                         </div>
                                         <div class="flex flex-col items-end">
                                             <span class="font-bold text-slate-900">$${precioStr}</span>
-                                            <span class="text-[0.55rem] bg-brand-100 text-brand-700 px-1.5 py-0.5 rounded uppercase tracking-widest font-bold mt-0.5">${tienda}</span>
+                                            <span class="text-[0.55rem] bg-brand-100 text-brand-700 px-1.5 py-0.5 rounded uppercase tracking-widest font-bold mt-0.5 text-right w-full">${tienda}</span>
                                         </div>
                                     </div>
                                 </div>
                             `;
                         } else {
                             li.innerHTML = `
-                                <div class="flex justify-between items-center w-full">
-                                    <span class="font-medium text-slate-700 outline-none focus:bg-white focus:ring-1 focus:ring-slate-200 rounded" contenteditable="true" data-mat-name>${mat}</span>
-                                    <div class="flex items-center bg-slate-100 rounded border border-slate-200 overflow-hidden">
-                                        <button type="button" class="px-2 py-0.5 text-slate-500 hover:bg-slate-200 hover:text-slate-700 transition" onclick="window.changeQty(${index}, -1)">-</button>
-                                        <input type="number" id="qty-mat-${index}" class="mat-qty-input w-8 text-center bg-transparent border-x border-slate-200 text-xs font-bold text-slate-800 outline-none p-0 hide-arrows" value="1" min="1" onchange="window.updateMaterialTotal()">
-                                        <button type="button" class="px-2 py-0.5 text-slate-500 hover:bg-slate-200 hover:text-slate-700 transition" onclick="window.changeQty(${index}, 1)">+</button>
+                                <div class="flex flex-col w-full gap-1.5">
+                                    <span class="font-medium text-slate-700 w-full outline-none focus:bg-white focus:ring-1 focus:ring-slate-200 rounded" contenteditable="true" data-mat-name>${mat}</span>
+                                    <div class="flex justify-start items-center w-full mt-1">
+                                        <div class="flex items-center bg-slate-100 rounded border border-slate-200 overflow-hidden shrink-0">
+                                            <button type="button" class="px-3 py-1 text-slate-500 hover:bg-slate-200 hover:text-slate-700 transition active:bg-slate-300" onclick="window.changeQty(${index}, -1)">-</button>
+                                            <input type="number" id="qty-mat-${index}" class="mat-qty-input w-10 text-center bg-transparent border-x border-slate-200 text-sm font-bold text-slate-800 outline-none p-0 hide-arrows" value="1" min="1" onchange="window.updateMaterialTotal()">
+                                            <button type="button" class="px-3 py-1 text-slate-500 hover:bg-slate-200 hover:text-slate-700 transition active:bg-slate-300" onclick="window.changeQty(${index}, 1)">+</button>
+                                        </div>
                                     </div>
                                 </div>
                             `;
@@ -2259,13 +2157,21 @@
                     superficie: document.getElementById('surface-type').innerText,
                     nivel_dano: document.getElementById('complexity-badge').innerText,
                     patologia: document.getElementById('damage-val').innerText,
-                    riesgo_futuro: document.getElementById('risk-val').innerText, // NUEVO
+                    riesgo_futuro: document.getElementById('risk-val').innerText, 
                     solucion: document.getElementById('solution-val').innerText,
                     precio_ref: document.getElementById('price-val').innerText,
                     unidad_ref: document.getElementById('unit-val').innerText,
                     tiempo: document.getElementById('time-val').innerText,
-                    // Se usa innerHTML para capturar la estructura completa, incluyendo los inputs generados dinámicamente si el usuario los ve y guarda antes de modificar
-                    materiales: Array.from(document.getElementById('materials-list').children).map(li => li.innerHTML),
+                    
+                    // Aseguramos capturar el valor del input quantity correctamente
+                    materiales: Array.from(document.getElementById('materials-list').children).map((li, index) => {
+                        const qtyInput = li.querySelector('.mat-qty-input');
+                        if (qtyInput) {
+                            qtyInput.setAttribute('value', qtyInput.value);
+                        }
+                        return li.innerHTML;
+                    }),
+                    
                     pasos: Array.from(document.getElementById('steps-list').children).map(li => li.innerHTML),
                     userNotes: document.getElementById('summary-notes').innerText,
                     location: finalWeatherLoc, temp: finalWeatherTemp, hum: finalWeatherHum,
@@ -2302,7 +2208,7 @@
                     superficie: document.getElementById('surface-type').innerText,
                     nivel_dano: document.getElementById('complexity-badge').innerText,
                     patologia: document.getElementById('damage-val').innerText,
-                    riesgo_futuro: document.getElementById('risk-val').innerText, // NUEVO
+                    riesgo_futuro: document.getElementById('risk-val').innerText, 
                     solucion: document.getElementById('solution-val').innerText,
                     precio_ref: document.getElementById('price-val').innerText,
                     unidad_ref: document.getElementById('unit-val').innerText,
@@ -2596,78 +2502,83 @@
             
             const materialsList = document.getElementById('materials-list');
             materialsList.innerHTML = '';
-            window.materialesData = []; // Resetear arreglo
+            window.materialesData = []; 
             
             if (data.materiales && Array.isArray(data.materiales)) {
                 data.materiales.forEach((mat, index) => {
                     const li = document.createElement('li');
                     li.className = "leading-relaxed transition my-2 border-b border-slate-100 pb-2 last:border-0";
                     
-                    // Verificamos si es un material guardado con el nuevo formato HTML o solo texto
-                    const esHtmlAntiguo = mat.includes('<div');
+                    let nombre = "";
+                    let precioStr = "";
+                    let tienda = "";
+                    let tienePrecio = false;
                     let matObj = { originalText: mat, precio: 0, cantidad: 1 };
                     
-                    if (esHtmlAntiguo) {
-                        // Si ya está guardado con el HTML de cantidades (porque el usuario lo guardó así)
-                        li.innerHTML = mat;
+                    // Extraemos los datos dependiendo de si es HTML antiguo (ya con cantidades) o texto/RAG
+                    if (mat.includes('<div')) {
+                        const tempDiv = document.createElement('div');
+                        tempDiv.innerHTML = mat;
+                        const nameEl = tempDiv.querySelector('[data-mat-name]') || tempDiv.querySelector('.text-slate-700');
+                        const priceEl = tempDiv.querySelector('.text-slate-900');
+                        const storeEl = tempDiv.querySelector('.bg-brand-100');
+                        const qtyEl = tempDiv.querySelector('.mat-qty-input');
                         
-                        // Intentamos reconstruir los eventos onclick que se pierden al inyectar HTML como string
-                        const btnMenos = li.querySelector('button:first-of-type');
-                        const btnMas = li.querySelector('button:last-of-type');
-                        const inputQty = li.querySelector('.mat-qty-input');
-                        
-                        if (btnMenos) btnMenos.onclick = () => window.changeQty(index, -1);
-                        if (btnMas) btnMas.onclick = () => window.changeQty(index, 1);
-                        if (inputQty) {
-                             inputQty.onchange = window.updateMaterialTotal;
-                             matObj.cantidad = parseInt(inputQty.value) || 1;
+                        if (nameEl) nombre = nameEl.innerText.trim();
+                        if (priceEl) {
+                            precioStr = priceEl.innerText.replace('$', '').trim();
+                            tienePrecio = true;
                         }
-                        
-                        // Intentamos recuperar el precio de la estructura guardada
-                        const precioSpan = li.querySelector('.text-slate-900.font-bold');
-                        if (precioSpan) {
-                            const pMatch = precioSpan.innerText.replace(/\./g, '').match(/\d+/);
-                            if (pMatch) matObj.precio = parseInt(pMatch[0], 10);
-                        }
+                        if (storeEl) tienda = storeEl.innerText.trim();
+                        if (qtyEl) matObj.cantidad = parseInt(qtyEl.getAttribute('value') || qtyEl.value, 10) || 1;
                     } else {
-                        // Si es texto plano o formato RAG (Nombre [Valor Ref: $... en Tienda])
                         const matchFormat = mat.match(/^(.*?) \[Valor Ref:\s*\$([\d.]+)\s*en\s*(.*?)\]/i);
                         if (matchFormat) {
-                            const nombre = matchFormat[1].trim();
-                            const precioStr = matchFormat[2].trim();
-                            const tienda = matchFormat[3].replace(/\]$/, '').trim();
-                            
-                            const valorNumerico = parseInt(precioStr.replace(/\./g, ''), 10);
-                            if (!isNaN(valorNumerico)) matObj.precio = valorNumerico;
-                            
-                            li.innerHTML = `
-                                <div class="flex flex-wrap justify-between items-center w-full gap-2">
-                                    <span class="font-medium text-slate-700 w-full sm:w-auto flex-1 outline-none focus:bg-white focus:ring-1 focus:ring-slate-200 rounded" contenteditable="true" data-mat-name>${nombre}</span>
-                                    <div class="flex items-center gap-3 shrink-0">
-                                        <div class="flex items-center bg-slate-100 rounded border border-slate-200 overflow-hidden">
-                                            <button type="button" class="px-2 py-0.5 text-slate-500 hover:bg-slate-200 hover:text-slate-700 transition" onclick="window.changeQty(${index}, -1)">-</button>
-                                            <input type="number" id="qty-mat-${index}" class="mat-qty-input w-8 text-center bg-transparent border-x border-slate-200 text-xs font-bold text-slate-800 outline-none p-0 hide-arrows" value="1" min="1" onchange="window.updateMaterialTotal()">
-                                            <button type="button" class="px-2 py-0.5 text-slate-500 hover:bg-slate-200 hover:text-slate-700 transition" onclick="window.changeQty(${index}, 1)">+</button>
-                                        </div>
-                                        <div class="flex flex-col items-end">
-                                            <span class="font-bold text-slate-900">$${precioStr}</span>
-                                            <span class="text-[0.55rem] bg-brand-100 text-brand-700 px-1.5 py-0.5 rounded uppercase tracking-widest font-bold mt-0.5">${tienda}</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            `;
+                            nombre = matchFormat[1].trim();
+                            precioStr = matchFormat[2].trim();
+                            tienda = matchFormat[3].replace(/\]$/, '').trim();
+                            tienePrecio = true;
                         } else {
-                             li.innerHTML = `
-                                <div class="flex justify-between items-center w-full">
-                                    <span class="font-medium text-slate-700 outline-none focus:bg-white focus:ring-1 focus:ring-slate-200 rounded" contenteditable="true" data-mat-name>${mat}</span>
-                                    <div class="flex items-center bg-slate-100 rounded border border-slate-200 overflow-hidden">
-                                        <button type="button" class="px-2 py-0.5 text-slate-500 hover:bg-slate-200 hover:text-slate-700 transition" onclick="window.changeQty(${index}, -1)">-</button>
-                                        <input type="number" id="qty-mat-${index}" class="mat-qty-input w-8 text-center bg-transparent border-x border-slate-200 text-xs font-bold text-slate-800 outline-none p-0 hide-arrows" value="1" min="1" onchange="window.updateMaterialTotal()">
-                                        <button type="button" class="px-2 py-0.5 text-slate-500 hover:bg-slate-200 hover:text-slate-700 transition" onclick="window.changeQty(${index}, 1)">+</button>
+                            nombre = mat;
+                        }
+                    }
+
+                    if (!nombre) nombre = "Material";
+
+                    const valorNumerico = parseInt(precioStr.replace(/\./g, ''), 10);
+                    if (!isNaN(valorNumerico) && tienePrecio) matObj.precio = valorNumerico;
+                    
+                    // Re-dibujamos forzosamente con el diseño de columnas para móvil
+                    if (tienePrecio) {
+                        li.innerHTML = `
+                            <div class="flex flex-col w-full gap-1.5">
+                                <span class="font-medium text-slate-700 w-full outline-none focus:bg-white focus:ring-1 focus:ring-slate-200 rounded" contenteditable="true" data-mat-name>${nombre}</span>
+                                <div class="flex justify-between items-end w-full mt-1">
+                                    <div class="flex items-center bg-slate-100 rounded border border-slate-200 overflow-hidden shrink-0">
+                                        <button type="button" class="px-3 py-1 text-slate-500 hover:bg-slate-200 hover:text-slate-700 transition active:bg-slate-300" onclick="window.changeQty(${index}, -1)">-</button>
+                                        <input type="number" id="qty-mat-${index}" class="mat-qty-input w-10 text-center bg-transparent border-x border-slate-200 text-sm font-bold text-slate-800 outline-none p-0 hide-arrows" value="${matObj.cantidad}" min="1" onchange="window.updateMaterialTotal()">
+                                        <button type="button" class="px-3 py-1 text-slate-500 hover:bg-slate-200 hover:text-slate-700 transition active:bg-slate-300" onclick="window.changeQty(${index}, 1)">+</button>
+                                    </div>
+                                    <div class="flex flex-col items-end min-w-[70px]">
+                                        <span class="font-bold text-slate-900">$${precioStr}</span>
+                                        <span class="text-[0.55rem] bg-brand-100 text-brand-700 px-1.5 py-0.5 rounded uppercase tracking-widest font-bold mt-0.5 text-right w-full">${tienda}</span>
                                     </div>
                                 </div>
-                            `;
-                        }
+                            </div>
+                        `;
+                    } else {
+                         li.innerHTML = `
+                            <div class="flex flex-col w-full gap-1.5">
+                                <span class="font-medium text-slate-700 w-full outline-none focus:bg-white focus:ring-1 focus:ring-slate-200 rounded" contenteditable="true" data-mat-name>${nombre}</span>
+                                <div class="flex justify-start items-center w-full mt-1">
+                                    <div class="flex items-center bg-slate-100 rounded border border-slate-200 overflow-hidden shrink-0">
+                                        <button type="button" class="px-3 py-1 text-slate-500 hover:bg-slate-200 hover:text-slate-700 transition active:bg-slate-300" onclick="window.changeQty(${index}, -1)">-</button>
+                                        <input type="number" id="qty-mat-${index}" class="mat-qty-input w-10 text-center bg-transparent border-x border-slate-200 text-sm font-bold text-slate-800 outline-none p-0 hide-arrows" value="${matObj.cantidad}" min="1" onchange="window.updateMaterialTotal()">
+                                        <button type="button" class="px-3 py-1 text-slate-500 hover:bg-slate-200 hover:text-slate-700 transition active:bg-slate-300" onclick="window.changeQty(${index}, 1)">+</button>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
                     }
                     window.materialesData.push(matObj);
                     materialsList.appendChild(li);
@@ -2922,7 +2833,7 @@
         };
 
         window.deleteDiagnostic = async function(userId, docId) {
-            if(!confirm("⚠️ ¿Eliminar permanentemente este diagnóstico de la cuenta del usuario Y de la memoria de la IA?")) return;
+            if(!confirm("⚠️️ ¿Eliminar permanentemente este diagnóstico de la cuenta del usuario Y de la memoria de la IA?")) return;
             
             try {
                 const docRef = doc(window.db, 'artifacts', window.globalAppId, 'users', userId, 'evaluaciones', docId);
