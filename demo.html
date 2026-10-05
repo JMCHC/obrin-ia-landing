@@ -105,6 +105,10 @@
         .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 10px; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
         .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        
+        /* Ocultar flechas del input number */
+        .hide-arrows::-webkit-inner-spin-button, .hide-arrows::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+        .hide-arrows { -moz-appearance: textfield; }
     </style>
 </head>
 <body class="bg-slate-50 min-h-screen flex items-center justify-center p-4 relative">
@@ -510,7 +514,7 @@
                             <div id="surface-type" class="font-serif text-xl text-slate-900 outline-none hover:bg-slate-50 focus:bg-white focus:ring-1 focus:ring-slate-200 rounded transition p-1 -ml-1 w-full" contenteditable="true"></div>
                             
                             <div id="weather-badge" class="hidden flex items-center gap-1 mt-2 text-[0.65rem] text-slate-500 bg-slate-50 border border-slate-100 py-1 px-2 rounded w-fit">
-                                <span>🌤️</span>
+                                <span>🌤️️</span>
                                 <span class="font-medium" id="loc-val"></span>: 
                                 <span id="temp-val"></span>, <span id="hum-val"></span> humedad
                             </div>
@@ -764,6 +768,39 @@
     <script>
         window.userTokensDisponibles = 0;
         window.userPlanActivo = null;
+        window.materialesData = []; // NUEVO: Almacena datos de materiales para cálculo
+
+        // NUEVO: Función para actualizar el total de la inversión al cambiar cantidades
+        window.updateMaterialTotal = function() {
+            let nuevoTotal = 0;
+            let index = 0;
+            
+            // Recorremos los inputs de cantidad
+            document.querySelectorAll('.mat-qty-input').forEach(input => {
+                const qty = parseInt(input.value) || 1;
+                const matInfo = window.materialesData[index];
+                if (matInfo && matInfo.precio > 0) {
+                    nuevoTotal += matInfo.precio * qty;
+                }
+                
+                // Actualizar la estructura guardada en memoria (para el Excel)
+                if (matInfo) matInfo.cantidad = qty;
+                index++;
+            });
+
+            if (nuevoTotal > 0) {
+                document.getElementById('price-val').innerText = "$" + nuevoTotal.toLocaleString('es-CL');
+            }
+        };
+
+        window.changeQty = function(index, delta) {
+            const input = document.getElementById(`qty-mat-${index}`);
+            if (!input) return;
+            let newVal = parseInt(input.value) + delta;
+            if (newVal < 1) newVal = 1;
+            input.value = newVal;
+            window.updateMaterialTotal();
+        };
 
         // NUEVO: Función para exportar el reporte actual a Excel (CSV)
         window.exportToExcel = function() {
@@ -788,15 +825,16 @@
                 const precio = getElText('price-val');
                 const unidad = getElText('unit-val');
                 
-                // Extraer y limpiar materiales en forma de lista
+                // Extraer materiales y cantidades
                 let materialesArr = [];
-                const matList = document.getElementById('materials-list');
-                if (matList) {
-                    Array.from(matList.children).forEach(li => {
-                         let text = li.textContent.replace(/"/g, '""').replace(/\s+/g, ' ').trim();
-                         if(text) materialesArr.push("• " + text);
-                    });
-                }
+                document.querySelectorAll('#materials-list li').forEach((li, index) => {
+                    const spanMat = li.querySelector('[data-mat-name]');
+                    const qtyInput = li.querySelector('.mat-qty-input');
+                    const qty = qtyInput ? qtyInput.value : 1;
+                    
+                    let matName = spanMat ? spanMat.innerText.trim() : li.textContent.replace(/[\n\r]+|[\s]{2,}/g, ' ').trim();
+                    if(matName) materialesArr.push(`• ${qty}x ${matName}`);
+                });
                 const materialesStr = materialesArr.join('\n'); // Salto de línea real de Excel
 
                 // Extraer el Procedimiento Operativo (Pasos)
@@ -1333,7 +1371,40 @@
         let currentRating = 0;
         let currentEditingDocId = null;
         window.historyDataCache = {};
-        
+        window.materialesData = []; // NUEVO: Almacena datos de materiales para cálculo
+
+        // NUEVO: Función para actualizar el total de la inversión al cambiar cantidades
+        window.updateMaterialTotal = function() {
+            let nuevoTotal = 0;
+            let index = 0;
+            
+            // Recorremos los inputs de cantidad
+            document.querySelectorAll('.mat-qty-input').forEach(input => {
+                const qty = parseInt(input.value) || 1;
+                const matInfo = window.materialesData[index];
+                if (matInfo && matInfo.precio > 0) {
+                    nuevoTotal += matInfo.precio * qty;
+                }
+                
+                // Actualizar la estructura guardada en memoria (para el Excel)
+                if (matInfo) matInfo.cantidad = qty;
+                index++;
+            });
+
+            if (nuevoTotal > 0) {
+                document.getElementById('price-val').innerText = "$" + nuevoTotal.toLocaleString('es-CL');
+            }
+        };
+
+        window.changeQty = function(index, delta) {
+            const input = document.getElementById(`qty-mat-${index}`);
+            if (!input) return;
+            let newVal = parseInt(input.value) + delta;
+            if (newVal < 1) newVal = 1;
+            input.value = newVal;
+            window.updateMaterialTotal();
+        };
+
         window.extractPrice = function(priceStr) {
             if (!priceStr) return 0;
             const match = priceStr.replace(/\./g, '').match(/\d+/);
@@ -1905,38 +1976,59 @@
                 
                 let sumaMateriales = 0;
                 let tienePrecios = false;
+                window.materialesData = []; // Resetear arreglo
 
                 if (resultObj.materiales && Array.isArray(resultObj.materiales)) {
-                    resultObj.materiales.forEach(mat => {
+                    resultObj.materiales.forEach((mat, index) => {
                         const li = document.createElement('li');
-                        li.className = "leading-relaxed outline-none hover:bg-slate-50 focus:bg-white focus:ring-1 focus:ring-slate-200 rounded transition px-1 my-1";
-                        li.setAttribute('contenteditable', 'true');
+                        li.className = "leading-relaxed transition my-2 border-b border-slate-100 pb-2 last:border-0";
                         
                         const matchFormat = mat.match(/^(.*?) \[Valor Ref:\s*\$([\d.]+)\s*en\s*(.*?)\]/i);
-                        
+                        let nombreReal = mat; // El nombre base que se guardará en RAG
+                        let matObj = { originalText: mat, precio: 0, cantidad: 1 };
+
                         if (matchFormat) {
                             const nombre = matchFormat[1].trim();
                             const precioStr = matchFormat[2].trim();
                             const tienda = matchFormat[3].replace(/\]$/, '').trim();
+                            nombreReal = nombre; // Solo guardamos el nombre para RAG
                             
                             const valorNumerico = parseInt(precioStr.replace(/\./g, ''), 10);
                             if (!isNaN(valorNumerico)) {
                                 sumaMateriales += valorNumerico;
                                 tienePrecios = true;
+                                matObj.precio = valorNumerico;
                             }
                             
                             li.innerHTML = `
                                 <div class="flex flex-wrap justify-between items-center w-full gap-2">
-                                    <span class="font-medium text-slate-700">${nombre}</span>
-                                    <div class="flex items-center gap-2">
-                                        <span class="font-bold text-slate-900">$${precioStr}</span>
-                                        <span class="text-[0.55rem] bg-brand-100 text-brand-700 px-2 py-0.5 rounded uppercase tracking-widest font-bold">${tienda}</span>
+                                    <span class="font-medium text-slate-700 w-full sm:w-auto flex-1 outline-none focus:bg-white focus:ring-1 focus:ring-slate-200 rounded" contenteditable="true" data-mat-name>${nombre}</span>
+                                    <div class="flex items-center gap-3 shrink-0">
+                                        <div class="flex items-center bg-slate-100 rounded border border-slate-200 overflow-hidden">
+                                            <button type="button" class="px-2 py-0.5 text-slate-500 hover:bg-slate-200 hover:text-slate-700 transition" onclick="window.changeQty(${index}, -1)">-</button>
+                                            <input type="number" id="qty-mat-${index}" class="mat-qty-input w-8 text-center bg-transparent border-x border-slate-200 text-xs font-bold text-slate-800 outline-none p-0 hide-arrows" value="1" min="1" onchange="window.updateMaterialTotal()">
+                                            <button type="button" class="px-2 py-0.5 text-slate-500 hover:bg-slate-200 hover:text-slate-700 transition" onclick="window.changeQty(${index}, 1)">+</button>
+                                        </div>
+                                        <div class="flex flex-col items-end">
+                                            <span class="font-bold text-slate-900">$${precioStr}</span>
+                                            <span class="text-[0.55rem] bg-brand-100 text-brand-700 px-1.5 py-0.5 rounded uppercase tracking-widest font-bold mt-0.5">${tienda}</span>
+                                        </div>
                                     </div>
                                 </div>
                             `;
                         } else {
-                            li.innerHTML = `<span class="font-medium text-slate-700">${mat}</span>`;
+                            li.innerHTML = `
+                                <div class="flex justify-between items-center w-full">
+                                    <span class="font-medium text-slate-700 outline-none focus:bg-white focus:ring-1 focus:ring-slate-200 rounded" contenteditable="true" data-mat-name>${mat}</span>
+                                    <div class="flex items-center bg-slate-100 rounded border border-slate-200 overflow-hidden">
+                                        <button type="button" class="px-2 py-0.5 text-slate-500 hover:bg-slate-200 hover:text-slate-700 transition" onclick="window.changeQty(${index}, -1)">-</button>
+                                        <input type="number" id="qty-mat-${index}" class="mat-qty-input w-8 text-center bg-transparent border-x border-slate-200 text-xs font-bold text-slate-800 outline-none p-0 hide-arrows" value="1" min="1" onchange="window.updateMaterialTotal()">
+                                        <button type="button" class="px-2 py-0.5 text-slate-500 hover:bg-slate-200 hover:text-slate-700 transition" onclick="window.changeQty(${index}, 1)">+</button>
+                                    </div>
+                                </div>
+                            `;
                         }
+                        window.materialesData.push(matObj);
                         materialsList.appendChild(li);
                     });
                 }
@@ -2172,6 +2264,7 @@
                     precio_ref: document.getElementById('price-val').innerText,
                     unidad_ref: document.getElementById('unit-val').innerText,
                     tiempo: document.getElementById('time-val').innerText,
+                    // Se usa innerHTML para capturar la estructura completa, incluyendo los inputs generados dinámicamente si el usuario los ve y guarda antes de modificar
                     materiales: Array.from(document.getElementById('materials-list').children).map(li => li.innerHTML),
                     pasos: Array.from(document.getElementById('steps-list').children).map(li => li.innerHTML),
                     userNotes: document.getElementById('summary-notes').innerText,
@@ -2214,7 +2307,16 @@
                     precio_ref: document.getElementById('price-val').innerText,
                     unidad_ref: document.getElementById('unit-val').innerText,
                     tiempo: document.getElementById('time-val').innerText,
-                    materiales: Array.from(document.getElementById('materials-list').children).map(li => li.innerHTML),
+                    
+                    // Modificamos el guardado de materiales para asegurar que el input value se capture en el string HTML para que al volver a cargar en loadHistoryItem la cantidad se mantenga
+                    materiales: Array.from(document.getElementById('materials-list').children).map((li, index) => {
+                        const qtyInput = li.querySelector('.mat-qty-input');
+                        if (qtyInput) {
+                            qtyInput.setAttribute('value', qtyInput.value);
+                        }
+                        return li.innerHTML;
+                    }),
+                    
                     pasos: Array.from(document.getElementById('steps-list').children).map(li => li.innerHTML),
                     rating: currentRating,
                     comment: document.getElementById('rating-comment').value,
@@ -2229,6 +2331,18 @@
                     const expertRef = doc(db, 'artifacts', globalAppId, 'conocimiento_experto', currentEditingDocId);
                     await setDoc(expertRef, diagnosticData, { merge: true });
                 } catch (e) {}
+
+                // Extraer solo texto plano de los materiales para la IA (ignorando botones de cantidad HTML)
+                let materialesPlanos = [];
+                document.querySelectorAll('#materials-list li').forEach(li => {
+                    const spanMat = li.querySelector('[data-mat-name]');
+                    if (spanMat) {
+                        materialesPlanos.push(spanMat.innerText.trim());
+                    } else {
+                        // Respaldo si no encuentra el span
+                        materialesPlanos.push(li.innerText.replace(/[\n\r]+|[\s]{2,}/g, ' ').trim());
+                    }
+                });
 
                 // --- ENVIAR AL CEREBRO PREDICTIVO (CLOUDFLARE WORKER) ---
                 try {
@@ -2482,12 +2596,80 @@
             
             const materialsList = document.getElementById('materials-list');
             materialsList.innerHTML = '';
+            window.materialesData = []; // Resetear arreglo
+            
             if (data.materiales && Array.isArray(data.materiales)) {
-                data.materiales.forEach(mat => {
+                data.materiales.forEach((mat, index) => {
                     const li = document.createElement('li');
-                    li.className = "leading-relaxed outline-none hover:bg-slate-50 focus:bg-white rounded transition px-1 my-1";
-                    li.setAttribute('contenteditable', 'true');
-                    li.innerHTML = mat;
+                    li.className = "leading-relaxed transition my-2 border-b border-slate-100 pb-2 last:border-0";
+                    
+                    // Verificamos si es un material guardado con el nuevo formato HTML o solo texto
+                    const esHtmlAntiguo = mat.includes('<div');
+                    let matObj = { originalText: mat, precio: 0, cantidad: 1 };
+                    
+                    if (esHtmlAntiguo) {
+                        // Si ya está guardado con el HTML de cantidades (porque el usuario lo guardó así)
+                        li.innerHTML = mat;
+                        
+                        // Intentamos reconstruir los eventos onclick que se pierden al inyectar HTML como string
+                        const btnMenos = li.querySelector('button:first-of-type');
+                        const btnMas = li.querySelector('button:last-of-type');
+                        const inputQty = li.querySelector('.mat-qty-input');
+                        
+                        if (btnMenos) btnMenos.onclick = () => window.changeQty(index, -1);
+                        if (btnMas) btnMas.onclick = () => window.changeQty(index, 1);
+                        if (inputQty) {
+                             inputQty.onchange = window.updateMaterialTotal;
+                             matObj.cantidad = parseInt(inputQty.value) || 1;
+                        }
+                        
+                        // Intentamos recuperar el precio de la estructura guardada
+                        const precioSpan = li.querySelector('.text-slate-900.font-bold');
+                        if (precioSpan) {
+                            const pMatch = precioSpan.innerText.replace(/\./g, '').match(/\d+/);
+                            if (pMatch) matObj.precio = parseInt(pMatch[0], 10);
+                        }
+                    } else {
+                        // Si es texto plano o formato RAG (Nombre [Valor Ref: $... en Tienda])
+                        const matchFormat = mat.match(/^(.*?) \[Valor Ref:\s*\$([\d.]+)\s*en\s*(.*?)\]/i);
+                        if (matchFormat) {
+                            const nombre = matchFormat[1].trim();
+                            const precioStr = matchFormat[2].trim();
+                            const tienda = matchFormat[3].replace(/\]$/, '').trim();
+                            
+                            const valorNumerico = parseInt(precioStr.replace(/\./g, ''), 10);
+                            if (!isNaN(valorNumerico)) matObj.precio = valorNumerico;
+                            
+                            li.innerHTML = `
+                                <div class="flex flex-wrap justify-between items-center w-full gap-2">
+                                    <span class="font-medium text-slate-700 w-full sm:w-auto flex-1 outline-none focus:bg-white focus:ring-1 focus:ring-slate-200 rounded" contenteditable="true" data-mat-name>${nombre}</span>
+                                    <div class="flex items-center gap-3 shrink-0">
+                                        <div class="flex items-center bg-slate-100 rounded border border-slate-200 overflow-hidden">
+                                            <button type="button" class="px-2 py-0.5 text-slate-500 hover:bg-slate-200 hover:text-slate-700 transition" onclick="window.changeQty(${index}, -1)">-</button>
+                                            <input type="number" id="qty-mat-${index}" class="mat-qty-input w-8 text-center bg-transparent border-x border-slate-200 text-xs font-bold text-slate-800 outline-none p-0 hide-arrows" value="1" min="1" onchange="window.updateMaterialTotal()">
+                                            <button type="button" class="px-2 py-0.5 text-slate-500 hover:bg-slate-200 hover:text-slate-700 transition" onclick="window.changeQty(${index}, 1)">+</button>
+                                        </div>
+                                        <div class="flex flex-col items-end">
+                                            <span class="font-bold text-slate-900">$${precioStr}</span>
+                                            <span class="text-[0.55rem] bg-brand-100 text-brand-700 px-1.5 py-0.5 rounded uppercase tracking-widest font-bold mt-0.5">${tienda}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                        } else {
+                             li.innerHTML = `
+                                <div class="flex justify-between items-center w-full">
+                                    <span class="font-medium text-slate-700 outline-none focus:bg-white focus:ring-1 focus:ring-slate-200 rounded" contenteditable="true" data-mat-name>${mat}</span>
+                                    <div class="flex items-center bg-slate-100 rounded border border-slate-200 overflow-hidden">
+                                        <button type="button" class="px-2 py-0.5 text-slate-500 hover:bg-slate-200 hover:text-slate-700 transition" onclick="window.changeQty(${index}, -1)">-</button>
+                                        <input type="number" id="qty-mat-${index}" class="mat-qty-input w-8 text-center bg-transparent border-x border-slate-200 text-xs font-bold text-slate-800 outline-none p-0 hide-arrows" value="1" min="1" onchange="window.updateMaterialTotal()">
+                                        <button type="button" class="px-2 py-0.5 text-slate-500 hover:bg-slate-200 hover:text-slate-700 transition" onclick="window.changeQty(${index}, 1)">+</button>
+                                    </div>
+                                </div>
+                            `;
+                        }
+                    }
+                    window.materialesData.push(matObj);
                     materialsList.appendChild(li);
                 });
             }
