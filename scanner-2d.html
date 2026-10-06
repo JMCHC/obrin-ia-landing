@@ -7,82 +7,104 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         .oculto { display: none !important; }
+        .scroll-horizontal::-webkit-scrollbar { height: 6px; }
+        .scroll-horizontal::-webkit-scrollbar-track { background: transparent; }
+        .scroll-horizontal::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
     </style>
 </head>
 <body class="bg-white text-slate-800 overflow-hidden font-sans w-full h-screen relative selection:bg-orange-500">
 
-    <!-- Canvas invisible para procesar la foto -->
     <canvas id="canvas" class="hidden"></canvas>
 
-    <!-- Feed de la cámara (Fondo) -->
-    <video id="video" autoplay playsinline class="absolute inset-0 w-full h-full object-cover z-0 oculto"></video>
-    <div id="video-overlay" class="absolute inset-0 bg-black/10 z-10 pointer-events-none oculto"></div>
-
-    <!-- PANTALLA 0: Permisos (Estilo Obrín IA) -->
+    <!-- PANTALLA 0: Permisos -->
     <div id="pantalla-0" class="absolute inset-0 z-50 flex flex-col items-center justify-center p-6 text-center bg-white">
-        <!-- Logo simulado Obrín IA -->
         <div class="mb-10 flex items-center justify-center gap-2">
             <span class="text-3xl">👷🏻‍♂️</span>
             <h1 class="text-3xl font-black tracking-tight text-slate-900">Obrín <span class="text-sm font-bold uppercase tracking-widest text-slate-500">IA</span></h1>
         </div>
 
-        <h2 class="text-3xl font-light text-slate-900 mb-4">Escáner de Muros <span class="font-bold">2D</span></h2>
+        <h2 class="text-3xl font-light text-slate-900 mb-4">Escáner <span class="font-bold">Visual 2D</span></h2>
         <p class="text-slate-500 mb-8 max-w-sm text-sm leading-relaxed">
-            Tecnología de vanguardia para el levantamiento de planos. Obrín IA necesita acceso a tu cámara y al giroscopio del dispositivo.
+            Levantamiento continuo de recintos. Mide múltiples muros y agrupa las capturas por paño.
         </p>
         
         <p id="error-msg" class="text-red-600 mb-6 bg-red-50 p-4 rounded-xl border border-red-100 font-medium text-sm oculto shadow-sm w-full max-w-xs"></p>
         
         <button id="btn-iniciar" class="bg-[#0f172a] hover:bg-slate-800 text-white w-full max-w-xs py-4 rounded-xl font-semibold text-lg transition-all shadow-md active:scale-95">
-            Habilitar Sensores
+            Activar Cámara
         </button>
     </div>
 
-    <!-- PANTALLA 1: Tomar primera foto -->
-    <div id="pantalla-1" class="absolute inset-0 z-20 flex-col items-center justify-between pb-12 pt-16 flex oculto">
-        <div class="bg-white/90 px-6 py-3 rounded-2xl backdrop-blur-md border border-slate-200 shadow-sm">
-            <p class="text-slate-800 font-medium tracking-wide">Sitúate al inicio del muro</p>
-        </div>
+    <!-- PANTALLA 1: Captura Infinita por Muros -->
+    <div id="pantalla-1" class="absolute inset-0 z-20 bg-black flex-col flex oculto">
         
-        <!-- Botón de captura (Obturador) -->
-        <button id="btn-foto1" class="w-20 h-20 bg-white/50 rounded-full border-4 border-white flex items-center justify-center backdrop-blur-md active:scale-90 transition-transform shadow-lg">
-            <div class="w-16 h-16 bg-white rounded-full shadow-inner"></div>
-        </button>
-    </div>
+        <video id="video" autoplay playsinline class="absolute inset-0 w-full h-full object-cover z-0"></video>
+        
+        <!-- EFECTO FANTASMA -->
+        <div id="fantasma-container" class="absolute top-0 left-0 w-1/4 h-full border-r-2 border-orange-500 z-10 opacity-75 oculto pointer-events-none shadow-[5px_0_15px_rgba(0,0,0,0.5)]">
+            <img id="img-fantasma" class="w-full h-full object-cover" style="object-position: right center;" />
+            <div class="absolute inset-0 bg-orange-500/10"></div>
+        </div>
 
-    <!-- PANTALLA 2: Guiado con Giroscopio -->
-    <div id="pantalla-2" class="absolute inset-0 z-20 flex-col items-center justify-center pb-12 flex oculto">
-        <div class="bg-white/95 p-6 rounded-3xl backdrop-blur-md border border-slate-200 w-11/12 max-w-sm flex flex-col items-center shadow-2xl">
-            <p id="texto-guia" class="text-lg font-semibold mb-6 text-slate-700 transition-colors duration-300">Gira a la derecha suavemente</p>
-            
-            <!-- Interfaz tipo Nivel/Brújula -->
-            <div class="w-full bg-slate-100 h-10 rounded-full relative overflow-hidden border border-slate-200 mb-2 shadow-inner">
-                <div class="absolute top-0 bottom-0 left-1/2 w-10 -ml-5 bg-orange-100 border-x-2 border-orange-500"></div>
-                <div id="punto-guia" class="absolute top-1/2 -mt-3 w-6 h-6 rounded-full shadow-md transition-all duration-100 ease-out z-10 bg-[#0f172a]" style="left: 50%; transform: translateX(-50%);"></div>
+        <!-- UI Superior -->
+        <div class="relative z-20 flex justify-between items-start p-6 pt-12 bg-gradient-to-b from-black/70 to-transparent">
+            <!-- Indicador de Progreso -->
+            <div class="bg-black/50 backdrop-blur-md px-4 py-2 rounded-lg border border-white/20">
+                <span id="indicador-muro" class="text-white font-semibold text-sm">Muro 1</span>
+                <div class="text-orange-400 font-bold text-xs" id="contador-fotos">0 Fotos</div>
             </div>
+            
+            <!-- Botones de Acción Superior -->
+            <div class="flex flex-col gap-2 items-end">
+                <!-- Botón de Doblar Esquina -->
+                <button id="btn-esquina" class="bg-orange-500 text-white px-4 py-2 rounded-lg font-bold text-sm shadow-lg active:scale-95 oculto transition-all flex items-center gap-2 border border-orange-400">
+                    <span>↪</span> Siguiente Muro
+                </button>
+                
+                <!-- Botón de Terminar Habitación -->
+                <button id="btn-finalizar" class="bg-white text-slate-900 px-4 py-2 rounded-lg font-bold text-sm shadow-lg active:scale-95 oculto transition-all">
+                    ✅ Terminar Recinto
+                </button>
+            </div>
+        </div>
+
+        <!-- Mensaje de Guía -->
+        <div class="relative z-20 flex-1 flex items-center justify-center pointer-events-none">
+            <div id="instruccion-captura" class="bg-black/60 text-white px-6 py-3 rounded-full backdrop-blur-md border border-white/20 text-center mx-4 transition-all duration-300">
+                Sitúate al inicio del Muro 1 y toma la 1ra foto.
+            </div>
+        </div>
+
+        <!-- Controles Inferiores (Obturador) -->
+        <div class="relative z-20 pb-12 flex justify-center items-center bg-gradient-to-t from-black/80 to-transparent pt-10">
+            <button id="btn-capturar" class="w-20 h-20 bg-white/30 rounded-full border-4 border-white flex items-center justify-center backdrop-blur-md active:scale-90 transition-transform shadow-[0_0_20px_rgba(255,255,255,0.3)]">
+                <div class="w-16 h-16 bg-white rounded-full shadow-inner flex items-center justify-center">
+                    <span class="text-2xl">📸</span>
+                </div>
+            </button>
         </div>
     </div>
 
-    <!-- PANTALLA 3: Resultado de Captura -->
-    <div id="pantalla-3" class="absolute inset-0 z-50 bg-slate-50 overflow-y-auto p-6 flex-col items-center flex oculto">
+    <!-- PANTALLA 2: Resultados y Galería Agrupada -->
+    <div id="pantalla-2" class="absolute inset-0 z-50 bg-slate-50 overflow-y-auto p-6 flex-col items-center flex oculto">
         <div class="w-full max-w-md mt-6">
-            <h2 class="text-3xl font-light text-slate-900 mb-2">Captura <span class="font-bold text-orange-500">Lista</span></h2>
-            <p class="text-slate-500 mb-8 text-sm">Imágenes pre-procesadas. Listas para IA y Costura 2D.</p>
+            <h2 class="text-3xl font-light text-slate-900 mb-2">Levantamiento <span class="font-bold text-orange-500">Exitoso</span></h2>
+            <p class="text-slate-500 mb-6 text-sm">Se ha mapeado el recinto por paños individuales. Datos listos para extrusión 2D.</p>
             
-            <div class="flex flex-col gap-6 w-full">
-                <div class="relative group bg-white p-2 rounded-2xl shadow-sm border border-slate-200">
-                    <span class="absolute top-4 left-4 bg-white/90 text-slate-800 px-3 py-1 text-xs rounded-md font-bold backdrop-blur-sm border border-slate-200 shadow-sm">Foto 1 (Izquierda)</span>
-                    <img id="img-foto1" class="w-full rounded-xl object-cover aspect-video" />
-                </div>
-                <div class="relative group bg-white p-2 rounded-2xl shadow-sm border border-slate-200">
-                    <span class="absolute top-4 left-4 bg-white/90 text-slate-800 px-3 py-1 text-xs rounded-md font-bold backdrop-blur-sm border border-slate-200 shadow-sm">Foto 2 (Derecha)</span>
-                    <img id="img-foto2" class="w-full rounded-xl object-cover aspect-video" />
+            <!-- Contenedor Dinámico para los Muros -->
+            <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 w-full mb-6">
+                <h3 class="font-bold text-slate-700 mb-4 text-sm flex justify-between border-b pb-2 border-slate-100">
+                    Resumen del Perímetro <span id="resumen-contador" class="text-orange-500 font-bold"></span>
+                </h3>
+                
+                <div id="galeria-muros" class="flex flex-col gap-4">
+                    <!-- Los muros se inyectan aquí con JS -->
                 </div>
             </div>
 
-            <div class="mt-8 flex gap-3 w-full pb-8">
-                <button id="btn-repetir" class="flex-1 bg-white text-slate-800 hover:bg-slate-50 py-4 rounded-xl font-semibold border border-slate-300 shadow-sm transition-colors">Repetir</button>
-                <button class="flex-1 bg-[#0f172a] text-white hover:bg-slate-800 py-4 rounded-xl font-semibold shadow-md transition-colors">Procesar 2D</button>
+            <div class="mt-4 flex gap-3 w-full pb-12">
+                <button id="btn-repetir" class="flex-1 bg-white text-slate-800 hover:bg-slate-50 py-4 rounded-xl font-semibold border border-slate-300 shadow-sm transition-colors">Nuevo Recinto</button>
+                <button class="flex-1 bg-[#0f172a] text-white hover:bg-slate-800 py-4 rounded-xl font-semibold shadow-md transition-colors">Procesar IA</button>
             </div>
         </div>
     </div>
@@ -91,125 +113,156 @@
         const ui = {
             video: document.getElementById('video'),
             canvas: document.getElementById('canvas'),
-            overlay: document.getElementById('video-overlay'),
             pantallas: [
                 document.getElementById('pantalla-0'),
                 document.getElementById('pantalla-1'),
-                document.getElementById('pantalla-2'),
-                document.getElementById('pantalla-3')
+                document.getElementById('pantalla-2')
             ],
             btnIniciar: document.getElementById('btn-iniciar'),
-            btnFoto1: document.getElementById('btn-foto1'),
+            btnCapturar: document.getElementById('btn-capturar'),
+            btnEsquina: document.getElementById('btn-esquina'),
+            btnFinalizar: document.getElementById('btn-finalizar'),
             btnRepetir: document.getElementById('btn-repetir'),
             errorMsg: document.getElementById('error-msg'),
-            textoGuia: document.getElementById('texto-guia'),
-            puntoGuia: document.getElementById('punto-guia'),
-            imgFoto1: document.getElementById('img-foto1'),
-            imgFoto2: document.getElementById('img-foto2'),
+            fantasmaContainer: document.getElementById('fantasma-container'),
+            imgFantasma: document.getElementById('img-fantasma'),
+            instruccion: document.getElementById('instruccion-captura'),
+            indicadorMuro: document.getElementById('indicador-muro'),
+            contadorFotos: document.getElementById('contador-fotos'),
+            resumenContador: document.getElementById('resumen-contador'),
+            galeriaMuros: document.getElementById('galeria-muros')
         };
 
-        let pasoActual = 0;
-        let anguloInicial = null;
-        let anguloActual = 0;
-        let fotos = [];
-        let timerEstabilidad = null;
-        
-        const GRADOS_OBJETIVO = 25;
-        const MARGEN_TOLERANCIA = 2;
+        // MATRIZ DE DATOS: habitacion almacena arrays de muroActual
+        let habitacion = [];
+        let muroActual = [];
 
         function cambiarPantalla(paso) {
             ui.pantallas.forEach(p => p.classList.add('oculto'));
             ui.pantallas[paso].classList.remove('oculto');
-            
-            if (paso === 1 || paso === 2) {
-                ui.video.classList.remove('oculto');
-                ui.overlay.classList.remove('oculto');
-            } else {
-                ui.video.classList.add('oculto');
-                ui.overlay.classList.add('oculto');
-            }
-            pasoActual = paso;
         }
 
-        function tomarFotoBase64() {
-            ui.canvas.width = ui.video.videoWidth;
-            ui.canvas.height = ui.video.videoHeight;
-            ui.canvas.getContext('2d').drawImage(ui.video, 0, 0);
-            return ui.canvas.toDataURL('image/jpeg', 0.85);
-        }
-
+        // 1. INICIAR CÁMARA
         ui.btnIniciar.addEventListener('click', async () => {
             try {
-                // SOLUCIÓN iOS: Pedir giroscopio PRIMERO, inmediatamente en el click
-                if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
-                    const permiso = await DeviceOrientationEvent.requestPermission();
-                    if (permiso !== 'granted') throw new Error('Se requiere acceso al movimiento del celular.');
-                }
-
-                // LUEGO pedir la cámara
                 const stream = await navigator.mediaDevices.getUserMedia({
                     video: { facingMode: 'environment', width: { ideal: 1920 }, height: { ideal: 1080 } },
                     audio: false
                 });
                 ui.video.srcObject = stream;
-
-                window.addEventListener('deviceorientation', manejarGiroscopio);
                 cambiarPantalla(1);
             } catch (err) {
-                ui.errorMsg.textContent = err.message || 'Error: Revisa los permisos de cámara y movimiento de tu navegador.';
+                ui.errorMsg.textContent = 'Error: Obrín IA necesita acceso a la cámara para medir.';
                 ui.errorMsg.classList.remove('oculto');
             }
         });
 
-        ui.btnFoto1.addEventListener('click', () => {
-            fotos[0] = tomarFotoBase64();
-            ui.imgFoto1.src = fotos[0];
-            anguloInicial = anguloActual;
+        // 2. TOMAR FOTO (Añade a muroActual)
+        ui.btnCapturar.addEventListener('click', () => {
+            ui.canvas.width = ui.video.videoWidth;
+            ui.canvas.height = ui.video.videoHeight;
+            ui.canvas.getContext('2d').drawImage(ui.video, 0, 0);
+            const base64Foto = ui.canvas.toDataURL('image/jpeg', 0.85);
+            
+            muroActual.push(base64Foto);
+            ui.contadorFotos.textContent = `${muroActual.length} Fotos`;
+
+            ui.imgFantasma.src = base64Foto;
+            ui.fantasmaContainer.classList.remove('oculto');
+            
+            // Mostrar botones de acción
+            ui.btnEsquina.classList.remove('oculto');
+            ui.btnFinalizar.classList.remove('oculto');
+            
+            ui.instruccion.innerHTML = "Desplázate a la derecha y superpón la franja.";
+            ui.instruccion.classList.add('scale-110', 'bg-orange-500');
+            setTimeout(() => ui.instruccion.classList.remove('scale-110', 'bg-orange-500'), 200);
+        });
+
+        // 3. DOBLAR ESQUINA (Guarda muroActual, reinicia para el siguiente)
+        ui.btnEsquina.addEventListener('click', () => {
+            if (muroActual.length === 0) return;
+
+            // Guardar muro completado
+            habitacion.push([...muroActual]);
+            
+            // Reiniciar para el nuevo muro
+            muroActual = [];
+            ui.indicadorMuro.textContent = `Muro ${habitacion.length + 1}`;
+            ui.contadorFotos.textContent = "0 Fotos";
+            
+            // Ocultar fantasma y botón esquina
+            ui.fantasmaContainer.classList.add('oculto');
+            ui.btnEsquina.classList.add('oculto');
+            ui.imgFantasma.src = "";
+
+            // Nueva instrucción
+            ui.instruccion.innerHTML = `Gira 90° hacia el nuevo muro y toma la 1ra foto.`;
+            ui.instruccion.classList.add('bg-blue-600');
+            setTimeout(() => ui.instruccion.classList.remove('bg-blue-600'), 1000);
+        });
+
+        // 4. TERMINAR RECINTO (Construye la Galería Agrupada)
+        ui.btnFinalizar.addEventListener('click', () => {
+            // Guardar el último muro si tiene fotos pendientes
+            if (muroActual.length > 0) {
+                habitacion.push([...muroActual]);
+                muroActual = [];
+            }
+
+            if (habitacion.length === 0) return; // No hay nada que mostrar
+            
+            // Limpiar y renderizar
+            ui.galeriaMuros.innerHTML = '';
+            ui.resumenContador.textContent = `${habitacion.length} Muros`;
+
+            habitacion.forEach((muro, indexMuro) => {
+                // Crear contenedor para cada muro
+                const divMuro = document.createElement('div');
+                divMuro.className = "bg-slate-50 p-3 rounded-xl border border-slate-200";
+                
+                // Título del muro
+                divMuro.innerHTML = `
+                    <div class="flex justify-between items-center mb-3 border-b border-slate-200 pb-2">
+                        <span class="font-bold text-slate-800 text-sm">Muro ${indexMuro + 1}</span>
+                        <span class="text-xs font-semibold text-slate-500 bg-slate-200 px-2 py-0.5 rounded-full">${muro.length} fotos</span>
+                    </div>
+                `;
+                
+                // Carrusel de fotos para este muro
+                const carrusel = document.createElement('div');
+                carrusel.className = "flex gap-2 overflow-x-auto scroll-horizontal pb-2 snap-x";
+
+                muro.forEach((foto, indexFoto) => {
+                    const imgContainer = document.createElement('div');
+                    imgContainer.className = "flex-shrink-0 w-28 snap-center relative rounded-lg overflow-hidden shadow-sm border border-slate-300";
+                    imgContainer.innerHTML = `
+                        <span class="absolute top-1 left-1 bg-black/70 text-white text-[10px] font-bold px-1.5 py-0.5 rounded">#${indexFoto + 1}</span>
+                        <img src="${foto}" class="w-full h-20 object-cover" />
+                    `;
+                    carrusel.appendChild(imgContainer);
+                });
+
+                divMuro.appendChild(carrusel);
+                ui.galeriaMuros.appendChild(divMuro);
+            });
+
             cambiarPantalla(2);
         });
 
-        function manejarGiroscopio(e) {
-            if (pasoActual !== 2 || e.alpha === null) return;
-            anguloActual = e.alpha;
-
-            let diferencia = anguloInicial - anguloActual;
-            if (diferencia < -180) diferencia += 360;
-            if (diferencia > 180) diferencia -= 360;
-
-            let progreso = diferencia;
-            let pxMovimiento = (progreso - GRADOS_OBJETIVO) * 5;
-            ui.puntoGuia.style.left = `calc(50% + ${pxMovimiento}px)`;
-
-            let estaEnPosicion = Math.abs(progreso - GRADOS_OBJETIVO) <= MARGEN_TOLERANCIA;
-
-            if (estaEnPosicion) {
-                ui.textoGuia.textContent = "¡Mantén firme el celular!";
-                ui.textoGuia.className = "text-lg font-bold mb-6 text-orange-500 transition-colors duration-300";
-                ui.puntoGuia.className = "absolute top-1/2 -mt-3 w-6 h-6 rounded-full shadow-[0_0_15px_rgba(249,115,22,0.6)] transition-all duration-100 ease-out z-10 bg-orange-500 scale-125";
-
-                if (!timerEstabilidad) {
-                    timerEstabilidad = setTimeout(() => {
-                        fotos[1] = tomarFotoBase64();
-                        ui.imgFoto2.src = fotos[1];
-                        cambiarPantalla(3);
-                        timerEstabilidad = null;
-                    }, 1200);
-                }
-            } else {
-                ui.textoGuia.textContent = "Gira a la derecha suavemente";
-                ui.textoGuia.className = "text-lg font-semibold mb-6 text-slate-700 transition-colors duration-300";
-                ui.puntoGuia.className = "absolute top-1/2 -mt-3 w-6 h-6 rounded-full shadow-md transition-all duration-100 ease-out z-10 bg-[#0f172a]";
-
-                if (timerEstabilidad) {
-                    clearTimeout(timerEstabilidad);
-                    timerEstabilidad = null;
-                }
-            }
-        }
-
+        // 5. REPETIR (Resetear todo)
         ui.btnRepetir.addEventListener('click', () => {
-            fotos = [];
-            anguloInicial = null;
+            habitacion = [];
+            muroActual = [];
+            
+            ui.indicadorMuro.textContent = "Muro 1";
+            ui.contadorFotos.textContent = "0 Fotos";
+            ui.fantasmaContainer.classList.add('oculto');
+            ui.btnEsquina.classList.add('oculto');
+            ui.btnFinalizar.classList.add('oculto');
+            ui.imgFantasma.src = "";
+            ui.instruccion.innerHTML = "Sitúate al inicio del Muro 1 y toma la 1ra foto.";
+            
             cambiarPantalla(1);
         });
     </script>
