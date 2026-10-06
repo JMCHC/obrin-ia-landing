@@ -8,7 +8,6 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         .oculto { display: none !important; }
-        /* Diseño de scroll horizontal para la galería final */
         .scroll-horizontal::-webkit-scrollbar { height: 6px; }
         .scroll-horizontal::-webkit-scrollbar-track { background: transparent; }
         .scroll-horizontal::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
@@ -16,25 +15,21 @@
 </head>
 <body class="bg-white text-slate-800 overflow-hidden font-sans w-full h-screen relative selection:bg-orange-500">
 
-    <!-- Canvas oculto para el procesamiento de imágenes -->
     <canvas id="canvas" class="hidden"></canvas>
 
     <!-- ==========================================
-         PANTALLA 0: INICIO Y PERMISOS
+         PANTALLA 0: INICIO Y CÁMARA
          ========================================== -->
     <div id="pantalla-0" class="absolute inset-0 z-50 flex flex-col items-center justify-center p-6 text-center bg-white">
         <div class="mb-10 flex items-center justify-center gap-2">
             <span class="text-3xl">👷🏻‍♂️</span>
             <h1 class="text-3xl font-black tracking-tight text-slate-900">Obrín <span class="text-sm font-bold uppercase tracking-widest text-slate-500">IA</span></h1>
         </div>
-
         <h2 class="text-3xl font-light text-slate-900 mb-4">Escáner <span class="font-bold">Visual 2D</span></h2>
         <p class="text-slate-500 mb-8 max-w-sm text-sm leading-relaxed">
             Levantamiento fotogramétrico por paños. Alinea las esquinas y superpón las capturas.
         </p>
-        
         <p id="error-msg" class="text-red-600 mb-6 bg-red-50 p-4 rounded-xl border border-red-100 font-medium text-sm oculto shadow-sm w-full max-w-xs"></p>
-        
         <button id="btn-iniciar" class="bg-[#0f172a] hover:bg-slate-800 text-white w-full max-w-xs py-4 rounded-xl font-semibold text-lg transition-all shadow-md active:scale-95">
             Activar Cámara
         </button>
@@ -45,31 +40,25 @@
          ========================================== -->
     <div id="pantalla-1" class="absolute inset-0 z-20 bg-black flex-col flex oculto">
         
-        <!-- Feed de Video -->
         <video id="video" autoplay playsinline class="absolute inset-0 w-full h-full object-cover z-0"></video>
         
-        <!-- EFECTO FANTASMA (25% izquierdo) -->
         <div id="fantasma-container" class="absolute top-0 left-0 w-1/4 h-full border-r-2 border-orange-500 z-10 opacity-75 oculto pointer-events-none shadow-[5px_0_15px_rgba(0,0,0,0.5)]">
             <img id="img-fantasma" class="w-full h-full object-cover" style="object-position: right center;" />
             <div class="absolute inset-0 bg-orange-500/10"></div>
         </div>
 
-        <!-- MIRA CENTRAL (Retícula topográfica) -->
         <div class="absolute top-0 bottom-0 left-1/2 w-px bg-white/50 border-x border-black/20 z-10 pointer-events-none flex flex-col justify-center items-center shadow-lg transform -translate-x-1/2">
             <div class="w-8 h-8 border-[3px] border-orange-500 rounded-full bg-black/10 flex items-center justify-center backdrop-blur-sm">
                 <div class="w-1.5 h-1.5 bg-orange-500 rounded-full shadow-lg"></div>
             </div>
         </div>
 
-        <!-- UI Superior: Contadores y Botones de Control -->
         <div class="relative z-20 flex justify-between items-start p-6 pt-12 bg-gradient-to-b from-black/80 to-transparent">
-            <!-- Indicador -->
             <div class="bg-black/60 backdrop-blur-md px-4 py-2 rounded-lg border border-white/20">
                 <span id="indicador-muro" class="text-white font-semibold text-sm">Muro 1</span>
                 <div class="text-orange-400 font-bold text-xs" id="contador-fotos">0 Fotos</div>
             </div>
             
-            <!-- Botones de Esquina y Finalizar -->
             <div class="flex flex-col gap-3 items-end">
                 <button id="btn-esquina" class="bg-orange-500 text-white px-4 py-2.5 rounded-lg font-bold text-sm shadow-lg active:scale-95 oculto transition-all flex items-center gap-2 border border-orange-400">
                     <span>↪</span> Siguiente Muro
@@ -80,14 +69,12 @@
             </div>
         </div>
 
-        <!-- Mensaje de Guía Dinámico -->
         <div class="relative z-20 flex-1 flex items-center justify-center pointer-events-none">
             <div id="instruccion-captura" class="bg-black/70 text-white px-6 py-3 rounded-full backdrop-blur-md border border-white/20 text-center mx-4 transition-all duration-300 text-sm font-medium">
                 Alinea la <span class="text-orange-400 font-bold">esquina inicial</span> en la mira central y captura.
             </div>
         </div>
 
-        <!-- Controles Inferiores (Obturador) -->
         <div class="relative z-20 pb-12 flex justify-center items-center bg-gradient-to-t from-black/90 to-transparent pt-10">
             <button id="btn-capturar" class="w-20 h-20 bg-white/30 rounded-full border-4 border-white flex items-center justify-center backdrop-blur-md active:scale-90 transition-transform shadow-[0_0_20px_rgba(255,255,255,0.3)]">
                 <div class="w-16 h-16 bg-white rounded-full shadow-inner flex items-center justify-center">
@@ -98,27 +85,43 @@
     </div>
 
     <!-- ==========================================
-         PANTALLA 2: RESULTADOS Y GALERÍA
+         PANTALLA 2: GALERÍA DE RESULTADOS
          ========================================== -->
     <div id="pantalla-2" class="absolute inset-0 z-50 bg-slate-50 overflow-y-auto p-6 flex-col items-center flex oculto">
-        <div class="w-full max-w-md mt-6">
+        <div class="w-full max-w-md mt-6" id="contenedor-resultados">
             <h2 class="text-3xl font-light text-slate-900 mb-2">Levantamiento <span class="font-bold text-orange-500">Exitoso</span></h2>
-            <p class="text-slate-500 mb-6 text-sm">Recinto mapeado por paños. Datos estructurados para fotogrametría.</p>
+            <p class="text-slate-500 mb-6 text-sm">Recinto mapeado por paños. Datos estructurados listos.</p>
             
             <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 w-full mb-6">
                 <h3 class="font-bold text-slate-700 mb-4 text-sm flex justify-between border-b pb-2 border-slate-100">
-                    Resumen del Perímetro <span id="resumen-contador" class="text-orange-500 font-bold"></span>
+                    Resumen <span id="resumen-contador" class="text-orange-500 font-bold"></span>
                 </h3>
-                
-                <!-- Contenedor inyectado con JS -->
                 <div id="galeria-muros" class="flex flex-col gap-4"></div>
             </div>
 
             <div class="mt-4 flex gap-3 w-full pb-12">
-                <button id="btn-repetir" class="flex-1 bg-white text-slate-800 hover:bg-slate-50 py-4 rounded-xl font-semibold border border-slate-300 shadow-sm transition-colors">Nuevo Recinto</button>
-                <button class="flex-1 bg-[#0f172a] text-white hover:bg-slate-800 py-4 rounded-xl font-semibold shadow-md transition-colors">Procesar IA</button>
+                <button id="btn-repetir" class="flex-1 bg-white text-slate-800 hover:bg-slate-50 py-4 rounded-xl font-semibold border border-slate-300 shadow-sm transition-colors">Nuevo</button>
+                <button id="btn-procesar" class="flex-1 bg-[#0f172a] text-white hover:bg-slate-800 py-4 rounded-xl font-semibold shadow-md transition-colors">Procesar Muro 1</button>
             </div>
         </div>
+    </div>
+
+    <!-- ==========================================
+         PANTALLA 3: PROCESAMIENTO MULTI-FOTO
+         ========================================== -->
+    <div id="pantalla-3" class="absolute inset-0 z-50 bg-[#0f172a] flex-col items-center justify-center p-6 text-center flex oculto">
+        <div class="relative w-32 h-32 mb-8 mx-auto">
+            <div class="absolute inset-0 border-4 border-slate-700 rounded-2xl"></div>
+            <div class="absolute inset-0 border-4 border-orange-500 rounded-2xl animate-[spin_3s_linear_infinite] border-t-transparent border-b-transparent"></div>
+            <div class="absolute inset-0 flex items-center justify-center text-4xl">⚙️</div>
+        </div>
+        <h2 class="text-2xl font-bold text-white mb-2">Costura Panorámica</h2>
+        <p id="estado-proceso" class="text-orange-400 font-medium mb-8">Iniciando motor matemático...</p>
+        
+        <div class="w-full max-w-xs mx-auto bg-slate-800 rounded-full h-2.5 mb-2 overflow-hidden border border-slate-700">
+            <div id="barra-progreso" class="bg-gradient-to-r from-orange-600 to-orange-400 h-2.5 rounded-full w-0 transition-all duration-300"></div>
+        </div>
+        <p id="porcentaje-proceso" class="text-slate-400 text-xs">0%</p>
     </div>
 
     <!-- ==========================================
@@ -131,13 +134,15 @@
             pantallas: [
                 document.getElementById('pantalla-0'),
                 document.getElementById('pantalla-1'),
-                document.getElementById('pantalla-2')
+                document.getElementById('pantalla-2'),
+                document.getElementById('pantalla-3')
             ],
             btnIniciar: document.getElementById('btn-iniciar'),
             btnCapturar: document.getElementById('btn-capturar'),
             btnEsquina: document.getElementById('btn-esquina'),
             btnFinalizar: document.getElementById('btn-finalizar'),
             btnRepetir: document.getElementById('btn-repetir'),
+            btnProcesar: document.getElementById('btn-procesar'),
             errorMsg: document.getElementById('error-msg'),
             fantasmaContainer: document.getElementById('fantasma-container'),
             imgFantasma: document.getElementById('img-fantasma'),
@@ -148,7 +153,6 @@
             galeriaMuros: document.getElementById('galeria-muros')
         };
 
-        // MATRIZ: habitacion = [ [foto1, foto2], [foto3, foto4], ... ]
         let habitacion = [];
         let muroActual = [];
 
@@ -157,7 +161,6 @@
             ui.pantallas[paso].classList.remove('oculto');
         }
 
-        // 1. INICIAR CÁMARA (Sin giroscopio)
         ui.btnIniciar.addEventListener('click', async () => {
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({
@@ -167,77 +170,60 @@
                 ui.video.srcObject = stream;
                 cambiarPantalla(1);
             } catch (err) {
-                ui.errorMsg.textContent = 'Error: Obrín IA necesita acceso a la cámara para iniciar el escáner.';
+                ui.errorMsg.textContent = 'Error: Se necesita acceso a la cámara.';
                 ui.errorMsg.classList.remove('oculto');
             }
         });
 
-        // 2. TOMAR FOTO
         ui.btnCapturar.addEventListener('click', () => {
-            // Dibujar video en canvas y extraer Base64
             ui.canvas.width = ui.video.videoWidth;
             ui.canvas.height = ui.video.videoHeight;
             ui.canvas.getContext('2d').drawImage(ui.video, 0, 0);
             const base64Foto = ui.canvas.toDataURL('image/jpeg', 0.85);
             
-            // Guardar en array del muro actual
             muroActual.push(base64Foto);
             ui.contadorFotos.textContent = `${muroActual.length} Fotos`;
 
-            // Actualizar fantasma
             ui.imgFantasma.src = base64Foto;
             ui.fantasmaContainer.classList.remove('oculto');
-            
-            // Mostrar botones de acción
             ui.btnEsquina.classList.remove('oculto');
             ui.btnFinalizar.classList.remove('oculto');
             
-            // Cambiar instrucción dinámica
-            ui.instruccion.innerHTML = "Gira y <span class='text-orange-400 font-bold'>superpón la franja</span>. Si es el final, centra la esquina.";
+            ui.instruccion.innerHTML = "Gira y <span class='text-orange-400 font-bold'>superpón la franja</span>. Al final, centra la esquina.";
             ui.instruccion.classList.add('scale-105', 'bg-orange-500');
             setTimeout(() => ui.instruccion.classList.remove('scale-105', 'bg-orange-500'), 200);
         });
 
-        // 3. DOBLAR ESQUINA (Cerrar muro actual)
         ui.btnEsquina.addEventListener('click', () => {
             if (muroActual.length === 0) return;
-
-            habitacion.push([...muroActual]); // Guardar copia del muro
+            habitacion.push([...muroActual]);
             
-            // Resetear estado para el nuevo muro
             muroActual = [];
             ui.indicadorMuro.textContent = `Muro ${habitacion.length + 1}`;
             ui.contadorFotos.textContent = "0 Fotos";
             
-            // Limpiar UI
             ui.fantasmaContainer.classList.add('oculto');
             ui.btnEsquina.classList.add('oculto');
             ui.imgFantasma.src = "";
 
-            // Nueva instrucción
             ui.instruccion.innerHTML = `Gira 90°. Alinea la <span class='text-orange-400 font-bold'>nueva esquina</span> en el centro.`;
             ui.instruccion.classList.add('bg-blue-600');
             setTimeout(() => ui.instruccion.classList.remove('bg-blue-600'), 1000);
         });
 
-        // 4. TERMINAR RECINTO (Generar Galería)
         ui.btnFinalizar.addEventListener('click', () => {
-            // Guardar último muro si quedó pendiente
             if (muroActual.length > 0) {
                 habitacion.push([...muroActual]);
                 muroActual = [];
             }
-
             if (habitacion.length === 0) return; 
             
-            // Renderizar resultados
             ui.galeriaMuros.innerHTML = '';
             ui.resumenContador.textContent = `${habitacion.length} Muros`;
 
             habitacion.forEach((muro, indexMuro) => {
                 const divMuro = document.createElement('div');
                 divMuro.className = "bg-slate-50 p-3 rounded-xl border border-slate-200";
-                
                 divMuro.innerHTML = `
                     <div class="flex justify-between items-center mb-3 border-b border-slate-200 pb-2">
                         <span class="font-bold text-slate-800 text-sm">Muro ${indexMuro + 1}</span>
@@ -247,7 +233,6 @@
                 
                 const carrusel = document.createElement('div');
                 carrusel.className = "flex gap-2 overflow-x-auto scroll-horizontal pb-2 snap-x";
-
                 muro.forEach((foto, indexFoto) => {
                     const imgContainer = document.createElement('div');
                     imgContainer.className = "flex-shrink-0 w-28 snap-center relative rounded-lg overflow-hidden shadow-sm border border-slate-300";
@@ -257,44 +242,215 @@
                     `;
                     carrusel.appendChild(imgContainer);
                 });
-
                 divMuro.appendChild(carrusel);
                 ui.galeriaMuros.appendChild(divMuro);
             });
 
-            // Apagar cámara para ahorrar batería
             if (ui.video.srcObject) {
                 ui.video.srcObject.getTracks().forEach(track => track.stop());
             }
-
             cambiarPantalla(2);
         });
 
-        // 5. REPETIR TODO
-        ui.btnRepetir.addEventListener('click', async () => {
-            habitacion = [];
-            muroActual = [];
-            
-            ui.indicadorMuro.textContent = "Muro 1";
-            ui.contadorFotos.textContent = "0 Fotos";
-            ui.fantasmaContainer.classList.add('oculto');
-            ui.btnEsquina.classList.add('oculto');
-            ui.btnFinalizar.classList.add('oculto');
-            ui.imgFantasma.src = "";
-            ui.instruccion.innerHTML = "Alinea la <span class='text-orange-400 font-bold'>esquina inicial</span> en la mira central y captura.";
-            
-            // Reactivar cámara
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia({
-                    video: { facingMode: 'environment', width: { ideal: 1920 }, height: { ideal: 1080 } },
-                    audio: false
-                });
-                ui.video.srcObject = stream;
-            } catch (e) {
-                console.error("Error reactivando cámara", e);
-            }
+        ui.btnRepetir.addEventListener('click', () => {
+            window.location.reload();
+        });
 
-            cambiarPantalla(1);
+        // ==========================================
+        // WORKER PARA MÚLTIPLES FOTOS (BUCLE SECUENCIAL)
+        // ==========================================
+        const workerCode = `
+            self.importScripts('https://docs.opencv.org/4.8.0/opencv.js');
+
+            cv.onRuntimeInitialized = () => {
+                self.postMessage({ type: 'STATUS', msg: 'OpenCV Cargado. Preparando imágenes...', progreso: 10 });
+            };
+
+            self.onmessage = function(e) {
+                const { imagenes } = e.data;
+                const totalFotos = imagenes.length;
+
+                try {
+                    // Instanciamos los motores matemáticos una sola vez
+                    let orb = new cv.ORB();
+                    let bf = new cv.BFMatcher(cv.NORM_HAMMING, true);
+                    
+                    // La "base" será la foto 1. A esta le iremos pegando las demás.
+                    let baseMat = cv.matFromImageData(imagenes[0]);
+
+                    // Iteramos sobre todas las fotos siguientes
+                    for (let i = 1; i < totalFotos; i++) {
+                        let progresoActual = 10 + Math.floor((i / totalFotos) * 80);
+                        self.postMessage({ type: 'STATUS', msg: \`Uniendo foto \${i + 1} de \${totalFotos}...\`, progreso: progresoActual });
+
+                        let nextMat = cv.matFromImageData(imagenes[i]);
+                        
+                        let grayBase = new cv.Mat();
+                        let grayNext = new cv.Mat();
+                        cv.cvtColor(baseMat, grayBase, cv.COLOR_RGBA2GRAY);
+                        cv.cvtColor(nextMat, grayNext, cv.COLOR_RGBA2GRAY);
+
+                        let kpBase = new cv.KeyPointVector();
+                        let kpNext = new cv.KeyPointVector();
+                        let desBase = new cv.Mat();
+                        let desNext = new cv.Mat();
+                        
+                        orb.detectAndCompute(grayBase, new cv.Mat(), kpBase, desBase);
+                        orb.detectAndCompute(grayNext, new cv.Mat(), kpNext, desNext);
+
+                        let matches = new cv.DMatchVector();
+                        bf.match(desBase, desNext, matches);
+
+                        let good_matches = [];
+                        for (let j = 0; j < matches.size(); j++) {
+                            if (matches.get(j).distance < 50) { 
+                                good_matches.push(matches.get(j));
+                            }
+                        }
+
+                        if (good_matches.length < 10) {
+                            throw new Error(\`Poco solape entre la foto \${i} y \${i+1}.\`);
+                        }
+
+                        let ptsBase = [];
+                        let ptsNext = [];
+                        for (let j = 0; j < good_matches.length; j++) {
+                            let pt1 = kpBase.get(good_matches[j].queryIdx).pt;
+                            let pt2 = kpNext.get(good_matches[j].trainIdx).pt;
+                            ptsBase.push(pt1.x, pt1.y);
+                            ptsNext.push(pt2.x, pt2.y);
+                        }
+
+                        let matPtsBase = cv.matFromArray(good_matches.length, 1, cv.CV_32FC2, ptsBase);
+                        let matPtsNext = cv.matFromArray(good_matches.length, 1, cv.CV_32FC2, ptsNext);
+
+                        // Calculamos perspectiva
+                        let H = cv.findHomography(matPtsNext, matPtsBase, cv.RANSAC, 5.0);
+
+                        // Deformamos la foto nueva y extendemos el lienzo
+                        let warpedMat = new cv.Mat();
+                        let dsize = new cv.Size(baseMat.cols + nextMat.cols, baseMat.rows);
+                        cv.warpPerspective(nextMat, warpedMat, H, dsize);
+
+                        // Fusionamos montando la base sobre el lienzo nuevo
+                        let roi = warpedMat.roi(new cv.Rect(0, 0, baseMat.cols, baseMat.rows));
+                        baseMat.copyTo(roi);
+
+                        // Actualizamos la base para la siguiente iteración del bucle
+                        baseMat.delete(); 
+                        baseMat = warpedMat; 
+
+                        // Liberar memoria temporal de este ciclo
+                        nextMat.delete(); grayBase.delete(); grayNext.delete();
+                        kpBase.delete(); kpNext.delete(); desBase.delete(); desNext.delete();
+                        matches.delete(); matPtsBase.delete(); matPtsNext.delete();
+                        H.delete(); roi.delete();
+                    }
+
+                    self.postMessage({ type: 'STATUS', msg: 'Generando imagen final...', progreso: 95 });
+
+                    // Extraer resultado
+                    let imgFinal = new ImageData(
+                        new Uint8ClampedArray(baseMat.data),
+                        baseMat.cols,
+                        baseMat.rows
+                    );
+
+                    self.postMessage({ type: 'RESULTADO', imgFinal: imgFinal, progreso: 100 });
+
+                    // Limpieza final
+                    baseMat.delete(); orb.delete(); bf.delete();
+
+                } catch (err) {
+                    self.postMessage({ type: 'ERROR', msg: err.message });
+                }
+            };
+        `;
+
+        // Utilidad: Promise.all para cargar 5 o 10 imágenes asincronamente
+        const obtenerImageData = (base64) => {
+            return new Promise((resolve) => {
+                const img = new Image();
+                img.src = base64;
+                img.onload = () => {
+                    const canvasObj = document.createElement('canvas');
+                    canvasObj.width = img.width;
+                    canvasObj.height = img.height;
+                    const ctx = canvasObj.getContext('2d');
+                    ctx.drawImage(img, 0, 0);
+                    resolve(ctx.getImageData(0, 0, img.width, img.height));
+                };
+            });
+        };
+
+        ui.btnProcesar.addEventListener('click', async () => {
+            if (habitacion.length === 0 || habitacion[0].length < 2) {
+                alert("Necesitas al menos 2 fotos en el Muro 1 para generar el plano.");
+                return;
+            }
+            
+            cambiarPantalla(3);
+            const estado = document.getElementById('estado-proceso');
+            const barra = document.getElementById('barra-progreso');
+            const porcentaje = document.getElementById('porcentaje-proceso');
+
+            estado.textContent = "Convirtiendo capturas a matrices...";
+            barra.style.width = "5%"; porcentaje.textContent = "5%";
+
+            // Aquí convertimos TODAS las fotos del Muro 1 a ImageData a la vez
+            const promesas = habitacion[0].map(foto => obtenerImageData(foto));
+            const imagenesData = await Promise.all(promesas);
+
+            const blob = new Blob([workerCode], { type: 'application/javascript' });
+            const worker = new Worker(URL.createObjectURL(blob));
+
+            worker.onmessage = function(e) {
+                const { type, msg, progreso, imgFinal } = e.data;
+                
+                if (type === 'STATUS') {
+                    estado.textContent = msg;
+                    barra.style.width = progreso + "%";
+                    porcentaje.textContent = progreso + "%";
+                    
+                    if (progreso === 10) { // Cuando OpenCV avisa que cargó, mandamos el array completo
+                        worker.postMessage({ imagenes: imagenesData });
+                    }
+                } 
+                else if (type === 'RESULTADO') {
+                    estado.textContent = "¡Plano 2D generado!";
+                    estado.classList.replace('text-orange-400', 'text-green-400');
+                    barra.style.width = "100%"; porcentaje.textContent = "100%";
+                    worker.terminate();
+
+                    setTimeout(() => {
+                        const contenedor = document.getElementById('contenedor-resultados');
+                        contenedor.innerHTML = `
+                            <h2 class="text-3xl font-light text-slate-900 mb-2">Plano <span class="font-bold text-orange-500">Completo</span></h2>
+                            <p class="text-slate-500 mb-6 text-sm">Todas las fotos del muro han sido procesadas.</p>
+                            
+                            <div class="bg-white p-2 rounded-2xl shadow-sm border border-slate-200 w-full mb-6 relative overflow-hidden overflow-x-auto">
+                                <!-- El canvas ahora crecerá horizontalmente según la cantidad de fotos -->
+                                <canvas id="canvas-resultado" class="h-48 object-contain rounded-xl min-w-full"></canvas>
+                            </div>
+                            
+                            <button onclick="window.location.reload()" class="w-full bg-[#0f172a] hover:bg-slate-800 text-white py-4 rounded-xl font-semibold shadow-md transition-all">Levantar otro Muro</button>
+                        `;
+                        
+                        const canvasRes = document.getElementById('canvas-resultado');
+                        canvasRes.width = imgFinal.width;
+                        canvasRes.height = imgFinal.height;
+                        canvasRes.getContext('2d').putImageData(imgFinal, 0, 0);
+                        
+                        cambiarPantalla(2);
+                    }, 1500);
+                }
+                else if (type === 'ERROR') {
+                    estado.textContent = "Error: " + msg;
+                    estado.classList.replace('text-orange-400', 'text-red-500');
+                    worker.terminate();
+                    setTimeout(() => cambiarPantalla(2), 3500);
+                }
+            };
         });
     </script>
 </body>
