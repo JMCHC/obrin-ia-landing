@@ -1925,12 +1925,20 @@
                     imgData2: imgData2, imgType2: imgType2
                 };
 
+                // SOLUCIÓN: Solo UN fetch con el token JWT
+                const token = await window.authInstance.currentUser.getIdToken();
+
                 const response = await fetch('https://obrin-ia-proxy.christensenjosemanuel.workers.dev', {
-                    method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload)
+                    method: 'POST', 
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    }, 
+                    body: JSON.stringify(payload)
                 });
 
                 const data = await response.json();
-                if (data.error) throw new Error("Error de API: " + data.error.message);
+                if (data.error) throw new Error("Error de API: " + (data.error.message || "Error desconocido"));
                 
                 const tokensGastados = data.usageMetadata?.totalTokenCount || 3500;
                 const userId = window.currentUserId;
@@ -2106,10 +2114,17 @@
                 console.error(e);
                 laser.classList.remove('scanning-active'); laser.style.display='none';
                 msgEl.className = "text-red-400 text-xs font-bold tracking-widest uppercase text-center";
-                msgEl.innerText = "Error: " + (e.message || "Fallo de conexión");
+                // Limpiamos el mensaje de error de transbank y lo hacemos más amigable
+                if (e.message && e.message.includes("Saldo insuficiente")) {
+                    msgEl.innerText = "⚠️ Saldo insuficiente para procesar la imagen.";
+                    setTimeout(() => window.openWallet(), 2000);
+                } else {
+                    msgEl.innerText = "Error: " + (e.message || "Fallo de conexión");
+                }
                 document.getElementById('error-retry-btn').classList.remove('hidden');
             }
         }
+            
     </script>
 
     <script type="module">
