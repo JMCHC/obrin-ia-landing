@@ -31,35 +31,28 @@
   }
 
   .pass-header {
-    padding: 20px;
+    padding: 15px 20px 5px; /* Reducido para subir el contenido */
     display: flex;
-    justify-content: space-between;
+    justify-content: center; /* Centramos el logo circular */
     align-items: center;
   }
 
-  /* Logo que reemplaza el texto */
-  .pass-header .logo-text {
-    height: 35px; /* Altura ajustada para que se vea proporcionado */
-    max-width: 180px;
-    object-fit: contain;
-  }
-
-  /* Logo circular de la derecha */
+  /* Logo circular */
   .pass-header .logo-icon {
-    width: 50px;
-    height: 50px;
+    width: 55px;
+    height: 55px;
     border-radius: 50%; 
     object-fit: contain;
   }
 
   .pass-body {
-    padding: 0 20px 20px;
+    padding: 0 20px 15px; /* Reducido para compactar el espacio inferior */
   }
 
   .user-info {
     display: flex;
     align-items: center;
-    margin-bottom: 20px;
+    margin-bottom: 15px; /* Reducido para compactar y subir */
   }
 
   .user-info img {
@@ -104,6 +97,11 @@
     font-size: 14px;
     font-weight: 600;
     color: #ffffff; 
+  }
+
+  /* Ocupar ambas columnas para textos largos como la Universidad */
+  .field.full-width {
+    grid-column: span 2;
   }
 
   /* Zona inferior para el QR */
@@ -153,9 +151,7 @@
 
 <div class="wallet-pass">
   <div class="pass-header">
-    <!-- Nuevo logo principal (reemplaza el texto) -->
-    <img class="logo-text" src="https://lh3.googleusercontent.com/pw/AP1GczPJ1o1fhAFasqk2uwiGOuIwNnr0sd1sbMIaseQEzlyn_W_xjs_k8gFJqlCiuerfw-PzV3uiZAbh26Ueap4seYL8PGOG-kX_Nt3Ptlf2HiAuTbkJB0C-gjHkn91LqRKKtxXLb-pKqaf1YG9RZ6xaPU9qyQ=w599-h599-s-no-gm?authuser=0" alt="Obrín IA">
-    <!-- Logo circular en la esquina superior derecha -->
+    <!-- Solo el logo circular centrado -->
     <img class="logo-icon" src="https://lh3.googleusercontent.com/pw/AP1GczPj7GoQTmfzWXX4jkvO3hu7_npJJehlCcxrcJkbr5gB3X9y97XxXlu7q8aIcuDr5-g_iKmymERwIWbwfbxHFGt72nexFoqovweVO802AgG-os60vlB58jhfs42c-b07_L8eivxqFyQ8hLN9xrKnV7GlTQ=w599-h599-s-no-gm?authuser=0" alt="Icono Obrín IA">
   </div>
   
@@ -177,6 +173,15 @@
         <label>Email</label>
         <span id="user-email" style="font-size: 12px;"></span>
       </div>
+      <!-- Nuevos campos de Educación que ocupan todo el ancho -->
+      <div class="field full-width">
+        <label>Carrera</label>
+        <span id="user-degree"></span>
+      </div>
+      <div class="field full-width">
+        <label>Universidad</label>
+        <span id="user-university" style="font-size: 12px;"></span>
+      </div>
     </div>
   </div>
 
@@ -193,6 +198,8 @@
       role: "Co-Fundador / CEO",
       phone: "+56 9 9258 2669", 
       email: "jose@obrinia.cl",
+      degree: "Construcción Civil",
+      university: "Pontificia Universidad Católica de Chile",
       photo: "https://lh3.googleusercontent.com/pw/AP1GczPx1EJ_8fIwPO2dphbWGkNuor7vTGc9aKzSdIdvFeLuH3WCy24NLlHLs1BCK9M5qrCeB8DxVYks-46LohhaR4NA4K3pyxX7sqHCackmj7pPEiKmArQaN-v5HpnKrY5Z5MLLLSdUR3Ig6Wz5N8EnbdboLA=w449-h599-s-no-gm?authuser=0", 
       qrData: "https://www.obrinia.cl/contacto/jose-manuel" 
     },
@@ -201,6 +208,8 @@
       role: "Co-Fundador / CTO",
       phone: "+56 9 8765 4321", // Si Clemente tiene otro número, reemplázalo aquí
       email: "clemente@obrinia.cl",
+      degree: "Ingeniería Civil", // Reemplazar con la carrera de Clemente si es distinta
+      university: "Pontificia Universidad Católica de Chile", // Reemplazar si es distinta
       photo: "https://lh3.googleusercontent.com/pw/AP1GczPAGbay3Va0BKkPUgiGX7SLhpD79DMBZF1xd5ccapCtq73169Pk_JQcetLv_gVSK3HfIG4txRC678ff79i6xEAe9l2pyQM_J7Q1wuh_fPuAsJDFtlAOksgQXD2-qY5LvUH5h_xJXeArENwt81PHkQW15Q=w449-h599-s-no-gm?authuser=0",
       qrData: "https://www.obrinia.cl/contacto/clemente"
     }
@@ -212,6 +221,8 @@
     document.getElementById('user-role').innerText = user.role;
     document.getElementById('user-phone').innerText = user.phone;
     document.getElementById('user-email').innerText = user.email;
+    document.getElementById('user-degree').innerText = user.degree;
+    document.getElementById('user-university').innerText = user.university;
     document.getElementById('user-photo').src = user.photo;
     
     // Generador dinámico de QR
