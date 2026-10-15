@@ -4,9 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Credencial - Obrín IA</title>
-<!-- Cambiamos a html2canvas -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<!-- Librería html2pdf -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <style>
+  /* Reset y fondo de pantalla */
   body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     background-color: #f2f2f7; 
@@ -18,6 +19,7 @@
     margin: 0;
   }
   
+  /* Contenedor principal de la tarjeta */
   .wallet-pass {
     width: 320px;
     background-color: #000000; 
@@ -29,6 +31,7 @@
     border: 2px solid #ff6b00; 
   }
 
+  /* Logo superior centrado */
   .pass-logo-top {
     padding: 15px 20px 5px;
     display: flex;
@@ -47,6 +50,7 @@
     padding: 0 20px 15px;
   }
 
+  /* Perfil del Usuario */
   .user-info {
     display: flex;
     align-items: center;
@@ -61,7 +65,7 @@
     margin-right: 15px;
     object-fit: cover;
     background-color: #333;
-    flex-shrink: 0; 
+    flex-shrink: 0; /* Mantiene la imagen redonda siempre */
   }
 
   .user-details h2 {
@@ -76,10 +80,11 @@
     font-weight: 600;
   }
 
+  /* Campos de detalles (Apilados verticalmente) */
   .fields {
     display: flex;
-    flex-direction: column; 
-    gap: 12px; 
+    flex-direction: column; /* Apila uno debajo del otro */
+    gap: 12px; /* Espacio uniforme entre cada bloque */
     margin-bottom: 20px;
   }
 
@@ -94,12 +99,13 @@
 
   .field span {
     display: block;
-    font-size: 14px; 
+    font-size: 14px; /* Tamaño de fuente consistente para todos los datos */
     font-weight: 600;
     color: #ffffff; 
-    word-break: break-word; 
+    word-break: break-word; /* Evita que correos largos rompan la tarjeta */
   }
 
+  /* Zona inferior para el QR */
   .qr-section {
     background-color: #ffffff;
     padding: 15px;
@@ -123,6 +129,7 @@
     color: #ff6b00; 
   }
 
+  /* Botones para probar */
   .demo-buttons {
     margin-bottom: 20px;
   }
@@ -138,6 +145,7 @@
     margin: 0 5px;
   }
 
+  /* Contenedor de botones de acción debajo de la tarjeta */
   .action-buttons {
     margin-top: 20px;
     display: flex;
@@ -166,6 +174,7 @@
     background-color: #555;
   }
   
+  /* Estilo del botón de Apple Wallet */
   .wallet-btn {
     display: inline-block;
     cursor: pointer;
@@ -189,23 +198,23 @@
   <button onclick="setUser('clemente')">Ver Credencial de Clemente</button>
 </div>
 
-<!-- CREDENCIAL (Lo que se captura en la Imagen) -->
+<!-- CREDENCIAL (Lo que se captura en el PDF) -->
 <div class="wallet-pass" id="credencial-pass">
   
   <div class="pass-logo-top">
-    <!-- El atributo crossorigin="anonymous" ayuda con el bloqueo de seguridad de imágenes externas -->
-    <img id="logo-img" crossorigin="anonymous" src="https://lh3.googleusercontent.com/pw/AP1GczPj7GoQTmfzWXX4jkvO3hu7_npJJehlCcxrcJkbr5gB3X9y97XxXlu7q8aIcuDr5-g_iKmymERwIWbwfbxHFGt72nexFoqovweVO802AgG-os60vlB58jhfs42c-b07_L8eivxqFyQ8hLN9xrKnV7GlTQ=w599-h599-s-no-gm?authuser=0" alt="Logo Obrín IA">
+    <img src="https://lh3.googleusercontent.com/pw/AP1GczPj7GoQTmfzWXX4jkvO3hu7_npJJehlCcxrcJkbr5gB3X9y97XxXlu7q8aIcuDr5-g_iKmymERwIWbwfbxHFGt72nexFoqovweVO802AgG-os60vlB58jhfs42c-b07_L8eivxqFyQ8hLN9xrKnV7GlTQ=w599-h599-s-no-gm?authuser=0" alt="Logo Obrín IA">
   </div>
   
   <div class="pass-body">
     <div class="user-info">
-      <img id="user-photo" crossorigin="anonymous" src="" alt="Foto de perfil">
+      <img id="user-photo" src="" alt="Foto de perfil">
       <div class="user-details">
         <h2 id="user-name">Nombre</h2>
         <p id="user-role">Cargo</p>
       </div>
     </div>
     
+    <!-- Campos apilados verticalmente -->
     <div class="fields">
       <div class="field">
         <label>Teléfono</label>
@@ -227,29 +236,31 @@
   </div>
 
   <div class="qr-section">
-    <img id="user-qr" crossorigin="anonymous" src="" alt="Código QR de Contacto">
+    <img id="user-qr" src="" alt="Código QR de Contacto">
     <p>Escanear para guardar contacto</p>
   </div>
 </div>
 
-<!-- Botones de Acción -->
+<!-- Botones de Acción (No aparecen en el PDF) -->
 <div class="action-buttons" data-html2canvas-ignore="true">
   
+  <!-- BOTÓN AGREGAR A APPLE WALLET -->
   <a id="btn-apple-wallet" href="#" class="wallet-btn" title="Agregar a Apple Wallet">
     <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/ca/Add_to_Apple_Wallet_logo.svg/320px-Add_to_Apple_Wallet_logo.svg.png" alt="Agregar a Apple Wallet">
   </a>
 
-  <!-- BOTÓN DESCARGAR IMAGEN -->
-  <button class="download-btn" onclick="descargarImagen()">
+  <!-- BOTÓN DESCARGAR PDF -->
+  <button class="download-btn" onclick="descargarPDF()">
     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 16 16">
       <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/>
       <path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"/>
     </svg>
-    Descargar como Imagen
+    Descargar PDF
   </button>
 </div>
 
 <script>
+  // Script completamente actualizado con solución para iOS
   const users = {
     jose: {
       name: "José Manuel",
@@ -260,6 +271,7 @@
       career: "Construcción Civil",
       university: "Pontificia Universidad Católica de Chile",
       photo: "https://lh3.googleusercontent.com/pw/AP1GczPx1EJ_8fIwPO2dphbWGkNuor7vTGc9aKzSdIdvFeLuH3WCy24NLlHLs1BCK9M5qrCeB8DxVYks-46LohhaR4NA4K3pyxX7sqHCackmj7pPEiKmArQaN-v5HpnKrY5Z5MLLLSdUR3Ig6Wz5N8EnbdboLA=w449-h599-s-no-gm?authuser=0", 
+      website: "https://www.obrinia.cl",
       walletFile: "jose.pkpass" 
     },
     clemente: {
@@ -271,6 +283,7 @@
       career: "Construcción Civil", 
       university: "Pontificia Universidad Católica de Chile",
       photo: "https://lh3.googleusercontent.com/pw/AP1GczPAGbay3Va0BKkPUgiGX7SLhpD79DMBZF1xd5ccapCtq73169Pk_JQcetLv_gVSK3HfIG4txRC678ff79i6xEAe9l2pyQM_J7Q1wuh_fPuAsJDFtlAOksgQXD2-qY5LvUH5h_xJXeArENwt81PHkQW15Q=w449-h599-s-no-gm?authuser=0",
+      website: "https://www.obrinia.cl",
       walletFile: "clemente.pkpass" 
     }
   };
@@ -290,55 +303,48 @@
     document.getElementById('user-university').innerText = user.university;
     document.getElementById('user-photo').src = user.photo;
     
-    const vCardData = `BEGIN:VCARD%0AVERSION:3.0%0AN:${user.lastName};${user.name};;;%0AFN:${fullName}%0AORG:Obrín IA%0ATITLE:${user.role}%0ATEL;TYPE=CELL:${user.phone.replace(/ /g, '')}%0AEMAIL;TYPE=WORK:${user.email}%0AURL:https://www.obrinia.cl%0AEND:VCARD`;
-    
-    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${vCardData}&color=000000`;
+    // 1. Construir la tarjeta de contacto vCard (formato V3.0 estricto para iOS)
+    // El campo N requiere: Apellidos;Nombres;;; 
+    // El campo FN es el Nombre Completo Formateado
+    const vCardData = `BEGIN:VCARD
+VERSION:3.0
+N:${user.lastName};${user.name};;;
+FN:${fullName}
+ORG:Obrín IA
+TITLE:${user.role}
+TEL;TYPE=CELL:${user.phone.replace(/ /g, '')}
+EMAIL;TYPE=WORK:${user.email}
+URL:${user.website}
+END:VCARD`;
+
+    // 2. Generar el código QR. Se usa encodeURIComponent para que los saltos de línea (\n) 
+    // y espacios se transmitan correctamente a la API de QR.
+    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(vCardData)}&color=000000`;
     document.getElementById('user-qr').src = qrUrl;
 
+    // Actualiza el link del botón de Apple Wallet
     document.getElementById('btn-apple-wallet').href = user.walletFile;
   }
 
-  // Nueva función para descargar como imagen PNG
-  function descargarImagen() {
+  function descargarPDF() {
     const user = users[currentUser];
     const fullName = `${user.name} ${user.lastName}`;
     const element = document.getElementById('credencial-pass');
     
-    // Cambiamos el texto del botón temporalmente para que el usuario sepa que está cargando
-    const btn = document.querySelector('.download-btn');
-    const originalText = btn.innerHTML;
-    btn.innerHTML = 'Generando imagen...';
-    
-    // Configuración de alta calidad
+    const nombreArchivo = `Credencial_ObrinIA_${fullName.replace(/ /g, '_')}.pdf`;
+
     const opt = {
-      scale: 3, // Multiplica la resolución por 3 para que se vea súper nítida
-      useCORS: true, // Permite cargar las fotos alojadas en Google
-      backgroundColor: null // Mantiene los bordes redondeados transparentes si es posible
+      margin:       0,
+      filename:     nombreArchivo,
+      image:        { type: 'jpeg', quality: 1 },
+      html2canvas:  { scale: 3, useCORS: true, backgroundColor: null },
+      jsPDF:        { unit: 'px', format: [element.offsetWidth, element.offsetHeight], orientation: 'portrait' }
     };
 
-    html2canvas(element, opt).then(canvas => {
-      // Convertir el canvas a una URL de imagen
-      const imgData = canvas.toDataURL('image/png');
-      
-      // Crear un enlace invisible para forzar la descarga
-      const link = document.createElement('a');
-      link.download = `Credencial_ObrinIA_${fullName.replace(/ /g, '_')}.png`;
-      link.href = imgData;
-      
-      // Hacer clic automático en el enlace
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      
-      // Restaurar el texto del botón
-      btn.innerHTML = originalText;
-    }).catch(error => {
-      console.error("Error al generar la imagen:", error);
-      btn.innerHTML = originalText;
-      alert("Hubo un problema al generar la imagen. Intenta de nuevo.");
-    });
+    html2pdf().set(opt).from(element).save();
   }
 
+  // Cargar perfil inicial
   setUser('jose');
 </script>
 
