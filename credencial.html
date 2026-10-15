@@ -37,13 +37,15 @@
     align-items: center;
   }
 
-  .pass-header h1 {
-    margin: 0;
-    font-size: 22px;
-    font-weight: 700;
+  /* Logo que reemplaza el texto */
+  .pass-header .logo-text {
+    height: 35px; /* Altura ajustada para que se vea proporcionado */
+    max-width: 180px;
+    object-fit: contain;
   }
 
-  .pass-header img {
+  /* Logo circular de la derecha */
+  .pass-header .logo-icon {
     width: 50px;
     height: 50px;
     border-radius: 50%; 
@@ -151,8 +153,10 @@
 
 <div class="wallet-pass">
   <div class="pass-header">
-    <h1>Obrín IA</h1>
-    <img src="https://lh3.googleusercontent.com/pw/AP1GczPj7GoQTmfzWXX4jkvO3hu7_npJJehlCcxrcJkbr5gB3X9y97XxXlu7q8aIcuDr5-g_iKmymERwIWbwfbxHFGt72nexFoqovweVO802AgG-os60vlB58jhfs42c-b07_L8eivxqFyQ8hLN9xrKnV7GlTQ=w599-h599-s-no-gm?authuser=0" alt="Logo Obrín IA">
+    <!-- Nuevo logo principal (reemplaza el texto) -->
+    <img class="logo-text" src="https://lh3.googleusercontent.com/pw/AP1GczPJ1o1fhAFasqk2uwiGOuIwNnr0sd1sbMIaseQEzlyn_W_xjs_k8gFJqlCiuerfw-PzV3uiZAbh26Ueap4seYL8PGOG-kX_Nt3Ptlf2HiAuTbkJB0C-gjHkn91LqRKKtxXLb-pKqaf1YG9RZ6xaPU9qyQ=w599-h599-s-no-gm?authuser=0" alt="Obrín IA">
+    <!-- Logo circular en la esquina superior derecha -->
+    <img class="logo-icon" src="https://lh3.googleusercontent.com/pw/AP1GczPj7GoQTmfzWXX4jkvO3hu7_npJJehlCcxrcJkbr5gB3X9y97XxXlu7q8aIcuDr5-g_iKmymERwIWbwfbxHFGt72nexFoqovweVO802AgG-os60vlB58jhfs42c-b07_L8eivxqFyQ8hLN9xrKnV7GlTQ=w599-h599-s-no-gm?authuser=0" alt="Icono Obrín IA">
   </div>
   
   <div class="pass-body">
@@ -195,7 +199,7 @@
     clemente: {
       name: "Clemente del Prado",
       role: "Co-Fundador / CTO",
-      phone: "+56 9 8765 4321", // Debes reemplazar esto con el número real de Clemente
+      phone: "+56 9 8765 4321", // Si Clemente tiene otro número, reemplázalo aquí
       email: "clemente@obrinia.cl",
       photo: "https://lh3.googleusercontent.com/pw/AP1GczPAGbay3Va0BKkPUgiGX7SLhpD79DMBZF1xd5ccapCtq73169Pk_JQcetLv_gVSK3HfIG4txRC678ff79i6xEAe9l2pyQM_J7Q1wuh_fPuAsJDFtlAOksgQXD2-qY5LvUH5h_xJXeArENwt81PHkQW15Q=w449-h599-s-no-gm?authuser=0",
       qrData: "https://www.obrinia.cl/contacto/clemente"
@@ -215,7 +219,7 @@
     document.getElementById('user-qr').src = qrUrl;
   }
 
-  // Cargar por defecto tu credencial al abrir
+  // Cargar por defecto la credencial de José Manuel al abrir
   setUser('jose');
 </script>
 
