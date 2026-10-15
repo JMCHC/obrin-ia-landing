@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Credencial - Obrín IA</title>
+<style>
+  /* Reset y fondo de pantalla */
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background-color: #f2f2f7; /* Color de fondo típico de iOS */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+  }
+  
+  /* Contenedor principal de la tarjeta */
+  .wallet-pass {
+    width: 320px;
+    background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); /* Colores oscuros elegantes, puedes cambiarlos a los de Obrín IA */
+    border-radius: 16px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+    overflow: hidden;
+    color: white;
+    position: relative;
+    margin-top: 20px;
+  }
+
+  .pass-header {
+    padding: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .pass-header h1 {
+    margin: 0;
+    font-size: 22px;
+    font-weight: 700;
+  }
+
+  .pass-header img {
+    width: 45px;
+    height: 45px;
+    border-radius: 10px;
+    background-color: white;
+    object-fit: contain;
+    padding: 2px;
+  }
+
+  .pass-body {
+    padding: 0 20px 20px;
+  }
+
+  .user-info {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+
+  .user-info img {
+    width: 65px;
+    height: 65px;
+    border-radius: 50%;
+    border: 2px solid white;
+    margin-right: 15px;
+    object-fit: cover;
+    background-color: #ccc;
+  }
+
+  .user-details h2 {
+    margin: 0 0 4px 0;
+    font-size: 19px;
+  }
+
+  .user-details p {
+    margin: 0;
+    font-size: 14px;
+    opacity: 0.8;
+    color: #cbd5e1;
+  }
+
+  .fields {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    margin-bottom: 25px;
+  }
+
+  .field label {
+    display: block;
+    font-size: 10px;
+    text-transform: uppercase;
+    opacity: 0.7;
+    margin-bottom: 4px;
+    color: #94a3b8;
+  }
+
+  .field span {
+    font-size: 14px;
+    font-weight: 600;
+  }
+
+  /* Zona inferior blanca para el QR */
+  .qr-section {
+    background-color: white;
+    padding: 20px;
+    text-align: center;
+    border-radius: 12px;
+    margin: 0 15px 15px;
+    color: #333;
+  }
+
+  .qr-section img {
+    width: 160px;
+    height: 160px;
+  }
+
+  .qr-section p {
+    margin: 12px 0 0;
+    font-size: 12px;
+    font-weight: 600;
+    color: #64748b;
+  }
+
+  /* Botones para probar (Puedes eliminarlos en producción) */
+  .demo-buttons {
+    margin-bottom: 20px;
+  }
+  .demo-buttons button {
+    padding: 8px 12px;
+    border: none;
+    border-radius: 6px;
+    background-color: #0ea5e9;
+    color: white;
+    cursor: pointer;
+    font-weight: bold;
+    margin: 0 5px;
+  }
+</style>
+</head>
+<body>
+
+<!-- Botones de demostración para cambiar entre tú y Clemente -->
+<div class="demo-buttons">
+  <button onclick="setUser('jose')">Ver Credencial de José Manuel</button>
+  <button onclick="setUser('clemente')">Ver Credencial de Clemente</button>
+</div>
+
+<div class="wallet-pass">
+  <div class="pass-header">
+    <h1>Obrín IA</h1>
+    <!-- LOGO OBRÍN IA: Cambia este link por el logo real que tienen en su web -->
+    <img src="https://via.placeholder.com/45?text=OIA" alt="Logo Obrín IA">
+  </div>
+  
+  <div class="pass-body">
+    <div class="user-info">
+      <!-- FOTO DE PERFIL -->
+      <img id="user-photo" src="" alt="Foto de perfil">
+      <div class="user-details">
+        <h2 id="user-name">Nombre</h2>
+        <p id="user-role">Cargo</p>
+      </div>
+    </div>
+    
+    <div class="fields">
+      <div class="field">
+        <label>Teléfono</label>
+        <span id="user-phone"></span>
+      </div>
+      <div class="field">
+        <label>Email</label>
+        <span id="user-email" style="font-size: 12px;"></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="qr-section">
+    <!-- El QR se genera automáticamente mediante una API gratuita -->
+    <img id="user-qr" src="" alt="Código QR">
+    <p>Escanear para compartir contacto</p>
+  </div>
+</div>
+
+<script>
+  // Base de datos local de Obrín IA
+  const users = {
+    jose: {
+      name: "José Manuel Christensen",
+      role: "Co-Fundador / CEO",
+      phone: "+56 9 1234 5678", // Reemplazar con tu número real
+      email: "jose@obrinia.cl",
+      photo: "https://via.placeholder.com/65/1e293b/ffffff?text=JM", // Pon la URL de tu foto real
+      // Esta URL será la que se abra cuando alguien escanee tu código QR
+      qrData: "https://www.obrinia.cl/contacto/jose-manuel" 
+    },
+    clemente: {
+      name: "Clemente del Prado",
+      role: "Co-Fundador / CTO",
+      phone: "+56 9 8765 4321", // Reemplazar con número real
+      email: "clemente@obrinia.cl",
+      photo: "https://via.placeholder.com/65/1e293b/ffffff?text=CP", // Pon la URL de su foto real
+      qrData: "https://www.obrinia.cl/contacto/clemente"
+    }
+  };
+
+  // Función para inyectar los datos en la tarjeta
+  function setUser(userId) {
+    const user = users[userId];
+    document.getElementById('user-name').innerText = user.name;
+    document.getElementById('user-role').innerText = user.role;
+    document.getElementById('user-phone').innerText = user.phone;
+    document.getElementById('user-email').innerText = user.email;
+    document.getElementById('user-photo').src = user.photo;
+    
+    // Generador dinámico de QR (Usa la API pública de QRServer)
+    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${encodeURIComponent(user.qrData)}&color=0f172a`;
+    document.getElementById('user-qr').src = qrUrl;
+  }
+
+  // Cargar por defecto la credencial de José Manuel
+  setUser('jose');
+</script>
+
+</body>
+</html>
