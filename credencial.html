@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Credencial - Obrín IA</title>
-<!-- Librería para generar el PDF -->
+<!-- Librería html2pdf -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <style>
   /* Reset y fondo de pantalla */
@@ -28,12 +28,12 @@
     overflow: hidden;
     color: #ffffff; 
     position: relative;
-    margin-top: 20px;
     border: 2px solid #ff6b00; 
   }
 
+  /* Logo superior centrado */
   .pass-logo-top {
-    padding: 20px 20px 5px;
+    padding: 15px 20px 5px;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -47,24 +47,25 @@
   }
 
   .pass-body {
-    padding: 0 20px 15px; /* Reducido para compactar el espacio inferior */
+    padding: 0 20px 15px;
   }
 
+  /* Perfil del Usuario */
   .user-info {
     display: flex;
     align-items: center;
-    margin-bottom: 15px;
+    margin-bottom: 20px;
   }
 
   .user-info img {
     width: 65px;
-    height: 65px; /* Mismo alto y ancho asegura que sea un círculo */
+    height: 65px;
     border-radius: 50%;
     border: 2px solid #ff6b00; 
     margin-right: 15px;
-    object-fit: cover; /* cover asegura que la imagen llene el círculo sin deformarse */
+    object-fit: cover;
     background-color: #333;
-    flex-shrink: 0; /* SOLUCIÓN: Esto evita que el flexbox aplaste la imagen y la vuelva ovalada */
+    flex-shrink: 0; /* Mantiene la imagen redonda siempre */
   }
 
   .user-details h2 {
@@ -79,11 +80,12 @@
     font-weight: 600;
   }
 
+  /* Campos de detalles (Apilados verticalmente) */
   .fields {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 15px;
-    margin-bottom: 25px;
+    display: flex;
+    flex-direction: column; /* Apila uno debajo del otro */
+    gap: 12px; /* Espacio uniforme entre cada bloque */
+    margin-bottom: 20px;
   }
 
   .field label {
@@ -91,25 +93,22 @@
     font-size: 10px;
     text-transform: uppercase;
     opacity: 0.7;
-    margin-bottom: 4px;
+    margin-bottom: 2px;
     color: #a3a3a3; 
   }
 
   .field span {
-    font-size: 14px;
+    display: block;
+    font-size: 14px; /* Tamaño de fuente consistente para todos los datos */
     font-weight: 600;
     color: #ffffff; 
-  }
-
-  /* Ocupar ambas columnas para textos largos como la Universidad */
-  .field.full-width {
-    grid-column: span 2;
+    word-break: break-word; /* Evita que correos largos rompan la tarjeta */
   }
 
   /* Zona inferior para el QR */
   .qr-section {
     background-color: #ffffff;
-    padding: 20px;
+    padding: 15px;
     text-align: center;
     border-radius: 12px;
     margin: 0 15px 15px;
@@ -117,14 +116,16 @@
   }
 
   .qr-section img {
-    width: 160px;
-    height: 160px;
+    width: 140px;
+    height: 140px;
+    margin: 0 auto;
+    display: block;
   }
 
   .qr-section p {
-    margin: 12px 0 0;
+    margin: 10px 0 0;
     font-size: 12px;
-    font-weight: 600;
+    font-weight: 700;
     color: #ff6b00; 
   }
 
@@ -132,6 +133,7 @@
   .demo-buttons {
     margin-bottom: 20px;
   }
+  
   .demo-buttons button {
     padding: 8px 12px;
     border: none;
@@ -143,39 +145,62 @@
     margin: 0 5px;
   }
 
-  /* Estilo para el botón de descarga PDF */
+  /* Contenedor de botones de acción debajo de la tarjeta */
+  .action-buttons {
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 40px;
+  }
+
   .download-btn {
-    margin-top: 25px;
-    padding: 12px 24px;
+    padding: 10px 20px;
     border: none;
     border-radius: 8px;
-    background-color: #10b981; /* Color verde para diferenciar de los botones de test */
+    background-color: #333; 
     color: white;
     cursor: pointer;
     font-weight: bold;
-    font-size: 16px;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    transition: background-color 0.3s;
+    font-size: 14px;
     display: flex;
     align-items: center;
     gap: 8px;
+    transition: background-color 0.2s;
+  }
+
+  .download-btn:hover {
+    background-color: #555;
   }
   
-  .download-btn:hover {
-    background-color: #059669;
+  /* Estilo del botón de Apple Wallet */
+  .wallet-btn {
+    display: inline-block;
+    cursor: pointer;
+    transition: transform 0.2s;
   }
+  
+  .wallet-btn:hover {
+    transform: scale(1.05);
+  }
+  
+  .wallet-btn img {
+    height: 40px; 
+  }
+
 </style>
 </head>
 <body>
 
-<div class="demo-buttons">
+<div class="demo-buttons" data-html2canvas-ignore="true">
   <button onclick="setUser('jose')">Ver Credencial de José Manuel</button>
   <button onclick="setUser('clemente')">Ver Credencial de Clemente</button>
 </div>
-<!-- CREDENCIAL -->
+
+<!-- CREDENCIAL (Lo que se captura en el PDF) -->
 <div class="wallet-pass" id="credencial-pass">
   
-  <!-- NUEVO: Logo centrado arriba -->
   <div class="pass-logo-top">
     <img src="https://lh3.googleusercontent.com/pw/AP1GczPj7GoQTmfzWXX4jkvO3hu7_npJJehlCcxrcJkbr5gB3X9y97XxXlu7q8aIcuDr5-g_iKmymERwIWbwfbxHFGt72nexFoqovweVO802AgG-os60vlB58jhfs42c-b07_L8eivxqFyQ8hLN9xrKnV7GlTQ=w599-h599-s-no-gm?authuser=0" alt="Logo Obrín IA">
   </div>
@@ -189,6 +214,7 @@
       </div>
     </div>
     
+    <!-- Campos apilados verticalmente -->
     <div class="fields">
       <div class="field">
         <label>Teléfono</label>
@@ -196,30 +222,42 @@
       </div>
       <div class="field">
         <label>Email</label>
-        <span id="user-email" style="font-size: 12px;"></span>
+        <span id="user-email"></span>
       </div>
-      <!-- Nuevos campos de Educación que ocupan todo el ancho -->
-      <div class="field full-width">
+      <div class="field">
         <label>Carrera</label>
-        <span id="user-degree"></span>
+        <span id="user-career"></span>
       </div>
-      <div class="field full-width">
+      <div class="field">
         <label>Universidad</label>
-        <span id="user-university" style="font-size: 12px;"></span>
+        <span id="user-university"></span>
       </div>
     </div>
   </div>
 
   <div class="qr-section">
-    <img id="user-qr" src="" alt="Código QR">
-    <p>Escanear para compartir contacto</p>
+    <img id="user-qr" src="" alt="Código QR de Contacto">
+    <p>Escanear para guardar contacto</p>
   </div>
 </div>
 
-<!-- Botón para descargar el PDF -->
-<button class="download-btn" onclick="downloadPDF()">
-  📥 Descargar Credencial en PDF
-</button>
+<!-- Botones de Acción (No aparecen en el PDF) -->
+<div class="action-buttons" data-html2canvas-ignore="true">
+  
+  <!-- BOTÓN AGREGAR A APPLE WALLET -->
+  <a id="btn-apple-wallet" href="#" class="wallet-btn" title="Agregar a Apple Wallet">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/ca/Add_to_Apple_Wallet_logo.svg/320px-Add_to_Apple_Wallet_logo.svg.png" alt="Agregar a Apple Wallet">
+  </a>
+
+  <!-- BOTÓN DESCARGAR PDF -->
+  <button class="download-btn" onclick="descargarPDF()">
+    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 16 16">
+      <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/>
+      <path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"/>
+    </svg>
+    Descargar PDF
+  </button>
+</div>
 
 <script>
   const users = {
@@ -228,65 +266,76 @@
       role: "Co-Fundador / CEO",
       phone: "+56 9 9258 2669", 
       email: "jmchristensen@estudiante.uc.cl",
-      degree: "Construcción Civil",
+      career: "Construcción Civil",
       university: "Pontificia Universidad Católica de Chile",
       photo: "https://lh3.googleusercontent.com/pw/AP1GczPx1EJ_8fIwPO2dphbWGkNuor7vTGc9aKzSdIdvFeLuH3WCy24NLlHLs1BCK9M5qrCeB8DxVYks-46LohhaR4NA4K3pyxX7sqHCackmj7pPEiKmArQaN-v5HpnKrY5Z5MLLLSdUR3Ig6Wz5N8EnbdboLA=w449-h599-s-no-gm?authuser=0", 
-      qrData: "https://www.obrinia.cl/contacto/jose-manuel" 
+      walletFile: "jose.pkpass" 
     },
     clemente: {
       name: "Clemente Del Prado Irigoín",
       role: "Co-Fundador / CTO",
-      phone: "+56 9 8795 4736", // Si Clemente tiene otro número, reemplázalo aquí
+      phone: "+56 9 8795 4736", 
       email: "cdelpradoi@estudiante.uc.cl",
-      degree: "Construcción Civil", // Reemplazar con la carrera de Clemente si es distinta
-      university: "Pontificia Universidad Católica de Chile", // Reemplazar si es distinta
+      career: "Construcción Civil", 
+      university: "Pontificia Universidad Católica de Chile",
       photo: "https://lh3.googleusercontent.com/pw/AP1GczPAGbay3Va0BKkPUgiGX7SLhpD79DMBZF1xd5ccapCtq73169Pk_JQcetLv_gVSK3HfIG4txRC678ff79i6xEAe9l2pyQM_J7Q1wuh_fPuAsJDFtlAOksgQXD2-qY5LvUH5h_xJXeArENwt81PHkQW15Q=w449-h599-s-no-gm?authuser=0",
-      qrData: "https://www.obrinia.cl/contacto/clemente"
+      walletFile: "clemente.pkpass" 
     }
   };
 
+  let currentUser = 'jose'; 
+
   function setUser(userId) {
+    currentUser = userId;
     const user = users[userId];
+    
     document.getElementById('user-name').innerText = user.name;
     document.getElementById('user-role').innerText = user.role;
     document.getElementById('user-phone').innerText = user.phone;
     document.getElementById('user-email').innerText = user.email;
-    document.getElementById('user-degree').innerText = user.degree;
+    document.getElementById('user-career').innerText = user.career;
     document.getElementById('user-university').innerText = user.university;
     document.getElementById('user-photo').src = user.photo;
     
-    // Generador dinámico de QR
-    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${encodeURIComponent(user.qrData)}&color=000000`;
+    // 1. Construir la tarjeta de contacto vCard (formato estándar internacional)
+    const vCardData = `BEGIN:VCARD
+VERSION:3.0
+FN:${user.name}
+ORG:Obrín IA
+TITLE:${user.role}
+TEL;TYPE=CELL:${user.phone}
+EMAIL;TYPE=WORK:${user.email}
+URL:https://www.obrinia.cl
+END:VCARD`;
+
+    // 2. Generar el código QR con los datos de contacto. 
+    // Usamos size=300x300 internamente para que la resolución sea alta, pero en CSS se muestra a 140px.
+    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(vCardData)}&color=000000`;
     document.getElementById('user-qr').src = qrUrl;
+
+    // Actualiza el link del botón de Apple Wallet
+    document.getElementById('btn-apple-wallet').href = user.walletFile;
   }
 
-  // Cargar por defecto la credencial de José Manuel al abrir
-  setUser('jose');
+  function descargarPDF() {
+    const user = users[currentUser];
+    const element = document.getElementById('credencial-pass');
+    
+    const nombreArchivo = `Credencial_ObrinIA_${user.name.replace(/ /g, '_')}.pdf`;
 
-  // Función para descargar el PDF
-  function downloadPDF() {
-    // 1. Obtenemos el elemento HTML que queremos convertir (la credencial)
-    const element = document.getElementById('credencial-card');
-    
-    // 2. Obtenemos el nombre actual para nombrar el archivo automáticamente
-    const currentName = document.getElementById('user-name').innerText.replace(/\s+/g, '_');
-    
-    // 3. Configuramos las opciones del PDF
-    const options = {
-      margin:       0.2, // Margen blanco alrededor de la tarjeta en el PDF
-      filename:     `Credencial_ObrinIA_${currentName}.pdf`, // Nombre del archivo
+    const opt = {
+      margin:       0,
+      filename:     nombreArchivo,
       image:        { type: 'jpeg', quality: 1 },
-      html2canvas:  { 
-        scale: 3, // Alta resolución
-        useCORS: true, // Permite cargar las imágenes externas (Google Photos, API del QR)
-        backgroundColor: '#000000' 
-      },
-      jsPDF:        { unit: 'in', format: [4, 6], orientation: 'portrait' } // Tamaño personalizado aproximado a la credencial
+      html2canvas:  { scale: 3, useCORS: true, backgroundColor: null },
+      jsPDF:        { unit: 'px', format: [element.offsetWidth, element.offsetHeight], orientation: 'portrait' }
     };
 
-    // 4. Ejecutamos la generación y descarga
-    html2pdf().set(options).from(element).save();
+    html2pdf().set(opt).from(element).save();
   }
+
+  // Cargar perfil inicial
+  setUser('jose');
 </script>
 
 </body>
