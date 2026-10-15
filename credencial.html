@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Credencial - Obrín IA</title>
+<!-- Librería para generar el PDF -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <style>
   /* Reset y fondo de pantalla */
   body {
@@ -140,6 +142,28 @@
     font-weight: bold;
     margin: 0 5px;
   }
+
+  /* Estilo para el botón de descarga PDF */
+  .download-btn {
+    margin-top: 25px;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    background-color: #10b981; /* Color verde para diferenciar de los botones de test */
+    color: white;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 16px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    transition: background-color 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  
+  .download-btn:hover {
+    background-color: #059669;
+  }
 </style>
 </head>
 <body>
@@ -149,7 +173,8 @@
   <button onclick="setUser('clemente')">Ver Credencial de Clemente</button>
 </div>
 
-<div class="wallet-pass">
+<!-- Se agregó el ID 'credencial-card' para que el script sepa qué parte exportar a PDF -->
+<div class="wallet-pass" id="credencial-card">
   <div class="pass-header">
     <!-- Solo el logo circular centrado -->
     <img class="logo-icon" src="https://lh3.googleusercontent.com/pw/AP1GczPj7GoQTmfzWXX4jkvO3hu7_npJJehlCcxrcJkbr5gB3X9y97XxXlu7q8aIcuDr5-g_iKmymERwIWbwfbxHFGt72nexFoqovweVO802AgG-os60vlB58jhfs42c-b07_L8eivxqFyQ8hLN9xrKnV7GlTQ=w599-h599-s-no-gm?authuser=0" alt="Icono Obrín IA">
@@ -190,6 +215,11 @@
     <p>Escanear para compartir contacto</p>
   </div>
 </div>
+
+<!-- Botón para descargar el PDF -->
+<button class="download-btn" onclick="downloadPDF()">
+  📥 Descargar Credencial en PDF
+</button>
 
 <script>
   const users = {
@@ -232,6 +262,31 @@
 
   // Cargar por defecto la credencial de José Manuel al abrir
   setUser('jose');
+
+  // Función para descargar el PDF
+  function downloadPDF() {
+    // 1. Obtenemos el elemento HTML que queremos convertir (la credencial)
+    const element = document.getElementById('credencial-card');
+    
+    // 2. Obtenemos el nombre actual para nombrar el archivo automáticamente
+    const currentName = document.getElementById('user-name').innerText.replace(/\s+/g, '_');
+    
+    // 3. Configuramos las opciones del PDF
+    const options = {
+      margin:       0.2, // Margen blanco alrededor de la tarjeta en el PDF
+      filename:     `Credencial_ObrinIA_${currentName}.pdf`, // Nombre del archivo
+      image:        { type: 'jpeg', quality: 1 },
+      html2canvas:  { 
+        scale: 3, // Alta resolución
+        useCORS: true, // Permite cargar las imágenes externas (Google Photos, API del QR)
+        backgroundColor: '#000000' 
+      },
+      jsPDF:        { unit: 'in', format: [4, 6], orientation: 'portrait' } // Tamaño personalizado aproximado a la credencial
+    };
+
+    // 4. Ejecutamos la generación y descarga
+    html2pdf().set(options).from(element).save();
+  }
 </script>
 
 </body>
