@@ -260,25 +260,30 @@
 </div>
 
 <script>
+  // Script completamente actualizado con solución para iOS
   const users = {
     jose: {
-      name: "José Manuel Christensen Correa",
+      name: "José Manuel",
+      lastName: "Christensen Correa",
       role: "Co-Fundador / CEO",
       phone: "+56 9 9258 2669", 
       email: "jmchristensen@estudiante.uc.cl",
       career: "Construcción Civil",
       university: "Pontificia Universidad Católica de Chile",
       photo: "https://lh3.googleusercontent.com/pw/AP1GczPx1EJ_8fIwPO2dphbWGkNuor7vTGc9aKzSdIdvFeLuH3WCy24NLlHLs1BCK9M5qrCeB8DxVYks-46LohhaR4NA4K3pyxX7sqHCackmj7pPEiKmArQaN-v5HpnKrY5Z5MLLLSdUR3Ig6Wz5N8EnbdboLA=w449-h599-s-no-gm?authuser=0", 
+      website: "https://www.obrinia.cl",
       walletFile: "jose.pkpass" 
     },
     clemente: {
-      name: "Clemente Del Prado Irigoín",
+      name: "Clemente",
+      lastName: "Del Prado Irigoín",
       role: "Co-Fundador / CTO",
       phone: "+56 9 8795 4736", 
       email: "cdelpradoi@estudiante.uc.cl",
       career: "Construcción Civil", 
       university: "Pontificia Universidad Católica de Chile",
       photo: "https://lh3.googleusercontent.com/pw/AP1GczPAGbay3Va0BKkPUgiGX7SLhpD79DMBZF1xd5ccapCtq73169Pk_JQcetLv_gVSK3HfIG4txRC678ff79i6xEAe9l2pyQM_J7Q1wuh_fPuAsJDFtlAOksgQXD2-qY5LvUH5h_xJXeArENwt81PHkQW15Q=w449-h599-s-no-gm?authuser=0",
+      website: "https://www.obrinia.cl",
       walletFile: "clemente.pkpass" 
     }
   };
@@ -288,8 +293,9 @@
   function setUser(userId) {
     currentUser = userId;
     const user = users[userId];
+    const fullName = `${user.name} ${user.lastName}`;
     
-    document.getElementById('user-name').innerText = user.name;
+    document.getElementById('user-name').innerText = fullName;
     document.getElementById('user-role').innerText = user.role;
     document.getElementById('user-phone').innerText = user.phone;
     document.getElementById('user-email').innerText = user.email;
@@ -297,19 +303,22 @@
     document.getElementById('user-university').innerText = user.university;
     document.getElementById('user-photo').src = user.photo;
     
-    // 1. Construir la tarjeta de contacto vCard (formato estándar internacional)
+    // 1. Construir la tarjeta de contacto vCard (formato V3.0 estricto para iOS)
+    // El campo N requiere: Apellidos;Nombres;;; 
+    // El campo FN es el Nombre Completo Formateado
     const vCardData = `BEGIN:VCARD
 VERSION:3.0
-FN:${user.name}
+N:${user.lastName};${user.name};;;
+FN:${fullName}
 ORG:Obrín IA
 TITLE:${user.role}
-TEL;TYPE=CELL:${user.phone}
+TEL;TYPE=CELL:${user.phone.replace(/ /g, '')}
 EMAIL;TYPE=WORK:${user.email}
-URL:https://www.obrinia.cl
+URL:${user.website}
 END:VCARD`;
 
-    // 2. Generar el código QR con los datos de contacto. 
-    // Usamos size=300x300 internamente para que la resolución sea alta, pero en CSS se muestra a 140px.
+    // 2. Generar el código QR. Se usa encodeURIComponent para que los saltos de línea (\n) 
+    // y espacios se transmitan correctamente a la API de QR.
     const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(vCardData)}&color=000000`;
     document.getElementById('user-qr').src = qrUrl;
 
@@ -319,9 +328,10 @@ END:VCARD`;
 
   function descargarPDF() {
     const user = users[currentUser];
+    const fullName = `${user.name} ${user.lastName}`;
     const element = document.getElementById('credencial-pass');
     
-    const nombreArchivo = `Credencial_ObrinIA_${user.name.replace(/ /g, '_')}.pdf`;
+    const nombreArchivo = `Credencial_ObrinIA_${fullName.replace(/ /g, '_')}.pdf`;
 
     const opt = {
       margin:       0,
