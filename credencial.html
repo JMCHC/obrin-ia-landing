@@ -8,7 +8,7 @@
   /* Reset y fondo de pantalla */
   body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    background-color: #f2f2f7; /* Color de fondo típico de iOS */
+    background-color: #f2f2f7; /* Color de fondo exterior suave */
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -17,16 +17,18 @@
     margin: 0;
   }
   
-  /* Contenedor principal de la tarjeta */
+  /* Contenedor principal de la tarjeta (Fondo Negro de Obrín IA) */
   .wallet-pass {
     width: 320px;
-    background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); /* Colores oscuros elegantes, puedes cambiarlos a los de Obrín IA */
+    background-color: #000000; /* Fondo negro como la imagen */
     border-radius: 16px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.3);
     overflow: hidden;
-    color: white;
+    color: #ffffff; /* Letras blancas */
     position: relative;
     margin-top: 20px;
+    /* Borde naranjo sutil inspirado en el borde de tu logo */
+    border: 2px solid #ff6b00; 
   }
 
   .pass-header {
@@ -43,12 +45,10 @@
   }
 
   .pass-header img {
-    width: 45px;
-    height: 45px;
-    border-radius: 10px;
-    background-color: white;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%; /* Logo redondo como la imagen */
     object-fit: contain;
-    padding: 2px;
   }
 
   .pass-body {
@@ -65,10 +65,11 @@
     width: 65px;
     height: 65px;
     border-radius: 50%;
-    border: 2px solid white;
+    /* Borde naranjo para la foto de perfil, manteniendo la línea de diseño */
+    border: 2px solid #ff6b00; 
     margin-right: 15px;
     object-fit: cover;
-    background-color: #ccc;
+    background-color: #333;
   }
 
   .user-details h2 {
@@ -79,8 +80,8 @@
   .user-details p {
     margin: 0;
     font-size: 14px;
-    opacity: 0.8;
-    color: #cbd5e1;
+    color: #ff6b00; /* Cargo en naranjo para destacar */
+    font-weight: 600;
   }
 
   .fields {
@@ -96,22 +97,23 @@
     text-transform: uppercase;
     opacity: 0.7;
     margin-bottom: 4px;
-    color: #94a3b8;
+    color: #a3a3a3; /* Gris claro para las etiquetas */
   }
 
   .field span {
     font-size: 14px;
     font-weight: 600;
+    color: #ffffff; /* Letras blancas */
   }
 
-  /* Zona inferior blanca para el QR */
+  /* Zona inferior para el QR (Se mantiene blanca para que el QR sea legible por las cámaras) */
   .qr-section {
-    background-color: white;
+    background-color: #ffffff;
     padding: 20px;
     text-align: center;
     border-radius: 12px;
     margin: 0 15px 15px;
-    color: #333;
+    color: #000000;
   }
 
   .qr-section img {
@@ -123,10 +125,10 @@
     margin: 12px 0 0;
     font-size: 12px;
     font-weight: 600;
-    color: #64748b;
+    color: #ff6b00; /* Texto inferior en naranjo */
   }
 
-  /* Botones para probar (Puedes eliminarlos en producción) */
+  /* Botones para probar */
   .demo-buttons {
     margin-bottom: 20px;
   }
@@ -134,7 +136,7 @@
     padding: 8px 12px;
     border: none;
     border-radius: 6px;
-    background-color: #0ea5e9;
+    background-color: #ff6b00; /* Botones en naranjo */
     color: white;
     cursor: pointer;
     font-weight: bold;
@@ -144,7 +146,6 @@
 </head>
 <body>
 
-<!-- Botones de demostración para cambiar entre tú y Clemente -->
 <div class="demo-buttons">
   <button onclick="setUser('jose')">Ver Credencial de José Manuel</button>
   <button onclick="setUser('clemente')">Ver Credencial de Clemente</button>
@@ -153,13 +154,12 @@
 <div class="wallet-pass">
   <div class="pass-header">
     <h1>Obrín IA</h1>
-    <!-- LOGO OBRÍN IA: Cambia este link por el logo real que tienen en su web -->
-    <img src="https://via.placeholder.com/45?text=OIA" alt="Logo Obrín IA">
+    <!-- Se actualizó el src con el link del logo que enviaste -->
+    <img src="https://lh3.googleusercontent.com/pw/AP1GczPj7GoQTmfzWXX4jkvO3hu7_npJJehlCcxrcJkbr5gB3X9y97XxXlu7q8aIcuDr5-g_iKmymERwIWbwfbxHFGt72nexFoqovweVO802AgG-os60vlB58jhfs42c-b07_L8eivxqFyQ8hLN9xrKnV7GlTQ=w599-h599-s-no-gm?authuser=0" alt="Logo Obrín IA">
   </div>
   
   <div class="pass-body">
     <div class="user-info">
-      <!-- FOTO DE PERFIL -->
       <img id="user-photo" src="" alt="Foto de perfil">
       <div class="user-details">
         <h2 id="user-name">Nombre</h2>
@@ -180,35 +180,32 @@
   </div>
 
   <div class="qr-section">
-    <!-- El QR se genera automáticamente mediante una API gratuita -->
+    <!-- El color del QR ahora es negro puro (000000) -->
     <img id="user-qr" src="" alt="Código QR">
     <p>Escanear para compartir contacto</p>
   </div>
 </div>
 
 <script>
-  // Base de datos local de Obrín IA
   const users = {
     jose: {
-      name: "José Manuel Christensen",
+      name: "José Manuel Christensen Correa",
       role: "Co-Fundador / CEO",
-      phone: "+56 9 1234 5678", // Reemplazar con tu número real
-      email: "jose@obrinia.cl",
-      photo: "https://via.placeholder.com/65/1e293b/ffffff?text=JM", // Pon la URL de tu foto real
-      // Esta URL será la que se abra cuando alguien escanee tu código QR
+      phone: "+56 9 9258 2669", 
+      email: "jmchristensen@estudiante.uc.cl",
+      photo: "https://via.placeholder.com/65/000000/ff6b00?text=JM", // Placeholder con colores de la marca
       qrData: "https://www.obrinia.cl/contacto/jose-manuel" 
     },
     clemente: {
-      name: "Clemente del Prado",
+      name: "Clemente Del Prado Irigoín",
       role: "Co-Fundador / CTO",
-      phone: "+56 9 8765 4321", // Reemplazar con número real
-      email: "clemente@obrinia.cl",
-      photo: "https://via.placeholder.com/65/1e293b/ffffff?text=CP", // Pon la URL de su foto real
+      phone: "+56 9 8795 4736", 
+      email: "cdelpradoi@estudiante.uc.cl",
+      photo: "https://via.placeholder.com/65/000000/ff6b00?text=CP",
       qrData: "https://www.obrinia.cl/contacto/clemente"
     }
   };
 
-  // Función para inyectar los datos en la tarjeta
   function setUser(userId) {
     const user = users[userId];
     document.getElementById('user-name').innerText = user.name;
@@ -217,12 +214,11 @@
     document.getElementById('user-email').innerText = user.email;
     document.getElementById('user-photo').src = user.photo;
     
-    // Generador dinámico de QR (Usa la API pública de QRServer)
-    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${encodeURIComponent(user.qrData)}&color=0f172a`;
+    // QR negro puro para máximo contraste
+    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${encodeURIComponent(user.qrData)}&color=000000`;
     document.getElementById('user-qr').src = qrUrl;
   }
 
-  // Cargar por defecto la credencial de José Manuel
   setUser('jose');
 </script>
 
