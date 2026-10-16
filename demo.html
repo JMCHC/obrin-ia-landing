@@ -1355,46 +1355,6 @@
         let currentRating = 0;
         let currentEditingDocId = null;
         window.historyDataCache = {};
-        window.materialesData = []; // NUEVO: Almacena datos de materiales para cálculo
-
-        // NUEVO: Función para actualizar el total de la inversión al cambiar cantidades
-        window.updateMaterialTotal = function() {
-            let nuevoTotal = 0;
-            let index = 0;
-            
-            // Recorremos los inputs de cantidad
-            document.querySelectorAll('.mat-qty-input').forEach(input => {
-                const qty = parseInt(input.value) || 1;
-                const matInfo = window.materialesData[index];
-                if (matInfo && matInfo.precio > 0) {
-                    const subtotalItem = matInfo.precio * qty;
-                    nuevoTotal += subtotalItem;
-                    
-                    // Actualizar el subtotal específico en la interfaz
-                    const subtotalEl = document.getElementById(`subtotal-mat-${index}`);
-                    if (subtotalEl) {
-                        subtotalEl.innerText = "$" + subtotalItem.toLocaleString('es-CL');
-                    }
-                }
-                
-                // Actualizar la estructura guardada en memoria (para el Excel)
-                if (matInfo) matInfo.cantidad = qty;
-                index++;
-            });
-
-            if (nuevoTotal > 0) {
-                document.getElementById('price-val').innerText = "$" + nuevoTotal.toLocaleString('es-CL');
-            }
-        };
-
-        window.changeQty = function(index, delta) {
-            const input = document.getElementById(`qty-mat-${index}`);
-            if (!input) return;
-            let newVal = parseInt(input.value) + delta;
-            if (newVal < 1) newVal = 1;
-            input.value = newVal;
-            window.updateMaterialTotal();
-        };
 
         window.extractPrice = function(priceStr) {
             if (!priceStr) return 0;
@@ -2346,16 +2306,21 @@
 
                 // --- ENVIAR AL CEREBRO PREDICTIVO (CLOUDFLARE WORKER) ---
                 try {
+                    const token = await auth.currentUser.getIdToken();
                     fetch('https://obrin-ia-proxy.christensenjosemanuel.workers.dev/api/admin/guardar-caso', {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
+                        headers: { 
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
                         body: JSON.stringify({
                             id: currentEditingDocId,
                             superficie: diagnosticData.superficie,
                             nivel_dano: diagnosticData.nivel_dano,
                             patologia: diagnosticData.patologia,
-                            riesgo_futuro: diagnosticData.riesgo_futuro, // NUEVO
+                            riesgo_futuro: diagnosticData.riesgo_futuro,
                             solucion: diagnosticData.solucion,
+                            materiales: materialesPlanos,
                             precio_ref: diagnosticData.precio_ref,
                             tiempo: diagnosticData.tiempo
                         })
@@ -2623,8 +2588,8 @@
                              matObj.cantidad = parseInt(inputQty.value) || 1;
                         }
                         
-                        // Intentamos recuperar el precio de la estructura guardada
-                        const precioSpan = li.querySelector('.text-slate-900.font-bold');
+                        // Intentamos recuperar el precio de la estructura guardada (.text-slate-800 o .text-slate-900)
+                        const precioSpan = li.querySelector('.text-slate-800.font-bold, .text-slate-900.font-bold');
                         if (precioSpan) {
                             const pMatch = precioSpan.innerText.replace(/\./g, '').match(/\d+/);
                             if (pMatch) matObj.precio = parseInt(pMatch[0], 10);
@@ -3014,7 +2979,9 @@
                             window.showSplashScreen("Cargando tu perfil...");
                             const userRef = window.doc(window.db, 'artifacts', window.globalAppId, 'users', user.uid);
                             
-                            window.onSnapshot(userRef, async (docSnap) => {
+                            if (window.unsubUserSnap) { window.unsubUserSnap(); window.unsubUserSnap = null; }
+                            
+                            window.unsubUserSnap = window.onSnapshot(userRef, async (docSnap) => {
                                 if (docSnap.exists()) {
                                     const data = docSnap.data();
                                     
@@ -3049,7 +3016,7 @@
                                                 data.plan_activo = 'pro_member';
                                                 
                                                 setTimeout(() => {
-                                                    alert(`¡Bienvenido!\n\nTu cuenta ha sido enlazada exitosamente a la licencia Plan Pro de: ${inviteData.masterName}.\n\nYa puedes comenzar a utilizar el saldo compartido de la empresa.`);
+                                                    showNotification(`🎉 Cuenta enlazada al Plan Pro de ${inviteData.masterName}`);
                                                 }, 1000);
                                             }
                                         } catch(e) { console.error("Error check invite", e); }
@@ -3060,8 +3027,9 @@
 
                                     if (window.userPlanActivo === 'pro_member' && window.idCuentaMaestra) {
                                         try {
+                                            if (window.unsubMasterSnap) { window.unsubMasterSnap(); window.unsubMasterSnap = null; }
                                             const masterRef = window.doc(window.db, 'artifacts', window.globalAppId, 'users', window.idCuentaMaestra);
-                                            window.onSnapshot(masterRef, (mSnap) => {
+                                            window.unsubMasterSnap = window.onSnapshot(masterRef, (mSnap) => {
                                                  if(mSnap.exists()) {
                                                      window.userTokensDisponibles = mSnap.data().tokens_disponibles || 0;
                                                      updateTokenUI(window.userTokensDisponibles, 15000000);
@@ -3069,6 +3037,7 @@
                                             });
                                         } catch(e) {}
                                     } else {
+                                        if (window.unsubMasterSnap) { window.unsubMasterSnap(); window.unsubMasterSnap = null; }
                                         window.userTokensDisponibles = data.tokens_disponibles || 0;
                                         updateTokenUI(window.userTokensDisponibles, (window.userPlanActivo === 'pro') ? 15000000 : (window.userPlanActivo === 'plus' ? 2500000 : 1000000));
                                     }
@@ -3109,6 +3078,8 @@
                         }
                     }
                 } else {
+                    if (window.unsubUserSnap) { window.unsubUserSnap(); window.unsubUserSnap = null; }
+                    if (window.unsubMasterSnap) { window.unsubMasterSnap(); window.unsubMasterSnap = null; }
                     window.currentUserId = null;
                     authBtnHeader.classList.remove('hidden');
                     userMenuBtn.classList.add('hidden');
