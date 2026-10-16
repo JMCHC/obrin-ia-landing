@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Obrín IA | Asistente de Diagnóstico Constructivo</title>
-    <meta name="description" content="Obrín IA: Asistente paramétrico de diagnóstico constructivo impulsado por IA e IoT. Elimina la subjetividad, automatiza tus presupuestos y protege la rentabilidad de la obra.">
+    <meta name="description" content="Obrín IA: Asistente paramétrico de diagnóstico de patologías constructivas en terreno. Estandariza criterios técnicos, proyecta riesgos y genera presupuestos referenciales en CLP.">
     
     <link rel="icon" href="https://lh3.googleusercontent.com/pw/AP1GczOOE3ZHICrV-_RfZdqAjRIdP5vT8mk8EUJgp83JaAa8uF1SEOlEcN5nkO410n_kUGrx1VZJU2MAD_yk6HcbPAhoW4zzYVJH3KVOOof-U3bsfH4yL6P5J2U9i8SaDuth_yZPP6_IihvtadZrNgEjzDIeUQ=w599-h599-s-no-gm?authuser=0" type="image/png">
     
@@ -50,25 +50,21 @@
         body {
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
-            overflow-x: clip; /* FIX: 'clip' evita el desencuadre horizontal sin romper position: sticky ni eventos de scroll en móviles */
-            background-color: #000; /* Fondo base negro global */
+            overflow-x: clip; 
+            background-color: #000; 
         }
 
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-        /* --- SISTEMA TIPOGRÁFICO DE MARCA --- */
-        /* Titulares: Space Grotesk (misma familia usada en carrusel, videos y flyer) */
         h1, h2, h3, h4 {
             font-family: 'Space Grotesk', sans-serif;
         }
-        /* Etiquetas técnicas / eyebrows / citas de fuente: IBM Plex Mono */
         .tracking-widest.uppercase,
         .tracking-\[0\.2em\].uppercase,
         .tracking-wider.uppercase {
             font-family: 'IBM Plex Mono', monospace;
         }
-        /* Cifras grandes (stats): IBM Plex Mono, como en el resto de la campaña */
         .stat-figure {
             font-family: 'IBM Plex Mono', monospace;
         }
@@ -83,7 +79,6 @@
             transform: translateY(0);
         }
 
-        /* --- ESTILOS IPHONE 3D CON EXTRUSIÓN --- */
         #hero-phone-container {
             position: fixed;
             top: 0;
@@ -93,7 +88,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            z-index: 10; /* Fondo de todo */
+            z-index: 10;
             pointer-events: none;
             transform-style: preserve-3d;
             will-change: transform, opacity;
@@ -163,19 +158,23 @@
                 <div class="flex-shrink-0 flex items-center cursor-pointer transition-transform hover:scale-105" onclick="window.scrollTo(0,0)">
                     <img src="https://lh3.googleusercontent.com/pw/AP1GczOOE3ZHICrV-_RfZdqAjRIdP5vT8mk8EUJgp83JaAa8uF1SEOlEcN5nkO410n_kUGrx1VZJU2MAD_yk6HcbPAhoW4zzYVJH3KVOOof-U3bsfH4yL6P5J2U9i8SaDuth_yZPP6_IihvtadZrNgEjzDIeUQ=w599-h599-s-no-gm?authuser=0" alt="Obrín IA Logo" class="h-16 w-auto object-contain invert brightness-0" onerror="this.onerror=null; this.src='https://placehold.co/150x50/ffffff/0f2942?text=Obrin+IA';">
                 </div>
-                
-                <div class="hidden lg:flex space-x-10 items-center">
+
+                <div class="hidden lg:flex space-x-8 items-center">
                     <a href="#problema" class="text-slate-400 hover:text-white font-medium text-sm transition-colors nav-link whitespace-nowrap" data-i18n="nav-problem">El Problema</a>
                     <a href="#solucion" class="text-slate-400 hover:text-white font-medium text-sm transition-colors nav-link whitespace-nowrap" data-i18n="nav-solution">Solución</a>
                     <a href="#tutorial" class="text-slate-400 hover:text-white font-medium text-sm transition-colors nav-link whitespace-nowrap" data-i18n="nav-tutorial">Tutorial</a>
-                    <a href="#caracteristicas" class="text-slate-400 hover:text-white font-medium text-sm transition-colors nav-link whitespace-nowrap" data-i18n="nav-tech">Tecnología</a>
+                    <a href="#caracteristicas" class="text-slate-400 hover:text-white font-medium text-sm transition-colors nav-link whitespace-nowrap" data-i18n="nav-tech">Entregables</a>
+                    <a href="#planes" class="text-slate-400 hover:text-white font-medium text-sm transition-colors nav-link whitespace-nowrap" data-i18n="nav-pricing">Planes y Tokens</a>
                     <a href="#equipo" class="text-slate-400 hover:text-white font-medium text-sm transition-colors nav-link whitespace-nowrap" data-i18n="nav-team">Equipo</a>
                 </div>
 
-                <div class="hidden md:flex items-center gap-4">
-                    <button id="lang-toggle-desktop" class="text-slate-400 hover:text-white font-medium text-sm transition-colors flex items-center gap-2 group border border-slate-700/50 hover:border-slate-500 rounded-full px-4 py-1.5 bg-black/40">
+                <div class="hidden md:flex items-center gap-3">
+                    <button id="lang-toggle-desktop" class="text-slate-400 hover:text-white font-medium text-sm transition-colors flex items-center gap-2 group border border-slate-700/50 hover:border-slate-500 rounded-full px-3.5 py-1.5 bg-black/40">
                         <i class="fa-solid fa-globe group-hover:animate-spin-slow text-brand-400"></i> <span id="lang-text-desktop">EN</span>
                     </button>
+                    <a href="https://wa.me/56992582669?text=Hola%20equipo%20Obr%C3%ADn%20IA%2C%20me%20gustar%C3%ADa%20conocer%20m%C3%A1s%20sobre%20la%20plataforma" target="_blank" rel="noopener noreferrer" class="text-slate-300 hover:text-white border border-slate-700 hover:border-emerald-500/60 bg-black/50 font-medium text-sm rounded-full px-4 py-2 transition-all flex items-center gap-2 whitespace-nowrap">
+                        <i class="fa-brands fa-whatsapp text-emerald-400 text-base"></i> <span data-i18n="nav-whatsapp">Hablar con el equipo</span>
+                    </a>
                     <a href="demo.html" target="_blank" class="bg-brand-500 hover:bg-brand-600 text-black font-bold text-sm rounded-full px-5 py-2 transition-all hover:scale-105 whitespace-nowrap" data-i18n="nav-demo">Acceder a Obrín IA</a>
                 </div>
 
@@ -193,13 +192,17 @@
                 <a href="#problema" class="text-slate-400 hover:text-white block px-3 py-2 rounded-md text-base font-medium transition-colors nav-link-mobile" data-i18n="nav-problem">El Problema</a>
                 <a href="#solucion" class="text-slate-400 hover:text-white block px-3 py-2 rounded-md text-base font-medium transition-colors nav-link-mobile" data-i18n="nav-solution">Solución</a>
                 <a href="#tutorial" class="text-slate-400 hover:text-white block px-3 py-2 rounded-md text-base font-medium transition-colors nav-link-mobile" data-i18n="nav-tutorial">Tutorial</a>
-                <a href="#caracteristicas" class="text-slate-400 hover:text-white block px-3 py-2 rounded-md text-base font-medium transition-colors nav-link-mobile" data-i18n="nav-tech">Tecnología</a>
+                <a href="#caracteristicas" class="text-slate-400 hover:text-white block px-3 py-2 rounded-md text-base font-medium transition-colors nav-link-mobile" data-i18n="nav-tech">Entregables</a>
+                <a href="#planes" class="text-slate-400 hover:text-white block px-3 py-2 rounded-md text-base font-medium transition-colors nav-link-mobile" data-i18n="nav-pricing">Planes y Tokens</a>
                 <a href="#equipo" class="text-slate-400 hover:text-white block px-3 py-2 rounded-md text-base font-medium transition-colors nav-link-mobile" data-i18n="nav-team">Equipo</a>
                 
-                <div class="border-t border-white/10 mt-2 pt-2 pb-2 space-y-1">
+                <div class="border-t border-white/10 mt-2 pt-2 pb-2 space-y-2">
                     <button id="lang-toggle-mobile" class="text-slate-400 hover:text-white w-full text-left px-3 py-2 rounded-md text-base font-medium transition-colors flex items-center gap-2">
                         <i class="fa-solid fa-globe text-brand-400"></i> <span id="lang-text-mobile">English</span>
                     </button>
+                    <a href="https://wa.me/56992582669?text=Hola%20equipo%20Obr%C3%ADn%20IA%2C%20me%20gustar%C3%ADa%20hacer%20una%20consulta" target="_blank" rel="noopener noreferrer" class="border border-emerald-500/40 bg-emerald-950/30 text-emerald-300 font-semibold text-center block px-3 py-2.5 rounded-md text-base transition-colors">
+                        <i class="fa-brands fa-whatsapp mr-1"></i> <span data-i18n="nav-whatsapp">Hablar con el equipo</span>
+                    </a>
                     <a href="demo.html" target="_blank" class="bg-brand-500 text-black font-bold text-center block px-3 py-2.5 rounded-md text-base transition-colors" data-i18n="nav-demo">Acceder a Obrín IA</a>
                 </div>
             </div>
@@ -220,17 +223,24 @@
     <section id="hero-section" class="relative z-20" style="height: 120vh;">
         <div class="sticky top-0 h-screen w-full flex items-center justify-center overflow-hidden z-20">
             
-            <div id="hero-text-container" class="absolute z-20 text-center pointer-events-none w-full px-4 flex flex-col items-center mt-[15vh] md:mt-[25vh]">
+            <div id="hero-text-container" class="absolute z-20 text-center pointer-events-none w-full px-4 flex flex-col items-center mt-[12vh] md:mt-[20vh]">
+                <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-black/80 border border-brand-500/40 text-brand-400 text-[11px] font-mono uppercase tracking-widest mb-5 shadow-lg">
+                    <span class="w-2 h-2 rounded-full bg-brand-500 animate-pulse"></span>
+                    <span data-i18n="hero-badge">Top 100 Jump Chile · Semifinalista Reto CChC</span>
+                </div>
                 <h1 class="text-[14vw] md:text-[9vw] font-black text-white tracking-tighter leading-[0.9] drop-shadow-2xl [text-shadow:0_10px_30px_rgba(0,0,0,0.8)]" data-i18n="hero-title">
                     NO ES SOLO<br />
                     <span class="text-white">UN DATO.</span>
                 </h1>
-                <p class="mt-8 text-xs md:text-sm text-white font-bold tracking-[0.2em] uppercase max-w-lg [text-shadow:0_2px_4px_rgba(0,0,0,1),_0_4px_10px_rgba(0,0,0,1),_0_0_25px_rgba(0,0,0,1)]" data-i18n="hero-subtitle">
-                    Es el resultado de avances en IA e IoT sin precedentes en la industria.
+                <p class="mt-6 text-xs md:text-sm text-white font-bold tracking-[0.18em] uppercase max-w-xl [text-shadow:0_2px_4px_rgba(0,0,0,1),_0_4px_10px_rgba(0,0,0,1),_0_0_25px_rgba(0,0,0,1)]" data-i18n="hero-subtitle">
+                    Diagnóstico de patologías constructivas en terreno. La IA asiste y estandariza; el profesional decide.
                 </p>
-                <div class="mt-12 pointer-events-auto">
-                    <a href="demo.html" target="_blank" class="inline-block bg-white text-black px-10 py-4 rounded-full font-bold transition-all hover:scale-105 shadow-[0_0_40px_rgba(255,255,255,0.3)]" data-i18n="hero-btn">
+                <div class="mt-10 pointer-events-auto flex flex-col sm:flex-row items-center justify-center gap-4">
+                    <a href="demo.html" target="_blank" class="inline-block bg-white text-black px-9 py-4 rounded-full font-bold transition-all hover:scale-105 shadow-[0_0_40px_rgba(255,255,255,0.3)]" data-i18n="hero-btn">
                         Acceder a Obrín IA
+                    </a>
+                    <a href="#caracteristicas" class="nav-link inline-flex items-center gap-2 bg-black/80 hover:bg-slate-900 text-white border border-white/25 hover:border-brand-500 px-7 py-4 rounded-full font-semibold text-sm transition-all backdrop-blur-md" data-i18n="hero-btn-secondary">
+                        Ver qué entrega una foto <i class="fa-solid fa-arrow-down text-brand-400 text-xs"></i>
                     </a>
                 </div>
             </div>
@@ -249,34 +259,37 @@
                         <h3 class="text-3xl md:text-4xl font-extrabold text-white mb-6 tracking-tight leading-tight [text-shadow:0_2px_4px_rgba(0,0,0,1),_0_0_20px_rgba(0,0,0,1),_0_0_40px_rgba(0,0,0,1),_0_0_80px_rgba(0,0,0,1)]" data-i18n="prob-title">El costo oculto de la evaluación visual.</h3>
                     </div>
                     <p class="text-lg text-white leading-relaxed mb-6 font-medium [text-shadow:0_2px_4px_rgba(0,0,0,1),_0_0_15px_rgba(0,0,0,1),_0_0_30px_rgba(0,0,0,1),_0_0_60px_rgba(0,0,0,1)]" data-i18n="prob-p1">
-                        La construcción transita hacia la industrialización, pero la captura de datos sigue siendo análoga. El levantamiento de fallas depende del ojo humano, generando diagnósticos subjetivos.
+                        La construcción avanza hacia la industrialización, pero el levantamiento de patologías constructivas, recepciones y postventa en terreno sigue dependiendo de criterios individuales no estandarizados.
                     </p>
                     <p class="text-lg text-white leading-relaxed font-medium [text-shadow:0_2px_4px_rgba(0,0,0,1),_0_0_15px_rgba(0,0,0,1),_0_0_30px_rgba(0,0,0,1),_0_0_60px_rgba(0,0,0,1)]" data-i18n="prob-p2">
-                        Estas desviaciones tempranas y correcciones mal diagnosticadas <strong class="text-white font-extrabold">destruyen silenciosamente los márgenes de utilidad</strong> en los contratos "llave en mano".
+                        Estas desviaciones tempranas y reparaciones mal cubicadas <strong class="text-white font-extrabold">erosionan silenciosamente los márgenes de utilidad</strong> en los contratos "llave en mano".
                     </p>
                 </div>
 
                 <div class="lg:col-span-7 grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <div class="bg-[#0a0a0a] rounded-3xl p-6 md:p-8 border border-slate-800 hover:border-brand-500/50 hover:shadow-[0_0_30px_rgba(255,107,53,0.15)] transition-all fade-in-up">
-                        <div class="stat-figure text-5xl font-semibold text-white mb-4 tracking-tighter">21.7<span class="text-brand-500 font-bold text-3xl">%</span></div>
-                        <h4 class="text-base font-bold text-white mb-2" data-i18n="prob-stat1-title">Retrabajos Constantes</h4>
-                        <p class="text-sm text-slate-400 leading-relaxed mb-4" data-i18n="prob-stat1-desc">De las partidas presentan observaciones tempranas. Corregirlas consume hasta un 6% del presupuesto total.</p>
-                        <p class="text-[10px] uppercase tracking-wider text-slate-500 font-semibold" data-i18n="prob-source">Matrix Consulting & CChC</p>
+                    <!-- Cifra 2026: 30% blanco, % naranjo -->
+                    <div class="bg-[#0a0a0a] rounded-3xl p-6 md:p-8 border border-brand-500/40 hover:border-brand-500 hover:shadow-[0_0_30px_rgba(255,107,53,0.15)] transition-all fade-in-up">
+                        <span class="inline-block text-[10px] font-mono uppercase tracking-widest text-brand-400 mb-1" data-i18n="prob-stat1-eyebrow">Hasta</span>
+                        <div class="stat-figure text-5xl font-semibold mb-3 tracking-tighter"><span class="text-white">30</span><span class="text-brand-500 font-bold text-3xl">%</span></div>
+                        <h4 class="text-base font-bold text-white mb-2" data-i18n="prob-stat1-title">Trabajo en Terreno es Retrabajo</h4>
+                        <p class="text-sm text-slate-400 leading-relaxed mb-4" data-i18n="prob-stat1-desc">Del trabajo en terreno puede ser retrabajo. Lo habitual consume entre un 5% y un 15% del costo total del proyecto.</p>
+                        <p class="text-[10px] uppercase tracking-wider text-slate-400 font-semibold" data-i18n="prob-source-2026">Fuente: Revista Constructivo (2026)</p>
                     </div>
 
                     <div class="bg-[#0a0a0a] rounded-3xl p-6 md:p-8 border border-slate-800 hover:border-brand-500/50 hover:shadow-[0_0_30px_rgba(255,107,53,0.15)] transition-all fade-in-up" style="transition-delay: 0.1s;">
-                        <div class="stat-figure text-5xl font-semibold text-white mb-4 tracking-tighter">71<span class="text-brand-500 font-bold text-3xl">%</span></div>
-                        <h4 class="text-base font-bold text-white mb-2" data-i18n="prob-stat2-title">Desviaciones Críticas</h4>
-                        <p class="text-sm text-slate-400 leading-relaxed mb-4" data-i18n="prob-stat2-desc">Obras que no se entregan a tiempo en Chile, promediando un atraso de 4 meses por reprocesos.</p>
-                        <p class="text-[10px] uppercase tracking-wider text-slate-500 font-semibold" data-i18n="prob-source">Matrix Consulting & CChC</p>
+                        <span class="inline-block text-[10px] font-mono uppercase tracking-widest text-slate-500 mb-1" data-i18n="prob-stat2-eyebrow">Incidencia</span>
+                        <div class="stat-figure text-5xl font-semibold mb-3 tracking-tighter"><span class="text-white">21.7</span><span class="text-brand-500 font-bold text-3xl">%</span></div>
+                        <h4 class="text-base font-bold text-white mb-2" data-i18n="prob-stat2-title">Partidas con Observaciones</h4>
+                        <p class="text-sm text-slate-400 leading-relaxed mb-4" data-i18n="prob-stat2-desc">De las partidas presentan observaciones tempranas. Corregirlas consume hasta un 6% del presupuesto de la obra.</p>
+                        <p class="text-[10px] uppercase tracking-wider text-slate-500 font-semibold" data-i18n="prob-source-2020">Matrix Consulting & CChC (2020)</p>
                     </div>
 
                     <div class="bg-[#0a0a0a] rounded-3xl p-6 md:p-8 border border-slate-800 hover:border-brand-500/50 hover:shadow-[0_0_30px_rgba(255,107,53,0.15)] transition-all fade-in-up sm:col-span-2 lg:col-span-1" style="transition-delay: 0.2s;">
-                        <div class="stat-figure text-5xl font-semibold text-white mb-4 tracking-tighter">6<span class="text-brand-500 font-bold text-3xl">%</span></div>
-                        <h4 class="text-base font-bold text-white mb-2" data-i18n="prob-stat3-title">Presupuesto en Riesgo</h4>
-                        <p class="text-sm text-slate-400 leading-relaxed mb-4" data-i18n="prob-stat3-desc">Del presupuesto total de la obra se puede perder corrigiendo partidas mal evaluadas desde el inicio.</p>
-                        <!-- data-i18n ya vinculado arriba -->
-                        <p class="text-[10px] uppercase tracking-wider text-slate-500 font-semibold" data-i18n="prob-source">Matrix Consulting & CChC</p>
+                        <span class="inline-block text-[10px] font-mono uppercase tracking-widest text-slate-500 mb-1" data-i18n="prob-stat3-eyebrow">Atrasos</span>
+                        <div class="stat-figure text-5xl font-semibold mb-3 tracking-tighter"><span class="text-white">71</span><span class="text-brand-500 font-bold text-3xl">%</span></div>
+                        <h4 class="text-base font-bold text-white mb-2" data-i18n="prob-stat3-title">Desviaciones de Plazo</h4>
+                        <p class="text-sm text-slate-400 leading-relaxed mb-4" data-i18n="prob-stat3-desc">De las obras analizadas en Chile no se entregan a tiempo, promediando 4 meses de atraso por reprocesos.</p>
+                        <p class="text-[10px] uppercase tracking-wider text-slate-500 font-semibold" data-i18n="prob-source-2020">Matrix Consulting & CChC (2020)</p>
                     </div>
                 </div>
             </div>
@@ -293,7 +306,7 @@
                     Análisis<br>Integral
                 </h3>
                 <p class="text-sm md:text-base text-slate-400 font-light max-w-sm leading-relaxed" data-i18n="sol-desc">
-                    Estandarización impulsada por IA. Emisión instantánea de diagnósticos, proyección de riesgos y presupuestos con alta precisión.
+                    Asistencia técnica impulsada por IA para patologías constructivas, terminaciones y postventa. Estandariza diagnósticos, proyecta riesgos y estima presupuestos en CLP.
                 </p>
             </div>
 
@@ -305,7 +318,7 @@
                         <i class="fa-solid fa-camera-retro text-lg md:text-xl"></i>
                     </div>
                     <h4 class="text-xl sm:text-2xl md:text-3xl font-extrabold text-white mb-2 md:mb-3 tracking-tight leading-tight" data-i18n="card1-title">Captura<br>multimodal</h4>
-                    <p class="text-[11px] sm:text-xs md:text-sm text-slate-400 leading-relaxed font-light" data-i18n="card1-desc">Interfaz móvil intuitiva para el ingreso in situ de fotografías contextuales y descripciones textuales detalladas de las anomalías constructivas.</p>
+                    <p class="text-[11px] sm:text-xs md:text-sm text-slate-400 leading-relaxed font-light" data-i18n="card1-desc">Interfaz móvil ágil para el registro en terreno de fotografías contextuales y observaciones técnicas de patologías en obra gruesa no estructural, terminaciones e instalaciones.</p>
                     <div class="card-number absolute bottom-2 right-4 text-brand-500/10 font-extrabold text-5xl sm:text-6xl md:text-7xl tracking-tighter opacity-0 translate-y-10 transition-all duration-700 ease-out z-0">01</div>
                 </div>
 
@@ -314,68 +327,68 @@
                     <div class="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-slate-900 flex items-center justify-center text-slate-400 mb-3 md:mb-4 border border-slate-800 group-hover:bg-brand-900/40 group-hover:text-brand-400 group-hover:border-brand-500/30 transition-colors">
                         <i class="fa-solid fa-brain text-lg md:text-xl"></i>
                     </div>
-                    <h4 class="text-xl sm:text-2xl md:text-3xl font-extrabold text-white mb-2 md:mb-3 tracking-tight leading-tight" data-i18n="card2-title">Motor de<br>inferencia IA</h4>
-                    <p class="text-[11px] sm:text-xs md:text-sm text-slate-400 leading-relaxed font-light" data-i18n="card2-desc">Visión computacional entrenada para detectar patrones en los elementos e identificar la causa raíz del problema, eliminando el sesgo humano en el diagnóstico inicial.</p>
+                    <h4 class="text-xl sm:text-2xl md:text-3xl font-extrabold text-white mb-2 md:mb-3 tracking-tight leading-tight" data-i18n="card2-title">Asistencia<br>con IA</h4>
+                    <p class="text-[11px] sm:text-xs md:text-sm text-slate-400 leading-relaxed font-light" data-i18n="card2-desc">Visión computacional entrenada para identificar patologías constructivas y sugerir causas probables, apoyando el criterio del ITO o jefe de obra con una base objetiva.</p>
                     <div class="card-number absolute bottom-2 right-4 text-brand-500/10 font-extrabold text-5xl sm:text-6xl md:text-7xl tracking-tighter opacity-0 translate-y-10 transition-all duration-700 ease-out z-0">02</div>
                 </div>
 
                 <!-- Tarjeta 3 -->
                 <div class="solucion-card w-[250px] sm:w-[280px] md:w-[320px] h-[310px] sm:h-[340px] md:h-[380px] shrink-0 bg-[#0a0a0a] border border-slate-800 hover:border-brand-500 hover:border-[2px] rounded-[2rem] p-5 sm:p-6 md:p-8 flex flex-col justify-center relative overflow-hidden group transition-all duration-300">
                     <div class="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-slate-900 flex items-center justify-center text-slate-400 mb-3 md:mb-4 border border-slate-800 group-hover:bg-brand-900/40 group-hover:text-brand-400 group-hover:border-brand-500/30 transition-colors">
-                        <i class="fa-solid fa-list-check text-lg md:text-xl"></i>
+                        <i class="fa-solid fa-triangle-exclamation text-lg md:text-xl"></i>
                     </div>
-                    <h4 class="text-xl sm:text-2xl md:text-3xl font-extrabold text-white mb-2 md:mb-3 tracking-tight leading-tight" data-i18n="card3-title">Mantenimiento<br>predictivo</h4>
-                    <p class="text-[11px] sm:text-xs md:text-sm text-slate-400 leading-relaxed font-light" data-i18n="card3-desc">Evaluación analítica que no solo diagnostica el daño actual, sino que proyecta los riesgos y fallas estructurales a futuro si el elemento no se interviene a tiempo.</p>
+                    <h4 class="text-xl sm:text-2xl md:text-3xl font-extrabold text-white mb-2 md:mb-3 tracking-tight leading-tight" data-i18n="card3-title">Proyección<br>de riesgo</h4>
+                    <p class="text-[11px] sm:text-xs md:text-sm text-slate-400 leading-relaxed font-light" data-i18n="card3-desc">Evaluación preventiva que clasifica la severidad del hallazgo hoy y proyecta el deterioro progresivo o sobrecosto futuro si la partida no se interviene a tiempo.</p>
                     <div class="card-number absolute bottom-2 right-4 text-brand-500/10 font-extrabold text-5xl sm:text-6xl md:text-7xl tracking-tighter opacity-0 translate-y-10 transition-all duration-700 ease-out z-0">03</div>
                 </div>
 
                 <!-- Tarjeta 4 -->
                 <div class="solucion-card w-[250px] sm:w-[280px] md:w-[320px] h-[310px] sm:h-[340px] md:h-[380px] shrink-0 bg-[#0a0a0a] border border-slate-800 hover:border-brand-500 hover:border-[2px] rounded-[2rem] p-5 sm:p-6 md:p-8 flex flex-col justify-center relative overflow-hidden group transition-all duration-300">
                     <div class="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-slate-900 flex items-center justify-center text-slate-400 mb-3 md:mb-4 border border-slate-800 group-hover:bg-brand-900/40 group-hover:text-brand-400 group-hover:border-brand-500/30 transition-colors">
-                        <i class="fa-solid fa-satellite-dish text-lg md:text-xl"></i>
+                        <i class="fa-solid fa-database text-lg md:text-xl"></i>
                     </div>
-                    <h4 class="text-xl sm:text-2xl md:text-3xl font-extrabold text-white mb-2 md:mb-3 tracking-tight leading-tight" data-i18n="card4-title">Memoria<br>experta</h4>
-                    <p class="text-[11px] sm:text-xs md:text-sm text-slate-400 leading-relaxed font-light" data-i18n="card4-desc">Tecnología RAG que vectoriza y aprende de los diagnósticos validados por tu empresa, estandarizando los criterios técnicos y eliminando las alucinaciones del sistema.</p>
+                    <h4 class="text-xl sm:text-2xl md:text-3xl font-extrabold text-white mb-2 md:mb-3 tracking-tight leading-tight" data-i18n="card4-title">Memoria<br>experta (RAG)</h4>
+                    <p class="text-[11px] sm:text-xs md:text-sm text-slate-400 leading-relaxed font-light" data-i18n="card4-desc">Arquitectura RAG que consulta el historial de soluciones validadas por tu constructora, estandarizando los protocolos de reparación y reduciendo imprecisiones.</p>
                     <div class="card-number absolute bottom-2 right-4 text-brand-500/10 font-extrabold text-5xl sm:text-6xl md:text-7xl tracking-tighter opacity-0 translate-y-10 transition-all duration-700 ease-out z-0">04</div>
                 </div>
 
                 <!-- Tarjeta 5 -->
                 <div class="solucion-card w-[250px] sm:w-[280px] md:w-[320px] h-[310px] sm:h-[340px] md:h-[380px] shrink-0 bg-[#0a0a0a] border border-slate-800 hover:border-brand-500 hover:border-[2px] rounded-[2rem] p-5 sm:p-6 md:p-8 flex flex-col justify-center relative overflow-hidden group transition-all duration-300">
                     <div class="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-slate-900 flex items-center justify-center text-slate-400 mb-3 md:mb-4 border border-slate-800 group-hover:bg-brand-900/40 group-hover:text-brand-400 group-hover:border-brand-500/30 transition-colors">
-                        <i class="fa-solid fa-map-location-dot text-lg md:text-xl"></i>
+                        <i class="fa-solid fa-cloud-sun-rain text-lg md:text-xl"></i>
                     </div>
                     <h4 class="text-xl sm:text-2xl md:text-3xl font-extrabold text-white mb-2 md:mb-3 tracking-tight leading-tight" data-i18n="card5-title">Contexto<br>climático</h4>
-                    <p class="text-[11px] sm:text-xs md:text-sm text-slate-400 leading-relaxed font-light" data-i18n="card5-desc">Detección inteligente de ubicación para capturar la temperatura y humedad ambiental en tiempo real, variables críticas para determinar la viabilidad y tiempos de curado de los materiales.</p>
+                    <p class="text-[11px] sm:text-xs md:text-sm text-slate-400 leading-relaxed font-light" data-i18n="card5-desc">Geolocalización automática que incorpora temperatura y humedad ambiental de la zona al momento de la inspección, variables clave para adhesivos, morteros y tiempos de curado.</p>
                     <div class="card-number absolute bottom-2 right-4 text-brand-500/10 font-extrabold text-5xl sm:text-6xl md:text-7xl tracking-tighter opacity-0 translate-y-10 transition-all duration-700 ease-out z-0">05</div>
                 </div>
 
                 <!-- Tarjeta 6 -->
                 <div class="solucion-card w-[250px] sm:w-[280px] md:w-[320px] h-[310px] sm:h-[340px] md:h-[380px] shrink-0 bg-[#0a0a0a] border border-slate-800 hover:border-brand-500 hover:border-[2px] rounded-[2rem] p-5 sm:p-6 md:p-8 flex flex-col justify-center relative overflow-hidden group transition-all duration-300">
                     <div class="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-slate-900 flex items-center justify-center text-slate-400 mb-3 md:mb-4 border border-slate-800 group-hover:bg-brand-900/40 group-hover:text-brand-400 group-hover:border-brand-500/30 transition-colors">
-                        <i class="fa-solid fa-cubes text-lg md:text-xl"></i>
+                        <i class="fa-solid fa-file-invoice-dollar text-lg md:text-xl"></i>
                     </div>
-                    <h4 class="text-xl sm:text-2xl md:text-3xl font-extrabold text-white mb-2 md:mb-3 tracking-tight leading-tight" data-i18n="card6-title">Presupuestos<br>dinámicos</h4>
-                    <p class="text-[11px] sm:text-xs md:text-sm text-slate-400 leading-relaxed font-light" data-i18n="card6-desc">Cotización paramétrica cruzada con catálogos reales. Incluye control interactivo de unidades de materiales y exportación inmediata a Excel y PDF.</p>
+                    <h4 class="text-xl sm:text-2xl md:text-3xl font-extrabold text-white mb-2 md:mb-3 tracking-tight leading-tight" data-i18n="card6-title">Presupuestos<br>en CLP</h4>
+                    <p class="text-[11px] sm:text-xs md:text-sm text-slate-400 leading-relaxed font-light" data-i18n="card6-desc">Estimación paramétrica vinculada a precios de catálogo en Chile. Permite ajustar cantidades de materiales en pantalla y exportar el informe técnico a Excel y PDF.</p>
                     <div class="card-number absolute bottom-2 right-4 text-brand-500/10 font-extrabold text-5xl sm:text-6xl md:text-7xl tracking-tighter opacity-0 translate-y-10 transition-all duration-700 ease-out z-0">06</div>
                 </div>
 
                 <!-- Tarjeta 7 -->
                 <div class="solucion-card w-[250px] sm:w-[280px] md:w-[320px] h-[310px] sm:h-[340px] md:h-[380px] shrink-0 bg-[#0a0a0a] border border-slate-800 hover:border-brand-500 hover:border-[2px] rounded-[2rem] p-5 sm:p-6 md:p-8 flex flex-col justify-center relative overflow-hidden group transition-all duration-300">
                     <div class="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-slate-900 flex items-center justify-center text-slate-400 mb-3 md:mb-4 border border-slate-800 group-hover:bg-brand-900/40 group-hover:text-brand-400 group-hover:border-brand-500/30 transition-colors">
-                        <i class="fa-solid fa-cubes text-lg md:text-xl"></i>
+                        <i class="fa-solid fa-list-check text-lg md:text-xl"></i>
                     </div>
-                    <h4 class="text-xl sm:text-2xl md:text-3xl font-extrabold text-white mb-2 md:mb-3 tracking-tight leading-tight" data-i18n="card6-title">Trazabilidad<br>de obra</h4>
-                    <p class="text-[11px] sm:text-xs md:text-sm text-slate-400 leading-relaxed font-light" data-i18n="card6-desc">Sistema interactivo de seguimiento por estados (Evaluado, Revisión, Aprobado/Rechazado, Ejecución, Finalizado) para mantener el control total del ciclo de vida de cada reparación.</p>
+                    <h4 class="text-xl sm:text-2xl md:text-3xl font-extrabold text-white mb-2 md:mb-3 tracking-tight leading-tight" data-i18n="card7-title">Trazabilidad<br>de obra</h4>
+                    <p class="text-[11px] sm:text-xs md:text-sm text-slate-400 leading-relaxed font-light" data-i18n="card7-desc">Flujo de control por estados (Evaluado, En Revisión, Aprobado/Rechazado, En Ejecución y Finalizado) donde el profesional responsable valida cada etapa.</p>
                     <div class="card-number absolute bottom-2 right-4 text-brand-500/10 font-extrabold text-5xl sm:text-6xl md:text-7xl tracking-tighter opacity-0 translate-y-10 transition-all duration-700 ease-out z-0">07</div>
                 </div>
 
                 <!-- Tarjeta 8 -->
                 <div class="solucion-card w-[250px] sm:w-[280px] md:w-[320px] h-[310px] sm:h-[340px] md:h-[380px] shrink-0 bg-[#0a0a0a] border border-slate-800 hover:border-brand-500 hover:border-[2px] rounded-[2rem] p-5 sm:p-6 md:p-8 flex flex-col justify-center relative overflow-hidden group transition-all duration-300">
                     <div class="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-slate-900 flex items-center justify-center text-slate-400 mb-3 md:mb-4 border border-slate-800 group-hover:bg-brand-900/40 group-hover:text-brand-400 group-hover:border-brand-500/30 transition-colors">
-                        <i class="fa-solid fa-cubes text-lg md:text-xl"></i>
+                        <i class="fa-solid fa-users-gear text-lg md:text-xl"></i>
                     </div>
-                    <h4 class="text-xl sm:text-2xl md:text-3xl font-extrabold text-white mb-2 md:mb-3 tracking-tight leading-tight" data-i18n="card6-title">Ecosistema<br>B2B y<br>seguridad</h4>
-                    <p class="text-[11px] sm:text-xs md:text-sm text-slate-400 leading-relaxed font-light" data-i18n="card6-desc">Arquitectura Serverless con panel de administración centralizado, pagos vía Webpay Plus y gestión de hasta 50 trabajadores compartiendo un mismo saldo de tokens.</p>
+                    <h4 class="text-xl sm:text-2xl md:text-3xl font-extrabold text-white mb-2 md:mb-3 tracking-tight leading-tight" data-i18n="card8-title">Bolsa B2B<br>compartida</h4>
+                    <p class="text-[11px] sm:text-xs md:text-sm text-slate-400 leading-relaxed font-light" data-i18n="card8-desc">Cuenta Maestra con hasta 49 usuarios de terreno compartiendo una misma bolsa de tokens y pagos integrados vía Transbank Webpay Plus.</p>
                     <div class="card-number absolute bottom-2 right-4 text-brand-500/10 font-extrabold text-5xl sm:text-6xl md:text-7xl tracking-tighter opacity-0 translate-y-10 transition-all duration-700 ease-out z-0">08</div>
                 </div>
 
@@ -417,22 +430,23 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div id="caract-text-container" class="text-center max-w-2xl mx-auto mb-16 opacity-0" style="transform: translateY(150px); will-change: transform, opacity;">
                 <h2 class="text-brand-400 font-bold tracking-widest uppercase text-xs mb-3" data-i18n="feat-subtitle">Cambio de Paradigma</h2>
-                <h3 class="text-3xl md:text-4xl font-extrabold tracking-tight mb-4" data-i18n="feat-title">De un registro pasivo a un asistente activo</h3>
+                <h3 class="text-3xl md:text-4xl font-extrabold tracking-tight mb-4" data-i18n="feat-title">La IA asiste y estandariza; el profesional decide</h3>
+                <p class="text-slate-400 text-sm md:text-base font-light" data-i18n="feat-desc">Diseñado para jefes de obra, ITOs y equipos de postventa que necesitan rapidez en terreno sin perder rigor técnico.</p>
             </div>
             
-            <div class="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+            <div class="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto mb-20">
                 <div id="caract-card-1" class="border border-slate-700 bg-slate-800/50 p-8 rounded-3xl opacity-0" style="transform: translateX(-400px); will-change: transform, opacity;">
                     <div class="flex items-center justify-between mb-8 pb-4 border-b border-slate-700">
                         <div>
-                            <h4 class="text-xl font-bold text-slate-200" data-i18n="feat-trad-title">Software Tradicional</h4>
-                            <p class="text-xs text-slate-500 uppercase tracking-widest font-bold mt-1" data-i18n="feat-trad-sub">Gestión Pasiva</p>
+                            <h4 class="text-xl font-bold text-slate-200" data-i18n="feat-trad-title">Flujo Tradicional</h4>
+                            <p class="text-xs text-slate-500 uppercase tracking-widest font-bold mt-1" data-i18n="feat-trad-sub">Registro Pasivo</p>
                         </div>
                         <i class="fa-solid fa-folder-open text-2xl text-slate-600"></i>
                     </div>
                     <ul class="space-y-4 text-slate-400 text-sm font-light">
-                        <li class="flex items-start gap-3"><i class="fa-solid fa-xmark text-slate-600 mt-1 shrink-0"></i> <span data-i18n="feat-trad-1">Funciona únicamente como un repositorio digital.</span></li>
-                        <li class="flex items-start gap-3"><i class="fa-solid fa-xmark text-slate-600 mt-1 shrink-0"></i> <span data-i18n="feat-trad-2">El diagnóstico inicial depende 100% de la deducción visual humana.</span></li>
-                        <li class="flex items-start gap-3"><i class="fa-solid fa-xmark text-slate-600 mt-1 shrink-0"></i> <span data-i18n="feat-trad-3">Presupuestos calculados a posteriori con un amplio margen de error.</span></li>
+                        <li class="flex items-start gap-3"><i class="fa-solid fa-xmark text-slate-600 mt-1 shrink-0"></i> <span data-i18n="feat-trad-1">Fotos sueltas en WhatsApp o planillas sin contexto climático ni trazabilidad.</span></li>
+                        <li class="flex items-start gap-3"><i class="fa-solid fa-xmark text-slate-600 mt-1 shrink-0"></i> <span data-i18n="feat-trad-2">Criterios dispares entre distintos inspectores frente a una misma patología constructiva.</span></li>
+                        <li class="flex items-start gap-3"><i class="fa-solid fa-xmark text-slate-600 mt-1 shrink-0"></i> <span data-i18n="feat-trad-3">Cubicaciones y presupuestos de reparación calculados días después en oficina.</span></li>
                     </ul>
                 </div>
                 
@@ -446,23 +460,194 @@
                     <div class="flex items-center justify-between mb-8 pb-4 border-b border-brand-500/20">
                         <div>
                             <h4 class="text-xl font-bold text-white">Obrín IA</h4>
-                            <p class="text-xs text-brand-400 uppercase tracking-widest font-bold mt-1" data-i18n="feat-obrin-sub">Asistente Activo</p>
+                            <p class="text-xs text-brand-400 uppercase tracking-widest font-bold mt-1" data-i18n="feat-obrin-sub">Asistente Activo en Terreno</p>
                         </div>
                         <i class="fa-solid fa-bolt text-2xl text-brand-400"></i>
                     </div>
                     <ul class="space-y-4 text-slate-200 text-sm font-light">
-                        <li class="flex items-start gap-3"><i class="fa-solid fa-check text-brand-400 mt-1 shrink-0"></i> <span data-i18n="feat-obrin-1">Procesa la evidencia y entrega un diagnóstico estructurado.</span></li>
-                        <li class="flex items-start gap-3"><i class="fa-solid fa-check text-brand-400 mt-1 shrink-0"></i> <span data-i18n="feat-obrin-2">Potencia la decisión profesional, mitigando el sesgo humano.</span></li>
-                        <li class="flex items-start gap-3"><i class="fa-solid fa-check text-brand-400 mt-1 shrink-0"></i> <span data-i18n="feat-obrin-3">Cálculo de presupuesto regionalizado instantáneo y exacto.</span></li>
+                        <li class="flex items-start gap-3"><i class="fa-solid fa-check text-brand-400 mt-1 shrink-0"></i> <span data-i18n="feat-obrin-1">Procesa la evidencia en terreno y estructura una propuesta técnica lista para revisión.</span></li>
+                        <li class="flex items-start gap-3"><i class="fa-solid fa-check text-brand-400 mt-1 shrink-0"></i> <span data-i18n="feat-obrin-2">Potencia la decisión del profesional estandarizando criterios validados por tu empresa.</span></li>
+                        <li class="flex items-start gap-3"><i class="fa-solid fa-check text-brand-400 mt-1 shrink-0"></i> <span data-i18n="feat-obrin-3">Estimación presupuestaria parametrizada en CLP con listado editable de materiales.</span></li>
                     </ul>
                     
-                    <div class="mt-8 pt-6 border-t border-brand-500/20 flex items-center justify-between">
+                    <div class="mt-8 pt-6 border-t border-brand-500/20 flex items-center justify-between gap-4">
                         <div>
-                            <p class="text-[10px] text-brand-300 font-bold uppercase tracking-widest" data-i18n="feat-kpi-title">Meta de Impacto (KPI)</p>
-                            <p class="text-sm text-white font-medium mt-1" data-i18n="feat-kpi-desc">Sobrecostos por errores iniciales.</p>
+                            <p class="text-[10px] text-brand-300 font-bold uppercase tracking-widest" data-i18n="feat-kpi-title">Entregables Estandarizados</p>
+                            <p class="text-sm text-white font-medium mt-1" data-i18n="feat-kpi-desc">Generados en segundos a partir de 1 foto en terreno.</p>
                         </div>
-                        <div class="text-5xl font-light text-white tracking-tighter">0<span class="text-xl text-brand-400 font-bold">%</span></div>
+                        <div class="stat-figure text-5xl font-semibold text-white tracking-tighter shrink-0">8<span class="text-lg text-brand-400 font-bold ml-1" data-i18n="feat-kpi-unit">ítems</span></div>
                     </div>
+                </div>
+            </div>
+
+            <!-- BLOQUE BASADO EN IMAGEN ADJUNTA: "Desde una foto en terreno, Obrín IA entrega:" -->
+            <div class="max-w-5xl mx-auto bg-[#0a0a0a] border border-slate-800 rounded-[2.5rem] p-8 md:p-12 fade-in-up relative overflow-hidden">
+                <div class="absolute -top-24 -right-24 w-72 h-72 bg-brand-500/10 rounded-full blur-3xl pointer-events-none"></div>
+                <div class="grid lg:grid-cols-12 gap-8 items-center">
+                    <div class="lg:col-span-5">
+                        <span class="text-brand-500 font-mono text-xs uppercase tracking-widest font-bold block mb-2" data-i18n="deliv-eyebrow">La Solución en Terreno</span>
+                        <h4 class="text-3xl md:text-4xl font-extrabold text-white tracking-tight leading-tight mb-4" data-i18n="deliv-title">
+                            Desde una foto en terreno, <span class="text-brand-500">Obrín IA entrega:</span>
+                        </h4>
+                        <p class="text-slate-400 text-sm font-light leading-relaxed mb-6" data-i18n="deliv-desc">
+                            Enfocada hoy en patologías constructivas de edificación, recepciones, terminaciones y postventa. El profesional revisa, ajusta cantidades si lo requiere y exporta en PDF o Excel.
+                        </p>
+                        <div class="flex flex-wrap gap-3">
+                            <a href="demo.html" target="_blank" class="inline-flex items-center gap-2 bg-brand-500 hover:bg-brand-600 text-black font-bold text-xs uppercase tracking-wider px-5 py-3 rounded-full transition-all">
+                                <span data-i18n="deliv-cta-1">Probar con una foto</span> <i class="fa-solid fa-arrow-right"></i>
+                            </a>
+                            <a href="https://wa.me/56992582669?text=Hola%2C%20quiero%20ver%20un%20ejemplo%20de%20informe%20PDF%20de%20Obr%C3%ADn%20IA" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 bg-slate-900 hover:bg-slate-800 text-slate-200 border border-slate-700 font-semibold text-xs px-5 py-3 rounded-full transition-all">
+                                <i class="fa-brands fa-whatsapp text-emerald-400 text-sm"></i> <span data-i18n="deliv-cta-2">Pedir informe de ejemplo</span>
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="lg:col-span-7 grid sm:grid-cols-2 gap-3.5">
+                        <div class="bg-black/80 border border-slate-800/90 hover:border-brand-500/50 rounded-2xl p-4 flex items-center gap-3.5 transition-colors">
+                            <span class="w-2.5 h-2.5 rounded-full bg-brand-500 shrink-0"></span>
+                            <span class="text-sm text-slate-200 font-medium" data-i18n="deliv-1">Diagnóstico de la patología y su gravedad</span>
+                        </div>
+                        <div class="bg-black/80 border border-slate-800/90 hover:border-brand-500/50 rounded-2xl p-4 flex items-center gap-3.5 transition-colors">
+                            <span class="w-2.5 h-2.5 rounded-full bg-brand-500 shrink-0"></span>
+                            <span class="text-sm text-slate-200 font-medium" data-i18n="deliv-2">Contexto climático del lugar</span>
+                        </div>
+                        <div class="bg-black/80 border border-slate-800/90 hover:border-brand-500/50 rounded-2xl p-4 flex items-center gap-3.5 transition-colors">
+                            <span class="w-2.5 h-2.5 rounded-full bg-brand-500 shrink-0"></span>
+                            <span class="text-sm text-slate-200 font-medium" data-i18n="deliv-3">Riesgo a futuro si no se repara</span>
+                        </div>
+                        <div class="bg-black/80 border border-slate-800/90 hover:border-brand-500/50 rounded-2xl p-4 flex items-center gap-3.5 transition-colors">
+                            <span class="w-2.5 h-2.5 rounded-full bg-brand-500 shrink-0"></span>
+                            <span class="text-sm text-slate-200 font-medium" data-i18n="deliv-4">Propuesta técnica de reparación</span>
+                        </div>
+                        <div class="bg-black/80 border border-slate-800/90 hover:border-brand-500/50 rounded-2xl p-4 flex items-center gap-3.5 transition-colors">
+                            <span class="w-2.5 h-2.5 rounded-full bg-brand-500 shrink-0"></span>
+                            <span class="text-sm text-slate-200 font-medium" data-i18n="deliv-5">Paso a paso del procedimiento</span>
+                        </div>
+                        <div class="bg-black/80 border border-slate-800/90 hover:border-brand-500/50 rounded-2xl p-4 flex items-center gap-3.5 transition-colors">
+                            <span class="w-2.5 h-2.5 rounded-full bg-brand-500 shrink-0"></span>
+                            <span class="text-sm text-slate-200 font-medium" data-i18n="deliv-6">Lista de materiales con precios</span>
+                        </div>
+                        <div class="bg-black/80 border border-slate-800/90 hover:border-brand-500/50 rounded-2xl p-4 flex items-center gap-3.5 transition-colors">
+                            <span class="w-2.5 h-2.5 rounded-full bg-brand-500 shrink-0"></span>
+                            <span class="text-sm text-slate-200 font-medium" data-i18n="deliv-7">Presupuesto total referencial en CLP</span>
+                        </div>
+                        <div class="bg-black/80 border border-slate-800/90 hover:border-brand-500/50 rounded-2xl p-4 flex items-center gap-3.5 transition-colors">
+                            <span class="w-2.5 h-2.5 rounded-full bg-brand-500 shrink-0"></span>
+                            <span class="text-sm text-slate-200 font-medium" data-i18n="deliv-8">Tiempo de ejecución estimado</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECCIÓN: BILLETERA Y PLANES (Sin botones de compra) -->
+    <section id="planes" class="py-24 bg-black text-white relative z-40 border-b border-slate-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-3xl mx-auto mb-14 fade-in-up">
+                <h2 class="text-brand-500 font-bold tracking-widest uppercase text-xs mb-3" data-i18n="plan-subtitle">Billetera y Planes</h2>
+                <h3 class="text-3xl md:text-4xl font-extrabold tracking-tight mb-4" data-i18n="plan-title">Costos transparentes por capacidad de procesamiento</h3>
+                <p class="text-slate-400 text-sm md:text-base font-light" data-i18n="plan-desc">
+                    Recarga tu capacidad con Transbank Webpay Plus. Los tokens se descuentan únicamente cuando generas diagnósticos, consultas la memoria experta o calculas presupuestos en terreno.
+                </p>
+            </div>
+
+            <!-- Explicación rápida de cómo funcionan los tokens -->
+            <div class="max-w-4xl mx-auto mb-12 bg-[#0a0a0a] border border-slate-800 rounded-2xl p-5 md:p-6 flex flex-col md:flex-row items-center justify-between gap-4 fade-in-up">
+                <div class="flex items-center gap-4">
+                    <div class="w-11 h-11 rounded-xl bg-brand-500/15 border border-brand-500/30 flex items-center justify-center text-brand-400 shrink-0">
+                        <i class="fa-solid fa-bolt text-lg"></i>
+                    </div>
+                    <div>
+                        <h4 class="text-sm font-bold text-white" data-i18n="token-how-title">¿Cómo funcionan los tokens en Obrín IA?</h4>
+                        <p class="text-xs text-slate-400 font-light mt-0.5" data-i18n="token-how-desc">Cada evaluación fotográfica completa + presupuesto CLP consume una fracción de tokens según su extensión. Con 1.000.000 de tokens realizas decenas de levantamientos completos al mes.</p>
+                    </div>
+                </div>
+                <span class="text-[11px] font-mono uppercase tracking-wider text-slate-400 bg-black px-3.5 py-1.5 rounded-full border border-slate-800 shrink-0" data-i18n="token-webpay">Pagos vía Webpay Plus</span>
+            </div>
+
+            <!-- Tarjetas de Planes (Distribución original de 3 columnas) -->
+            <div class="grid lg:grid-cols-3 gap-8 max-w-5xl mx-auto items-stretch mb-8">
+                
+                <!-- Plan Básico -->
+                <div class="bg-[#0a0a0a] border border-slate-800 hover:border-slate-700 rounded-3xl p-8 flex flex-col justify-between transition-all fade-in-up">
+                    <div>
+                        <span class="inline-block bg-slate-900 text-slate-300 border border-slate-800 text-[10px] font-mono uppercase tracking-widest px-3 py-1 rounded-md font-semibold mb-5" data-i18n="plan1-badge">Suscripción Mensual</span>
+                        <h4 class="text-2xl font-extrabold text-white mb-1" data-i18n="plan1-name">Plan Básico</h4>
+                        <p class="text-xs text-slate-400 font-light mb-6" data-i18n="plan1-sub">Para profesionales independientes.</p>
+                        
+                        <div class="mb-6">
+                            <span class="stat-figure text-4xl font-bold text-white">$24.990</span>
+                            <span class="text-slate-500 text-sm" data-i18n="plan-month">/mes</span>
+                        </div>
+
+                        <div class="space-y-2 pt-4 border-t border-slate-800/80 mb-2">
+                            <p class="text-sm font-bold text-white flex items-center gap-2">
+                                <i class="fa-solid fa-bolt text-brand-500"></i> <span>1.000.000 Tokens</span>
+                            </p>
+                            <p class="text-xs text-slate-400" data-i18n="plan-single-user">Uso individual</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Plan Plus (Más Popular) -->
+                <div class="bg-gradient-to-b from-[#141118] to-[#0a0a0a] border-2 border-brand-500 rounded-3xl p-8 flex flex-col justify-between shadow-glow relative transition-all lg:-translate-y-2 fade-in-up" style="transition-delay: 0.1s;">
+                    <div>
+                        <span class="inline-block bg-brand-500 text-black text-[10px] font-mono uppercase tracking-widest px-3 py-1 rounded-md font-bold mb-5" data-i18n="plan2-badge">Más Popular</span>
+                        <h4 class="text-2xl font-extrabold text-white mb-1" data-i18n="plan2-name">Plan Plus</h4>
+                        <p class="text-xs text-slate-300 font-light mb-6" data-i18n="plan2-sub">Mayor capacidad para analistas diarios.</p>
+                        
+                        <div class="mb-6">
+                            <span class="stat-figure text-4xl font-bold text-white">$44.990</span>
+                            <span class="text-slate-400 text-sm" data-i18n="plan-month">/mes</span>
+                        </div>
+
+                        <div class="space-y-2 pt-4 border-t border-slate-800 mb-2">
+                            <p class="text-sm font-bold text-brand-400 flex items-center gap-2">
+                                <i class="fa-solid fa-bolt"></i> <span>2.500.000 Tokens</span>
+                            </p>
+                            <p class="text-xs text-slate-300" data-i18n="plan-single-user">Uso individual</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Plan Pro (Constructora / B2B) -->
+                <div class="bg-gradient-to-b from-[#2e237a] to-[#1b1447] border border-indigo-400/30 rounded-3xl p-8 flex flex-col justify-between transition-all fade-in-up" style="transition-delay: 0.2s;">
+                    <div>
+                        <span class="inline-block bg-indigo-950/80 text-indigo-200 border border-indigo-400/30 text-[10px] font-mono uppercase tracking-widest px-3 py-1 rounded-md font-semibold mb-5" data-i18n="plan3-badge">Constructora / B2B</span>
+                        <h4 class="text-2xl font-extrabold text-white mb-1" data-i18n="plan3-name">Plan Pro</h4>
+                        <p class="text-xs text-indigo-200 font-light mb-6" data-i18n="plan3-sub">Bolsa compartida para todo tu equipo.</p>
+                        
+                        <div class="mb-6">
+                            <span class="stat-figure text-4xl font-bold text-white">$249.990</span>
+                            <span class="text-indigo-200 text-sm" data-i18n="plan-month">/mes</span>
+                        </div>
+
+                        <div class="space-y-3 pt-4 border-t border-indigo-400/20 mb-2">
+                            <p class="text-sm font-bold text-indigo-200 flex items-center gap-2">
+                                <i class="fa-solid fa-bolt text-brand-400"></i> <span>15.000.000 Tokens</span>
+                            </p>
+                            <div class="inline-flex items-center gap-2 bg-indigo-950/70 border border-indigo-400/30 rounded-lg px-3 py-1.5 text-[11px] font-mono uppercase tracking-wider text-indigo-100">
+                                <i class="fa-solid fa-users text-xs"></i> <span data-i18n="plan3-users">Cuenta Maestra + 49 Usuarios</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recarga Express (Abajo) -->
+            <div class="max-w-5xl mx-auto bg-[#0a0a0a] border border-slate-800 rounded-2xl p-6 flex flex-col sm:flex-row items-center justify-between gap-6 fade-in-up">
+                <div>
+                    <div class="flex items-center gap-2 text-white font-bold text-base">
+                        <i class="fa-solid fa-battery-three-quarters text-brand-500"></i>
+                        <span data-i18n="recharge-title">Recarga Express</span>
+                    </div>
+                    <p class="text-xs text-slate-400 font-light mt-1" data-i18n="recharge-desc">
+                        Añade 200.000 tokens instantáneos que no vencen. Exclusivo para usuarios con plan activo.
+                    </p>
+                </div>
+                <div class="flex items-center gap-5 shrink-0">
+                    <span class="stat-figure text-2xl font-bold text-white">$9.990</span>
                 </div>
             </div>
         </div>
@@ -532,17 +717,47 @@
 
     <section id="galeria" class="py-24 bg-black relative z-40 border-b border-slate-800">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center max-w-2xl mx-auto mb-16 fade-in-up">
-                <h2 class="text-brand-600 font-bold tracking-widest uppercase text-xs mb-3" data-i18n="gal-subtitle">Galería</h2>
-                <h3 class="text-3xl md:text-4xl font-extrabold text-white tracking-tight" data-i18n="gal-title">Obrín IA en acción</h3>
+            <div class="text-center max-w-3xl mx-auto mb-16 fade-in-up">
+                <h2 class="text-brand-500 font-bold tracking-widest uppercase text-xs mb-3" data-i18n="gal-subtitle">Tracción y Validación en el Ecosistema</h2>
+                <h3 class="text-3xl md:text-4xl font-extrabold text-white tracking-tight mb-4" data-i18n="gal-title">Respaldado por la academia y puesto a prueba en la industria</h3>
+                <p class="text-slate-400 text-sm md:text-base font-light" data-i18n="gal-desc">
+                    Construido desde la Escuela de Construcción Civil UC y validado en instancias nacionales de innovación y emprendimiento.
+                </p>
+            </div>
+
+            <!-- Hitos de Validación (Jump Chile + Reto CChC + UC) -->
+            <div class="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto mb-12">
+                <div class="bg-[#0a0a0a] border border-slate-800 rounded-2xl p-6 fade-in-up">
+                    <div class="text-brand-400 font-mono text-xs uppercase tracking-widest font-bold mb-2">Jump Chile · UC</div>
+                    <h4 class="text-lg font-bold text-white mb-2" data-i18n="mile1-title">Top 100 Nacional</h4>
+                    <p class="text-xs text-slate-400 font-light leading-relaxed" data-i18n="mile1-desc">Proyecto seleccionado entre los 100 mejores emprendimientos del programa Jump Chile del Centro de Innovación UC Anacleto Angelini.</p>
+                </div>
+                <div class="bg-[#0a0a0a] border border-slate-800 rounded-2xl p-6 fade-in-up" style="transition-delay: 0.1s;">
+                    <div class="text-brand-400 font-mono text-xs uppercase tracking-widest font-bold mb-2">Reto Construye Academia CChC</div>
+                    <h4 class="text-lg font-bold text-white mb-2" data-i18n="mile2-title">Semifinalistas</h4>
+                    <p class="text-xs text-slate-400 font-light leading-relaxed" data-i18n="mile2-desc">Reconocimiento como semifinalistas en el Reto de Innovación de la Cámara Chilena de la Construcción.</p>
+                </div>
+                <div class="bg-[#0a0a0a] border border-slate-800 rounded-2xl p-6 fade-in-up" style="transition-delay: 0.2s;">
+                    <div class="text-brand-400 font-mono text-xs uppercase tracking-widest font-bold mb-2">Construcción Civil UC</div>
+                    <h4 class="text-lg font-bold text-white mb-2" data-i18n="mile3-title">Rigor Metodológico</h4>
+                    <p class="text-xs text-slate-400 font-light leading-relaxed" data-i18n="mile3-desc">Desarrollo guiado por profesores e investigadores en construcción inteligente para asegurar criterios técnicos aplicables en obra.</p>
+                </div>
             </div>
 
             <div class="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-                <div class="rounded-3xl overflow-hidden shadow-soft hover:shadow-glow transition-all duration-300 fade-in-up">
-                    <img src="Equipo Obrín IA.jpg" alt="Equipo de Obrín IA trabajando" class="w-full h-80 object-cover">
+                <div class="rounded-3xl overflow-hidden bg-[#0a0a0a] border border-slate-800 shadow-soft hover:shadow-glow transition-all duration-300 fade-in-up">
+                    <img src="Equipo Obrín IA.jpg" alt="Equipo de Obrín IA en Jump Chile y terreno" class="w-full h-72 object-cover" onerror="this.onerror=null; this.src='https://placehold.co/800x500/111111/FF6B35?text=Equipo+Obrin+IA';">
+                    <div class="p-5">
+                        <span class="text-[10px] font-mono uppercase tracking-widest text-brand-400">Jump Chile & Desarrollo</span>
+                        <p class="text-sm text-white font-semibold mt-1" data-i18n="gal-cap1">Equipo fundador perfeccionando el motor paramétrico de diagnóstico constructivo.</p>
+                    </div>
                 </div>
-                <div class="rounded-3xl overflow-hidden shadow-soft hover:shadow-glow transition-all duration-300 fade-in-up" style="transition-delay: 0.1s;">
-                    <img src="Reto CChC.jpg" alt="Obrín IA en el Reto CChC" class="w-full h-80 object-cover">
+                <div class="rounded-3xl overflow-hidden bg-[#0a0a0a] border border-slate-800 shadow-soft hover:shadow-glow transition-all duration-300 fade-in-up" style="transition-delay: 0.1s;">
+                    <img src="Reto CChC.jpg" alt="Obrín IA en el Reto CChC" class="w-full h-72 object-cover" onerror="this.onerror=null; this.src='https://placehold.co/800x500/111111/FF6B35?text=Reto+CChC';">
+                    <div class="p-5">
+                        <span class="text-[10px] font-mono uppercase tracking-widest text-brand-400">Reto Construye Academia CChC</span>
+                        <p class="text-sm text-white font-semibold mt-1" data-i18n="gal-cap2">Exposición y validación de casos de uso reales ante representantes del sector construcción.</p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -554,11 +769,28 @@
                 <div>
                     <img src="https://lh3.googleusercontent.com/pw/AP1GczOOE3ZHICrV-_RfZdqAjRIdP5vT8mk8EUJgp83JaAa8uF1SEOlEcN5nkO410n_kUGrx1VZJU2MAD_yk6HcbPAhoW4zzYVJH3KVOOof-U3bsfH4yL6P5J2U9i8SaDuth_yZPP6_IihvtadZrNgEjzDIeUQ=w599-h599-s-no-gm?authuser=0" alt="Obrín IA Logo" class="h-10 w-auto object-contain mb-6 invert grayscale opacity-90" onerror="this.onerror=null; this.src='https://placehold.co/150x50/000000/ffffff?text=Obrin+IA';">
                     <p class="text-slate-400 text-sm mb-6 max-w-sm font-light leading-relaxed" data-i18n="foot-desc">
-                        Sistema paramétrico de diagnóstico estructural. Protegiendo la rentabilidad de las constructoras a través de tecnología avanzada.
+                        Asistente paramétrico de diagnóstico de patologías constructivas en terreno. Estandarizando criterios técnicos y protegiendo los márgenes de la obra.
                     </p>
-                    <a href="mailto:contacto@obrinia.cl" class="inline-flex items-center gap-2 text-brand-400 hover:text-brand-300 transition-colors text-sm font-medium">
-                        <i class="fa-solid fa-envelope"></i> contacto@obrinia.cl
-                    </a>
+                    <div class="flex flex-col space-y-2.5 mb-6">
+                        <a href="https://wa.me/56992582669?text=Hola%20equipo%20Obr%C3%ADn%20IA%2C%20quisiera%20conversar%20sobre%20un%20piloto" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 text-emerald-400 hover:text-emerald-300 transition-colors text-sm font-medium">
+                            <i class="fa-brands fa-whatsapp text-base"></i> <span data-i18n="foot-wa">WhatsApp directo con el equipo</span>
+                        </a>
+                        <a href="mailto:contacto@obrinia.cl" class="inline-flex items-center gap-2 text-brand-400 hover:text-brand-300 transition-colors text-sm font-medium">
+                            <i class="fa-solid fa-envelope"></i> contacto@obrinia.cl
+                        </a>
+                    </div>
+                    <!-- Redes Sociales -->
+                    <div class="flex items-center gap-3">
+                        <a href="https://www.instagram.com/obrin.ia/" target="_blank" rel="noopener noreferrer" aria-label="Instagram Obrín IA" class="w-9 h-9 rounded-full bg-slate-900 border border-slate-800 hover:border-brand-500 flex items-center justify-center text-slate-300 hover:text-white transition-all">
+                            <i class="fa-brands fa-instagram"></i>
+                        </a>
+                        <a href="https://youtube.com/shorts/1cWU5Xq0AyM?feature=share" target="_blank" rel="noopener noreferrer" aria-label="YouTube Obrín IA" class="w-9 h-9 rounded-full bg-slate-900 border border-slate-800 hover:border-brand-500 flex items-center justify-center text-slate-300 hover:text-white transition-all">
+                            <i class="fa-brands fa-youtube"></i>
+                        </a>
+                        <a href="https://www.linkedin.com/in/jmchristensenc/" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn" class="w-9 h-9 rounded-full bg-slate-900 border border-slate-800 hover:border-brand-500 flex items-center justify-center text-slate-300 hover:text-white transition-all">
+                            <i class="fa-brands fa-linkedin-in"></i>
+                        </a>
+                    </div>
                 </div>
 
                 <div class="flex flex-col justify-start">
@@ -570,8 +802,9 @@
                     <h4 class="text-white font-semibold mb-4 text-sm" data-i18n="foot-plat">Plataforma</h4>
                     <ul class="space-y-3 text-sm font-light">
                         <li><a href="#problema" class="text-slate-400 hover:text-white transition-colors nav-link" data-i18n="nav-problem">El Problema</a></li>
-                        <li><a href="#solucion" class="text-slate-400 hover:text-white transition-colors nav-link" data-i18n="nav-solution">Tecnología IA</a></li>
-                        <li><a href="#caracteristicas" class="text-slate-400 hover:text-white transition-colors nav-link" data-i18n="nav-tech">Características</a></li>
+                        <li><a href="#solucion" class="text-slate-400 hover:text-white transition-colors nav-link" data-i18n="nav-solution">Solución</a></li>
+                        <li><a href="#caracteristicas" class="text-slate-400 hover:text-white transition-colors nav-link" data-i18n="nav-tech">Entregables</a></li>
+                        <li><a href="#planes" class="text-slate-400 hover:text-white transition-colors nav-link" data-i18n="nav-pricing">Planes y Tokens</a></li>
                     </ul>
                 </div>
             </div>
@@ -581,68 +814,120 @@
                     © 2026 Obrín IA. Proyecto de Innovación.
                 </p>
                 <p class="text-xs text-slate-500 font-light">
-                    Ref: Construye2025 (2020) | Matrix Consulting (2020)
+                    Ref: Revista Constructivo (2026) | Matrix Consulting & CChC (2020)
                 </p>
             </div>
         </div>
     </footer>
 
+    <!-- BOTÓN FLOTANTE WHATSAPP -->
+    <a href="https://wa.me/56992582669?text=Hola%20equipo%20Obr%C3%ADn%20IA%2C%20tengo%20una%20consulta%20sobre%20la%20plataforma" target="_blank" rel="noopener noreferrer" aria-label="Contactar por WhatsApp" class="fixed bottom-6 right-6 z-50 flex items-center gap-2.5 bg-emerald-500 hover:bg-emerald-400 text-black font-bold text-xs sm:text-sm px-4 py-3 rounded-full shadow-[0_10px_30px_rgba(16,185,129,0.4)] transition-all hover:scale-105">
+        <i class="fa-brands fa-whatsapp text-xl"></i>
+        <span class="hidden sm:inline" data-i18n="float-wa">¿Dudas? Escríbenos</span>
+    </a>
+
     <script>
-        // --- SISTEMA DE TRADUCCIÓN (i18n) ---
         const translations = {
             es: {
                 "nav-problem": "El Problema",
                 "nav-solution": "Solución",
                 "nav-tutorial": "Tutorial",
-                "nav-tech": "Tecnología",
+                "nav-tech": "Entregables",
+                "nav-pricing": "Planes y Tokens",
                 "nav-team": "Equipo",
-                "nav-demo": "Solicitar Demo",
+                "nav-whatsapp": "Hablar con el equipo",
+                "nav-demo": "Acceder a Obrín IA",
+                "hero-badge": "Top 100 Jump Chile · Semifinalista Reto CChC",
                 "hero-title": "NO ES SOLO<br /><span class=\"text-white\">UN DATO.</span>",
-                "hero-subtitle": "Es el resultado de avances en IA e IoT sin precedentes en la industria.",
-                "hero-btn": "Descubrir Obrín IA",
+                "hero-subtitle": "Diagnóstico de patologías constructivas en terreno. La IA asiste y estandariza; el profesional decide.",
+                "hero-btn": "Acceder a Obrín IA",
+                "hero-btn-secondary": "Ver qué entrega una foto <i class=\"fa-solid fa-arrow-down text-brand-400 text-xs\"></i>",
                 "prob-subtitle": "El Problema de la Industria",
                 "prob-title": "El costo oculto de la evaluación visual.",
-                "prob-p1": "La construcción transita hacia la industrialización, pero la captura de datos sigue siendo análoga. El levantamiento de fallas depende del ojo humano, generando diagnósticos subjetivos.",
-                "prob-p2": "Estas desviaciones tempranas y correcciones mal diagnosticadas <strong class=\"text-white font-extrabold\">destruyen silenciosamente los márgenes de utilidad</strong> en los contratos \"llave en mano\".",
-                "prob-stat1-title": "Retrabajos Constantes",
-                "prob-stat1-desc": "De las partidas presentan observaciones tempranas. Corregirlas consume hasta un 6% del presupuesto total.",
-                "prob-source": "Matrix Consulting & CChC",
-                "prob-stat2-title": "Desviaciones Críticas",
-                "prob-stat2-desc": "Obras que no se entregan a tiempo en Chile, promediando un atraso de 4 meses por reprocesos.",
-                "prob-stat3-title": "Presupuesto en Riesgo",
-                "prob-stat3-desc": "Del presupuesto total de la obra se puede perder corrigiendo partidas mal evaluadas desde el inicio.",
+                "prob-p1": "La construcción avanza hacia la industrialización, pero el levantamiento de patologías constructivas, recepciones y postventa en terreno sigue dependiendo de criterios individuales no estandarizados.",
+                "prob-p2": "Estas desviaciones tempranas y reparaciones mal cubicadas <strong class=\"text-white font-extrabold\">erosionan silenciosamente los márgenes de utilidad</strong> en los contratos \"llave en mano\".",
+                "prob-stat1-eyebrow": "Hasta",
+                "prob-stat1-title": "Trabajo en Terreno es Retrabajo",
+                "prob-stat1-desc": "Del trabajo en terreno puede ser retrabajo. Lo habitual consume entre un 5% y un 15% del costo total del proyecto.",
+                "prob-source-2026": "Fuente: Revista Constructivo (2026)",
+                "prob-stat2-eyebrow": "Incidencia",
+                "prob-stat2-title": "Partidas con Observaciones",
+                "prob-stat2-desc": "De las partidas presentan observaciones tempranas. Corregirlas consume hasta un 6% del presupuesto de la obra.",
+                "prob-source-2020": "Matrix Consulting & CChC (2020)",
+                "prob-stat3-eyebrow": "Atrasos",
+                "prob-stat3-title": "Desviaciones de Plazo",
+                "prob-stat3-desc": "De las obras analizadas en Chile no se entregan a tiempo, promediando 4 meses de atraso por reprocesos.",
                 "sol-subtitle": "Plataforma Paramétrica",
                 "sol-title": "Análisis<br>Integral",
-                "sol-desc": "Estandarización impulsada por IA + IoT. Emisión instantánea de prescripciones técnicas exactas.",
+                "sol-desc": "Asistencia técnica impulsada por IA para patologías constructivas, terminaciones y postventa. Estandariza diagnósticos, proyecta riesgos y estima presupuestos en CLP.",
                 "card1-title": "Captura<br>multimodal",
-                "card1-desc": "Interfaz móvil intuitiva para el ingreso in situ de fotografías contextuales y descripciones textuales de las fallas.",
-                "card2-title": "Motor de<br>inferencia IA",
-                "card2-desc": "Visión computacional entrenada para detectar patrones estructurales e identificar la causa raíz eliminando el sesgo humano.",
-                "card3-title": "Resultado<br>paramétrico",
-                "card3-desc": "Emisión inmediata de un reporte capaz de diagnosticar patologías y definir soluciones, insumos, protocolos y costos por m².",
-                "card4-title": "Telemetría<br>IoT",
-                "card4-desc": "Integración perimetral con sensores LiDAR e higrómetros para medir volúmenes y condiciones con precisión milimétrica.",
-                "card5-title": "Contexto<br>geográfico",
-                "card5-desc": "Cotización inteligente cruzando la ubicación GPS de la obra vía API con catálogos de proveedores locales actualizados.",
-                "card6-title": "Cubicación<br>BIM",
-                "card6-desc": "Ingesta de planimetrías (CAD/BIM) para geolocalizar patologías y generar listas de materiales exactas para abastecimiento.",
+                "card1-desc": "Interfaz móvil ágil para el registro en terreno de fotografías contextuales y observaciones técnicas de patologías en obra gruesa no estructural, terminaciones e instalaciones.",
+                "card2-title": "Asistencia<br>con IA",
+                "card2-desc": "Visión computacional entrenada para identificar patologías constructivas y sugerir causas probables, apoyando el criterio del ITO o jefe de obra con una base objetiva.",
+                "card3-title": "Proyección<br>de riesgo",
+                "card3-desc": "Evaluación preventiva que clasifica la severidad del hallazgo hoy y proyecta el deterioro progresivo o sobrecosto futuro si la partida no se interviene a tiempo.",
+                "card4-title": "Memoria<br>experta (RAG)",
+                "card4-desc": "Arquitectura RAG que consulta el historial de soluciones validadas por tu constructora, estandarizando los protocolos de reparación y reduciendo imprecisiones.",
+                "card5-title": "Contexto<br>climático",
+                "card5-desc": "Geolocalización automática que incorpora temperatura y humedad ambiental de la zona al momento de la inspección, variables clave para adhesivos, morteros y tiempos de curado.",
+                "card6-title": "Presupuestos<br>en CLP",
+                "card6-desc": "Estimación paramétrica vinculada a precios de catálogo en Chile. Permite ajustar cantidades de materiales en pantalla y exportar el informe técnico a Excel y PDF.",
+                "card7-title": "Trazabilidad<br>de obra",
+                "card7-desc": "Flujo de control por estados (Evaluado, En Revisión, Aprobado/Rechazado, En Ejecución y Finalizado) donde el profesional responsable valida cada etapa.",
+                "card8-title": "Bolsa B2B<br>compartida",
+                "card8-desc": "Cuenta Maestra con hasta 49 usuarios de terreno compartiendo una misma bolsa de tokens y pagos integrados vía Transbank Webpay Plus.",
                 "tut-subtitle": "Video Tutorial",
                 "tut-title": "Mira Obrín IA en acción",
                 "tut-desc": "Descubre en pocos minutos cómo nuestra plataforma captura, analiza y presupuesta soluciones constructivas directamente en terreno.",
                 "tut-btn": "<i class=\"fa-brands fa-youtube text-red-600 text-lg\"></i> Ver en YouTube",
                 "feat-subtitle": "Cambio de Paradigma",
-                "feat-title": "De un registro pasivo a un asistente activo",
-                "feat-trad-title": "Software Tradicional",
-                "feat-trad-sub": "Gestión Pasiva",
-                "feat-trad-1": "Funciona únicamente como un repositorio digital.",
-                "feat-trad-2": "El diagnóstico inicial depende 100% de la deducción visual humana.",
-                "feat-trad-3": "Presupuestos calculados a posteriori con un amplio margen de error.",
-                "feat-obrin-sub": "Asistente Activo",
-                "feat-obrin-1": "Procesa la evidencia y entrega un diagnóstico estructurado.",
-                "feat-obrin-2": "Potencia la decisión profesional, mitigando el sesgo humano.",
-                "feat-obrin-3": "Cálculo de presupuesto regionalizado instantáneo y exacto.",
-                "feat-kpi-title": "Meta de Impacto (KPI)",
-                "feat-kpi-desc": "Sobrecostos por errores iniciales.",
+                "feat-title": "La IA asiste y estandariza; el profesional decide",
+                "feat-desc": "Diseñado para jefes de obra, ITOs y equipos de postventa que necesitan rapidez en terreno sin perder rigor técnico.",
+                "feat-trad-title": "Flujo Tradicional",
+                "feat-trad-sub": "Registro Pasivo",
+                "feat-trad-1": "Fotos sueltas en WhatsApp o planillas sin contexto climático ni trazabilidad.",
+                "feat-trad-2": "Criterios dispares entre distintos inspectores frente a una misma patología constructiva.",
+                "feat-trad-3": "Cubicaciones y presupuestos de reparación calculados días después en oficina.",
+                "feat-obrin-sub": "Asistente Activo en Terreno",
+                "feat-obrin-1": "Procesa la evidencia en terreno y estructura una propuesta técnica lista para revisión.",
+                "feat-obrin-2": "Potencia la decisión del profesional estandarizando criterios validados por tu empresa.",
+                "feat-obrin-3": "Estimación presupuestaria parametrizada en CLP con listado editable de materiales.",
+                "feat-kpi-title": "Entregables Estandarizados",
+                "feat-kpi-desc": "Generados en segundos a partir de 1 foto en terreno.",
+                "feat-kpi-unit": "ítems",
+                "deliv-eyebrow": "La Solución en Terreno",
+                "deliv-title": "Desde una foto en terreno, <span class=\"text-brand-500\">Obrín IA entrega:</span>",
+                "deliv-desc": "Enfocada hoy en patologías constructivas de edificación, recepciones, terminaciones y postventa. El profesional revisa, ajusta cantidades si lo requiere y exporta en PDF o Excel.",
+                "deliv-cta-1": "Probar con una foto",
+                "deliv-cta-2": "Pedir informe de ejemplo",
+                "deliv-1": "Diagnóstico de la patología y su gravedad",
+                "deliv-2": "Contexto climático del lugar",
+                "deliv-3": "Riesgo a futuro si no se repara",
+                "deliv-4": "Propuesta técnica de reparación",
+                "deliv-5": "Paso a paso del procedimiento",
+                "deliv-6": "Lista de materiales con precios",
+                "deliv-7": "Presupuesto total referencial en CLP",
+                "deliv-8": "Tiempo de ejecución estimado",
+                "plan-subtitle": "Billetera y Planes",
+                "plan-title": "Costos transparentes por capacidad de procesamiento",
+                "plan-desc": "Recarga tu capacidad con Transbank Webpay Plus. Los tokens se descuentan únicamente cuando generas diagnósticos, consultas la memoria experta o calculas presupuestos en terreno.",
+                "token-how-title": "¿Cómo funcionan los tokens en Obrín IA?",
+                "token-how-desc": "Cada evaluación fotográfica completa + presupuesto CLP consume una fracción de tokens según su extensión. Con 1.000.000 de tokens realizas decenas de levantamientos completos al mes.",
+                "token-webpay": "Pagos vía Webpay Plus",
+                "plan1-badge": "Suscripción Mensual",
+                "plan1-name": "Plan Básico",
+                "plan1-sub": "Para profesionales independientes.",
+                "plan2-badge": "Más Popular",
+                "plan2-name": "Plan Plus",
+                "plan2-sub": "Mayor capacidad para analistas diarios.",
+                "plan3-badge": "Constructora / B2B",
+                "plan3-name": "Plan Pro",
+                "plan3-sub": "Bolsa compartida para todo tu equipo.",
+                "plan3-users": "Cuenta Maestra + 49 Usuarios",
+                "plan-month": "/mes",
+                "plan-single-user": "Uso individual",
+                "recharge-title": "Recarga Express",
+                "recharge-desc": "Añade 200.000 tokens instantáneos que no vencen. Exclusivo para usuarios con plan activo.",
                 "team-title": "Desarrollado por expertos",
                 "team-role1": "Líder / Co-creador",
                 "team-role2": "Co-creador",
@@ -654,66 +939,124 @@
                 "team-acad-desc": "Vínculo institucional con la Escuela de Construcción Civil.",
                 "team-acad-p1": "Ph.D. Construcción Inteligente, Virginia Tech (2022).",
                 "team-acad-p2": "M.Eng. Computer Science / Ms.C. Construcción, Virginia Tech.",
-                "gal-subtitle": "Galería",
-                "gal-title": "Obrín IA en acción",
-                "foot-desc": "Sistema paramétrico de diagnóstico estructural. Protegiendo la rentabilidad de las constructoras a través de tecnología avanzada.",
+                "gal-subtitle": "Tracción y Validación en el Ecosistema",
+                "gal-title": "Respaldado por la academia y puesto a prueba en la industria",
+                "gal-desc": "Construido desde la Escuela de Construcción Civil UC y validado en instancias nacionales de innovación y emprendimiento.",
+                "mile1-title": "Top 100 Nacional",
+                "mile1-desc": "Proyecto seleccionado entre los 100 mejores emprendimientos del programa Jump Chile del Centro de Innovación UC Anacleto Angelini.",
+                "mile2-title": "Semifinalistas",
+                "mile2-desc": "Reconocimiento como semifinalistas en el Reto de Innovación de la Cámara Chilena de la Construcción.",
+                "mile3-title": "Rigor Metodológico",
+                "mile3-desc": "Desarrollo guiado por profesores e investigadores en construcción inteligente para asegurar criterios técnicos aplicables en obra.",
+                "gal-cap1": "Equipo fundador perfeccionando el motor paramétrico de diagnóstico constructivo.",
+                "gal-cap2": "Exposición y validación de casos de uso reales ante representantes del sector construcción.",
+                "foot-desc": "Asistente paramétrico de diagnóstico de patologías constructivas en terreno. Estandarizando criterios técnicos y protegiendo los márgenes de la obra.",
+                "foot-wa": "WhatsApp directo con el equipo",
                 "foot-plat": "Plataforma",
                 "foot-backed": "Proyecto respaldado por",
-                "foot-copy": "© 2026 Obrín IA. Proyecto de Innovación."
+                "foot-copy": "© 2026 Obrín IA. Proyecto de Innovación.",
+                "float-wa": "¿Dudas? Escríbenos"
             },
             en: {
                 "nav-problem": "The Problem",
                 "nav-solution": "Solution",
                 "nav-tutorial": "Tutorial",
-                "nav-tech": "Technology",
+                "nav-tech": "Deliverables",
+                "nav-pricing": "Plans & Tokens",
                 "nav-team": "Team",
-                "nav-demo": "Request Demo",
+                "nav-whatsapp": "Talk to the team",
+                "nav-demo": "Access Obrín IA",
+                "hero-badge": "Top 100 Jump Chile · Semifinalist CChC Challenge",
                 "hero-title": "IT'S NOT JUST<br /><span class=\"text-white\">DATA.</span>",
-                "hero-subtitle": "It is the result of unprecedented AI and IoT advancements in the industry.",
-                "hero-btn": "Discover Obrín IA",
+                "hero-subtitle": "On-site construction pathology diagnostics. AI assists and standardizes; the professional decides.",
+                "hero-btn": "Access Obrín IA",
+                "hero-btn-secondary": "See what 1 photo delivers <i class=\"fa-solid fa-arrow-down text-brand-400 text-xs\"></i>",
                 "prob-subtitle": "The Industry Problem",
                 "prob-title": "The hidden cost of visual assessment.",
-                "prob-p1": "Construction is moving towards industrialization, but data capture remains analog. Defect surveying depends on the human eye, generating subjective diagnostics.",
-                "prob-p2": "These early deviations and poorly diagnosed corrections <strong class=\"text-white font-extrabold\">silently destroy profit margins</strong> in turnkey contracts.",
-                "prob-stat1-title": "Constant Rework",
-                "prob-stat1-desc": "Of the tasks present early observations. Correcting them consumes up to 6% of the total budget.",
-                "prob-source": "Matrix Consulting & CChC",
-                "prob-stat2-title": "Critical Deviations",
-                "prob-stat2-desc": "Projects in Chile that are not delivered on time, averaging a 4-month delay due to rework.",
-                "prob-stat3-title": "Budget at Risk",
-                "prob-stat3-desc": "Of the total project budget can be lost correcting poorly assessed items from the start.",
+                "prob-p1": "Construction is moving towards industrialization, yet on-site surveying of construction defects, handovers, and after-sales still relies on unstandardized individual criteria.",
+                "prob-p2": "These early deviations and poorly estimated repairs <strong class=\"text-white font-extrabold\">silently erode profit margins</strong> in turnkey contracts.",
+                "prob-stat1-eyebrow": "Up to",
+                "prob-stat1-title": "Field Work is Rework",
+                "prob-stat1-desc": "Of on-site work can be rework. Typically, it consumes between 5% and 15% of total project cost.",
+                "prob-source-2026": "Source: Revista Constructivo (2026)",
+                "prob-stat2-eyebrow": "Incidence",
+                "prob-stat2-title": "Items with Observations",
+                "prob-stat2-desc": "Of construction items show early observations. Fixing them consumes up to 6% of the project budget.",
+                "prob-source-2020": "Matrix Consulting & CChC (2020)",
+                "prob-stat3-eyebrow": "Delays",
+                "prob-stat3-title": "Schedule Deviations",
+                "prob-stat3-desc": "Of analyzed projects in Chile are not delivered on time, averaging a 4-month delay due to rework.",
                 "sol-subtitle": "Parametric Platform",
                 "sol-title": "Comprehensive<br>Analysis",
-                "sol-desc": "Standardization driven by AI + IoT. Instant issuance of exact technical prescriptions.",
+                "sol-desc": "AI-powered technical assistance for construction pathologies, finishes, and after-sales. Standardize diagnostics, project risks, and estimate budgets in CLP.",
                 "card1-title": "Multimodal<br>Capture",
-                "card1-desc": "Intuitive mobile interface for on-site input of contextual photographs and textual descriptions of defects.",
-                "card2-title": "AI Inference<br>Engine",
-                "card2-desc": "Computer vision trained to detect structural patterns and identify the root cause, eliminating human bias.",
-                "card3-title": "Parametric<br>Result",
-                "card3-desc": "Immediate issuance of a report capable of diagnosing pathologies and defining solutions, inputs, protocols, and costs per sqm.",
-                "card4-title": "IoT<br>Telemetry",
-                "card4-desc": "Perimeter integration with LiDAR sensors and hygrometers to measure volumes and conditions with millimeter precision.",
-                "card5-title": "Geographical<br>Context",
-                "card5-desc": "Smart quoting by cross-referencing the site's GPS location via API with updated local supplier catalogs.",
-                "card6-title": "BIM<br>Takeoff",
-                "card6-desc": "Ingestion of planimetries (CAD/BIM) to geolocate pathologies and generate exact material lists for procurement.",
+                "card1-desc": "Agile mobile interface for on-site recording of contextual photos and technical notes on non-structural rough work, finishes, and installations.",
+                "card2-title": "AI-Assisted<br>Diagnostics",
+                "card2-desc": "Computer vision trained to identify construction pathologies and suggest probable causes, supporting the site manager's or inspector's judgment.",
+                "card3-title": "Risk<br>Projection",
+                "card3-desc": "Preventive evaluation that classifies current severity and projects progressive deterioration or future cost overruns if not addressed in time.",
+                "card4-title": "Expert<br>Memory (RAG)",
+                "card4-desc": "RAG architecture that queries your company's validated repair history, standardizing technical protocols and reducing model inaccuracies.",
+                "card5-title": "Weather<br>Context",
+                "card5-desc": "Automatic geolocation capturing real-time ambient temperature and humidity during inspection—critical variables for curing times and materials.",
+                "card6-title": "Dynamic<br>CLP Budgets",
+                "card6-desc": "Parametric estimation linked to Chilean catalog prices. Adjust material quantities interactively and export reports to Excel and PDF.",
+                "card7-title": "On-Site<br>Traceability",
+                "card7-desc": "Status-based workflow (Evaluated, In Review, Approved/Rejected, In Execution, Completed) where the responsible professional validates each step.",
+                "card8-title": "Shared B2B<br>Token Pool",
+                "card8-desc": "Master Account supporting up to 49 field users sharing a single token balance with integrated Transbank Webpay Plus payments.",
                 "tut-subtitle": "Video Tutorial",
                 "tut-title": "Watch Obrín IA in action",
                 "tut-desc": "Discover in just a few minutes how our platform captures, analyzes, and budgets construction solutions directly on-site.",
                 "tut-btn": "<i class=\"fa-brands fa-youtube text-red-600 text-lg\"></i> Watch on YouTube",
                 "feat-subtitle": "Paradigm Shift",
-                "feat-title": "From a passive record to an active assistant",
-                "feat-trad-title": "Traditional Software",
-                "feat-trad-sub": "Passive Management",
-                "feat-trad-1": "Functions solely as a digital repository.",
-                "feat-trad-2": "Initial diagnosis depends 100% on human visual deduction.",
-                "feat-trad-3": "Budgets calculated a posteriori with a wide margin of error.",
-                "feat-obrin-sub": "Active Assistant",
-                "feat-obrin-1": "Processes the evidence and delivers a structured diagnosis.",
-                "feat-obrin-2": "Empowers professional decision-making, mitigating human bias.",
-                "feat-obrin-3": "Instant and exact regionalized budget calculation.",
-                "feat-kpi-title": "Impact Goal (KPI)",
-                "feat-kpi-desc": "Cost overruns due to initial errors.",
+                "feat-title": "AI assists and standardizes; the professional decides",
+                "feat-desc": "Built for site managers, inspectors (ITOs), and after-sales teams who need speed on-site without sacrificing technical rigor.",
+                "feat-trad-title": "Traditional Workflow",
+                "feat-trad-sub": "Passive Record",
+                "feat-trad-1": "Scattered WhatsApp photos or spreadsheets lacking weather context or traceability.",
+                "feat-trad-2": "Inconsistent criteria across inspectors when facing the exact same construction pathology.",
+                "feat-trad-3": "Takeoffs and repair budgets calculated days later back at the office.",
+                "feat-obrin-sub": "Active On-Site Assistant",
+                "feat-obrin-1": "Processes field evidence and structures a technical proposal ready for professional review.",
+                "feat-obrin-2": "Empowers professional judgment by standardizing criteria validated by your company.",
+                "feat-obrin-3": "Parametric budget estimation in CLP with an editable bill of materials.",
+                "feat-kpi-title": "Standardized Deliverables",
+                "feat-kpi-desc": "Generated in seconds from 1 photo on-site.",
+                "feat-kpi-unit": "items",
+                "deliv-eyebrow": "The On-Site Solution",
+                "deliv-title": "From a single photo on-site, <span class=\"text-brand-500\">Obrín IA delivers:</span>",
+                "deliv-desc": "Focused today on building construction pathologies, handovers, finishes, and after-sales. The professional reviews, adjusts quantities if needed, and exports to PDF or Excel.",
+                "deliv-cta-1": "Try with a photo",
+                "deliv-cta-2": "Request sample report",
+                "deliv-1": "Pathology diagnosis and severity level",
+                "deliv-2": "Local weather context",
+                "deliv-3": "Future risk if left unrepaired",
+                "deliv-4": "Technical repair proposal",
+                "deliv-5": "Step-by-step repair procedure",
+                "deliv-6": "Material list with unit prices",
+                "deliv-7": "Total reference budget in CLP",
+                "deliv-8": "Estimated execution time",
+                "plan-subtitle": "Wallet & Plans",
+                "plan-title": "Transparent pricing based on processing capacity",
+                "plan-desc": "Top up your capacity with Transbank Webpay Plus. Tokens are only deducted when generating diagnostics, querying expert memory, or calculating budgets.",
+                "token-how-title": "How do tokens work in Obrín IA?",
+                "token-how-desc": "Each full photo evaluation + CLP budget uses a fraction of tokens based on length. With 1,000,000 tokens you can run dozens of complete surveys per month.",
+                "token-webpay": "Payments via Webpay Plus",
+                "plan1-badge": "Monthly Subscription",
+                "plan1-name": "Basic Plan",
+                "plan1-sub": "For independent professionals.",
+                "plan2-badge": "Most Popular",
+                "plan2-name": "Plus Plan",
+                "plan2-sub": "Higher capacity for daily analysts.",
+                "plan3-badge": "Construction / B2B",
+                "plan3-name": "Pro Plan",
+                "plan3-sub": "Shared token pool for your entire team.",
+                "plan3-users": "Master Account + 49 Users",
+                "plan-month": "/mo",
+                "plan-single-user": "Single user",
+                "recharge-title": "Express Top-Up",
+                "recharge-desc": "Add 200,000 instant non-expiring tokens. Exclusive for users with an active plan.",
                 "team-title": "Developed by experts",
                 "team-role1": "Leader / Co-creator",
                 "team-role2": "Co-creator",
@@ -725,12 +1068,23 @@
                 "team-acad-desc": "Institutional link with the School of Civil Construction.",
                 "team-acad-p1": "Ph.D. Smart Construction, Virginia Tech (2022).",
                 "team-acad-p2": "M.Eng. Computer Science / Ms.C. Construction, Virginia Tech.",
-                "gal-subtitle": "Gallery",
-                "gal-title": "Obrín IA in action",
-                "foot-desc": "Parametric structural diagnosis system. Protecting construction companies' profitability through advanced technology.",
+                "gal-subtitle": "Ecosystem Traction & Validation",
+                "gal-title": "Backed by academia and tested in the industry",
+                "gal-desc": "Built at the UC School of Civil Construction and validated in national innovation and entrepreneurship programs.",
+                "mile1-title": "Top 100 National",
+                "mile1-desc": "Selected among the top 100 ventures in the Jump Chile program at the UC Anacleto Angelini Innovation Center.",
+                "mile2-title": "Semifinalists",
+                "mile2-desc": "Recognized as semifinalists in the Chilean Chamber of Construction (CChC) Innovation Challenge.",
+                "mile3-title": "Methodological Rigor",
+                "mile3-desc": "Guided by smart-construction professors and researchers to ensure field-ready technical criteria.",
+                "gal-cap1": "Founding team refining the parametric construction pathology engine.",
+                "gal-cap2": "Presenting and validating real use cases with construction industry representatives.",
+                "foot-desc": "Parametric on-site construction pathology diagnostic assistant. Standardizing technical criteria and protecting project margins.",
+                "foot-wa": "Direct WhatsApp with the team",
                 "foot-plat": "Platform",
                 "foot-backed": "Project backed by",
-                "foot-copy": "© 2026 Obrín IA. Innovation Project."
+                "foot-copy": "© 2026 Obrín IA. Innovation Project.",
+                "float-wa": "Questions? Message us"
             }
         };
 
@@ -740,11 +1094,9 @@
             currentLang = currentLang === 'es' ? 'en' : 'es';
             document.documentElement.lang = currentLang;
             
-            // Cambiar textos de los botones
             document.getElementById('lang-text-desktop').innerText = currentLang === 'es' ? 'EN' : 'ES';
             document.getElementById('lang-text-mobile').innerText = currentLang === 'es' ? 'English' : 'Español';
 
-            // Traducir todos los elementos marcados
             document.querySelectorAll('[data-i18n]').forEach(el => {
                 const key = el.getAttribute('data-i18n');
                 if (translations[currentLang][key]) {
@@ -762,7 +1114,6 @@
             const scrollY = window.scrollY;
             const winHeight = window.innerHeight;
             
-            // 1. Lógica Hero Text (Desvanecimiento)
             const heroSection = document.getElementById('hero-section');
             if (heroSection) {
                 const textProgress = Math.min(scrollY / (winHeight * 0.8), 1);
@@ -773,40 +1124,32 @@
                 }
             }
 
-            // 2. Lógica Celular 3D Global (Atraviesa secciones)
             const phoneWrapper = document.getElementById('hero-phone-container');
             const problemaSection = document.getElementById('problema');
             const solucionSection = document.getElementById('solucion');
 
             if (phoneWrapper && heroSection && problemaSection && solucionSection) {
-                // Distancia total de scroll antes de llegar a la sección 'Solución'
                 const distanceToSolucion = heroSection.offsetHeight + problemaSection.offsetHeight;
-                
-                // Progreso matemático continuo (garantiza cero saltos, siempre entre 0 y 1)
                 const movementProgress = Math.min(scrollY / distanceToSolucion, 1);
                 
-                // Variables de transformación que crecen fluidamente a medida que haces scroll
-                let scale = 0.6 + (0.6 * movementProgress); // Crece suavemente de 0.6 a 1.2
-                let rotateY = -40 + (70 * movementProgress); // Gira de -40 a 30 grados
-                let rotateX = movementProgress * 15; // Inclinación suave hacia atrás
-                let translateY = movementProgress * -80; // Sube ligeramente
-                let translateX = movementProgress * (window.innerWidth * 0.25); // Se desplaza a la derecha
+                let scale = 0.6 + (0.6 * movementProgress);
+                let rotateY = -40 + (70 * movementProgress);
+                let rotateX = movementProgress * 15;
+                let translateY = movementProgress * -80;
+                let translateX = movementProgress * (window.innerWidth * 0.25);
 
                 let opacity = 1;
 
-                // FASE DE DESVANECIMIENTO: Cuando la 'Solución' empieza a subir por la pantalla
                 const solucionRect = solucionSection.getBoundingClientRect();
                 if (solucionRect.top < winHeight) {
-                    // Calculamos el porcentaje de entrada de la sección a la pantalla (0 a 1)
                     const fadeProgress = Math.max(0, Math.min(1, (winHeight - solucionRect.top) / winHeight));
                     opacity = 1 - fadeProgress;
-                    translateY -= fadeProgress * 150; // Sigue subiendo extra mientras desaparece
+                    translateY -= fadeProgress * 150;
                 }
 
                 phoneWrapper.style.transform = `perspective(1200px) translate(${translateX}px, ${translateY}px) scale(${scale}) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
                 phoneWrapper.style.opacity = opacity;
 
-                // --- EFECTO BLUR Y ZOOM-IN PARA EL TEXTO ---
                 const problemaTextContainer = document.getElementById('problema-text-container');
                 if (problemaTextContainer) {
                     const problemaRect = problemaSection.getBoundingClientRect();
@@ -825,7 +1168,6 @@
                 }
             }
 
-            // 3. Lógica Scroll Horizontal (Sección Solución)
             const solWrapper = document.getElementById('solucion');
             const solTrack = document.getElementById('solucion-track');
             const solTextContainer = document.getElementById('solucion-text-container');
@@ -835,19 +1177,13 @@
                 const wrapperTop = wrapperRect.top;
                 const wrapperHeight = solWrapper.offsetHeight;
 
-                // Verificamos si estamos dentro de la sección pineada (400vh)
                 if (wrapperTop <= 0 && wrapperTop >= -(wrapperHeight - winHeight)) {
-                    // Calculamos el porcentaje de avance dentro del wrapper
                     const progress = Math.abs(wrapperTop) / (wrapperHeight - winHeight);
-                    // Distancia máxima que el track puede moverse a la izquierda
                     const maxScroll = solTrack.scrollWidth - window.innerWidth;
                     
                     solTrack.style.transform = `translateX(-${progress * maxScroll}px)`;
 
-                    // Lógica para desvanecer el título de Solución
                     if (solTextContainer) {
-                        // Queremos que empiece a desvanecerse rápido (ej. al 5% del scroll)
-                        // y desaparezca por completo pronto (ej. al 25% del scroll)
                         const fadeStart = 0.05;
                         const fadeEnd = 0.25;
                         
@@ -856,12 +1192,10 @@
 
                         if (progress > fadeStart) {
                             if (progress < fadeEnd) {
-                                // Calculamos la opacidad entre fadeStart y fadeEnd
                                 const fadeProgress = (progress - fadeStart) / (fadeEnd - fadeStart);
                                 textOpacity = 1 - fadeProgress;
-                                textTranslateY = fadeProgress * -50; // Sube 50px mientras desaparece
+                                textTranslateY = fadeProgress * -50;
                             } else {
-                                // Ya pasó el punto de desvanecimiento total
                                 textOpacity = 0;
                                 textTranslateY = -50;
                             }
@@ -872,7 +1206,6 @@
                     }
 
                 } 
-                // Si estamos antes de llegar a la sección
                 else if (wrapperTop > 0) {
                     solTrack.style.transform = `translateX(0px)`;
                     if (solTextContainer) {
@@ -880,7 +1213,6 @@
                         solTextContainer.style.transform = `translateY(0px)`;
                     }
                 } 
-                // Si ya pasamos la sección
                 else {
                     const maxScroll = solTrack.scrollWidth - window.innerWidth;
                     solTrack.style.transform = `translateX(-${maxScroll}px)`;
@@ -890,25 +1222,21 @@
                 }
             }
 
-            // 4. Lógica de animación de los números al avanzar
             const cards = document.querySelectorAll('.solucion-card');
             cards.forEach(card => {
                 const rect = card.getBoundingClientRect();
                 const numberEl = card.querySelector('.card-number');
                 if (numberEl) {
-                    // Si la tarjeta está bien centrada/visible en el viewport
                     if (rect.left < window.innerWidth * 0.9 && rect.right > window.innerWidth * 0.1) {
                         numberEl.classList.remove('opacity-0', 'translate-y-10');
                         numberEl.classList.add('opacity-100', 'translate-y-0');
                     } else {
-                        // Vuelve a ocultarse si se sale de la pantalla
                         numberEl.classList.add('opacity-0', 'translate-y-10');
                         numberEl.classList.remove('opacity-100', 'translate-y-0');
                     }
                 }
             });
 
-            // 5. Lógica Cinemática Video Tutorial (3D Tilt y Focus por scroll)
             const tutorialSection = document.getElementById('tutorial');
             const tutorialWrapper = document.getElementById('tutorial-video-wrapper');
             const tutorialTextContainer = document.getElementById('tutorial-text-container');
@@ -916,10 +1244,7 @@
             if (tutorialSection) {
                 const tutorialRect = tutorialSection.getBoundingClientRect();
                 
-                // Si la sección está visible en pantalla
                 if (tutorialRect.top < winHeight && tutorialRect.bottom > 0) {
-                    
-                    // --- Lógica Zoom In de Texto (x4 a x1) ---
                     if (tutorialTextContainer) {
                         const visibilityProgress = Math.max(0, Math.min(1, (winHeight - tutorialRect.top) / (winHeight * 0.7)));
                         
@@ -934,16 +1259,14 @@
                         const sectionCenter = tutorialRect.top + (tutorialRect.height / 2);
                         const screenCenter = winHeight / 2;
                         
-                        // Calculamos distancia relativa al centro de la pantalla
                         const distanceFromCenter = (sectionCenter - screenCenter) / (winHeight / 1.5);
                         const clampedDistance = Math.max(-1, Math.min(1, distanceFromCenter));
                         const absDistance = Math.abs(clampedDistance);
                         
-                        // Efectos: Inclinación en ejes X e Y, Blur en los bordes y Escala (acercamiento)
-                        const rotateX = clampedDistance * 30; // 30 grados de inclinación max
-                        const rotateY = clampedDistance * -10; // Leve giro de 10 grados en Y
-                        const scale = 1 - (absDistance * 0.2); // Se achica a 0.8 en los extremos
-                        const blur = absDistance * 12; // Se vuelve borroso al alejarse del centro
+                        const rotateX = clampedDistance * 30;
+                        const rotateY = clampedDistance * -10;
+                        const scale = 1 - (absDistance * 0.2);
+                        const blur = absDistance * 12;
                         
                         tutorialWrapper.style.transform = `perspective(1200px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(${scale})`;
                         tutorialWrapper.style.filter = `blur(${blur}px)`;
@@ -951,7 +1274,6 @@
                 }
             }
 
-            // 6. Lógica Scroll Características (Aparición progresiva vinculada al scroll)
             const caractSection = document.getElementById('caracteristicas');
             const caractText = document.getElementById('caract-text-container');
             const caractCard1 = document.getElementById('caract-card-1');
@@ -960,9 +1282,7 @@
             if (caractSection) {
                 const caractRect = caractSection.getBoundingClientRect();
                 
-                // Si la sección entra a la pantalla
                 if (caractRect.top < winHeight && caractRect.bottom > 0) {
-                    // Calculamos progreso tomando en cuenta cuándo inicia la sección desde abajo
                     const progress = Math.max(0, Math.min(1, (winHeight - caractRect.top) / (winHeight * 1.2)));
                     
                     if (caractText) {
@@ -972,14 +1292,12 @@
                     }
                     
                     if (caractCard1) {
-                        // Empieza la animación un poco más tarde (progress - 0.2)
                         const cardsProg = Math.max(0, Math.min(1, (progress - 0.2) * 1.5));
                         caractCard1.style.opacity = cardsProg;
                         caractCard1.style.transform = `translateX(${-400 + (cardsProg * 400)}px)`;
                     }
                     
                     if (caractCard2) {
-                        // Sincronizado idéntico a Card 1 para efecto espejo
                         const cardsProg = Math.max(0, Math.min(1, (progress - 0.2) * 1.5));
                         caractCard2.style.opacity = cardsProg;
                         caractCard2.style.transform = `translateX(${400 - (cardsProg * 400)}px)`;
@@ -988,7 +1306,6 @@
             }
         });
 
-        // --- Inicia código iPhone Mockup ---
         const canvas = document.getElementById('phoneCanvas');
         const ctx = canvas.getContext('2d');
         const wrapper = document.getElementById('screen-wrapper');
@@ -1200,7 +1517,6 @@
             });
         });
 
-        // --- Lógica Menú Móvil ---
         const mobileMenuBtn = document.getElementById('mobile-menu-btn');
         const mobileMenu = document.getElementById('mobile-menu');
         const mobileNavLinks = document.querySelectorAll('.nav-link-mobile');
@@ -1210,13 +1526,12 @@
                 mobileMenu.classList.toggle('hidden');
             });
 
-            // Cerrar menú al hacer clic en un enlace
             mobileNavLinks.forEach(link => {
                 link.addEventListener('click', function(e) {
                     const targetId = this.getAttribute('href');
                     if (targetId && targetId.startsWith('#')) {
                         e.preventDefault();
-                        mobileMenu.classList.add('hidden'); // Oculta el menú
+                        mobileMenu.classList.add('hidden');
                         const targetElement = document.querySelector(targetId);
                         if (targetElement) {
                             targetElement.scrollIntoView({ behavior: 'smooth' });
@@ -1225,7 +1540,6 @@
                 });
             });
         }
-
     </script>
 </body>
 </html>
