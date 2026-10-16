@@ -106,7 +106,7 @@
     <div id="screen-intro" class="screen">
         <div class="card transform hover:scale-105 transition duration-300 cursor-pointer" id="btn-open">
             <div class="text-6xl mb-4">💌</div>
-            <h2 class="text-3xl text-pink-600 mb-2 font-bold">Tienes un mensaje</h2>
+            <h2 class="text-3xl text-pink-600 mb-2 font-bold">Martina, tienes un mensaje</h2>
             <p class="text-gray-600">Toca para abrir</p>
         </div>
     </div>
@@ -218,6 +218,14 @@
                 // Añadir más corazones de celebración
                 createHearts();
                 createHearts();
+                
+                // Redirigir a WhatsApp después de 3 segundos para que alcance a leer
+                setTimeout(() => {
+                    const numero = "56992582669";
+                    const mensaje = "¡Siii, me encantaría ir al cine mañana contigo! 🍿🎬";
+                    window.location.href = `https://wa.me/${numero}?text=${encodeURIComponent(mensaje)}`;
+                }, 3000);
+                
             }, 500);
         });
     </script>
