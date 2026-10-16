@@ -1012,37 +1012,10 @@
                 
                 window.hideSplashScreen(); // Ocultamos el splash para mostrar el voucher
 
-                setTimeout(async () => {
-                    if (window.authInstance && window.authInstance.currentUser && window.addDoc) {
-                        try {
-                            const uid = window.authInstance.currentUser.uid;
-                            let tokensASumar = planComprado === "pro" ? 15000000 : (planComprado === "plus" ? 2500000 : (planComprado === "basico" ? 1000000 : 200000));
-
-                            const userRef = window.doc(window.db, 'artifacts', window.globalAppId, 'users', uid);
-                            await window.updateDoc(userRef, {
-                                tokens_disponibles: window.increment(tokensASumar),
-                                plan_activo: planComprado,
-                                fecha_vencimiento: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
-                            });
-
-                            const pagosRef = window.collection(window.db, 'artifacts', window.globalAppId, 'users', uid, 'pagos');
-                            await window.addDoc(pagosRef, {
-                                plan: planComprado,
-                                monto: parseInt(vMonto),
-                                autorizacion: vAuth,
-                                tarjeta: vTarjeta,
-                                tipo_pago: vTipo,
-                                fecha_transaccion: vFecha,
-                                fecha_registro: new Date()
-                            });
-
-                            showNotification("🎉 Pago Aprobado y Guardado en Historial");
-                        } catch(e) {
-                            console.error("Error guardando voucher en BD:", e);
-                            showNotification("Tokens sumados. Error al guardar copia en BD.", true);
-                        }
-                    }
-                }, 2500);
+                // El Worker (/api/confirmar) ya sumó los tokens, activó el plan y guardó el pago en Firestore de forma segura.
+                setTimeout(() => {
+                    showNotification("🎉 Pago Aprobado y Guardado en Historial");
+                }, 800);
 
             } else if (pagoStatus === 'rechazado') {
                 setTimeout(() => showNotification("❌ Pago rechazado por el banco o sin fondos.", true), 1500);
@@ -1195,6 +1168,7 @@
             btn.disabled = true;
 
             try {
+                const token = await window.authInstance.currentUser.getIdToken();
                 const payload = {
                     planId: planId,
                     monto: monto,
@@ -1203,7 +1177,10 @@
                 
                 const response = await fetch('https://obrin-ia-proxy.christensenjosemanuel.workers.dev/api/pagar', {
                     method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
                     body: JSON.stringify(payload)
                 });
                 
@@ -1921,11 +1898,12 @@
                     userNotes: userNotes,
                     weatherContextText: weatherContextText,
                     expertContext: expertContextText,
+                    cuentaMaestraId: (window.userPlanActivo === 'pro_member' && window.idCuentaMaestra) ? window.idCuentaMaestra : null,
                     imgData1: imgData1, imgType1: imgType1,
                     imgData2: imgData2, imgType2: imgType2
                 };
 
-                // SOLUCIÓN: Solo UN fetch con el token JWT
+                // SOLUCIÓN: Solo UN fetch con el token JWT (el Worker descuenta los tokens con permisos Admin)
                 const token = await window.authInstance.currentUser.getIdToken();
 
                 const response = await fetch('https://obrin-ia-proxy.christensenjosemanuel.workers.dev', {
@@ -1939,22 +1917,6 @@
 
                 const data = await response.json();
                 if (data.error) throw new Error("Error de API: " + (data.error.message || "Error desconocido"));
-                
-                const tokensGastados = data.usageMetadata?.totalTokenCount || 3500;
-                const userId = window.currentUserId;
-                if (userId && window.db) {
-                    if (window.userPlanActivo === 'pro_member' && window.idCuentaMaestra) {
-                         const masterRef = window.doc(window.db, 'artifacts', window.globalAppId, 'users', window.idCuentaMaestra);
-                         window.updateDoc(masterRef, {
-                             tokens_disponibles: window.increment(-tokensGastados)
-                         }).catch(e => console.error("Error descontando tokens maestros:", e));
-                    } else {
-                         const userRef = window.doc(window.db, 'artifacts', window.globalAppId, 'users', userId);
-                         window.updateDoc(userRef, {
-                             tokens_disponibles: window.increment(-tokensGastados)
-                         }).catch(e => console.error("Error descontando tokens local:", e));
-                    }
-                }
 
                 const candidate = data.candidates?.[0];
                 const text = candidate?.content?.parts?.[0]?.text;
