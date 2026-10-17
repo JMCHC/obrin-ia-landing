@@ -3000,29 +3000,42 @@
                                     mainAppContainer.classList.remove('hidden');
                                 }
 
-                                // Lógica B2B: Revisar si este usuario fue invitado
-                                if (data.plan_activo === 'ninguno' || !data.plan_activo) {
+                                // Lógica B2B: Revisar si este usuario fue invitado o si su invitación fue revocada por el administrador
+                                if (data.plan_activo === 'ninguno' || !data.plan_activo || data.plan_activo === 'pro_member') {
                                     try {
                                         const inviteRef = window.doc(window.db, 'artifacts', window.globalAppId, 'invitaciones', user.email.toLowerCase());
                                         const inviteSnap = await window.getDoc(inviteRef);
                                         if (inviteSnap.exists()) {
                                             const inviteData = inviteSnap.data();
                                             
-                                            await window.updateDoc(userRef, {
-                                                id_cuenta_maestra: inviteData.masterId,
-                                                plan_activo: 'pro_member'
-                                            });
+                                            if (data.plan_activo !== 'pro_member' || data.id_cuenta_maestra !== inviteData.masterId) {
+                                                await window.updateDoc(userRef, {
+                                                    id_cuenta_maestra: inviteData.masterId,
+                                                    plan_activo: 'pro_member'
+                                                });
 
-                                            if (inviteData.inviteId) {
-                                                const memberStatusRef = window.doc(window.db, 'artifacts', window.globalAppId, 'users', inviteData.masterId, 'equipo', inviteData.inviteId);
-                                                try { await window.updateDoc(memberStatusRef, { estado: 'Activo' }); } catch(e){}
+                                                if (inviteData.inviteId) {
+                                                    const memberStatusRef = window.doc(window.db, 'artifacts', window.globalAppId, 'users', inviteData.masterId, 'equipo', inviteData.inviteId);
+                                                    try { await window.updateDoc(memberStatusRef, { estado: 'Activo' }); } catch(e){}
+                                                }
+                                                
+                                                setTimeout(() => {
+                                                    showNotification(`🎉 Cuenta enlazada al Plan Pro de ${inviteData.masterName}`);
+                                                }, 1000);
                                             }
                                             
                                             data.id_cuenta_maestra = inviteData.masterId;
                                             data.plan_activo = 'pro_member';
-                                            
+                                        } else if (data.plan_activo === 'pro_member') {
+                                            // Si tenía rol pro_member pero su invitación fue eliminada, se desenlaza automáticamente
+                                            await window.updateDoc(userRef, {
+                                                id_cuenta_maestra: null,
+                                                plan_activo: 'ninguno'
+                                            });
+                                            data.id_cuenta_maestra = null;
+                                            data.plan_activo = 'ninguno';
                                             setTimeout(() => {
-                                                showNotification(`🎉 Cuenta enlazada al Plan Pro de ${inviteData.masterName}`);
+                                                showNotification("⚠️ Tu acceso al equipo Pro fue revocado por el administrador.", true);
                                             }, 1000);
                                         }
                                     } catch(e) { console.error("Error check invite", e); }
