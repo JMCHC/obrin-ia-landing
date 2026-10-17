@@ -672,15 +672,26 @@
                     <canvas id="admin-chart"></canvas>
                 </div>
                 
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <div class="bg-white rounded-xl border border-emerald-200 shadow-sm overflow-hidden flex flex-col h-[400px]">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div id="admin-users-card" class="bg-white rounded-xl border border-blue-200 shadow-sm overflow-hidden flex flex-col h-[420px]">
+                        <div class="px-5 py-3.5 border-b border-blue-100 bg-blue-50 flex justify-between items-center">
+                            <h3 class="text-xs font-bold text-blue-800 uppercase tracking-widest"><i class="fas fa-users text-blue-500 mr-1"></i> Usuarios Registrados</h3>
+                            <span id="admin-users-count-badge" class="bg-blue-100 text-blue-700 text-[0.65rem] font-bold px-2 py-0.5 rounded-full">0</span>
+                        </div>
+                        <div class="p-2.5 border-b border-slate-100 bg-slate-50/50">
+                            <input type="text" id="admin-user-search" oninput="window.filterAdminUsers(this.value)" placeholder="Buscar por nombre o correo..." class="w-full px-3 py-1.5 text-xs bg-white border border-slate-200 rounded-lg outline-none focus:ring-1 focus:ring-blue-500">
+                        </div>
+                        <div id="admin-users-list" class="divide-y divide-slate-100 overflow-y-auto custom-scrollbar flex-1"></div>
+                    </div>
+
+                    <div class="bg-white rounded-xl border border-emerald-200 shadow-sm overflow-hidden flex flex-col h-[420px]">
                         <div class="px-5 py-4 border-b border-emerald-100 bg-emerald-50 flex justify-between items-center">
                             <h3 class="text-xs font-bold text-emerald-800 uppercase tracking-widest"><i class="fas fa-money-check-alt text-emerald-500 mr-1"></i> Transbank: Últimos Pagos</h3>
                         </div>
                         <div id="admin-payments-list" class="divide-y divide-slate-100 overflow-y-auto custom-scrollbar flex-1"></div>
                     </div>
 
-                    <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden flex flex-col h-[400px]">
+                    <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden flex flex-col h-[420px]">
                         <div class="px-5 py-4 border-b border-slate-100 bg-slate-50 flex justify-between items-center">
                             <h3 class="text-xs font-bold text-slate-700 uppercase tracking-widest"><i class="fas fa-list text-slate-400 mr-1"></i> Reportes Recientes Globales</h3>
                         </div>
@@ -2715,6 +2726,64 @@
         };
 
         let adminChartInstance = null;
+        window.adminUsersCache = [];
+
+        window.renderAdminUsersList = function(usersArray) {
+            const usersContainer = document.getElementById('admin-users-list');
+            const badge = document.getElementById('admin-users-count-badge');
+            if (!usersContainer) return;
+
+            if (badge) badge.innerText = usersArray.length;
+
+            if (usersArray.length === 0) {
+                usersContainer.innerHTML = '<div class="p-6 text-center text-slate-400 text-xs font-medium">No se encontraron usuarios.</div>';
+                return;
+            }
+
+            usersContainer.innerHTML = '';
+            usersArray.forEach(u => {
+                const safeName = (u.name || 'Sin nombre').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                const safeEmail = (u.email || 'Sin correo').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                const tokens = (u.tokens_disponibles || 0).toLocaleString('es-CL');
+
+                let planBadge = '<span class="bg-slate-100 text-slate-500 text-[0.55rem] font-bold px-2 py-0.5 rounded uppercase tracking-wider">Sin Plan</span>';
+                if (u.plan_activo === 'pro') planBadge = '<span class="bg-indigo-100 text-indigo-700 text-[0.55rem] font-bold px-2 py-0.5 rounded uppercase tracking-wider">Plan Pro</span>';
+                else if (u.plan_activo === 'pro_member') planBadge = '<span class="bg-indigo-50 text-indigo-600 text-[0.55rem] font-bold px-2 py-0.5 rounded uppercase tracking-wider">Equipo Pro</span>';
+                else if (u.plan_activo === 'plus') planBadge = '<span class="bg-brand-100 text-brand-700 text-[0.55rem] font-bold px-2 py-0.5 rounded uppercase tracking-wider">Plan Plus</span>';
+                else if (u.plan_activo === 'basico') planBadge = '<span class="bg-emerald-100 text-emerald-700 text-[0.55rem] font-bold px-2 py-0.5 rounded uppercase tracking-wider">Plan Básico</span>';
+
+                usersContainer.innerHTML += `
+                    <div class="px-4 py-3.5 hover:bg-slate-50 transition-colors flex justify-between items-center gap-3 border-b border-slate-100 last:border-0">
+                        <div class="flex items-center gap-3 min-w-0 flex-1">
+                            <div class="w-9 h-9 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center text-xs font-bold shrink-0">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            <div class="truncate">
+                                <p class="text-xs font-bold text-slate-800 truncate">${safeName}</p>
+                                <p class="text-[0.65rem] text-slate-500 truncate select-all">${safeEmail}</p>
+                            </div>
+                        </div>
+                        <div class="text-right shrink-0 flex flex-col items-end gap-1">
+                            ${planBadge}
+                            <p class="text-[0.6rem] font-mono text-slate-400 font-semibold">${tokens} Tks</p>
+                        </div>
+                    </div>
+                `;
+            });
+        };
+
+        window.filterAdminUsers = function(searchTerm) {
+            const term = (searchTerm || '').toLowerCase().trim();
+            if (!term) {
+                window.renderAdminUsersList(window.adminUsersCache);
+                return;
+            }
+            const filtered = window.adminUsersCache.filter(u =>
+                (u.name || '').toLowerCase().includes(term) ||
+                (u.email || '').toLowerCase().includes(term)
+            );
+            window.renderAdminUsersList(filtered);
+        };
 
         window.openAdminDashboard = async function() {
             userDropdown.classList.add('hidden');
@@ -2729,19 +2798,41 @@
 
             const listContainer = document.getElementById('admin-global-list');
             const pagosContainer = document.getElementById('admin-payments-list');
+            const usersContainer = document.getElementById('admin-users-list');
             const statsContainer = document.getElementById('admin-stats-container');
+            const searchInput = document.getElementById('admin-user-search');
+            if (searchInput) searchInput.value = '';
             
             listContainer.innerHTML = '<div class="p-8 text-center text-slate-400 text-xs font-bold uppercase tracking-widest"><i class="fas fa-circle-notch fa-spin text-2xl mb-2 text-brand-500"></i><br>Extrayendo datos globales...</div>';
             pagosContainer.innerHTML = '<div class="p-8 text-center text-slate-400 text-xs font-bold uppercase tracking-widest"><i class="fas fa-circle-notch fa-spin text-2xl mb-2 text-emerald-500"></i><br>Cargando pagos...</div>';
+            if (usersContainer) usersContainer.innerHTML = '<div class="p-8 text-center text-slate-400 text-xs font-bold uppercase tracking-widest"><i class="fas fa-circle-notch fa-spin text-2xl mb-2 text-blue-500"></i><br>Cargando usuarios...</div>';
             
             try {
-                // 1. OBTENER USUARIOS PARA CRUZAR CORREOS
+                // 1. OBTENER USUARIOS PARA CRUZAR CORREOS Y MOSTRAR DIRECTORIO
                 const usersSnap = await getDocs(collection(db, 'artifacts', globalAppId, 'users'));
                 let usersMap = {};
+                let allUsers = [];
                 usersSnap.forEach(doc => {
-                    usersMap[doc.id] = doc.data().email || 'Usuario Desconocido';
+                    const uData = doc.data();
+                    usersMap[doc.id] = uData.email || 'Usuario Desconocido';
+                    allUsers.push({
+                        id: doc.id,
+                        name: uData.name || 'Usuario',
+                        email: uData.email || 'Sin correo',
+                        plan_activo: uData.plan_activo || 'ninguno',
+                        tokens_disponibles: uData.tokens_disponibles || 0,
+                        tncAcceptedAt: uData.tncAcceptedAt || null
+                    });
                 });
                 const totalUsuarios = usersSnap.size;
+
+                allUsers.sort((a, b) => {
+                    const timeA = a.tncAcceptedAt?.seconds || 0;
+                    const timeB = b.tncAcceptedAt?.seconds || 0;
+                    return timeB - timeA;
+                });
+                window.adminUsersCache = allUsers;
+                window.renderAdminUsersList(allUsers);
 
                 // 2. CARGAR EVALUACIONES
                 const evalsSnap = await getDocs(collectionGroup(db, 'evaluaciones'));
@@ -2802,7 +2893,7 @@
                         <div class="w-10 h-10 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center text-lg"><i class="fas fa-credit-card"></i></div>
                         <div><p class="text-[0.6rem] text-slate-400 uppercase tracking-widest font-bold">Transacciones</p><p class="text-lg font-bold text-slate-800">${allPagos.length}</p></div>
                     </div>
-                    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-center items-center text-center gap-2">
+                    <div onclick="document.getElementById('admin-users-card').scrollIntoView({ behavior: 'smooth' })" class="bg-white p-4 rounded-xl border border-slate-200 hover:border-blue-300 cursor-pointer transition shadow-sm flex flex-col justify-center items-center text-center gap-2" title="Ver lista de usuarios">
                         <div class="w-10 h-10 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center text-lg"><i class="fas fa-users"></i></div>
                         <div><p class="text-[0.6rem] text-slate-400 uppercase tracking-widest font-bold">Usuarios Reg.</p><p class="text-lg font-bold text-slate-800">${totalUsuarios}</p></div>
                     </div>
