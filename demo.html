@@ -1695,6 +1695,7 @@
             
             // NUEVO: Ocultar el recuadro de Riesgo Futuro
             document.getElementById('risk-container').classList.add('hidden');
+            document.getElementById('risk-val').innerText = '';
             
             const priceSubtitle = document.getElementById('price-subtitle');
             if (priceSubtitle) priceSubtitle.innerText = "Valor de Mercado Competitivo";
@@ -1911,6 +1912,9 @@
                 if (resultObj.riesgo_futuro) {
                     document.getElementById('risk-val').innerText = resultObj.riesgo_futuro;
                     document.getElementById('risk-container').classList.remove('hidden');
+                } else {
+                    document.getElementById('risk-val').innerText = '';
+                    document.getElementById('risk-container').classList.add('hidden');
                 }
                 
                 document.getElementById('solution-val').innerText = resultObj.solucion;
@@ -2334,7 +2338,12 @@
                 btn.classList.replace('bg-slate-900', 'bg-emerald-600');
                 btn.classList.replace('hover:bg-slate-800', 'hover:bg-emerald-500');
 
-                setTimeout(() => { document.getElementById('rating-section').classList.add('hidden'); }, 2000);
+                setTimeout(() => { 
+                    btn.innerHTML = 'ACTUALIZAR FICHA GUARDADA';
+                    btn.disabled = false;
+                    btn.classList.replace('bg-emerald-600', 'bg-slate-900');
+                    btn.classList.replace('hover:bg-emerald-500', 'hover:bg-slate-800');
+                }, 2000);
             } catch (error) {
                 console.error("Save Error:", error);
                 showNotification("Hubo un problema al guardar.", true);
@@ -2969,113 +2978,109 @@
 
                     closeAuthModal();
 
-                    if (window.justSignedUpWithTNC) {
-                        mainAppContainer.classList.remove('hidden');
-                        window.loadProjectsList();
-                        window.justSignedUpWithTNC = false;
-                        window.hideSplashScreen();
-                    } else {
-                        try {
+                    try {
+                        if (!window.justSignedUpWithTNC) {
                             window.showSplashScreen("Cargando tu perfil...");
-                            const userRef = window.doc(window.db, 'artifacts', window.globalAppId, 'users', user.uid);
-                            
-                            if (window.unsubUserSnap) { window.unsubUserSnap(); window.unsubUserSnap = null; }
-                            
-                            window.unsubUserSnap = window.onSnapshot(userRef, async (docSnap) => {
-                                if (docSnap.exists()) {
-                                    const data = docSnap.data();
-                                    
-                                    if (!data.tncAccepted) {
-                                        document.getElementById('tnc-modal').classList.remove('hidden');
-                                        document.getElementById('tnc-modal').classList.add('flex');
-                                        window.hideSplashScreen();
-                                        return;
-                                    } else {
-                                        mainAppContainer.classList.remove('hidden');
-                                    }
-
-                                    // Lógica B2B: Revisar si este usuario fue invitado
-                                    if (data.plan_activo === 'ninguno' || !data.plan_activo) {
-                                        try {
-                                            const inviteRef = window.doc(window.db, 'artifacts', window.globalAppId, 'invitaciones', user.email.toLowerCase());
-                                            const inviteSnap = await window.getDoc(inviteRef);
-                                            if (inviteSnap.exists()) {
-                                                const inviteData = inviteSnap.data();
-                                                
-                                                await window.updateDoc(userRef, {
-                                                    id_cuenta_maestra: inviteData.masterId,
-                                                    plan_activo: 'pro_member'
-                                                });
-
-                                                if (inviteData.inviteId) {
-                                                    const memberStatusRef = window.doc(window.db, 'artifacts', window.globalAppId, 'users', inviteData.masterId, 'equipo', inviteData.inviteId);
-                                                    try { await window.updateDoc(memberStatusRef, { estado: 'Activo' }); } catch(e){}
-                                                }
-                                                
-                                                data.id_cuenta_maestra = inviteData.masterId;
-                                                data.plan_activo = 'pro_member';
-                                                
-                                                setTimeout(() => {
-                                                    showNotification(`🎉 Cuenta enlazada al Plan Pro de ${inviteData.masterName}`);
-                                                }, 1000);
-                                            }
-                                        } catch(e) { console.error("Error check invite", e); }
-                                    }
-
-                                    window.userPlanActivo = data.plan_activo || null;
-                                    window.idCuentaMaestra = data.id_cuenta_maestra || null;
-
-                                    if (window.userPlanActivo === 'pro_member' && window.idCuentaMaestra) {
-                                        try {
-                                            if (window.unsubMasterSnap) { window.unsubMasterSnap(); window.unsubMasterSnap = null; }
-                                            const masterRef = window.doc(window.db, 'artifacts', window.globalAppId, 'users', window.idCuentaMaestra);
-                                            window.unsubMasterSnap = window.onSnapshot(masterRef, (mSnap) => {
-                                                 if(mSnap.exists()) {
-                                                     window.userTokensDisponibles = mSnap.data().tokens_disponibles || 0;
-                                                     updateTokenUI(window.userTokensDisponibles, 15000000);
-                                                 }
-                                            });
-                                        } catch(e) {}
-                                    } else {
-                                        if (window.unsubMasterSnap) { window.unsubMasterSnap(); window.unsubMasterSnap = null; }
-                                        window.userTokensDisponibles = data.tokens_disponibles || 0;
-                                        updateTokenUI(window.userTokensDisponibles, (window.userPlanActivo === 'pro') ? 15000000 : (window.userPlanActivo === 'plus' ? 2500000 : 1000000));
-                                    }
-                                    
-                                    const teamBtn = document.getElementById('team-admin-btn');
-                                    if (window.userPlanActivo === 'pro') {
-                                        teamBtn.classList.remove('hidden'); teamBtn.classList.add('flex');
-                                    } else {
-                                        teamBtn.classList.add('hidden'); teamBtn.classList.remove('flex');
-                                    }
-
-                                    const recargaSec = document.getElementById('recarga-section');
-                                    if (recargaSec) {
-                                        if (window.userPlanActivo && window.userPlanActivo !== 'ninguno' && window.userPlanActivo !== 'pro_member') {
-                                            recargaSec.classList.remove('hidden');
-                                        } else {
-                                            recargaSec.classList.add('hidden');
-                                        }
-                                    }
-                                    
-                                    // Retraso para evitar el pantallazo blanco
-                                    setTimeout(() => window.hideSplashScreen(), 500);
-
-                                } else {
+                        }
+                        const userRef = window.doc(window.db, 'artifacts', window.globalAppId, 'users', user.uid);
+                        
+                        if (window.unsubUserSnap) { window.unsubUserSnap(); window.unsubUserSnap = null; }
+                        
+                        window.unsubUserSnap = window.onSnapshot(userRef, async (docSnap) => {
+                            if (docSnap.exists()) {
+                                window.justSignedUpWithTNC = false;
+                                const data = docSnap.data();
+                                
+                                if (!data.tncAccepted) {
                                     document.getElementById('tnc-modal').classList.remove('hidden');
                                     document.getElementById('tnc-modal').classList.add('flex');
                                     window.hideSplashScreen();
+                                    return;
+                                } else {
+                                    mainAppContainer.classList.remove('hidden');
                                 }
-                            });
-                            
-                            window.loadProjectsList();
-                            
-                        } catch(e) {
-                            console.error("Error al validar T&C en BD", e);
-                            document.getElementById('tnc-modal').classList.remove('hidden');
-                            document.getElementById('tnc-modal').classList.add('flex');
-                            window.hideSplashScreen();
-                        }
+
+                                // Lógica B2B: Revisar si este usuario fue invitado
+                                if (data.plan_activo === 'ninguno' || !data.plan_activo) {
+                                    try {
+                                        const inviteRef = window.doc(window.db, 'artifacts', window.globalAppId, 'invitaciones', user.email.toLowerCase());
+                                        const inviteSnap = await window.getDoc(inviteRef);
+                                        if (inviteSnap.exists()) {
+                                            const inviteData = inviteSnap.data();
+                                            
+                                            await window.updateDoc(userRef, {
+                                                id_cuenta_maestra: inviteData.masterId,
+                                                plan_activo: 'pro_member'
+                                            });
+
+                                            if (inviteData.inviteId) {
+                                                const memberStatusRef = window.doc(window.db, 'artifacts', window.globalAppId, 'users', inviteData.masterId, 'equipo', inviteData.inviteId);
+                                                try { await window.updateDoc(memberStatusRef, { estado: 'Activo' }); } catch(e){}
+                                            }
+                                            
+                                            data.id_cuenta_maestra = inviteData.masterId;
+                                            data.plan_activo = 'pro_member';
+                                            
+                                            setTimeout(() => {
+                                                showNotification(`🎉 Cuenta enlazada al Plan Pro de ${inviteData.masterName}`);
+                                            }, 1000);
+                                        }
+                                    } catch(e) { console.error("Error check invite", e); }
+                                }
+
+                                window.userPlanActivo = data.plan_activo || null;
+                                window.idCuentaMaestra = data.id_cuenta_maestra || null;
+
+                                if (window.userPlanActivo === 'pro_member' && window.idCuentaMaestra) {
+                                    try {
+                                        if (window.unsubMasterSnap) { window.unsubMasterSnap(); window.unsubMasterSnap = null; }
+                                        const masterRef = window.doc(window.db, 'artifacts', window.globalAppId, 'users', window.idCuentaMaestra);
+                                        window.unsubMasterSnap = window.onSnapshot(masterRef, (mSnap) => {
+                                             if(mSnap.exists()) {
+                                                 window.userTokensDisponibles = mSnap.data().tokens_disponibles || 0;
+                                                 updateTokenUI(window.userTokensDisponibles, 15000000);
+                                             }
+                                        });
+                                    } catch(e) {}
+                                } else {
+                                    if (window.unsubMasterSnap) { window.unsubMasterSnap(); window.unsubMasterSnap = null; }
+                                    window.userTokensDisponibles = data.tokens_disponibles || 0;
+                                    updateTokenUI(window.userTokensDisponibles, (window.userPlanActivo === 'pro') ? 15000000 : (window.userPlanActivo === 'plus' ? 2500000 : 1000000));
+                                }
+                                
+                                const teamBtn = document.getElementById('team-admin-btn');
+                                if (window.userPlanActivo === 'pro') {
+                                    teamBtn.classList.remove('hidden'); teamBtn.classList.add('flex');
+                                } else {
+                                    teamBtn.classList.add('hidden'); teamBtn.classList.remove('flex');
+                                }
+
+                                const recargaSec = document.getElementById('recarga-section');
+                                if (recargaSec) {
+                                    if (window.userPlanActivo && window.userPlanActivo !== 'ninguno' && window.userPlanActivo !== 'pro_member') {
+                                        recargaSec.classList.remove('hidden');
+                                    } else {
+                                        recargaSec.classList.add('hidden');
+                                    }
+                                }
+                                
+                                // Retraso para evitar el pantallazo blanco
+                                setTimeout(() => window.hideSplashScreen(), 500);
+
+                            } else if (!window.justSignedUpWithTNC) {
+                                document.getElementById('tnc-modal').classList.remove('hidden');
+                                document.getElementById('tnc-modal').classList.add('flex');
+                                window.hideSplashScreen();
+                            }
+                        });
+                        
+                        window.loadProjectsList();
+                        
+                    } catch(e) {
+                        console.error("Error al validar T&C en BD", e);
+                        document.getElementById('tnc-modal').classList.remove('hidden');
+                        document.getElementById('tnc-modal').classList.add('flex');
+                        window.hideSplashScreen();
                     }
                 } else {
                     if (window.unsubUserSnap) { window.unsubUserSnap(); window.unsubUserSnap = null; }
