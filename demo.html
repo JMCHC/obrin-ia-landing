@@ -934,7 +934,7 @@
             if(barra && texto) {
                 barra.style.width = `${porcentaje}%`;
                 
-                let limiteTexto = '';
+                let limiteTexto = ' (Sin Plan Activo)';
                 if (maxTokens === 15000000) limiteTexto = ' / 15.000.000 (Pro)';
                 else if (maxTokens === 2500000) limiteTexto = ' / 2.500.000 (Plus)';
                 else if (maxTokens === 1000000) limiteTexto = ' / 1.000.000 (Básico)';
@@ -1455,6 +1455,10 @@
             
             let seg = data.seguimiento || { paso_actual: 1, estado_rechazado: false, fechas: { "1": (data.createdAt ? data.createdAt.seconds * 1000 : Date.now()) } };
             
+            if (seg.estado_rechazado && targetStep > 3) {
+                return showNotification("Un presupuesto rechazado debe aprobarse en el paso 3 antes de pasar a Ejecución.", true);
+            }
+
             if (targetStep > seg.paso_actual + 1 && !isRejected) {
                 return showNotification("Debes avanzar los estados en orden.", true);
             }
@@ -1846,8 +1850,13 @@
                     if (validaciones.length > 0) {
                         expertContextText = validaciones.map((v) => {
                             const titulo = `${(v.superficie || '').toUpperCase()} | ${(v.patologia || '').toUpperCase()}`;
-                            const mats = (v.materiales || []).map(m => m.replace(/<[^>]*>?/gm, '')).join('; ');
-                            const steps = (v.pasos || []).map(p => p.replace(/<[^>]*>?/gm, '')).join('; ');
+                            const mats = (v.materiales || []).map(m => {
+                                const tempDiv = document.createElement('div');
+                                tempDiv.innerHTML = m;
+                                const spanName = tempDiv.querySelector('[data-mat-name]');
+                                return spanName ? spanName.textContent.trim() : tempDiv.textContent.replace(/Precio Unit\.|Total|-\s*\+/g, '').replace(/\s+/g, ' ').trim();
+                            }).join('; ');
+                            const steps = (v.pasos || []).map(p => p.replace(/<[^>]*>?/gm, '').replace(/\s+/g, ' ').trim()).join('; ');
                             return `TÍTULO DEL CASO EXPERTO: [${titulo}]\n- Riesgo: ${v.riesgo_futuro || 'N/A'}\n- Solución: ${v.solucion}\n- Materiales: ${mats}\n- Pasos: ${steps}`;
                         }).join('\n\n');
                     }
@@ -2291,22 +2300,27 @@
                 const docRef = doc(db, 'artifacts', globalAppId, 'users', userId, 'evaluaciones', currentEditingDocId);
                 await updateDoc(docRef, diagnosticData);
 
-                try {
-                    const expertRef = doc(db, 'artifacts', globalAppId, 'conocimiento_experto', currentEditingDocId);
-                    await setDoc(expertRef, diagnosticData, { merge: true });
-                } catch (e) {}
-
-                // Extraer solo texto plano de los materiales para la IA (ignorando botones de cantidad HTML)
+                // Extraer solo texto plano de los materiales y pasos para la IA (ignorando botones de cantidad y precios de interfaz)
                 let materialesPlanos = [];
                 document.querySelectorAll('#materials-list li').forEach(li => {
                     const spanMat = li.querySelector('[data-mat-name]');
                     if (spanMat) {
                         materialesPlanos.push(spanMat.innerText.trim());
                     } else {
-                        // Respaldo si no encuentra el span
                         materialesPlanos.push(li.innerText.replace(/[\n\r]+|[\s]{2,}/g, ' ').trim());
                     }
                 });
+
+                let pasosPlanos = Array.from(document.getElementById('steps-list').children).map(li => li.innerText.replace(/[\n\r]+|[\s]{2,}/g, ' ').trim());
+
+                try {
+                    const expertRef = doc(db, 'artifacts', globalAppId, 'conocimiento_experto', currentEditingDocId);
+                    await setDoc(expertRef, {
+                        ...diagnosticData,
+                        materiales: materialesPlanos,
+                        pasos: pasosPlanos
+                    }, { merge: true });
+                } catch (e) {}
 
                 // --- ENVIAR AL CEREBRO PREDICTIVO (CLOUDFLARE WORKER) ---
                 try {
@@ -2411,12 +2425,15 @@
                         if (e.precio_ref) projTotal += window.extractPrice(e.precio_ref);
                     });
 
+                    const safeProjNameAttr = (data.name || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+                    const safeProjNameHtml = (data.name || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
                     projectsList.innerHTML += `
-                        <div onclick="window.loadProjectEvals('${docSnap.id}', '${data.name}')" class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-all cursor-pointer flex justify-between items-center group">
+                        <div onclick="window.loadProjectEvals('${docSnap.id}', '${safeProjNameAttr}')" class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-all cursor-pointer flex justify-between items-center group">
                             <div class="flex items-center gap-4">
                                 <div class="w-10 h-10 rounded-full bg-brand-50 text-brand-500 flex items-center justify-center text-lg group-hover:scale-110 transition-transform"><i class="fas fa-folder"></i></div>
                                 <div>
-                                    <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wide">${data.name}</h3>
+                                    <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wide">${safeProjNameHtml}</h3>
                                     <p class="text-[0.65rem] text-slate-400 font-semibold uppercase tracking-widest mt-0.5">${projEvals.length} Evaluaciones</p>
                                 </div>
                             </div>
@@ -3058,7 +3075,8 @@
                                 } else {
                                     if (window.unsubMasterSnap) { window.unsubMasterSnap(); window.unsubMasterSnap = null; }
                                     window.userTokensDisponibles = data.tokens_disponibles || 0;
-                                    updateTokenUI(window.userTokensDisponibles, (window.userPlanActivo === 'pro') ? 15000000 : (window.userPlanActivo === 'plus' ? 2500000 : 1000000));
+                                    const maxTokensPlan = (window.userPlanActivo === 'pro') ? 15000000 : (window.userPlanActivo === 'plus' ? 2500000 : (window.userPlanActivo === 'basico' ? 1000000 : 0));
+                                    updateTokenUI(window.userTokensDisponibles, maxTokensPlan);
                                 }
                                 
                                 const teamBtn = document.getElementById('team-admin-btn');
