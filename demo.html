@@ -348,7 +348,7 @@
 
                 </div>
 
-                <!-- PLAN PRUEBA: 10.000 TOKENS / 1 - 2 DIAGNÓSTICOS COMPLETOS ($990) -->
+                <!-- PLAN PRUEBA: 10.000 TOKENS / 1 DIAGNÓSTICO COMPLETO ($990) -->
                 <div id="prueba-section" class="bg-gradient-to-r from-amber-50 via-orange-50 to-white rounded-xl border-2 border-brand-400 shadow-md p-6 flex flex-col md:flex-row items-center justify-between gap-4 mb-4">
                     <div class="flex items-start gap-4">
                         <div class="w-11 h-11 rounded-xl bg-brand-500 text-white flex items-center justify-center text-lg shrink-0 shadow-sm">
@@ -359,8 +359,8 @@
                                 <span class="bg-brand-600 text-white text-[0.6rem] font-bold px-2 py-0.5 rounded uppercase tracking-widest">Pago Único · Sin Suscripción</span>
                                 <h3 class="text-base font-bold text-slate-900">Plan Prueba (1 - 2 Evaluaciones Técnicas)</h3>
                             </div>
-                            <p class="text-xs font-bold text-brand-600 mt-1"><i class="fas fa-bolt"></i> 10.000 Tokens (1 -2 Diagnósticos Completos)</p>
-                            <p class="text-xs text-slate-600 mt-1">¿Quieres poner a prueba Obrín IA en un caso real antes de suscribirte? Incluye <strong>1 - 2 diagnósticos completos</strong> con precios de mercado, reporte PDF y exportación a Excel.</p>
+                            <p class="text-xs font-bold text-brand-600 mt-1"><i class="fas fa-bolt"></i> 10.000 Tokens (1 Diagnóstico Completo)</p>
+                            <p class="text-xs text-slate-600 mt-1">¿Quieres poner a prueba Obrín IA en un caso real antes de suscribirte? Incluye <strong>1 diagnóstico completo</strong> con precios de mercado, reporte PDF y exportación a Excel.</p>
                         </div>
                     </div>
                     <div class="flex items-center justify-between md:justify-end gap-4 w-full md:w-auto border-t md:border-t-0 pt-3 md:pt-0 border-brand-200/60 shrink-0">
@@ -1122,7 +1122,7 @@
                 if (maxTokens === 15000000) limiteTexto = ' / 15.000.000 (Pro)';
                 else if (maxTokens === 2500000) limiteTexto = ' / 2.500.000 (Plus)';
                 else if (maxTokens === 1000000) limiteTexto = ' / 1.000.000 (Básico)';
-                else if (maxTokens === 10000) limiteTexto = ' / 10.000 (Pase 1 - 2 Diagnósticos)';
+                else if (maxTokens === 10000) limiteTexto = ' / 10.000 (Pase 1 Diagnóstico)';
                 else limiteTexto = ' (Sin Plan Activo)';
                 
                 texto.innerText = `${safeTokens.toLocaleString('es-CL')} Tks${limiteTexto}`;
@@ -1180,7 +1180,7 @@
                 if (planComprado === 'pro') nombrePlan = 'Plan Pro (15M Tks)';
                 if (planComprado === 'plus') nombrePlan = 'Plan Plus (2.5M Tks)';
                 if (planComprado === 'basico') nombrePlan = 'Plan Básico (1M Tks)';
-                if (planComprado === 'prueba') nombrePlan = 'Pase de Prueba (1 - 2 Diagnósticos)';
+                if (planComprado === 'prueba') nombrePlan = 'Pase de Prueba (1 Diagnóstico o 10000 tokens)';
 
                 document.getElementById('v-plan').innerText = nombrePlan;
                 document.getElementById('v-monto').innerText = '$' + parseInt(vMonto || '0', 10).toLocaleString('es-CL');
