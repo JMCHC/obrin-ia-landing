@@ -348,7 +348,7 @@
 
                 </div>
 
-                <!-- PLAN PRUEBA: 10.000 TOKENS / 1 DIAGNÓSTICO COMPLETO ($990) -->
+                <!-- PLAN PRUEBA: 10.000 TOKENS / 1 - 2 DIAGNÓSTICOS COMPLETOS ($990) -->
                 <div id="prueba-section" class="bg-gradient-to-r from-amber-50 via-orange-50 to-white rounded-xl border-2 border-brand-400 shadow-md p-6 flex flex-col md:flex-row items-center justify-between gap-4 mb-4">
                     <div class="flex items-start gap-4">
                         <div class="w-11 h-11 rounded-xl bg-brand-500 text-white flex items-center justify-center text-lg shrink-0 shadow-sm">
@@ -1122,7 +1122,7 @@
                 if (maxTokens === 15000000) limiteTexto = ' / 15.000.000 (Pro)';
                 else if (maxTokens === 2500000) limiteTexto = ' / 2.500.000 (Plus)';
                 else if (maxTokens === 1000000) limiteTexto = ' / 1.000.000 (Básico)';
-                else if (maxTokens === 10000) limiteTexto = ' / 10.000 (Pase 1 Diagnóstico)';
+                else if (maxTokens === 10000) limiteTexto = ' / 10.000 (Pase 1 - 2 Diagnósticos)';
                 else limiteTexto = ' (Sin Plan Activo)';
                 
                 texto.innerText = `${safeTokens.toLocaleString('es-CL')} Tks${limiteTexto}`;
@@ -1180,7 +1180,7 @@
                 if (planComprado === 'pro') nombrePlan = 'Plan Pro (15M Tks)';
                 if (planComprado === 'plus') nombrePlan = 'Plan Plus (2.5M Tks)';
                 if (planComprado === 'basico') nombrePlan = 'Plan Básico (1M Tks)';
-                if (planComprado === 'prueba') nombrePlan = 'Pase de Prueba (1 Diagnóstico)';
+                if (planComprado === 'prueba') nombrePlan = 'Pase de Prueba (1 - 2 Diagnósticos)';
 
                 document.getElementById('v-plan').innerText = nombrePlan;
                 document.getElementById('v-monto').innerText = '$' + parseInt(vMonto || '0', 10).toLocaleString('es-CL');
