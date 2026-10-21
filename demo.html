@@ -368,7 +368,7 @@
                             <p class="text-[0.6rem] font-bold text-slate-400 uppercase tracking-widest">10.000 Tokens</p>
                             <p class="text-2xl font-serif font-bold text-slate-900">$990</p>
                         </div>
-                        <button onclick="window.iniciarPago('prueba', 2990, event)" class="bg-brand-600 hover:bg-brand-500 text-white font-bold py-3 px-6 rounded-lg text-xs uppercase tracking-widest transition shadow-md whitespace-nowrap">
+                        <button onclick="window.iniciarPago('prueba', 990, event)" class="bg-brand-600 hover:bg-brand-500 text-white font-bold py-3 px-6 rounded-lg text-xs uppercase tracking-widest transition shadow-md whitespace-nowrap">
                             Adquirir Prueba
                         </button>
                     </div>
@@ -864,6 +864,28 @@
         window.userDatosBoleta = null;
         window.pendingPaymentPlan = null;
         window.materialesData = [];
+        window.cortesiaCheckedForUid = null;
+
+        // Solicitar 1 pregunta de cortesía (10.000 tokens únicos por cuenta) al Worker
+        window.solicitarCortesia = async function() {
+            if (!window.authInstance || !window.authInstance.currentUser) return;
+            try {
+                const token = await window.authInstance.currentUser.getIdToken();
+                const res = await fetch('https://obrin-ia-proxy.christensenjosemanuel.workers.dev/api/cortesia', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                const data = await res.json();
+                if (data && data.otorgada) {
+                    showNotification("🎁 ¡Bienvenido! Tienes 1 pregunta de cortesía gratis acreditada.");
+                }
+            } catch (e) {
+                console.warn("No se pudo verificar cortesía:", e);
+            }
+        };
 
         window.updateBoletaSummaryUI = function() {
             const summaryEl = document.getElementById('wallet-boleta-summary');
@@ -1122,6 +1144,9 @@
                 if (maxTokens === 15000000) limiteTexto = ' / 15.000.000 (Pro)';
                 else if (maxTokens === 2500000) limiteTexto = ' / 2.500.000 (Plus)';
                 else if (maxTokens === 1000000) limiteTexto = ' / 1.000.000 (Básico)';
+                else if (window.userPlanActivo === 'cortesia') {
+                    limiteTexto = safeTokens > 0 ? ' / 10.000 (1 Pregunta de Cortesía)' : ' (Cortesía Utilizada)';
+                }
                 else if (maxTokens === 10000) limiteTexto = ' / 10.000 (Pase 1 Diagnóstico)';
                 else limiteTexto = ' (Sin Plan Activo)';
                 
@@ -1237,6 +1262,9 @@
                         tncAcceptedAt: new Date()
                     }, { merge: true });
                     
+                    window.cortesiaCheckedForUid = user.uid;
+                    await window.solicitarCortesia();
+
                     document.getElementById('tnc-modal').classList.add('hidden');
                     document.getElementById('tnc-modal').classList.remove('flex');
                     document.getElementById('main-app-container').classList.remove('hidden');
@@ -2929,6 +2957,7 @@
                 else if (u.plan_activo === 'plus') planBadge = '<span class="bg-brand-100 text-brand-700 text-[0.55rem] font-bold px-2 py-0.5 rounded uppercase tracking-wider">Plan Plus</span>';
                 else if (u.plan_activo === 'basico') planBadge = '<span class="bg-emerald-100 text-emerald-700 text-[0.55rem] font-bold px-2 py-0.5 rounded uppercase tracking-wider">Plan Básico</span>';
                 else if (u.plan_activo === 'prueba') planBadge = '<span class="bg-amber-100 text-amber-700 text-[0.55rem] font-bold px-2 py-0.5 rounded uppercase tracking-wider">Pase Prueba</span>';
+                else if (u.plan_activo === 'cortesia') planBadge = '<span class="bg-teal-100 text-teal-700 text-[0.55rem] font-bold px-2 py-0.5 rounded uppercase tracking-wider">Cortesía</span>';
 
                 usersContainer.innerHTML += `
                     <div class="px-4 py-3.5 hover:bg-slate-50 transition-colors flex justify-between items-center gap-3 border-b border-slate-100 last:border-0">
@@ -3265,6 +3294,7 @@
                 window.idCuentaMaestra = null;
                 window.userDatosBoleta = null;
                 window.pendingPaymentPlan = null;
+                window.cortesiaCheckedForUid = null;
                 window.updateBoletaSummaryUI();
                 updateTokenUI(0, 0);
 
@@ -3313,8 +3343,14 @@
                                     mainAppContainer.classList.remove('hidden');
                                 }
 
+                                // Si el usuario aún no ha recibido su pregunta de cortesía única, solicitarla al Worker
+                                if (!data.cortesia_otorgada && window.cortesiaCheckedForUid !== user.uid) {
+                                    window.cortesiaCheckedForUid = user.uid;
+                                    window.solicitarCortesia();
+                                }
+
                                 // Lógica B2B: Revisar si este usuario fue invitado o si su invitación fue revocada
-                                if (data.plan_activo === 'ninguno' || !data.plan_activo || data.plan_activo === 'pro_member') {
+                                if (data.plan_activo === 'ninguno' || data.plan_activo === 'cortesia' || !data.plan_activo || data.plan_activo === 'pro_member') {
                                     try {
                                         const inviteRef = window.doc(window.db, 'artifacts', window.globalAppId, 'invitaciones', user.email.toLowerCase());
                                         const inviteSnap = await window.getDoc(inviteRef);
@@ -3369,7 +3405,7 @@
                                 } else {
                                     if (window.unsubMasterSnap) { window.unsubMasterSnap(); window.unsubMasterSnap = null; }
                                     window.userTokensDisponibles = data.tokens_disponibles || 0;
-                                    const maxTokensPlan = (window.userPlanActivo === 'pro') ? 15000000 : (window.userPlanActivo === 'plus' ? 2500000 : (window.userPlanActivo === 'basico' ? 1000000 : (window.userPlanActivo === 'prueba' ? 10000 : 0)));
+                                    const maxTokensPlan = (window.userPlanActivo === 'pro') ? 15000000 : (window.userPlanActivo === 'plus' ? 2500000 : (window.userPlanActivo === 'basico' ? 1000000 : ((window.userPlanActivo === 'prueba' || window.userPlanActivo === 'cortesia') ? 10000 : 0)));
                                     updateTokenUI(window.userTokensDisponibles, maxTokensPlan);
                                 }
                                 
@@ -3588,6 +3624,9 @@
                         tokens_disponibles: 0,
                         plan_activo: 'ninguno'
                     }, { merge: true });
+
+                    window.cortesiaCheckedForUid = userCredential.user.uid;
+                    await window.solicitarCortesia();
 
                     userEmailDisplay.textContent = fullname;
                 } else { await signInWithEmailAndPassword(auth, email, password); }
