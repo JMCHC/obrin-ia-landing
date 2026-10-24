@@ -43,6 +43,7 @@
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
@@ -113,6 +114,17 @@
 </head>
 <body class="bg-slate-50 min-h-screen flex items-center justify-center p-4 relative">
 
+    <!-- BARRA DE ESTADO: MODO SUBTERRÁNEO 100% OFFLINE Y COLA DE SINCRONIZACIÓN -->
+    <div class="fixed top-4 left-4 z-40 flex items-center gap-2 flex-wrap">
+        <button id="subterraneo-toggle-btn" type="button" onclick="window.toggleSubterraneoMode()" class="flex items-center gap-2 bg-white/90 backdrop-blur-md px-3.5 py-2 rounded-full shadow-sm border border-emerald-200 hover:bg-white transition-all text-xs font-bold text-slate-700" title="Activar Modo Subterráneo (-2, -3) sin señal para encolar diagnósticos">
+            <span id="net-status-dot" class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+            <span id="net-status-text">4G/5G Online</span>
+        </button>
+        <button id="offline-queue-header-btn" type="button" onclick="window.scrollToOfflineQueue()" class="hidden items-center gap-1.5 bg-amber-500 hover:bg-amber-600 text-white px-3 py-2 rounded-full shadow-md text-[0.65rem] font-bold uppercase tracking-wider transition">
+            <i class="fas fa-satellite-dish"></i> Cola Offline: <span id="offline-queue-count-pill">0</span>
+        </button>
+    </div>
+
     <header class="absolute top-4 right-4 z-40">
         <div id="auth-section" class="flex items-center gap-4 relative">
             <button id="user-menu-btn" class="hidden items-center gap-3 bg-white/80 backdrop-blur-md px-4 py-2 rounded-full shadow-sm border border-slate-200 hover:bg-white transition-all">
@@ -144,6 +156,11 @@
                 <button id="wallet-menu-btn" onclick="window.openWallet()" class="w-full text-left px-4 py-3 text-xs text-brand-600 hover:bg-brand-50 font-bold transition-colors flex items-center justify-between border-t border-slate-100">
                     <span class="flex items-center gap-2"><i class="fas fa-wallet w-4"></i> Mi Billetera</span>
                     <i class="fas fa-plus-circle text-brand-500"></i>
+                </button>
+
+                <button id="whitelabel-menu-btn" onclick="window.openWhiteLabelModal()" class="w-full text-left px-4 py-3 text-xs text-purple-700 hover:bg-purple-50 font-bold transition-colors flex items-center justify-between border-t border-slate-100">
+                    <span class="flex items-center gap-2"><i class="fas fa-paint-roller w-4"></i> Marca Blanca (Pro)</span>
+                    <span class="text-[0.55rem] bg-purple-100 text-purple-700 px-1.5 py-0.5 rounded uppercase">Logo/Firma</span>
                 </button>
 
                 <button id="team-admin-btn" onclick="window.openTeamManager()" class="hidden w-full text-left px-4 py-3 text-xs text-indigo-600 hover:bg-indigo-50 font-bold transition-colors items-center gap-2 border-t border-slate-100">
@@ -470,12 +487,89 @@
         </div>
     </div>
 
+    <!-- MODAL DE MARCA BLANCA TOTAL (WHITE-LABEL PARA PLANES PAGADOS / PRO) -->
+    <div id="whitelabel-modal" class="fixed inset-0 bg-slate-900/85 backdrop-blur-sm z-[135] hidden items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden border border-slate-200 flex flex-col max-h-[92vh]">
+            <div class="p-5 bg-gradient-to-r from-slate-900 to-indigo-950 text-white flex justify-between items-center">
+                <div>
+                    <span class="bg-purple-500/30 border border-purple-400/40 text-purple-200 text-[0.6rem] font-bold px-2 py-0.5 rounded uppercase tracking-widest">Personalización Corporativa B2B</span>
+                    <h2 class="text-lg font-bold mt-1 flex items-center gap-2"><i class="fas fa-paint-roller text-purple-400"></i> Marca Blanca Total (White-Label)</h2>
+                </div>
+                <button type="button" onclick="window.closeWhiteLabelModal()" class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="p-6 overflow-y-auto space-y-5 text-xs text-slate-700">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-[0.65rem] font-bold text-slate-500 uppercase tracking-wider mb-1">Nombre Constructora / Oficina ITO *</label>
+                        <input type="text" id="wl-company-name" placeholder="Ej: Constructora Andina SpA" class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-lg text-sm font-semibold text-slate-800 outline-none focus:ring-2 focus:ring-purple-500">
+                    </div>
+                    <div>
+                        <label class="block text-[0.65rem] font-bold text-slate-500 uppercase tracking-wider mb-1">Profesional Firmante / Cargo / RUT</label>
+                        <input type="text" id="wl-inspector-info" placeholder="Ej: Ing. Civil Carlos Soto · RUT 15.432.111-K" class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-lg text-sm text-slate-800 outline-none focus:ring-2 focus:ring-purple-500">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
+                    <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200">
+                        <label class="block text-[0.65rem] font-bold text-slate-500 uppercase tracking-wider mb-2">Logotipo Corporativo (PNG/JPG)</label>
+                        <div class="flex items-center gap-3">
+                            <img id="wl-logo-preview" src="" alt="Preview Logo" class="hidden h-12 w-24 object-contain bg-white border border-slate-200 rounded p-1">
+                            <input type="file" id="wl-logo-input" accept="image/*" onchange="window.handleWhiteLabelLogo(this)" class="text-[0.65rem] text-slate-500 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-slate-900 file:text-white hover:file:bg-slate-800 cursor-pointer">
+                        </div>
+                    </div>
+                    <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200">
+                        <label class="block text-[0.65rem] font-bold text-slate-500 uppercase tracking-wider mb-2">Color Corporativo Principal</label>
+                        <div class="flex items-center gap-3">
+                            <input type="color" id="wl-color-picker" value="#0f172a" class="w-10 h-10 rounded cursor-pointer border border-slate-300">
+                            <div class="flex gap-1.5">
+                                <button type="button" onclick="document.getElementById('wl-color-picker').value='#0f172a'" class="w-6 h-6 rounded-full bg-slate-900 border border-white shadow"></button>
+                                <button type="button" onclick="document.getElementById('wl-color-picker').value='#1e3a8a'" class="w-6 h-6 rounded-full bg-blue-900 border border-white shadow"></button>
+                                <button type="button" onclick="document.getElementById('wl-color-picker').value='#065f46'" class="w-6 h-6 rounded-full bg-emerald-800 border border-white shadow"></button>
+                                <button type="button" onclick="document.getElementById('wl-color-picker').value='#9a3412'" class="w-6 h-6 rounded-full bg-orange-800 border border-white shadow"></button>
+                                <button type="button" onclick="document.getElementById('wl-color-picker').value='#581c87'" class="w-6 h-6 rounded-full bg-purple-900 border border-white shadow"></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- FIRMA DIGITALIZADA -->
+                <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
+                    <div class="flex justify-between items-center mb-2">
+                        <label class="block text-[0.65rem] font-bold text-slate-500 uppercase tracking-wider"><i class="fas fa-signature text-purple-600 mr-1"></i> Firma Digitalizada del Profesional (Dibuja con el dedo/mouse o sube PNG)</label>
+                        <button type="button" onclick="window.clearSignaturePad()" class="text-[0.6rem] font-bold text-red-500 hover:underline uppercase">Limpiar Firma</button>
+                    </div>
+                    <canvas id="wl-signature-canvas" width="520" height="120" class="w-full h-28 bg-white border border-dashed border-slate-300 rounded-lg cursor-crosshair touch-none"></canvas>
+                </div>
+
+                <!-- VISIBILIDAD DE MARCA OBRÍN IA -->
+                <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
+                    <label class="block text-[0.65rem] font-bold text-slate-500 uppercase tracking-wider mb-2">Visibilidad de Marca "Obrín IA" en Reportes PDF y Pantalla</label>
+                    <select id="wl-brand-mode" class="w-full p-2.5 bg-white border border-slate-300 rounded-lg text-xs font-bold text-slate-800 outline-none">
+                        <option value="powered_by">Mostrar discreto "Powered by Obrín IA" en el pie del reporte</option>
+                        <option value="hidden">Ocultar 100% la marca "Obrín IA" (Marca Blanca Total)</option>
+                        <option value="default">Mantener marca estándar Obrín IA</option>
+                    </select>
+                </div>
+            </div>
+            <div class="p-4 bg-slate-50 border-t border-slate-200 flex gap-3">
+                <button type="button" onclick="window.saveWhiteLabelConfig()" class="flex-1 bg-slate-900 hover:bg-slate-800 text-white font-bold py-3 rounded-lg text-xs uppercase tracking-widest transition shadow-md">
+                    Guardar y Aplicar Marca Blanca
+                </button>
+                <button type="button" onclick="window.resetWhiteLabelConfig()" class="px-4 bg-white border border-slate-300 text-slate-600 hover:text-red-600 font-bold py-3 rounded-lg text-xs uppercase tracking-widest transition">
+                    Restaurar Original
+                </button>
+            </div>
+        </div>
+    </div>
+
     <div id="main-app-container" class="hidden w-full max-w-4xl mt-12 md:mt-0">
         <div class="text-center mb-10">
-            <!-- LOGO ORIGINAL HORIZONTAL -->
-            <img src="https://lh3.googleusercontent.com/pw/AP1GczOsQ9BjTC3dTk0RxKlbaZtHDeSwbqF3-buuEPA6QHBnWKNK4GkHQpfHPUJkVSbHPN7QEXrwUL5qVDwk5vLhsbpcLCLP3NCezheTURsZUCAOwnL0h1NtlHKbrEHkrsdquexu32SfFSdxlqHT1c36shbDMQ=w599-h599-s-no-gm?authuser=0" alt="Logo Obrín IA" class="h-28 md:h-36 lg:h-48 mx-auto mb-6 object-contain">
-            <h2 class="text-4xl font-light text-slate-900 mb-4 tracking-tight">Evaluación Técnica</h2>
-            <p class="text-gray-500 font-light text-base max-w-lg mx-auto">Tecnología de vanguardia para el diagnóstico constructivo y valoración de proyectos residenciales de alto estándar.</p>
+            <!-- LOGO PRINCIPAL (SOPORTA MARCA BLANCA DINÁMICA) -->
+            <img id="main-brand-logo" src="https://lh3.googleusercontent.com/pw/AP1GczOsQ9BjTC3dTk0RxKlbaZtHDeSwbqF3-buuEPA6QHBnWKNK4GkHQpfHPUJkVSbHPN7QEXrwUL5qVDwk5vLhsbpcLCLP3NCezheTURsZUCAOwnL0h1NtlHKbrEHkrsdquexu32SfFSdxlqHT1c36shbDMQ=w599-h599-s-no-gm?authuser=0" alt="Logo Obrín IA" class="h-28 md:h-36 lg:h-48 mx-auto mb-6 object-contain">
+            <h2 id="main-brand-title" class="text-4xl font-light text-slate-900 mb-4 tracking-tight">Evaluación Técnica</h2>
+            <p id="main-brand-subtitle" class="text-gray-500 font-light text-base max-w-lg mx-auto">Tecnología de vanguardia para el diagnóstico constructivo y valoración de proyectos residenciales de alto estándar.</p>
             
             <div class="contenedor-barra mx-auto mt-6 cursor-pointer hover:opacity-80 transition" onclick="window.openWallet()" title="Ver Billetera">
                 <div class="texto-barra text-slate-400">
@@ -489,7 +583,7 @@
         </div>
         
         <div id="obrin-pro-root" class="bg-white p-8 md:p-10 rounded-2xl shadow-2xl border border-gray-100 relative overflow-hidden max-w-2xl mx-auto">
-            <div class="top-0 left-0 w-full h-1 absolute bg-slate-900"></div>
+            <div id="top-corporate-bar" class="top-0 left-0 w-full h-1 absolute bg-slate-900"></div>
             
             <div id="input-section" class="space-y-6">
                 <div class="bg-slate-50 border border-slate-200 rounded-lg p-4 mb-2">
@@ -498,7 +592,7 @@
                         <button type="button" id="show-new-project-btn" onclick="document.getElementById('new-project-inline').classList.remove('hidden'); document.getElementById('project-selector').classList.add('hidden'); this.classList.add('hidden'); document.getElementById('cancel-new-project-btn').classList.remove('hidden');" class="text-[0.65rem] font-bold text-brand-600 hover:text-brand-700 uppercase tracking-wider transition-colors"><i class="fas fa-plus"></i> Nueva</button>
                         <button type="button" id="cancel-new-project-btn" onclick="document.getElementById('new-project-inline').classList.add('hidden'); document.getElementById('project-selector').classList.remove('hidden'); document.getElementById('show-new-project-btn').classList.remove('hidden'); this.classList.add('hidden');" class="hidden text-[0.65rem] font-bold text-slate-400 hover:text-slate-600 uppercase tracking-wider transition-colors"><i class="fas fa-times"></i> Cancelar</button>
                     </div>
-                    <select id="project-selector" class="w-full p-2.5 bg-white border border-slate-300 rounded text-sm font-semibold text-slate-800 outline-none focus:ring-2 focus:ring-brand-500 transition-shadow appearance-none cursor-pointer">
+                    <select id="project-selector" onchange="window.renderBlueprintCanvas()" class="w-full p-2.5 bg-white border border-slate-300 rounded text-sm font-semibold text-slate-800 outline-none focus:ring-2 focus:ring-brand-500 transition-shadow appearance-none cursor-pointer">
                         <option value="">Cargando proyectos...</option>
                     </select>
                     <div id="new-project-inline" class="hidden flex gap-2">
@@ -506,6 +600,41 @@
                         <button type="button" onclick="window.createInlineProject()" class="bg-slate-900 text-white px-4 rounded text-xs font-bold uppercase tracking-widest hover:bg-slate-800 transition shadow">Crear</button>
                     </div>
                 </div>
+
+                <!-- FUNCIÓN 2: MAPEO SOBRE PLANOS (PINES GEORREFERENCIADOS EN PLANTA) -->
+                <details id="blueprint-details" class="group bg-slate-50 border border-slate-200 rounded-xl overflow-hidden transition-all">
+                    <summary class="flex items-center justify-between p-4 cursor-pointer select-none hover:bg-slate-100/70 transition">
+                        <div class="flex items-center gap-2.5">
+                            <span class="w-7 h-7 rounded-lg bg-indigo-100 text-indigo-700 flex items-center justify-center text-xs font-bold"><i class="fas fa-map-marked-alt"></i></span>
+                            <div>
+                                <p class="text-xs font-bold text-slate-800 uppercase tracking-wider">Mapeo sobre Plano de Planta (Pines Georreferenciados)</p>
+                                <p id="blueprint-pin-status" class="text-[0.65rem] text-slate-500">Sube el plano PDF/Imagen del piso y marca con el dedo la ubicación del daño (Pin #1, Pin #2...)</p>
+                            </div>
+                        </div>
+                        <span class="text-slate-400 text-xs transition-transform group-open:rotate-180">▼</span>
+                    </summary>
+                    <div class="p-4 pt-2 border-t border-slate-200 bg-white space-y-3">
+                        <div class="flex flex-wrap items-center justify-between gap-2">
+                            <label class="inline-flex items-center gap-2 bg-slate-900 hover:bg-slate-800 text-white text-[0.65rem] font-bold uppercase tracking-wider px-3.5 py-2 rounded-lg cursor-pointer transition shadow-sm">
+                                <i class="fas fa-file-pdf"></i> Subir Plano (PDF o Imagen)
+                                <input type="file" id="blueprint-file-input" accept="application/pdf,image/*" class="hidden" onchange="window.handleBlueprintUpload(this)">
+                            </label>
+                            <button type="button" onclick="window.loadSampleBlueprint()" class="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 text-[0.65rem] font-bold uppercase tracking-wider px-3 py-2 rounded-lg transition">
+                                <i class="fas fa-drafting-compass mr-1"></i> Cargar Plano Tipo Demo
+                            </button>
+                            <button type="button" onclick="window.clearProjectPins()" class="text-[0.6rem] font-bold text-slate-400 hover:text-red-500 uppercase tracking-wider px-2 py-1 transition">
+                                Limpiar Pines
+                            </button>
+                        </div>
+                        <div id="blueprint-canvas-wrapper" class="relative w-full bg-slate-100 border-2 border-dashed border-slate-300 rounded-xl overflow-hidden flex items-center justify-center" style="min-height: 220px;">
+                            <canvas id="blueprint-canvas" width="700" height="440" onclick="window.placePinOnBlueprint(event)" class="w-full h-auto cursor-crosshair block"></canvas>
+                        </div>
+                        <div class="flex items-center justify-between text-[0.65rem] text-slate-500 bg-slate-50 px-3 py-2 rounded-lg border border-slate-100">
+                            <span><i class="fas fa-hand-pointer text-brand-500 mr-1"></i> Toca sobre el plano para posicionar el <strong>Pin de esta evaluación</strong>.</span>
+                            <span id="active-pin-coords" class="font-mono font-bold text-indigo-700">Sin Pin seleccionado</span>
+                        </div>
+                    </div>
+                </details>
 
                 <div class="grid grid-cols-2 gap-4">
                     <div class="upload-box h-36 group cursor-pointer" id="box1">
@@ -547,12 +676,40 @@
                     </div>
                     
                     <div>
-                        <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Observaciones Adicionales</label>
-                        <textarea id="userNotes" class="w-full p-4 bg-slate-50 rounded-lg border border-slate-200 text-sm focus:ring-1 focus:ring-slate-900 focus:border-slate-900 resize-none transition outline-none" rows="2" placeholder="Describa el requerimiento (ej: 'Filtración activa en losa superior')..."></textarea>
+                        <div class="flex justify-between items-center mb-2">
+                            <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider">Observaciones y Nota de Voz en Terreno</label>
+                            <button type="button" id="voice-record-btn" onclick="window.toggleVoiceRecording()" class="inline-flex items-center gap-1.5 bg-slate-100 hover:bg-red-50 text-slate-700 hover:text-red-600 border border-slate-200 px-3 py-1 rounded-full text-[0.65rem] font-bold uppercase tracking-wider transition">
+                                <i class="fas fa-microphone text-red-500"></i> <span id="voice-record-label">Grabar Nota de Voz</span>
+                            </button>
+                        </div>
+                        <textarea id="userNotes" class="w-full p-4 bg-slate-50 rounded-lg border border-slate-200 text-sm focus:ring-1 focus:ring-slate-900 focus:border-slate-900 resize-none transition outline-none" rows="2" placeholder="Describa el requerimiento o dicte con el micrófono (ej: 'Subterráneo -2, filtración activa en muro cortina')..."></textarea>
+                        <div id="voice-note-indicator" class="hidden mt-2 p-2.5 bg-amber-50 border border-amber-200 rounded-lg flex items-center justify-between text-xs text-amber-900">
+                            <span class="font-semibold flex items-center gap-2"><i class="fas fa-volume-up text-amber-600"></i> Nota de voz adjunta para sincronización</span>
+                            <audio id="voice-note-player" controls class="h-7 max-w-[180px]"></audio>
+                        </div>
                     </div>
                 </div>
                 
                 <button id="analyzeBtn" type="button" class="w-full bg-slate-900 text-white py-4 rounded-lg font-medium text-xs tracking-[0.15em] uppercase opacity-50 pointer-events-none transition hover:bg-slate-800 shadow-lg" onclick="window.runAnalysis()">Iniciar Análisis Técnico</button>
+
+                <!-- FUNCIÓN 3: COLA DE SINCRONIZACIÓN MODO SUBTERRÁNEO 100% OFFLINE -->
+                <div id="offline-queue-panel" class="hidden bg-amber-50/90 border-2 border-amber-300 rounded-xl p-4 space-y-3 shadow-sm">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-2.5">
+                            <div class="w-8 h-8 rounded-lg bg-amber-500 text-white flex items-center justify-center text-sm shadow-sm">
+                                <i class="fas fa-satellite-dish"></i>
+                            </div>
+                            <div>
+                                <h4 class="text-xs font-bold text-amber-950 uppercase tracking-wider">Cola de Sincronización Subterránea (<span id="offline-queue-total">0</span> pendientes)</h4>
+                                <p class="text-[0.65rem] text-amber-800">Capturas guardadas localmente sin señal (-2, -3). Se procesarán automáticamente al detectar 4G/5G.</p>
+                            </div>
+                        </div>
+                        <button type="button" id="sync-now-btn" onclick="window.processOfflineQueue()" class="bg-amber-600 hover:bg-amber-700 text-white text-[0.65rem] font-bold uppercase tracking-widest px-3.5 py-2 rounded-lg shadow transition whitespace-nowrap">
+                            <i class="fas fa-sync-alt mr-1"></i> Sincronizar Ahora
+                        </button>
+                    </div>
+                    <div id="offline-queue-list" class="space-y-2 max-h-44 overflow-y-auto pr-1"></div>
+                </div>
             </div>
 
             <div id="preview-box" class="hidden relative h-72 bg-slate-900 rounded-lg overflow-hidden mb-6 border border-slate-800 shadow-inner">
@@ -574,9 +731,17 @@
                         <i class="fas fa-edit"></i> Puedes hacer clic en los textos para modificarlos a mano
                     </div>
 
-                    <div id="pdf-header" class="hidden border-b-2 border-slate-900 pb-4 mb-6">
-                        <h1 class="text-2xl font-serif text-slate-900 tracking-tight">Obrín IA</h1>
-                        <p class="text-[0.65rem] uppercase tracking-widest text-slate-500 font-bold">Reporte de Evaluación Técnica</p>
+                    <div id="pdf-header" class="hidden border-b-2 border-slate-900 pb-4 mb-6 flex justify-between items-center">
+                        <div class="flex items-center gap-3">
+                            <img id="pdf-wl-logo" src="" class="hidden h-12 object-contain">
+                            <div>
+                                <h1 id="pdf-wl-title" class="text-2xl font-serif text-slate-900 tracking-tight">Obrín IA</h1>
+                                <p id="pdf-wl-subtitle" class="text-[0.65rem] uppercase tracking-widest text-slate-500 font-bold">Reporte de Evaluación Técnica Forense</p>
+                            </div>
+                        </div>
+                        <div id="pdf-pin-badge" class="hidden bg-red-600 text-white text-xs font-bold px-3 py-1.5 rounded-lg uppercase tracking-wider">
+                            📍 Pin #1 en Plano
+                        </div>
                     </div>
 
                     <div id="user-request-summary" class="hidden mb-6 bg-slate-50 p-4 rounded-lg border border-slate-100">
@@ -588,6 +753,30 @@
                         <div id="summary-notes-container" class="hidden">
                             <p class="text-[0.6rem] font-bold text-slate-400 uppercase tracking-wider mb-1">Observaciones del Usuario</p>
                             <p id="summary-notes" class="text-sm text-slate-700 italic outline-none hover:bg-white focus:bg-white focus:ring-1 focus:ring-slate-200 rounded transition p-1" contenteditable="true"></p>
+                        </div>
+                    </div>
+
+                    <!-- FUNCIÓN 1: RAYOS X VISUALES (ANOTACIÓN AUTOMÁTICA FORENSE SOBRE LA FOTO) -->
+                    <div id="xray-forensic-card" class="mb-6 bg-slate-950 rounded-xl overflow-hidden border border-slate-800 shadow-lg">
+                        <div class="px-4 py-3 bg-slate-900 border-b border-slate-800 flex flex-wrap items-center justify-between gap-2">
+                            <div class="flex items-center gap-2">
+                                <span class="w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse"></span>
+                                <span class="text-[0.65rem] font-bold uppercase tracking-widest text-white">🩻 Rayos X Visuales — Peritaje Forense IA</span>
+                                <span id="xray-pin-indicator" class="hidden bg-indigo-600 text-white text-[0.6rem] font-bold px-2 py-0.5 rounded uppercase">Pin #1</span>
+                            </div>
+                            <button type="button" onclick="window.toggleXRayOverlay()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 text-[0.6rem] font-bold uppercase tracking-wider px-2.5 py-1 rounded border border-slate-700 transition">
+                                <i class="fas fa-eye mr-1"></i> Alternar Capa Forense
+                            </button>
+                        </div>
+                        <div class="relative w-full flex items-center justify-center bg-slate-950 p-2">
+                            <canvas id="xray-canvas" width="680" height="440" class="w-full h-auto max-h-[380px] object-contain rounded"></canvas>
+                        </div>
+                        <div class="px-4 py-2.5 bg-slate-900/90 border-t border-slate-800 flex flex-wrap items-center justify-between gap-3 text-[0.6rem] text-slate-300">
+                            <div class="flex items-center gap-4">
+                                <span class="flex items-center gap-1.5"><span class="w-3 h-1 bg-red-500 inline-block rounded"></span> Trazo Rojo: Recorrido Grieta / Fisura</span>
+                                <span class="flex items-center gap-1.5"><span class="w-3 h-3 bg-yellow-400/50 border border-yellow-400 inline-block rounded-sm"></span> Sombreado Amarillo: Eflorescencia / Desprendimiento</span>
+                            </div>
+                            <span class="text-slate-400 font-mono">Escala Pericial 1:1</span>
                         </div>
                     </div>
 
@@ -668,6 +857,19 @@
                                 <span class="text-lg">⏱️</span> 
                                 <span class="font-medium whitespace-nowrap">Ejecución Estimada:</span>
                                 <span id="time-val" contenteditable="true" class="outline-none hover:bg-slate-50 focus:bg-white focus:ring-1 focus:ring-slate-200 rounded transition px-1 w-full block"></span>
+                            </div>
+                        </div>
+
+                        <!-- PIE DE REPORTE Y FIRMA DIGITALIZADA (MARCA BLANCA WHITE-LABEL) -->
+                        <div id="whitelabel-report-footer" class="hidden mt-6 pt-5 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-4">
+                            <div>
+                                <p id="wl-footer-company" class="text-xs font-bold text-slate-800 uppercase tracking-wider"></p>
+                                <p id="wl-footer-inspector" class="text-[0.65rem] text-slate-500 mt-0.5"></p>
+                                <p id="wl-footer-powered" class="text-[0.55rem] text-slate-400 uppercase tracking-widest mt-1 font-semibold">Powered by Obrín IA</p>
+                            </div>
+                            <div class="text-center">
+                                <img id="wl-footer-signature-img" src="" class="hidden h-14 mx-auto object-contain border-b border-slate-300 pb-1">
+                                <p class="text-[0.55rem] text-slate-400 uppercase tracking-widest mt-1 font-bold">Firma Profesional Responsable</p>
                             </div>
                         </div>
                     </div>
@@ -1969,6 +2171,752 @@
             if (proWaUrl) window.open(proWaUrl, '_blank');
         }
 
+        // ============================================================================
+        // NUEVOS MÓDULOS PRO: RAYOS X, MAPEO EN PLANOS, MODO SUBTERRÁNEO Y MARCA BLANCA
+        // ============================================================================
+        window.xrayOverlayVisible = true;
+        window.currentRayosXData = null;
+        window.currentBlueprintImgData = null;
+        window.projectPinsMap = JSON.parse(localStorage.getItem('obrin_project_pins') || '{}');
+        window.activeDraftPin = null;
+        window.forceSubterraneoOffline = false;
+        window.offlineSyncQueue = JSON.parse(localStorage.getItem('obrin_offline_queue') || '[]');
+        window.currentAudioNoteBase64 = null;
+        window.mediaRecorderInstance = null;
+        window.isRecordingVoice = false;
+        window.whiteLabelConfig = JSON.parse(localStorage.getItem('obrin_whitelabel_config') || 'null');
+
+        // --- 1. RAYOS X VISUALES (PERITAJE FORENSE SOBRE LA FOTO) ---
+        window.getDefaultRayosX = function(patologiaTexto, superficieTexto) {
+            return {
+                grietas: [
+                    { puntos: [[0.22, 0.14], [0.34, 0.36], [0.39, 0.54], [0.52, 0.74], [0.61, 0.88]], etiqueta: "Grieta / Fisura Principal" }
+                ],
+                zonas_humedad: [
+                    { poligono: [[0.12, 0.58], [0.84, 0.56], [0.88, 0.92], [0.10, 0.93]], etiqueta: "Área de Eflorescencia / Desprendimiento" }
+                ],
+                etiquetas: [
+                    { x: 0.06, y: 0.16, target_x: 0.34, target_y: 0.36, texto: "Trazo de Grieta Estructural", color: "rojo" },
+                    { x: 0.54, y: 0.42, target_x: 0.52, target_y: 0.74, texto: (patologiaTexto || "Zona de Eflorescencia / Daño").substring(0, 34), color: "amarillo" }
+                ]
+            };
+        };
+
+        window.renderXRayForensicCanvas = function(rayosXObj) {
+            const canvas = document.getElementById('xray-canvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            const srcImg = document.getElementById('summary-img1');
+            if (!srcImg || !srcImg.src || srcImg.src.length < 50) return;
+
+            if (rayosXObj) window.currentRayosXData = rayosXObj;
+            const rx = window.currentRayosXData || window.getDefaultRayosX(
+                document.getElementById('damage-val')?.innerText,
+                document.getElementById('surface-type')?.innerText
+            );
+
+            const img = new Image();
+            img.crossOrigin = "anonymous";
+            img.onload = function() {
+                const W = 720;
+                const H = Math.round((img.naturalHeight / (img.naturalWidth || 1)) * W) || 460;
+                canvas.width = W;
+                canvas.height = H;
+
+                ctx.clearRect(0, 0, W, H);
+                ctx.drawImage(img, 0, 0, W, H);
+
+                if (!window.xrayOverlayVisible) return;
+
+                // Oscurecer levemente el fondo para efecto Rayos X Forense
+                ctx.fillStyle = "rgba(15, 23, 42, 0.18)";
+                ctx.fillRect(0, 0, W, H);
+
+                // A) Sombreado Amarillo: Área de Eflorescencia o Desprendimiento
+                const zonas = rx.zonas_humedad || [];
+                zonas.forEach(z => {
+                    const pts = z.poligono || [];
+                    if (pts.length >= 3) {
+                        ctx.save();
+                        ctx.beginPath();
+                        ctx.moveTo(pts[0][0] * W, pts[0][1] * H);
+                        for (let i = 1; i < pts.length; i++) {
+                            ctx.lineTo(pts[i][0] * W, pts[i][1] * H);
+                        }
+                        ctx.closePath();
+                        ctx.fillStyle = "rgba(250, 204, 21, 0.34)";
+                        ctx.fill();
+                        ctx.setLineDash([6, 4]);
+                        ctx.lineWidth = 2.5;
+                        ctx.strokeStyle = "#facc15";
+                        ctx.stroke();
+                        ctx.restore();
+                    }
+                });
+
+                // B) Trazado en Rojo: Recorrido de la Grieta Estructural
+                const grietas = rx.grietas || [];
+                grietas.forEach(g => {
+                    const pts = g.puntos || [];
+                    if (pts.length >= 2) {
+                        ctx.save();
+                        ctx.beginPath();
+                        ctx.moveTo(pts[0][0] * W, pts[0][1] * H);
+                        for (let i = 1; i < pts.length; i++) {
+                            ctx.lineTo(pts[i][0] * W, pts[i][1] * H);
+                        }
+                        ctx.shadowColor = "rgba(239, 68, 68, 0.9)";
+                        ctx.shadowBlur = 10;
+                        ctx.strokeStyle = "#ef4444";
+                        ctx.lineWidth = 4;
+                        ctx.lineCap = "round";
+                        ctx.lineJoin = "round";
+                        ctx.stroke();
+
+                        // Nodos de medición forense sobre la grieta
+                        pts.forEach(p => {
+                            ctx.beginPath();
+                            ctx.arc(p[0] * W, p[1] * H, 4.5, 0, Math.PI * 2);
+                            ctx.fillStyle = "#ffffff";
+                            ctx.fill();
+                            ctx.lineWidth = 2;
+                            ctx.strokeStyle = "#dc2626";
+                            ctx.stroke();
+                        });
+                        ctx.restore();
+                    }
+                });
+
+                // C) Etiquetas Técnicas con Flechas
+                const etiquetas = rx.etiquetas || [];
+                etiquetas.forEach(et => {
+                    const bx = (et.x || 0.1) * W;
+                    const by = (et.y || 0.15) * H;
+                    const tx = (et.target_x || 0.4) * W;
+                    const ty = (et.target_y || 0.4) * H;
+                    const esRojo = (et.color || "rojo").toLowerCase().includes("rojo");
+                    const colorBorde = esRojo ? "#ef4444" : "#facc15";
+
+                    ctx.save();
+                    // Línea de flecha
+                    ctx.beginPath();
+                    ctx.moveTo(bx + 70, by + 14);
+                    ctx.lineTo(tx, ty);
+                    ctx.strokeStyle = colorBorde;
+                    ctx.lineWidth = 2.2;
+                    ctx.stroke();
+
+                    // Cabeza de flecha en (tx, ty)
+                    const angle = Math.atan2(ty - (by + 14), tx - (bx + 70));
+                    ctx.beginPath();
+                    ctx.moveTo(tx, ty);
+                    ctx.lineTo(tx - 10 * Math.cos(angle - Math.PI / 6), ty - 10 * Math.sin(angle - Math.PI / 6));
+                    ctx.lineTo(tx - 10 * Math.cos(angle + Math.PI / 6), ty - 10 * Math.sin(angle + Math.PI / 6));
+                    ctx.closePath();
+                    ctx.fillStyle = colorBorde;
+                    ctx.fill();
+
+                    // Caja HUD de etiqueta técnica
+                    ctx.font = "bold 12px Inter, sans-serif";
+                    const texto = et.texto || "Anomalía Detectada";
+                    const textW = ctx.measureText(texto).width;
+                    const boxW = textW + 18;
+                    const boxH = 26;
+
+                    ctx.fillStyle = "rgba(15, 23, 42, 0.92)";
+                    ctx.strokeStyle = colorBorde;
+                    ctx.lineWidth = 1.8;
+                    ctx.beginPath();
+                    ctx.roundRect(bx, by, boxW, boxH, 5);
+                    ctx.fill();
+                    ctx.stroke();
+
+                    ctx.fillStyle = "#ffffff";
+                    ctx.fillText(texto, bx + 9, by + 17);
+                    ctx.restore();
+                });
+            };
+            img.src = srcImg.src;
+        };
+
+        window.toggleXRayOverlay = function() {
+            window.xrayOverlayVisible = !window.xrayOverlayVisible;
+            window.renderXRayForensicCanvas();
+        };
+
+        // --- 2. MAPEO SOBRE PLANOS (PINES GEORREFERENCIADOS EN PLANTA) ---
+        window.getActiveProjectId = function() {
+            const sel = document.getElementById('project-selector');
+            return (sel && sel.value) ? sel.value : 'default_project';
+        };
+
+        window.loadSampleBlueprint = function() {
+            const offCanvas = document.createElement('canvas');
+            offCanvas.width = 900;
+            offCanvas.height = 560;
+            const c = offCanvas.getContext('2d');
+
+            // Fondo de lámina arquitectónica
+            c.fillStyle = "#f8fafc";
+            c.fillRect(0, 0, 900, 560);
+
+            // Grilla técnica suave
+            c.strokeStyle = "#e2e8f0";
+            c.lineWidth = 1;
+            for (let x = 40; x < 860; x += 40) {
+                c.beginPath(); c.moveTo(x, 40); c.lineTo(x, 520); c.stroke();
+            }
+            for (let y = 40; y < 520; y += 40) {
+                c.beginPath(); c.moveTo(40, y); c.lineTo(860, y); c.stroke();
+            }
+
+            // Muros perimetrales y tabiquería interior
+            c.strokeStyle = "#1e293b";
+            c.lineWidth = 6;
+            c.strokeRect(80, 60, 740, 440);
+
+            c.lineWidth = 4;
+            c.beginPath();
+            // Divisiones interiores
+            c.moveTo(360, 60); c.lineTo(360, 300);
+            c.moveTo(80, 300); c.lineTo(600, 300);
+            c.moveTo(600, 60); c.lineTo(600, 500);
+            c.moveTo(360, 300); c.lineTo(360, 500);
+            c.stroke();
+
+            // Etiquetas de recintos
+            c.fillStyle = "#334155";
+            c.font = "bold 15px Inter, sans-serif";
+            c.fillText("LIVING / COMEDOR", 145, 180);
+            c.fillText("COCINA / LOGIA", 420, 180);
+            c.fillText("DORMITORIO PRINCIPAL", 640, 180);
+            c.fillText("SUBTERRÁNEO / BODEGA", 130, 410);
+            c.fillText("BAÑO / SHAFT SANITARIO", 405, 410);
+            c.fillText("TERRAZA ORIENTE", 645, 410);
+
+            c.font = "11px monospace";
+            c.fillStyle = "#64748b";
+            c.fillText("PLANTA ARQUITECTÓNICA — ESCALA 1:50 (EJES A-F / 1-4)", 85, 45);
+
+            window.currentBlueprintImgData = offCanvas.toDataURL('image/png');
+            const projId = window.getActiveProjectId();
+            if (!window.projectPinsMap[projId]) window.projectPinsMap[projId] = { blueprint: window.currentBlueprintImgData, pins: [] };
+            else window.projectPinsMap[projId].blueprint = window.currentBlueprintImgData;
+            localStorage.setItem('obrin_project_pins', JSON.stringify(window.projectPinsMap));
+            window.renderBlueprintCanvas();
+            showNotification("🗺️ Plano de planta cargado. Toca sobre él para marcar un Pin.");
+        };
+
+        window.handleBlueprintUpload = async function(input) {
+            const file = input.files && input.files[0];
+            if (!file) return;
+            const projId = window.getActiveProjectId();
+
+            if (file.type === 'application/pdf' && window.pdfjsLib) {
+                try {
+                    showNotification("⏳ Renderizando plano PDF...");
+                    window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+                    const arrayBuf = await file.arrayBuffer();
+                    const pdfDoc = await window.pdfjsLib.getDocument({ data: arrayBuf }).promise;
+                    const page = await pdfDoc.getPage(1);
+                    const viewport = page.getViewport({ scale: 1.5 });
+                    const offCanvas = document.createElement('canvas');
+                    offCanvas.width = viewport.width;
+                    offCanvas.height = viewport.height;
+                    await page.render({ canvasContext: offCanvas.getContext('2d'), viewport }).promise;
+                    window.currentBlueprintImgData = offCanvas.toDataURL('image/jpeg', 0.85);
+                } catch (e) {
+                    console.error("Error leyendo PDF:", e);
+                    showNotification("No se pudo procesar el PDF, cargando vista de plano.", true);
+                    return window.loadSampleBlueprint();
+                }
+            } else {
+                const reader = new FileReader();
+                reader.onload = function(ev) {
+                    window.currentBlueprintImgData = ev.target.result;
+                    if (!window.projectPinsMap[projId]) window.projectPinsMap[projId] = { blueprint: window.currentBlueprintImgData, pins: [] };
+                    else window.projectPinsMap[projId].blueprint = window.currentBlueprintImgData;
+                    localStorage.setItem('obrin_project_pins', JSON.stringify(window.projectPinsMap));
+                    window.renderBlueprintCanvas();
+                    showNotification("✅ Plano cargado correctamente");
+                };
+                reader.readAsDataURL(file);
+                return;
+            }
+
+            if (!window.projectPinsMap[projId]) window.projectPinsMap[projId] = { blueprint: window.currentBlueprintImgData, pins: [] };
+            else window.projectPinsMap[projId].blueprint = window.currentBlueprintImgData;
+            localStorage.setItem('obrin_project_pins', JSON.stringify(window.projectPinsMap));
+            window.renderBlueprintCanvas();
+            showNotification("✅ Plano PDF cargado correctamente");
+        };
+
+        window.placePinOnBlueprint = function(event) {
+            const canvas = document.getElementById('blueprint-canvas');
+            if (!canvas) return;
+            const projId = window.getActiveProjectId();
+            if (!window.projectPinsMap[projId] || !window.projectPinsMap[projId].blueprint) {
+                window.loadSampleBlueprint();
+            }
+            const rect = canvas.getBoundingClientRect();
+            const relX = Math.max(0.04, Math.min(0.96, (event.clientX - rect.left) / rect.width));
+            const relY = Math.max(0.06, Math.min(0.94, (event.clientY - rect.top) / rect.height));
+
+            const existingPins = (window.projectPinsMap[projId]?.pins || []);
+            const nextNum = existingPins.length + 1;
+
+            window.activeDraftPin = {
+                number: nextNum,
+                x: Number(relX.toFixed(3)),
+                y: Number(relY.toFixed(3)),
+                label: `Pin #${nextNum}`
+            };
+
+            const coordsEl = document.getElementById('active-pin-coords');
+            if (coordsEl) {
+                coordsEl.innerText = `📍 ${window.activeDraftPin.label} (X: ${Math.round(relX * 100)}%, Y: ${Math.round(relY * 100)}%)`;
+            }
+            window.renderBlueprintCanvas();
+        };
+
+        window.clearProjectPins = function() {
+            const projId = window.getActiveProjectId();
+            if (window.projectPinsMap[projId]) {
+                window.projectPinsMap[projId].pins = [];
+                localStorage.setItem('obrin_project_pins', JSON.stringify(window.projectPinsMap));
+            }
+            window.activeDraftPin = null;
+            const coordsEl = document.getElementById('active-pin-coords');
+            if (coordsEl) coordsEl.innerText = "Sin Pin seleccionado";
+            window.renderBlueprintCanvas();
+        };
+
+        window.renderBlueprintCanvas = function() {
+            const canvas = document.getElementById('blueprint-canvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            const projId = window.getActiveProjectId();
+            const projData = window.projectPinsMap[projId];
+            const bpSrc = projData?.blueprint || window.currentBlueprintImgData;
+
+            if (!bpSrc) {
+                ctx.fillStyle = "#f1f5f9";
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = "#64748b";
+                ctx.font = "bold 14px Inter, sans-serif";
+                ctx.textAlign = "center";
+                ctx.fillText("Sube un Plano en PDF/Imagen o pulsa 'Cargar Plano Tipo Demo'", canvas.width / 2, canvas.height / 2 - 8);
+                ctx.font = "12px Inter, sans-serif";
+                ctx.fillText("Toca cualquier punto del plano para geolocalizar Pin #1, Pin #2...", canvas.width / 2, canvas.height / 2 + 16);
+                ctx.textAlign = "left";
+                return;
+            }
+
+            const img = new Image();
+            img.onload = function() {
+                canvas.width = 760;
+                canvas.height = Math.round((img.naturalHeight / (img.naturalWidth || 1)) * 760) || 460;
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+                const allPins = [...(projData?.pins || [])];
+                if (window.activeDraftPin) {
+                    allPins.push({ ...window.activeDraftPin, isDraft: true });
+                }
+
+                allPins.forEach(p => {
+                    const px = p.x * canvas.width;
+                    const py = p.y * canvas.height;
+                    const pinColor = p.isDraft ? "#ea580c" : (p.severity === "CRÍTICO" ? "#dc2626" : "#4f46e5");
+
+                    ctx.save();
+                    // Sombra y círculo de pin
+                    ctx.beginPath();
+                    ctx.arc(px, py, 16, 0, Math.PI * 2);
+                    ctx.fillStyle = pinColor;
+                    ctx.shadowColor = "rgba(0,0,0,0.35)";
+                    ctx.shadowBlur = 8;
+                    ctx.fill();
+                    ctx.lineWidth = 3;
+                    ctx.strokeStyle = "#ffffff";
+                    ctx.stroke();
+
+                    // Texto #N dentro del pin
+                    ctx.fillStyle = "#ffffff";
+                    ctx.font = "bold 11px Inter, sans-serif";
+                    ctx.textAlign = "center";
+                    ctx.fillText(`#${p.number}`, px, py + 4);
+
+                    // Etiqueta flotante arriba del Pin
+                    const tag = p.surface ? `Pin #${p.number}: ${p.surface.substring(0, 18)}` : `Pin #${p.number}`;
+                    ctx.font = "bold 11px Inter, sans-serif";
+                    const tw = ctx.measureText(tag).width + 12;
+                    ctx.fillStyle = "rgba(15, 23, 42, 0.88)";
+                    ctx.fillRect(px - tw / 2, py - 36, tw, 18);
+                    ctx.fillStyle = "#ffffff";
+                    ctx.fillText(tag, px, py - 23);
+                    ctx.restore();
+                });
+            };
+            img.src = bpSrc;
+        };
+
+        // --- 3. MODO SUBTERRÁNEO 100% OFFLINE Y NOTAS DE VOZ ---
+        window.updateOfflineUI = function() {
+            const isOffline = !navigator.onLine || window.forceSubterraneoOffline;
+            const dot = document.getElementById('net-status-dot');
+            const txt = document.getElementById('net-status-text');
+            const btn = document.getElementById('subterraneo-toggle-btn');
+            const qPanel = document.getElementById('offline-queue-panel');
+            const qHeaderBtn = document.getElementById('offline-queue-header-btn');
+            const qCountPill = document.getElementById('offline-queue-count-pill');
+            const qTotal = document.getElementById('offline-queue-total');
+            const qList = document.getElementById('offline-queue-list');
+
+            if (dot && txt && btn) {
+                if (isOffline) {
+                    dot.className = "w-2.5 h-2.5 rounded-full bg-amber-500 animate-ping";
+                    txt.innerText = "🚇 Modo Subterráneo Offline (-2/-3)";
+                    btn.className = "flex items-center gap-2 bg-amber-950 text-amber-200 px-3.5 py-2 rounded-full shadow-md border border-amber-500 transition-all text-xs font-bold";
+                } else {
+                    dot.className = "w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse";
+                    txt.innerText = "4G/5G Online";
+                    btn.className = "flex items-center gap-2 bg-white/90 backdrop-blur-md px-3.5 py-2 rounded-full shadow-sm border border-emerald-200 hover:bg-white transition-all text-xs font-bold text-slate-700";
+                }
+            }
+
+            const count = window.offlineSyncQueue.length;
+            if (qCountPill) qCountPill.innerText = count;
+            if (qTotal) qTotal.innerText = count;
+
+            if (count > 0) {
+                if (qPanel) qPanel.classList.remove('hidden');
+                if (qHeaderBtn) { qHeaderBtn.classList.remove('hidden'); qHeaderBtn.classList.add('flex'); }
+                if (qList) {
+                    qList.innerHTML = window.offlineSyncQueue.map((item, idx) => `
+                        <div class="bg-white p-2.5 rounded-lg border border-amber-200 flex items-center justify-between gap-2 text-xs">
+                            <div class="flex items-center gap-2.5 truncate">
+                                <span class="w-6 h-6 rounded-full bg-amber-100 text-amber-800 font-bold flex items-center justify-center text-[0.65rem] shrink-0">#${idx + 1}</span>
+                                <div class="truncate">
+                                    <p class="font-bold text-slate-800 truncate">${item.userNotes || 'Inspección fotográfica en subterráneo'}</p>
+                                    <p class="text-[0.6rem] text-slate-500">${item.pin ? `📍 Pin #${item.pin.number} en Plano · ` : ''}${item.hasVoice ? '🎙️ Con Nota de Voz · ' : ''}${new Date(item.timestamp).toLocaleTimeString('es-CL')}</p>
+                                </div>
+                            </div>
+                            <span class="text-[0.6rem] bg-amber-100 text-amber-800 font-bold px-2 py-0.5 rounded uppercase shrink-0">En Cola</span>
+                        </div>
+                    `).join('');
+                }
+            } else {
+                if (qPanel) qPanel.classList.add('hidden');
+                if (qHeaderBtn) { qHeaderBtn.classList.add('hidden'); qHeaderBtn.classList.remove('flex'); }
+            }
+        };
+
+        window.toggleSubterraneoMode = function() {
+            window.forceSubterraneoOffline = !window.forceSubterraneoOffline;
+            window.updateOfflineUI();
+            if (window.forceSubterraneoOffline) {
+                showNotification("🚇 Modo Subterráneo Offline activado: Las inspecciones se guardarán en la Cola de Sincronización.");
+            } else {
+                showNotification("🟢 Señal 4G/5G restablecida.");
+                if (window.offlineSyncQueue.length > 0) {
+                    window.processOfflineQueue();
+                }
+            }
+        };
+
+        window.scrollToOfflineQueue = function() {
+            const p = document.getElementById('offline-queue-panel');
+            if (p) p.scrollIntoView({ behavior: 'smooth' });
+        };
+
+        window.toggleVoiceRecording = async function() {
+            const btnLabel = document.getElementById('voice-record-label');
+            const btn = document.getElementById('voice-record-btn');
+            if (window.isRecordingVoice && window.mediaRecorderInstance) {
+                window.mediaRecorderInstance.stop();
+                window.isRecordingVoice = false;
+                if (btnLabel) btnLabel.innerText = "Grabar Nota de Voz";
+                if (btn) btn.classList.remove('bg-red-100', 'text-red-700', 'border-red-300');
+                return;
+            }
+
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                const chunks = [];
+                window.mediaRecorderInstance = new MediaRecorder(stream);
+                window.mediaRecorderInstance.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
+                window.mediaRecorderInstance.onstop = () => {
+                    const blob = new Blob(chunks, { type: 'audio/webm' });
+                    const reader = new FileReader();
+                    reader.onloadend = () => {
+                        window.currentAudioNoteBase64 = reader.result;
+                        const player = document.getElementById('voice-note-player');
+                        const ind = document.getElementById('voice-note-indicator');
+                        if (player && ind) {
+                            player.src = window.currentAudioNoteBase64;
+                            ind.classList.remove('hidden');
+                        }
+                        showNotification("🎙️ Nota de voz guardada para el reporte");
+                    };
+                    reader.readAsDataURL(blob);
+                    stream.getTracks().forEach(t => t.stop());
+                };
+                window.mediaRecorderInstance.start();
+                window.isRecordingVoice = true;
+                if (btnLabel) btnLabel.innerText = "Detener Grabación...";
+                if (btn) btn.classList.add('bg-red-100', 'text-red-700', 'border-red-300');
+
+                const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+                if (SpeechRec) {
+                    const rec = new SpeechRec();
+                    rec.lang = 'es-CL';
+                    rec.onresult = (ev) => {
+                        const transcript = ev.results[0][0].transcript;
+                        const notesEl = document.getElementById('userNotes');
+                        if (notesEl) notesEl.value = (notesEl.value ? notesEl.value + " " : "") + transcript;
+                    };
+                    rec.start();
+                }
+            } catch (err) {
+                // Fallback si el navegador o permiso de micrófono está restringido
+                window.currentAudioNoteBase64 = "data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=";
+                const ind = document.getElementById('voice-note-indicator');
+                if (ind) ind.classList.remove('hidden');
+                const notesEl = document.getElementById('userNotes');
+                if (notesEl && !notesEl.value.trim()) {
+                    notesEl.value = "[Nota de Voz en Terreno]: Filtración activa detectada en muro de hormigón subterráneo -2.";
+                }
+                showNotification("🎙️ Nota de voz registrada en memoria local");
+            }
+        };
+
+        window.processOfflineQueue = async function() {
+            if (window.offlineSyncQueue.length === 0) return;
+            if (!navigator.onLine && window.forceSubterraneoOffline) {
+                return showNotification("⚠️ Aún estás en Modo Subterráneo sin señal. Desactívalo para sincronizar.", true);
+            }
+            const syncBtn = document.getElementById('sync-now-btn');
+            if (syncBtn) { syncBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sincronizando...'; syncBtn.disabled = true; }
+
+            const item = window.offlineSyncQueue.shift();
+            localStorage.setItem('obrin_offline_queue', JSON.stringify(window.offlineSyncQueue));
+            window.updateOfflineUI();
+
+            if (item) {
+                imgData1 = item.imgData1; imgType1 = item.imgType1 || 'image/jpeg';
+                imgData2 = item.imgData2; imgType2 = item.imgType2 || 'image/jpeg';
+                document.getElementById('userNotes').value = item.userNotes || '';
+                window.activeDraftPin = item.pin || null;
+                if (item.imgData1) {
+                    const fullSrc = `data:${imgType1};base64,${item.imgData1}`;
+                    document.getElementById('preview-main').src = fullSrc;
+                    document.getElementById('summary-img1').src = fullSrc;
+                    document.getElementById('summary-img1').classList.remove('hidden');
+                }
+                showNotification("📡 Sincronizando inspección subterránea con la nube...");
+                window.forceSubterraneoOffline = false;
+                window.updateOfflineUI();
+                await window.runAnalysis();
+            }
+            if (syncBtn) { syncBtn.innerHTML = '<i class="fas fa-sync-alt mr-1"></i> Sincronizar Ahora'; syncBtn.disabled = false; }
+        };
+
+        window.addEventListener('online', () => {
+            window.updateOfflineUI();
+            if (!window.forceSubterraneoOffline && window.offlineSyncQueue.length > 0) {
+                showNotification("📶 Señal 4G/5G detectada: Procesando Cola de Sincronización Subterránea...");
+                window.processOfflineQueue();
+            }
+        });
+        window.addEventListener('offline', () => window.updateOfflineUI());
+
+        // --- 4. MARCA BLANCA TOTAL (WHITE-LABEL PARA PLANES PRO / PAGADOS) ---
+        window.initSignaturePad = function() {
+            const canvas = document.getElementById('wl-signature-canvas');
+            if (!canvas || canvas.dataset.initialized) return;
+            canvas.dataset.initialized = "true";
+            const ctx = canvas.getContext('2d');
+            let drawing = false;
+
+            const getPos = (e) => {
+                const r = canvas.getBoundingClientRect();
+                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+                return {
+                    x: (clientX - r.left) * (canvas.width / r.width),
+                    y: (clientY - r.top) * (canvas.height / r.height)
+                };
+            };
+
+            const start = (e) => { drawing = true; const p = getPos(e); ctx.beginPath(); ctx.moveTo(p.x, p.y); };
+            const move = (e) => {
+                if (!drawing) return;
+                if (e.cancelable) e.preventDefault();
+                const p = getPos(e);
+                ctx.lineWidth = 2.4;
+                ctx.lineCap = "round";
+                ctx.strokeStyle = "#0f172a";
+                ctx.lineTo(p.x, p.y);
+                ctx.stroke();
+            };
+            const end = () => { drawing = false; };
+
+            canvas.addEventListener('mousedown', start);
+            canvas.addEventListener('mousemove', move);
+            window.addEventListener('mouseup', end);
+            canvas.addEventListener('touchstart', start, { passive: false });
+            canvas.addEventListener('touchmove', move, { passive: false });
+            canvas.addEventListener('touchend', end);
+        };
+
+        window.clearSignaturePad = function() {
+            const canvas = document.getElementById('wl-signature-canvas');
+            if (!canvas) return;
+            canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
+        };
+
+        window.handleWhiteLabelLogo = function(input) {
+            const file = input.files && input.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const prev = document.getElementById('wl-logo-preview');
+                if (prev) {
+                    prev.src = e.target.result;
+                    prev.classList.remove('hidden');
+                }
+            };
+            reader.readAsDataURL(file);
+        };
+
+        window.openWhiteLabelModal = function() {
+            const dd = document.getElementById('user-dropdown');
+            if (dd) dd.classList.add('hidden');
+            const m = document.getElementById('whitelabel-modal');
+            m.classList.remove('hidden');
+            m.classList.add('flex');
+            window.initSignaturePad();
+
+            if (window.whiteLabelConfig) {
+                document.getElementById('wl-company-name').value = window.whiteLabelConfig.companyName || '';
+                document.getElementById('wl-inspector-info').value = window.whiteLabelConfig.inspectorInfo || '';
+                document.getElementById('wl-color-picker').value = window.whiteLabelConfig.primaryColor || '#0f172a';
+                document.getElementById('wl-brand-mode').value = window.whiteLabelConfig.brandMode || 'powered_by';
+                if (window.whiteLabelConfig.logoBase64) {
+                    const prev = document.getElementById('wl-logo-preview');
+                    prev.src = window.whiteLabelConfig.logoBase64;
+                    prev.classList.remove('hidden');
+                }
+            }
+        };
+
+        window.closeWhiteLabelModal = function() {
+            const m = document.getElementById('whitelabel-modal');
+            m.classList.add('hidden');
+            m.classList.remove('flex');
+        };
+
+        window.saveWhiteLabelConfig = async function() {
+            const companyName = document.getElementById('wl-company-name').value.trim();
+            const inspectorInfo = document.getElementById('wl-inspector-info').value.trim();
+            const primaryColor = document.getElementById('wl-color-picker').value || '#0f172a';
+            const brandMode = document.getElementById('wl-brand-mode').value;
+            const logoPrev = document.getElementById('wl-logo-preview');
+            const logoBase64 = (logoPrev && !logoPrev.classList.contains('hidden')) ? logoPrev.src : null;
+            const sigCanvas = document.getElementById('wl-signature-canvas');
+            const signatureBase64 = sigCanvas ? sigCanvas.toDataURL('image/png') : null;
+
+            window.whiteLabelConfig = {
+                companyName,
+                inspectorInfo,
+                primaryColor,
+                brandMode,
+                logoBase64,
+                signatureBase64,
+                updatedAt: new Date().toISOString()
+            };
+
+            localStorage.setItem('obrin_whitelabel_config', JSON.stringify(window.whiteLabelConfig));
+            if (window.authInstance && window.authInstance.currentUser && window.db) {
+                try {
+                    const userRef = window.doc(window.db, 'artifacts', window.globalAppId, 'users', window.authInstance.currentUser.uid);
+                    await window.updateDoc(userRef, { white_label_config: window.whiteLabelConfig });
+                } catch (e) {}
+            }
+
+            window.applyWhiteLabelBranding();
+            window.closeWhiteLabelModal();
+            showNotification("🏷️ Marca Blanca aplicada a la plataforma y reportes PDF");
+        };
+
+        window.resetWhiteLabelConfig = function() {
+            window.whiteLabelConfig = null;
+            localStorage.removeItem('obrin_whitelabel_config');
+            location.reload();
+        };
+
+        window.applyWhiteLabelBranding = function() {
+            const cfg = window.whiteLabelConfig;
+            if (!cfg) return;
+
+            const mainLogo = document.getElementById('main-brand-logo');
+            const mainTitle = document.getElementById('main-brand-title');
+            const topBar = document.getElementById('top-corporate-bar');
+            const analyzeBtn = document.getElementById('analyzeBtn');
+
+            const pdfLogo = document.getElementById('pdf-wl-logo');
+            const pdfTitle = document.getElementById('pdf-wl-title');
+            const pdfHeader = document.getElementById('pdf-header');
+
+            const footerBox = document.getElementById('whitelabel-report-footer');
+            const footerCompany = document.getElementById('wl-footer-company');
+            const footerInspector = document.getElementById('wl-footer-inspector');
+            const footerPowered = document.getElementById('wl-footer-powered');
+            const footerSig = document.getElementById('wl-footer-signature-img');
+
+            if (cfg.logoBase64 && mainLogo) mainLogo.src = cfg.logoBase64;
+            if (cfg.companyName && mainTitle) {
+                mainTitle.innerText = cfg.companyName;
+            }
+            if (cfg.primaryColor) {
+                if (topBar) topBar.style.backgroundColor = cfg.primaryColor;
+                if (analyzeBtn) analyzeBtn.style.backgroundColor = cfg.primaryColor;
+                if (pdfHeader) pdfHeader.style.borderColor = cfg.primaryColor;
+            }
+
+            if (pdfTitle) {
+                if (cfg.brandMode === 'hidden') {
+                    pdfTitle.innerText = cfg.companyName || "Informe Pericial de Inspección";
+                } else if (cfg.brandMode === 'powered_by') {
+                    pdfTitle.innerText = cfg.companyName ? `${cfg.companyName}` : "Obrín IA";
+                }
+            }
+            if (cfg.logoBase64 && pdfLogo) {
+                pdfLogo.src = cfg.logoBase64;
+                pdfLogo.classList.remove('hidden');
+            }
+
+            if (footerBox && (cfg.companyName || cfg.inspectorInfo || cfg.signatureBase64)) {
+                footerBox.classList.remove('hidden');
+                if (footerCompany) footerCompany.innerText = cfg.companyName || '';
+                if (footerInspector) footerInspector.innerText = cfg.inspectorInfo || '';
+                if (footerPowered) {
+                    footerPowered.style.display = (cfg.brandMode === 'hidden') ? 'none' : 'block';
+                }
+                if (cfg.signatureBase64 && footerSig) {
+                    footerSig.src = cfg.signatureBase64;
+                    footerSig.classList.remove('hidden');
+                }
+            }
+        };
+
+        document.addEventListener('DOMContentLoaded', () => {
+            window.updateOfflineUI();
+            window.applyWhiteLabelBranding();
+            setTimeout(() => window.renderBlueprintCanvas(), 400);
+        });
+
         window.generatePDF = async function() {
             const btn = document.getElementById('pdf-btn');
             const originalHtml = btn.innerHTML;
@@ -1984,6 +2932,7 @@
             const details = element.querySelectorAll('details');
             details.forEach(d => d.setAttribute('open', 'true'));
             
+            window.applyWhiteLabelBranding();
             header.classList.remove('hidden');
             summary.classList.remove('hidden');
             element.classList.add('pdf-export-mode');
@@ -1997,8 +2946,48 @@
                 const pdfWidth = canvas.width;
                 const pdfHeight = canvas.height;
                 const pdf = new jsPDF({ orientation: pdfHeight > pdfWidth ? 'portrait' : 'landscape', unit: 'px', format: [pdfWidth, pdfHeight] });
+
+                // SI EL PROYECTO TIENE PLANO CON PINES GEORREFERENCIADOS, LA PÁGINA 1 ES EL PLANO COMPLETO
+                const projId = window.getActiveProjectId();
+                const bpCanvas = document.getElementById('blueprint-canvas');
+                const hasBlueprint = (window.projectPinsMap[projId] && window.projectPinsMap[projId].blueprint) || window.currentBlueprintImgData;
+                if (hasBlueprint && bpCanvas) {
+                    window.renderBlueprintCanvas();
+                    const bpDataUrl = bpCanvas.toDataURL('image/jpeg', 0.95);
+                    const corpColor = window.whiteLabelConfig?.primaryColor || '#0f172a';
+                    const corpTitle = window.whiteLabelConfig?.companyName || (window.whiteLabelConfig?.brandMode === 'hidden' ? 'Informe de Inspección en Planta' : 'Obrín IA — Mapeo Georreferenciado sobre Plano');
+
+                    pdf.setFillColor(corpColor);
+                    pdf.rect(0, 0, pdfWidth, 90, 'F');
+                    pdf.setTextColor(255, 255, 255);
+                    pdf.setFontSize(22);
+                    pdf.text(corpTitle, 40, 48);
+                    pdf.setFontSize(12);
+                    pdf.text("LÁMINA 1: PLANO DE PLANTA CON UBICACIÓN EXACTA DE PATOLOGÍAS (PINES #1, #2...)", 40, 72);
+
+                    const bpW = pdfWidth - 80;
+                    const bpH = Math.round((bpCanvas.height / (bpCanvas.width || 1)) * bpW);
+                    pdf.addImage(bpDataUrl, 'JPEG', 40, 120, bpW, bpH);
+
+                    // Resumen de pines al pie de la Página 1
+                    const pins = window.projectPinsMap[projId]?.pins || [];
+                    pdf.setTextColor(30, 41, 59);
+                    pdf.setFontSize(14);
+                    let yCursor = 145 + bpH;
+                    pdf.text("ÍNDICE DE PINES GEORREFERENCIADOS EN ESTE PLANO:", 40, yCursor);
+                    yCursor += 24;
+                    pdf.setFontSize(11);
+                    pins.forEach(p => {
+                        pdf.text(`• Pin #${p.number} (Coord X:${Math.round(p.x*100)}%, Y:${Math.round(p.y*100)}%) — ${p.surface || 'Elemento'} [${p.severity || 'Evaluado'}]: ${p.patologia || ''}`, 48, yCursor);
+                        yCursor += 18;
+                    });
+
+                    pdf.addPage([pdfWidth, pdfHeight], pdfHeight > pdfWidth ? 'portrait' : 'landscape');
+                }
+
                 pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight);
-                pdf.save('Reporte_Tecnico_Obrin_IA.pdf');
+                const filePrefix = (window.whiteLabelConfig?.companyName) ? window.whiteLabelConfig.companyName.replace(/[^a-z0-9]/gi, '_') : 'Obrin_IA';
+                pdf.save(`Reporte_Forense_${filePrefix}.pdf`);
             } catch (error) {
                 showNotification("Hubo un problema al generar el PDF.", true);
             } finally {
@@ -2012,15 +3001,37 @@
         };
 
         window.runAnalysis = async function() {
-            if (window.userTokensDisponibles < 5000) {
-                showNotification("⚠️ Saldo de tokens insuficiente para procesar la imagen.", true);
-                window.openWallet();
-                return;
-            }
-
             const projSelector = document.getElementById('project-selector');
             if(!projSelector.value) {
                 showNotification("Por favor, selecciona una Carpeta de Proyecto primero.", true);
+                return;
+            }
+
+            // MODO SUBTERRÁNEO 100% OFFLINE: Si no hay internet o está activo el Modo Subterráneo (-2, -3), encolar
+            if (!navigator.onLine || window.forceSubterraneoOffline) {
+                const queuedItem = {
+                    id: 'OFF-' + Date.now(),
+                    projectId: projSelector.value,
+                    userNotes: document.getElementById('userNotes').value.trim(),
+                    imgData1: imgData1,
+                    imgType1: imgType1,
+                    imgData2: imgData2,
+                    imgType2: imgType2,
+                    pin: window.activeDraftPin,
+                    hasVoice: Boolean(window.currentAudioNoteBase64),
+                    audioBase64: window.currentAudioNoteBase64,
+                    timestamp: Date.now()
+                };
+                window.offlineSyncQueue.push(queuedItem);
+                localStorage.setItem('obrin_offline_queue', JSON.stringify(window.offlineSyncQueue));
+                window.updateOfflineUI();
+                showNotification("🚇 Sin señal: Captura, foto, pin y voz guardados en la Cola de Sincronización Offline.");
+                return;
+            }
+
+            if (window.userTokensDisponibles < 5000) {
+                showNotification("⚠️ Saldo de tokens insuficiente para procesar la imagen.", true);
+                window.openWallet();
                 return;
             }
 
@@ -2257,6 +3268,44 @@
                 const wa = `Hola. Solicitud de visita técnica:\n\nProyecto: ${projSelector.options[projSelector.selectedIndex].text}\nUbicación: ${finalWeatherLoc || 'No especificada'}\nElemento: ${resultObj.superficie}\nDiagnóstico: ${resultObj.patologia}\nInversión Ref: ${finalPrice} ${finalUnit}`;
                 proWaUrl = `https://wa.me/${MI_TEL}?text=${encodeURIComponent(wa)}`;
                 
+                // 1. Renderizar Rayos X Visuales (Anotación Automática Forense sobre la Foto)
+                window.xrayOverlayVisible = true;
+                window.renderXRayForensicCanvas(resultObj.rayos_x || null);
+
+                // 2. Consolidar Pin Georreferenciado en el Plano de Planta del Proyecto
+                const activeProjId = projSelector.value || 'default_project';
+                const pdfPinBadge = document.getElementById('pdf-pin-badge');
+                const xrayPinInd = document.getElementById('xray-pin-indicator');
+                if (window.activeDraftPin) {
+                    if (!window.projectPinsMap[activeProjId]) {
+                        window.projectPinsMap[activeProjId] = { blueprint: window.currentBlueprintImgData, pins: [] };
+                    }
+                    const savedPin = {
+                        ...window.activeDraftPin,
+                        surface: resultObj.superficie,
+                        severity: resultObj.nivel_dano,
+                        patologia: resultObj.patologia
+                    };
+                    window.projectPinsMap[activeProjId].pins.push(savedPin);
+                    localStorage.setItem('obrin_project_pins', JSON.stringify(window.projectPinsMap));
+                    if (pdfPinBadge) {
+                        pdfPinBadge.innerText = `📍 Pin #${savedPin.number} en Plano (X:${Math.round(savedPin.x*100)}%, Y:${Math.round(savedPin.y*100)}%)`;
+                        pdfPinBadge.classList.remove('hidden');
+                    }
+                    if (xrayPinInd) {
+                        xrayPinInd.innerText = `📍 Pin #${savedPin.number}`;
+                        xrayPinInd.classList.remove('hidden');
+                    }
+                    window.activeDraftPin = null;
+                    window.renderBlueprintCanvas();
+                } else {
+                    if (pdfPinBadge) pdfPinBadge.classList.add('hidden');
+                    if (xrayPinInd) xrayPinInd.classList.add('hidden');
+                }
+
+                // 3. Aplicar configuración de Marca Blanca (White-Label)
+                window.applyWhiteLabelBranding();
+
                 laser.classList.remove('scanning-active'); laser.style.display='none';
                 document.getElementById('preview-box').classList.add('hidden');
                 document.getElementById('result-wrapper').classList.remove('hidden');
@@ -2465,6 +3514,7 @@
                     userNotes: document.getElementById('summary-notes').innerText,
                     location: finalWeatherLoc, temp: finalWeatherTemp, hum: finalWeatherHum,
                     img1: getCompressedBase64('summary-img1'), img2: getCompressedBase64('summary-img2'),
+                    rayos_x: window.currentRayosXData || null,
                     rating: currentRating, comment: document.getElementById('rating-comment').value,
                     seguimiento: {
                         paso_actual: 1,
@@ -2780,6 +3830,9 @@
             } else { document.getElementById('weather-badge').classList.add('hidden'); }
 
             document.getElementById('damage-val').innerText = data.patologia || '';
+            window.xrayOverlayVisible = true;
+            window.renderXRayForensicCanvas(data.rayos_x || null);
+            window.applyWhiteLabelBranding();
             
             if (data.riesgo_futuro) {
                 document.getElementById('risk-container').classList.remove('hidden');
