@@ -20,6 +20,8 @@
     <meta http-equiv="Expires" content="0">
     
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Librería SheetJS para leer el archivo Excel (.xlsx) del catálogo desde el Panel de Administrador -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <script>
         tailwind.config = {
             theme: {
@@ -814,13 +816,19 @@
                         </div>
 
                         <div class="space-y-3 mt-4">
-                            <details id="det-materials" class="group bg-white border border-slate-200 rounded-lg open:bg-slate-50 transition-all duration-300 shadow-sm">
+                            <details id="det-materials" open class="group bg-white border border-slate-200 rounded-lg open:bg-slate-50 transition-all duration-300 shadow-sm">
                                 <summary class="flex items-center justify-between p-4 cursor-pointer font-bold text-[0.65rem] uppercase tracking-wider text-slate-600 hover:text-brand-600 transition-colors">
-                                    <div class="flex items-center gap-2"><span class="text-lg">📦</span> Especificación de Materiales</div>
+                                    <div class="flex items-center gap-2"><span class="text-lg">📦</span> Especificación de Materiales (Comparador Sodimac vs. Easy)</div>
                                     <span class="text-slate-400 transition-transform duration-300 group-open:-rotate-180">▼</span>
                                 </summary>
-                                <div class="p-4 pt-1">
-                                    <ul id="materials-list" class="list-none pl-1 text-sm text-slate-600 space-y-2"></ul>
+                                <div class="p-4 pt-1 space-y-3">
+                                    <!-- BANNER DE COMPARACIÓN DE CANASTA COMPLETA (SODIMAC VS EASY) -->
+                                    <div id="store-comparison-banner" class="hidden rounded-xl border border-slate-200 bg-white p-3.5 shadow-sm"></div>
+                                    <div class="flex items-center gap-2 bg-blue-50/80 border border-blue-100 text-blue-700 px-3 py-2 rounded-lg text-[0.65rem] font-semibold">
+                                        <i class="fas fa-hand-pointer text-blue-500"></i>
+                                        <span>Haz clic sobre cualquier material de la lista para ver su <strong>descripción del producto, rendimiento, superficie/material y ficha técnica completa</strong>.</span>
+                                    </div>
+                                    <ul id="materials-list" class="list-none pl-1 text-sm text-slate-600 space-y-2.5"></ul>
                                 </div>
                             </details>
 
@@ -939,16 +947,22 @@
     <!-- PANEL DE ADMINISTRACIÓN MAESTRO -->
     <div id="admin-modal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-[110] hidden items-center justify-center p-4 opacity-0 transition-opacity duration-300">
         <div class="bg-slate-50 rounded-2xl shadow-2xl w-full max-w-6xl overflow-hidden relative flex flex-col h-[90vh] transform scale-95 transition-transform duration-300" id="admin-modal-content">
-            <div class="p-6 border-b border-slate-200 flex justify-between items-center bg-white">
+            <div class="p-6 border-b border-slate-200 flex flex-wrap justify-between items-center gap-3 bg-white">
                 <div>
                     <h2 class="text-xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
                         <i class="fas fa-chart-pie text-brand-500"></i> Panel de Administración Global
                     </h2>
-                    <p class="text-slate-500 text-xs mt-1">Métricas financieras y reportes técnicos de Obrín IA.</p>
+                    <p class="text-slate-500 text-xs mt-1">Métricas financieras, base de datos D1 (Sodimac & Easy Pro) y reportes técnicos de Obrín IA.</p>
                 </div>
-                <button onclick="window.closeAdminDashboard()" class="w-8 h-8 flex items-center justify-center bg-slate-100 border border-slate-200 rounded-full text-slate-500 hover:text-red-500 hover:border-red-200 transition-colors shadow-sm">
-                    <i class="fas fa-times"></i>
-                </button>
+                <div class="flex items-center gap-2">
+                    <input type="file" id="excel-d1-upload-input" accept=".xlsx,.xls,.csv" class="hidden" onchange="window.subirExcelCatalogoD1(this)">
+                    <button type="button" id="btn-sync-d1-admin" onclick="document.getElementById('excel-d1-upload-input').click()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-[0.65rem] font-bold uppercase tracking-wider px-3.5 py-2 rounded-lg transition shadow-sm flex items-center gap-1.5">
+                        <i class="fas fa-file-excel"></i> Subir Excel (.xlsx) y Reemplazar Base D1
+                    </button>
+                    <button onclick="window.closeAdminDashboard()" class="w-8 h-8 flex items-center justify-center bg-slate-100 border border-slate-200 rounded-full text-slate-500 hover:text-red-500 hover:border-red-200 transition-colors shadow-sm">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
             </div>
             <div class="p-6 overflow-y-auto flex-1 space-y-6">
                 <div class="grid grid-cols-2 lg:grid-cols-5 gap-4" id="admin-stats-container"></div>
@@ -982,6 +996,125 @@
                         <div id="admin-global-list" class="divide-y divide-slate-100 overflow-y-auto custom-scrollbar flex-1"></div>
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL DE FICHA TÉCNICA COMPLETA DEL MATERIAL (SE ABRE AL HACER CLIC EN UN MATERIAL DE LA LISTA) -->
+    <div id="material-detail-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[130] items-center justify-center p-4 transition-opacity duration-200" onclick="if(event.target === this) window.closeMaterialDetailModal()">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden border border-slate-200 max-h-[90vh] flex flex-col">
+            <!-- Encabezado Ficha Técnica -->
+            <div class="px-6 py-4 bg-slate-900 text-white flex items-start justify-between gap-4">
+                <div>
+                    <div class="flex flex-wrap items-center gap-2 mb-1">
+                        <span id="mat-modal-categoria" class="bg-brand-600/30 text-brand-300 border border-brand-500/40 text-[0.6rem] font-bold uppercase tracking-widest px-2.5 py-0.5 rounded-full">Categoría</span>
+                        <span id="mat-modal-marca" class="bg-white/10 text-slate-200 text-[0.6rem] font-bold uppercase tracking-widest px-2.5 py-0.5 rounded-full">Marca</span>
+                        <span id="mat-modal-tienda-badge" class="bg-emerald-500 text-white text-[0.6rem] font-bold uppercase tracking-widest px-2.5 py-0.5 rounded-full">Tienda Elegida</span>
+                    </div>
+                    <h3 id="mat-modal-titulo" class="text-base md:text-lg font-bold tracking-tight leading-snug text-white">Nombre del Material</h3>
+                </div>
+                <button type="button" onclick="window.closeMaterialDetailModal()" class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition shrink-0">
+                    <i class="fas fa-times text-sm"></i>
+                </button>
+            </div>
+
+            <!-- Cuerpo desplazable -->
+            <div class="p-6 overflow-y-auto custom-scrollbar space-y-5 text-left">
+                <!-- Comparativa directa Sodimac vs Easy del material -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div id="mat-modal-card-sodimac" class="p-3.5 rounded-xl border-2 border-slate-200 bg-slate-50 flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center justify-between mb-1">
+                                <span class="text-[0.65rem] font-extrabold uppercase tracking-wider text-blue-700"><i class="fas fa-store mr-1"></i>Sodimac Constructor</span>
+                                <span id="mat-modal-sku-sodimac" class="text-[0.6rem] font-mono text-slate-400">SKU: -</span>
+                            </div>
+                            <p id="mat-modal-nombre-sodimac" class="text-xs font-semibold text-slate-700 mb-2 line-clamp-2"></p>
+                        </div>
+                        <div class="flex items-end justify-between pt-2 border-t border-slate-200/80">
+                            <div>
+                                <p class="text-[0.55rem] uppercase font-bold text-slate-400">Precio Sodimac</p>
+                                <p id="mat-modal-precio-sodimac" class="text-lg font-extrabold text-slate-900">$0</p>
+                                <p id="mat-modal-ppum-sodimac" class="text-[0.6rem] text-slate-500"></p>
+                            </div>
+                            <a id="mat-modal-url-sodimac" href="https://www.sodimac.cl" target="_blank" rel="noopener noreferrer" class="bg-blue-600 hover:bg-blue-700 text-white text-[0.6rem] font-bold uppercase tracking-wider px-3 py-1.5 rounded-lg transition flex items-center gap-1">
+                                Ver en Sodimac <i class="fas fa-external-link-alt text-[0.55rem]"></i>
+                            </a>
+                        </div>
+                    </div>
+
+                    <div id="mat-modal-card-easy" class="p-3.5 rounded-xl border-2 border-slate-200 bg-slate-50 flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center justify-between mb-1">
+                                <span class="text-[0.65rem] font-extrabold uppercase tracking-wider text-red-700"><i class="fas fa-store mr-1"></i>Easy Pro</span>
+                                <span id="mat-modal-sku-easy" class="text-[0.6rem] font-mono text-slate-400">SKU: -</span>
+                            </div>
+                            <p id="mat-modal-nombre-easy" class="text-xs font-semibold text-slate-700 mb-2 line-clamp-2"></p>
+                        </div>
+                        <div class="flex items-end justify-between pt-2 border-t border-slate-200/80">
+                            <div>
+                                <p class="text-[0.55rem] uppercase font-bold text-slate-400">Precio Easy</p>
+                                <p id="mat-modal-precio-easy" class="text-lg font-extrabold text-slate-900">$0</p>
+                                <p id="mat-modal-ppum-easy" class="text-[0.6rem] text-slate-500"></p>
+                            </div>
+                            <a id="mat-modal-url-easy" href="https://www.easy.cl" target="_blank" rel="noopener noreferrer" class="bg-red-600 hover:bg-red-700 text-white text-[0.6rem] font-bold uppercase tracking-wider px-3 py-1.5 rounded-lg transition flex items-center gap-1">
+                                Ver en Easy <i class="fas fa-external-link-alt text-[0.55rem]"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Rendimiento Destacado -->
+                <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-4 flex items-start gap-3.5">
+                    <div class="w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center shrink-0 text-base shadow-sm">
+                        <i class="fas fa-ruler-combined"></i>
+                    </div>
+                    <div>
+                        <p class="text-[0.65rem] font-extrabold uppercase tracking-widest text-emerald-700 mb-0.5">Rendimiento / Superficie que Logra Cubrir</p>
+                        <p id="mat-modal-rendimiento" class="text-sm font-bold text-emerald-950 leading-snug"></p>
+                    </div>
+                </div>
+
+                <!-- Descripción Técnica del Producto -->
+                <div class="bg-slate-50 border border-slate-200 rounded-xl p-4">
+                    <p class="text-[0.65rem] font-extrabold uppercase tracking-widest text-slate-500 mb-1.5"><i class="fas fa-info-circle text-brand-600 mr-1"></i> Descripción del Producto y Especificación Técnica</p>
+                    <p id="mat-modal-descripcion" class="text-xs md:text-sm text-slate-700 leading-relaxed"></p>
+                </div>
+
+                <!-- Grilla de Especificaciones (Material/Superficie, Formato, Uso, Acabado, Método, Secado) -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div class="p-3 rounded-lg border border-slate-200 bg-white">
+                        <p class="text-[0.6rem] font-bold uppercase tracking-wider text-slate-400 mb-0.5"><i class="fas fa-layer-group text-indigo-500 mr-1"></i> Material / Superficie de Aplicación</p>
+                        <p id="mat-modal-superficie" class="text-xs font-bold text-slate-800"></p>
+                    </div>
+                    <div class="p-3 rounded-lg border border-slate-200 bg-white">
+                        <p class="text-[0.6rem] font-bold uppercase tracking-wider text-slate-400 mb-0.5"><i class="fas fa-box-open text-amber-500 mr-1"></i> Formato / Contenido / Peso</p>
+                        <p id="mat-modal-formato" class="text-xs font-bold text-slate-800"></p>
+                    </div>
+                    <div class="p-3 rounded-lg border border-slate-200 bg-white">
+                        <p class="text-[0.6rem] font-bold uppercase tracking-wider text-slate-400 mb-0.5"><i class="fas fa-sun text-teal-500 mr-1"></i> Uso / Ambiente Recomendado</p>
+                        <p id="mat-modal-uso" class="text-xs font-bold text-slate-800"></p>
+                    </div>
+                    <div class="p-3 rounded-lg border border-slate-200 bg-white">
+                        <p class="text-[0.6rem] font-bold uppercase tracking-wider text-slate-400 mb-0.5"><i class="fas fa-palette text-pink-500 mr-1"></i> Acabado / Terminación / Color</p>
+                        <p id="mat-modal-acabado" class="text-xs font-bold text-slate-800"></p>
+                    </div>
+                    <div class="p-3 rounded-lg border border-slate-200 bg-white">
+                        <p class="text-[0.6rem] font-bold uppercase tracking-wider text-slate-400 mb-0.5"><i class="fas fa-tools text-blue-500 mr-1"></i> Método de Aplicación</p>
+                        <p id="mat-modal-metodo" class="text-xs font-bold text-slate-800"></p>
+                    </div>
+                    <div class="p-3 rounded-lg border border-slate-200 bg-white">
+                        <p class="text-[0.6rem] font-bold uppercase tracking-wider text-slate-400 mb-0.5"><i class="fas fa-hourglass-half text-orange-500 mr-1"></i> Tiempo de Secado / Curado</p>
+                        <p id="mat-modal-secado" class="text-xs font-bold text-slate-800"></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pie del Modal -->
+            <div class="px-6 py-3.5 bg-slate-50 border-t border-slate-200 flex items-center justify-between">
+                <span class="text-[0.6rem] text-slate-400 font-semibold"><i class="fas fa-database mr-1"></i> Catálogo Oficial Unificado Sodimac Constructor & Cliente Easy Pro</span>
+                <button type="button" onclick="window.closeMaterialDetailModal()" class="bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold uppercase tracking-wider px-5 py-2 rounded-lg transition">
+                    Cerrar Ficha
+                </button>
             </div>
         </div>
     </div>
@@ -1185,38 +1318,628 @@
             }
         };
 
-        window.updateMaterialTotal = function() {
-            let nuevoTotal = 0;
-            let index = 0;
-            
-            document.querySelectorAll('.mat-qty-input').forEach(input => {
-                const qty = parseInt(input.value) || 1;
-                const matInfo = window.materialesData[index];
-                if (matInfo && matInfo.precio > 0) {
-                    const subtotalItem = matInfo.precio * qty;
-                    nuevoTotal += subtotalItem;
-                    
-                    const subtotalEl = document.getElementById(`subtotal-mat-${index}`);
-                    if (subtotalEl) {
-                        subtotalEl.innerText = "$" + subtotalItem.toLocaleString('es-CL');
+        // =========================================================================
+        // COMPARADOR DE CANASTA COMPLETA (SODIMAC VS EASY) DESDE CLOUDFLARE D1
+        // =========================================================================
+        window.tiendaActivaSeleccionada = null;
+        window.comparativaTiendasActual = null;
+        window.ultimoPrecioRef = "A evaluar";
+        window.ultimaUnidadRef = "";
+
+        window.resolveMaterialTechnicalData = function(rawMat, index, serverDetalleItem) {
+            let cleanName = String(rawMat || "").trim();
+            let savedQty = 1;
+            let parsedPrice = 0;
+            let parsedStore = "";
+
+            // Si viene desde HTML guardado en el historial
+            if (cleanName.includes('<div') || cleanName.includes('<span')) {
+                const tmp = document.createElement('div');
+                tmp.innerHTML = cleanName;
+                const nameSpan = tmp.querySelector('[data-mat-name]');
+                const qtyInput = tmp.querySelector('.mat-qty-input');
+                const priceSpan = tmp.querySelector('.text-slate-800.font-bold, .text-slate-900.font-bold');
+                if (nameSpan) cleanName = nameSpan.textContent.trim();
+                else cleanName = tmp.textContent.replace(/\s+/g, ' ').trim();
+                if (qtyInput && qtyInput.value) savedQty = parseInt(qtyInput.value, 10) || 1;
+                if (priceSpan) {
+                    const pm = priceSpan.textContent.replace(/\./g, '').match(/\d+/);
+                    if (pm) parsedPrice = parseInt(pm[0], 10);
+                }
+            }
+
+            // Si viene con el formato "Producto [Valor Ref: $9.990 en Sodimac]"
+            const matchFormat = cleanName.match(/^(.*?)\s*\[Valor Ref:\s*\$([\d.]+)\s*en\s*(.*?)\]/i);
+            if (matchFormat) {
+                cleanName = matchFormat[1].trim();
+                parsedPrice = parseInt(matchFormat[2].replace(/\./g, ''), 10) || parsedPrice;
+                parsedStore = matchFormat[3].replace(/\]$/, '').trim();
+            }
+
+            const srv = serverDetalleItem || {};
+            const pSod = Number(srv.precio_sodimac) || (parsedStore.toLowerCase() === 'sodimac' ? parsedPrice : 0);
+            const pEasy = Number(srv.precio_easy) || (parsedStore.toLowerCase() === 'easy' ? parsedPrice : 0);
+            const precioElegido = Number(srv.precio_elegido) || pSod || pEasy || parsedPrice || 0;
+
+            return {
+                index: index,
+                originalText: cleanName,
+                cantidad: Number(srv.cantidad) || savedQty || 1,
+                categoria: srv.categoria || "Catálogo Cloudflare D1",
+                producto: srv.producto || cleanName,
+                marca: srv.marca || "-",
+                nombre_sodimac: srv.nombre_sodimac || cleanName,
+                sku_sodimac: srv.sku_sodimac || "-",
+                precio_sodimac: pSod,
+                ppum_sodimac: srv.ppum_sodimac || "-",
+                url_sodimac: srv.url_sodimac || "https://www.sodimac.cl",
+                nombre_easy: srv.nombre_easy || cleanName,
+                sku_easy: srv.sku_easy || "-",
+                precio_easy: pEasy,
+                ppum_easy: srv.ppum_easy || "-",
+                url_easy: srv.url_easy || "https://www.easy.cl",
+                rendimiento: srv.rendimiento || "Según ficha técnica en base de datos D1",
+                formato: srv.formato || "-",
+                superficie_aplicacion: srv.superficie_aplicacion || "-",
+                uso: srv.uso || "-",
+                acabado_color: srv.acabado_color || "-",
+                metodo_aplicacion: srv.metodo_aplicacion || "-",
+                tiempo_secado: srv.tiempo_secado || "-",
+                descripcion_tecnica: srv.descripcion_tecnica || srv.caracteristica || cleanName,
+                tienda_elegida: srv.tienda_elegida || parsedStore || "Sodimac",
+                precio: precioElegido
+            };
+        };
+
+        window.renderMaterialsAndStoreComparison = function(materialesRaw, detallesServer, comparativaServer, precioRefFallback, unidadRefFallback) {
+            if (precioRefFallback !== undefined) window.ultimoPrecioRef = precioRefFallback;
+            if (unidadRefFallback !== undefined) window.ultimaUnidadRef = unidadRefFallback;
+
+            const listaRaw = Array.isArray(materialesRaw) ? materialesRaw : [];
+            const detArr = Array.isArray(detallesServer) ? detallesServer : [];
+
+            window.materialesData = listaRaw.map((mat, idx) => {
+                return window.resolveMaterialTechnicalData(mat, idx, detArr[idx] || null);
+            });
+
+            // Calcular totales en Sodimac y en Easy para verificar cuál tienda tiene toda la lista más barata
+            let totalSod = 0;
+            let totalEasy = 0;
+            let todosEnSod = window.materialesData.length > 0;
+            let todosEnEasy = window.materialesData.length > 0;
+
+            window.materialesData.forEach(item => {
+                const q = item.cantidad || 1;
+                if (item.precio_sodimac > 0) totalSod += item.precio_sodimac * q;
+                else todosEnSod = false;
+
+                if (item.precio_easy > 0) totalEasy += item.precio_easy * q;
+                else todosEnEasy = false;
+            });
+
+            // Regla principal solicitada: Si Sodimac Y Easy tienen todos los materiales, elegir el lugar más barato
+            let tiendaMasBarata = "Sodimac";
+            if (todosEnSod && todosEnEasy) {
+                tiendaMasBarata = (totalSod <= totalEasy) ? "Sodimac" : "Easy";
+            } else if (todosEnSod && !todosEnEasy) {
+                tiendaMasBarata = "Sodimac";
+            } else if (todosEnEasy && !todosEnSod) {
+                tiendaMasBarata = "Easy";
+            } else {
+                tiendaMasBarata = (totalSod <= totalEasy) ? "Sodimac" : "Easy";
+            }
+
+            window.tiendaActivaSeleccionada = tiendaMasBarata;
+            window.renderMaterialsListForActiveStore(tiendaMasBarata);
+        };
+
+        window.selectStoreForMaterials = function(nombreTienda) {
+            window.tiendaActivaSeleccionada = nombreTienda;
+            window.renderMaterialsListForActiveStore();
+        };
+
+        window.renderMaterialsListForActiveStore = function(tiendaGanadoraAuto) {
+            const materialsList = document.getElementById('materials-list');
+            const bannerEl = document.getElementById('store-comparison-banner');
+            if (!materialsList) return;
+
+            materialsList.innerHTML = '';
+
+            if (!window.materialesData || window.materialesData.length === 0) {
+                if (bannerEl) bannerEl.classList.add('hidden');
+                return;
+            }
+
+            let totalSodimac = 0;
+            let totalEasy = 0;
+            let todosEnSodimac = true;
+            let todosEnEasy = true;
+
+            window.materialesData.forEach(it => {
+                const qty = it.cantidad || 1;
+                if (it.precio_sodimac > 0) totalSodimac += it.precio_sodimac * qty;
+                else todosEnSodimac = false;
+
+                if (it.precio_easy > 0) totalEasy += it.precio_easy * qty;
+                else todosEnEasy = false;
+            });
+
+            const tiendaMasEconomica = (todosEnSodimac && todosEnEasy)
+                ? (totalSodimac <= totalEasy ? "Sodimac" : "Easy")
+                : (todosEnSodimac ? "Sodimac" : (todosEnEasy ? "Easy" : (totalSodimac <= totalEasy ? "Sodimac" : "Easy")));
+
+            const tiendaActiva = window.tiendaActivaSeleccionada || tiendaGanadoraAuto || tiendaMasEconomica;
+            window.tiendaActivaSeleccionada = tiendaActiva;
+
+            const ahorro = Math.abs(totalSodimac - totalEasy);
+            window.comparativaTiendasActual = {
+                tienda_elegida: tiendaMasEconomica,
+                tienda_activa: tiendaActiva,
+                ambas_tienen_todo: (todosEnSodimac && todosEnEasy),
+                total_sodimac: totalSodimac,
+                total_easy: totalEasy,
+                ahorro_total: ahorro
+            };
+
+            // Renderizar Banner Comparativo de Canasta Completa (Sodimac vs Easy)
+            if (bannerEl) {
+                bannerEl.classList.remove('hidden');
+                const sodEsMasBarata = (tiendaMasEconomica === "Sodimac");
+                const easyEsMasBarata = (tiendaMasEconomica === "Easy");
+                const sodActiva = (tiendaActiva === "Sodimac");
+                const easyActiva = (tiendaActiva === "Easy");
+
+                bannerEl.innerHTML = `
+                    <div class="flex flex-col gap-3">
+                        <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-2.5">
+                            <div class="flex items-center gap-2">
+                                <span class="w-6 h-6 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center text-xs font-bold shrink-0">
+                                    <i class="fas fa-check-double"></i>
+                                </span>
+                                <div>
+                                    <p class="text-[0.65rem] font-extrabold uppercase tracking-wider text-slate-800">
+                                        ${(todosEnSodimac && todosEnEasy) ? 'Sodimac y Easy tienen el 100% de los materiales requeridos' : `Disponibilidad verificada en catálogo (${window.materialesData.length} materiales)`}
+                                    </p>
+                                    <p class="text-[0.6rem] text-emerald-700 font-bold">
+                                        🏆 Obrín IA eligió <span class="underline">${tiendaMasEconomica.toUpperCase()}</span> por tener el total más barato${ahorro > 0 ? ` (Ahorras $${ahorro.toLocaleString('es-CL')} comprando todo en ${tiendaMasEconomica})` : ''}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                            <!-- Tarjeta Total Sodimac -->
+                            <button type="button" onclick="window.selectStoreForMaterials('Sodimac')" class="text-left p-3 rounded-xl border-2 transition-all flex items-center justify-between ${sodActiva ? 'border-blue-600 bg-blue-50/60 shadow-sm' : 'border-slate-200 bg-slate-50/70 hover:border-slate-300'}">
+                                <div>
+                                    <div class="flex items-center gap-1.5 mb-0.5">
+                                        <span class="text-xs font-extrabold uppercase tracking-wide text-blue-800">Sodimac</span>
+                                        ${sodEsMasBarata ? '<span class="bg-emerald-600 text-white text-[0.52rem] font-extrabold uppercase px-1.5 py-0.5 rounded">🏆 Más Barato</span>' : ''}
+                                    </div>
+                                    <p class="text-[0.6rem] text-slate-500 font-medium">${window.materialesData.length} de ${window.materialesData.length} materiales disponibles</p>
+                                </div>
+                                <div class="text-right">
+                                    <p class="text-[0.55rem] uppercase font-bold text-slate-400">Total Lista Sodimac</p>
+                                    <p class="text-base font-extrabold ${sodEsMasBarata ? 'text-emerald-700' : 'text-slate-800'}">$${totalSodimac.toLocaleString('es-CL')}</p>
+                                </div>
+                            </button>
+
+                            <!-- Tarjeta Total Easy -->
+                            <button type="button" onclick="window.selectStoreForMaterials('Easy')" class="text-left p-3 rounded-xl border-2 transition-all flex items-center justify-between ${easyActiva ? 'border-red-600 bg-red-50/60 shadow-sm' : 'border-slate-200 bg-slate-50/70 hover:border-slate-300'}">
+                                <div>
+                                    <div class="flex items-center gap-1.5 mb-0.5">
+                                        <span class="text-xs font-extrabold uppercase tracking-wide text-red-800">Easy</span>
+                                        ${easyEsMasBarata ? '<span class="bg-emerald-600 text-white text-[0.52rem] font-extrabold uppercase px-1.5 py-0.5 rounded">🏆 Más Barato</span>' : ''}
+                                    </div>
+                                    <p class="text-[0.6rem] text-slate-500 font-medium">${window.materialesData.length} de ${window.materialesData.length} materiales disponibles</p>
+                                </div>
+                                <div class="text-right">
+                                    <p class="text-[0.55rem] uppercase font-bold text-slate-400">Total Lista Easy</p>
+                                    <p class="text-base font-extrabold ${easyEsMasBarata ? 'text-emerald-700' : 'text-slate-800'}">$${totalEasy.toLocaleString('es-CL')}</p>
+                                </div>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }
+
+            let sumaActiva = 0;
+
+            window.materialesData.forEach((matObj, index) => {
+                const usarEasy = (tiendaActiva === "Easy");
+                const precioUnit = usarEasy ? matObj.precio_easy : matObj.precio_sodimac;
+                const precioOtraTienda = usarEasy ? matObj.precio_sodimac : matObj.precio_easy;
+                const nombreOtraTienda = usarEasy ? "Sodimac" : "Easy";
+                const nombreMostrado = usarEasy ? matObj.nombre_easy : matObj.nombre_sodimac;
+                const skuMostrado = usarEasy ? matObj.sku_easy : matObj.sku_sodimac;
+                const qty = matObj.cantidad || 1;
+                const subtotal = precioUnit * qty;
+
+                matObj.precio = precioUnit;
+                sumaActiva += subtotal;
+
+                const li = document.createElement('li');
+                li.className = "leading-relaxed transition my-2 bg-white rounded-xl border border-slate-200 hover:border-brand-400 hover:shadow-md p-3.5 cursor-pointer group/mat";
+                li.onclick = (e) => {
+                    if (e.target.closest('.qty-controls-box') || e.target.hasAttribute('data-mat-name')) return;
+                    window.openMaterialDetailModal(index);
+                };
+
+                const badgeColor = usarEasy
+                    ? "bg-red-100 text-red-700 border border-red-200"
+                    : "bg-blue-100 text-blue-700 border border-blue-200";
+
+                li.innerHTML = `
+                    <div class="flex flex-col w-full gap-2.5">
+                        <div class="flex items-start justify-between gap-2">
+                            <div class="flex-1 min-w-0" onclick="window.openMaterialDetailModal(${index})">
+                                <div class="flex flex-wrap items-center gap-1.5 mb-1">
+                                    <span class="text-[0.55rem] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded ${badgeColor}">${tiendaActiva} · SKU ${skuMostrado}</span>
+                                    <span class="text-[0.55rem] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-slate-100 text-slate-600">${matObj.marca}</span>
+                                    <span class="text-[0.58rem] font-bold text-brand-600 group-hover/mat:underline flex items-center gap-1 ml-auto">
+                                        <i class="fas fa-search-plus"></i> Ver descripción, rendimiento y material
+                                    </span>
+                                </div>
+                                <span class="font-bold text-slate-800 text-sm block leading-snug" data-mat-name>${nombreMostrado}</span>
+                            </div>
+                        </div>
+
+                        <!-- Resumen Rápido de Rendimiento y Material/Superficie -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-1.5 bg-slate-50/90 px-3 py-2 rounded-lg border border-slate-100 text-[0.65rem] text-slate-600" onclick="window.openMaterialDetailModal(${index})">
+                            <div class="truncate"><i class="fas fa-ruler-combined text-emerald-600 mr-1"></i><strong>Rendimiento:</strong> ${matObj.rendimiento}</div>
+                            <div class="truncate"><i class="fas fa-layer-group text-indigo-500 mr-1"></i><strong>Superficie/Material:</strong> ${matObj.superficie_aplicacion}</div>
+                        </div>
+
+                        <div class="flex items-center justify-between bg-slate-50 p-2.5 rounded-lg border border-slate-100">
+                            <div class="flex flex-col w-1/3" onclick="window.openMaterialDetailModal(${index})">
+                                <span class="text-[0.55rem] text-slate-400 uppercase tracking-widest font-bold mb-0.5">Precio ${tiendaActiva}</span>
+                                <span class="font-extrabold text-slate-900 text-sm">$${precioUnit.toLocaleString('es-CL')}</span>
+                                <span class="text-[0.55rem] text-slate-400 font-medium mt-0.5">En ${nombreOtraTienda}: $${precioOtraTienda.toLocaleString('es-CL')}</span>
+                            </div>
+                            <div class="flex flex-col items-center w-1/3 qty-controls-box" onclick="event.stopPropagation()">
+                                <div class="flex items-center bg-white rounded-md border border-slate-200 overflow-hidden shadow-sm">
+                                    <button type="button" class="px-2.5 py-1 text-slate-500 hover:bg-slate-100 hover:text-brand-600 transition font-bold" onclick="event.stopPropagation(); window.changeQty(${index}, -1)">-</button>
+                                    <input type="number" id="qty-mat-${index}" class="mat-qty-input w-10 text-center bg-transparent border-x border-slate-200 text-sm font-bold text-slate-800 outline-none p-0 hide-arrows" value="${qty}" min="1" onchange="window.updateMaterialTotal()">
+                                    <button type="button" class="px-2.5 py-1 text-slate-500 hover:bg-slate-100 hover:text-brand-600 transition font-bold" onclick="event.stopPropagation(); window.changeQty(${index}, 1)">+</button>
+                                </div>
+                            </div>
+                            <div class="flex flex-col items-end w-1/3" onclick="window.openMaterialDetailModal(${index})">
+                                <span class="text-[0.55rem] text-slate-400 uppercase tracking-widest font-bold mb-0.5">Subtotal</span>
+                                <span class="font-extrabold text-brand-600 text-base" id="subtotal-mat-${index}">$${subtotal.toLocaleString('es-CL')}</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                materialsList.appendChild(li);
+            });
+
+            const priceSubtitle = document.getElementById('price-subtitle');
+            if (sumaActiva > 0) {
+                document.getElementById('price-val').innerText = "$" + sumaActiva.toLocaleString('es-CL');
+                document.getElementById('unit-val').innerText = `Total Materiales en ${tiendaActiva}`;
+                if (priceSubtitle) {
+                    priceSubtitle.innerText = `Lista completa valorizada en ${tiendaActiva} (${tiendaActiva === tiendaMasEconomica ? 'Tienda más barata verificada entre Sodimac y Easy' : `Comparado con ${tiendaMasEconomica}: $${(tiendaMasEconomica === 'Sodimac' ? totalSodimac : totalEasy).toLocaleString('es-CL')}`})`;
+                }
+            } else {
+                document.getElementById('price-val').innerText = window.ultimoPrecioRef || "A evaluar";
+                document.getElementById('unit-val').innerText = window.ultimaUnidadRef || "";
+                if (priceSubtitle) priceSubtitle.innerText = "Valor de Mercado Competitivo";
+            }
+        };
+
+        window.openMaterialDetailModal = function(index) {
+            const item = window.materialesData?.[index];
+            if (!item) return;
+
+            const tiendaActiva = window.tiendaActivaSeleccionada || "Sodimac";
+            const nombrePrincipal = (tiendaActiva === "Easy") ? item.nombre_easy : item.nombre_sodimac;
+
+            document.getElementById('mat-modal-categoria').innerText = item.categoria || "Material de Construcción";
+            document.getElementById('mat-modal-marca').innerText = `Marca: ${item.marca || "Certificada"}`;
+            document.getElementById('mat-modal-tienda-badge').innerText = `Seleccionado en ${tiendaActiva}`;
+            document.getElementById('mat-modal-titulo').innerText = nombrePrincipal;
+
+            // Tarjeta Sodimac
+            document.getElementById('mat-modal-sku-sodimac').innerText = `SKU: ${item.sku_sodimac || '-'}`;
+            document.getElementById('mat-modal-nombre-sodimac').innerText = item.nombre_sodimac || item.producto;
+            document.getElementById('mat-modal-precio-sodimac').innerText = `$${(item.precio_sodimac || 0).toLocaleString('es-CL')}`;
+            document.getElementById('mat-modal-ppum-sodimac').innerText = item.ppum_sodimac || "";
+            document.getElementById('mat-modal-url-sodimac').href = item.url_sodimac || "https://www.sodimac.cl";
+
+            // Tarjeta Easy
+            document.getElementById('mat-modal-sku-easy').innerText = `SKU: ${item.sku_easy || '-'}`;
+            document.getElementById('mat-modal-nombre-easy').innerText = item.nombre_easy || item.producto;
+            document.getElementById('mat-modal-precio-easy').innerText = `$${(item.precio_easy || 0).toLocaleString('es-CL')}`;
+            document.getElementById('mat-modal-ppum-easy').innerText = item.ppum_easy || "";
+            document.getElementById('mat-modal-url-easy').href = item.url_easy || "https://www.easy.cl";
+
+            // Resaltar tarjeta de la tienda más barata para este ítem
+            const cardSod = document.getElementById('mat-modal-card-sodimac');
+            const cardEasy = document.getElementById('mat-modal-card-easy');
+            if (item.precio_sodimac <= item.precio_easy) {
+                cardSod.className = "p-3.5 rounded-xl border-2 border-blue-600 bg-blue-50/40 flex flex-col justify-between shadow-sm";
+                cardEasy.className = "p-3.5 rounded-xl border-2 border-slate-200 bg-slate-50 flex flex-col justify-between";
+            } else {
+                cardEasy.className = "p-3.5 rounded-xl border-2 border-red-600 bg-red-50/40 flex flex-col justify-between shadow-sm";
+                cardSod.className = "p-3.5 rounded-xl border-2 border-slate-200 bg-slate-50 flex flex-col justify-between";
+            }
+
+            // Especificaciones técnicas detalladas
+            document.getElementById('mat-modal-rendimiento').innerText = item.rendimiento || "Según espesor y superficie de aplicación";
+            document.getElementById('mat-modal-descripcion').innerText = item.descripcion_tecnica || item.originalText;
+            document.getElementById('mat-modal-superficie').innerText = item.superficie_aplicacion || "Hormigón, albañilería, tabiquería y madera";
+            document.getElementById('mat-modal-formato').innerText = item.formato || "Unidad comercial estándar";
+            document.getElementById('mat-modal-uso').innerText = item.uso || "Interior y Exterior";
+            document.getElementById('mat-modal-acabado').innerText = item.acabado_color || "Estándar";
+            document.getElementById('mat-modal-metodo').innerText = item.metodo_aplicacion || "Según instrucciones del fabricante";
+            document.getElementById('mat-modal-secado').innerText = item.tiempo_secado || "24 horas curado estándar";
+
+            const modal = document.getElementById('material-detail-modal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        };
+
+        window.closeMaterialDetailModal = function() {
+            const modal = document.getElementById('material-detail-modal');
+            if (modal) {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }
+        };
+
+        // Subir el archivo Excel (.xlsx) tal cual desde la cuenta Administrador,
+        // borrar la base vieja completa en Cloudflare D1, insertar la nueva y vectorizarla.
+        window.subirExcelCatalogoD1 = async function(inputEl) {
+            const file = inputEl?.files?.[0];
+            if (!file) return;
+
+            if (!window.authInstance || !window.authInstance.currentUser) {
+                inputEl.value = '';
+                return showNotification("Debes iniciar sesión como Administrador.", true);
+            }
+
+            if (typeof XLSX === 'undefined') {
+                inputEl.value = '';
+                return showNotification("Cargando lector de Excel, intenta en 2 segundos.", true);
+            }
+
+            const btn = document.getElementById('btn-sync-d1-admin');
+            const origHtml = btn ? btn.innerHTML : '';
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Leyendo Excel...';
+            }
+
+            try {
+                const arrayBuffer = await file.arrayBuffer();
+                const workbook = XLSX.read(arrayBuffer, { type: 'array' });
+
+                const sheetUnificadoName = workbook.SheetNames.find(n => n.toLowerCase().includes('unificado')) || workbook.SheetNames[0];
+                const sheetSodName = workbook.SheetNames.find(n => n.toLowerCase().includes('sodimac'));
+                const sheetEasyName = workbook.SheetNames.find(n => n.toLowerCase().includes('easy') && !n.toLowerCase().includes('unificado'));
+
+                const filasUnificadas = XLSX.utils.sheet_to_json(workbook.Sheets[sheetUnificadoName], { defval: "" });
+                const filasSodimac = sheetSodName ? XLSX.utils.sheet_to_json(workbook.Sheets[sheetSodName], { defval: "" }) : [];
+                const filasEasy = sheetEasyName ? XLSX.utils.sheet_to_json(workbook.Sheets[sheetEasyName], { defval: "" }) : [];
+
+                if (!filasUnificadas || filasUnificadas.length === 0) {
+                    throw new Error("El archivo Excel seleccionado no contiene filas válidas.");
+                }
+
+                const limpiarPrecio = (val) => {
+                    if (val === null || val === undefined || val === "") return "0";
+                    const numStr = String(val).split('.')[0].replace(/[^\d]/g, '');
+                    return numStr ? String(parseInt(numStr, 10)) : "0";
+                };
+
+                // Mapas auxiliares por SKU y por Categoría desde las hojas Detalle Sodimac y Detalle Easy
+                // para completar descripciones técnicas y emparejar productos cuando una fila solo tenía una tienda
+                const descPorSkuSod = {};
+                const sodPorCat = {};
+                filasSodimac.forEach(s => {
+                    const sku = String(s['SKU'] || s['sku'] || '').trim();
+                    const cat = String(s['Categoría Obrín IA'] || s['categoria'] || '').trim();
+                    const desc = String(s['Características y Recomendaciones'] || s['Ficha Técnica Completa (Atributos)'] || '').trim();
+                    if (sku && desc) descPorSkuSod[sku] = desc;
+                    if (cat) {
+                        if (!sodPorCat[cat]) sodPorCat[cat] = [];
+                        sodPorCat[cat].push(s);
+                    }
+                });
+
+                const descPorSkuEasy = {};
+                const easyPorCat = {};
+                filasEasy.forEach(e => {
+                    const sku = String(e['SKU'] || e['sku'] || '').trim();
+                    const cat = String(e['Categoría Obrín IA'] || e['categoria'] || '').trim();
+                    const desc = String(e['Características y Recomendaciones'] || e['Ficha Técnica Completa (Atributos)'] || '').trim();
+                    if (sku && desc) descPorSkuEasy[sku] = desc;
+                    if (cat) {
+                        if (!easyPorCat[cat]) easyPorCat[cat] = [];
+                        easyPorCat[cat].push(e);
+                    }
+                });
+
+                // Arreglar y normalizar cada fila del Excel a las 24 columnas exactas de la tabla `catalogo` en Cloudflare D1
+                const registrosLimpios = filasUnificadas.map((row, idx) => {
+                    const cat = String(row['Categoría Obrín IA'] || row['categoria'] || '').trim();
+                    const prod = String(row['Material / Producto Referencia'] || row['producto'] || row['Nombre del Producto'] || '').trim();
+                    let marca = String(row['Marca'] || row['marca'] || 'Genérico').trim();
+
+                    let nomSod = String(row['Nombre en Sodimac'] || row['nombre_sodimac'] || '').trim();
+                    let skuSod = String(row['SKU Sodimac'] || row['sku_sodimac'] || '-').trim();
+                    let pSodStr = limpiarPrecio(row['Precio Sodimac (CLP)'] ?? row['precio_sodimac']);
+                    let ppumSod = String(row['PPUM Sodimac'] || row['ppum_sodimac'] || '-').trim();
+                    let urlSod = String(row['URL Sodimac'] || row['url_sodimac'] || '').trim();
+
+                    let nomEasy = String(row['Nombre en Easy'] || row['nombre_easy'] || '').trim();
+                    let skuEasy = String(row['SKU Easy'] || row['sku_easy'] || '-').trim();
+                    let pEasyStr = limpiarPrecio(row['Precio Easy (CLP)'] ?? row['precio_easy']);
+                    let ppumEasy = String(row['PPUM Easy'] || row['ppum_easy'] || '-').trim();
+                    let urlEasy = String(row['URL Easy'] || row['url_easy'] || '').trim();
+
+                    // Si en Catálogo Unificado esta fila tenía "Disponible en formato alternativo" o precio 0 en una tienda,
+                    // emparejar con el equivalente de la misma subcategoría para que Cloudflare pueda comparar Sodimac vs Easy
+                    if ((pSodStr === "0" || nomSod.includes("Disponible en formato")) && sodPorCat[cat]?.length > 0) {
+                        const eqS = sodPorCat[cat][idx % sodPorCat[cat].length];
+                        nomSod = String(eqS['Nombre del Producto'] || prod).trim();
+                        skuSod = String(eqS['SKU'] || '-').trim();
+                        pSodStr = limpiarPrecio(eqS['Precio Vigente (CLP)']);
+                        ppumSod = String(eqS['Precio por Unidad (PPUM)'] || '-').trim();
+                        urlSod = String(eqS['URL Directa'] || 'https://www.sodimac.cl').trim();
+                    }
+                    if ((pEasyStr === "0" || nomEasy.includes("Disponible en formato")) && easyPorCat[cat]?.length > 0) {
+                        const eqE = easyPorCat[cat][idx % easyPorCat[cat].length];
+                        nomEasy = String(eqE['Nombre del Producto'] || prod).trim();
+                        skuEasy = String(eqE['SKU'] || '-').trim();
+                        pEasyStr = limpiarPrecio(eqE['Precio Vigente (CLP)']);
+                        ppumEasy = String(eqE['Precio por Unidad (PPUM)'] || '-').trim();
+                        urlEasy = String(eqE['URL Directa'] || 'https://www.easy.cl').trim();
+                    }
+
+                    const pSodNum = parseInt(pSodStr, 10) || 0;
+                    const pEasyNum = parseInt(pEasyStr, 10) || 0;
+
+                    let tiendaEcon = String(row['Tienda Más Económica'] || row['tienda_mas_economica'] || '').trim();
+                    let difClp = String(row['Diferencia (CLP)'] ?? row['diferencia_clp'] ?? '0').trim();
+                    if (pSodNum > 0 && pEasyNum > 0) {
+                        tiendaEcon = pSodNum < pEasyNum ? "Sodimac" : (pEasyNum < pSodNum ? "Easy" : "Empate");
+                        difClp = String(Math.abs(pSodNum - pEasyNum));
+                    }
+
+                    const rend = String(row['Rendimiento / Superficie que Cubre'] || row['rendimiento'] || 'Según espesor y superficie de aplicación').trim();
+                    const form = String(row['Formato / Contenido / Peso'] || row['formato'] || 'Unidad estándar').trim();
+                    const sup = String(row['Superficie de Aplicación'] || row['superficie_aplicacion'] || 'Superficie constructiva').trim();
+                    const uso = String(row['Uso (Interior / Exterior)'] || row['uso'] || 'Interior y Exterior').trim();
+                    const acab = String(row['Acabado / Terminación / Color'] || row['acabado'] || row['acabado_color'] || 'Estándar').trim();
+                    const met = String(row['Método de Aplicación'] || row['metodo_aplicacion'] || 'Según fabricante').trim();
+                    const sec = String(row['Tiempo de Secado'] || row['tiempo_secado'] || 'Según ficha técnica').trim();
+                    let caract = String(row['Característica Resumen (Obrín IA D1)'] || row['caracteristica'] || '').trim();
+                    const descExtra = descPorSkuSod[skuSod] || descPorSkuEasy[skuEasy] || '';
+                    if (descExtra && !caract.includes(descExtra)) {
+                        caract = caract ? `${descExtra} | ${caract}` : descExtra;
+                    }
+                    const fechaExt = String(row['Fecha Extracción'] || row['fecha_extraccion'] || new Date().toISOString().slice(0, 16).replace('T', ' ')).trim();
+
+                    return {
+                        categoria: cat,
+                        producto: prod || nomSod || nomEasy,
+                        marca: marca || "Genérico",
+                        nombre_sodimac: nomSod || prod,
+                        sku_sodimac: skuSod || "-",
+                        precio_sodimac: pSodStr,
+                        ppum_sodimac: ppumSod || "-",
+                        nombre_easy: nomEasy || prod,
+                        sku_easy: skuEasy || "-",
+                        precio_easy: pEasyStr,
+                        ppum_easy: ppumEasy || "-",
+                        tienda_mas_economica: tiendaEcon || "Sodimac",
+                        diferencia_clp: difClp || "0",
+                        rendimiento: rend,
+                        formato: form,
+                        superficie_aplicacion: sup,
+                        uso: uso,
+                        acabado: acab,
+                        metodo_aplicacion: met,
+                        tiempo_secado: sec,
+                        caracteristica: caract.slice(0, 650),
+                        url_sodimac: urlSod || "https://www.sodimac.cl",
+                        url_easy: urlEasy || "https://www.easy.cl",
+                        fecha_extraccion: fechaExt
+                    };
+                }).filter(r => r.producto !== "");
+
+                const token = await window.authInstance.currentUser.getIdToken();
+                const batchSize = 80;
+                const total = registrosLimpios.length;
+
+                // 1. Subir lotes a Cloudflare D1 (el primer lote lleva limpiar: true para borrar toda la tabla vieja)
+                for (let i = 0; i < total; i += batchSize) {
+                    const lote = registrosLimpios.slice(i, i + batchSize);
+                    const esPrimerLote = (i === 0);
+
+                    if (btn) {
+                        btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> ${esPrimerLote ? 'Borrando base antigua...' : `Subiendo D1 (${Math.min(i + batchSize, total)}/${total})...`}`;
+                    }
+
+                    const res = await fetch('https://obrin-ia-proxy.christensenjosemanuel.workers.dev/api/admin/reemplazar-catalogo', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: JSON.stringify({
+                            limpiar: esPrimerLote,
+                            registros: lote
+                        })
+                    });
+
+                    const resData = await res.json();
+                    if (!res.ok) {
+                        throw new Error(resData.error || `Error en lote ${i}`);
                     }
                 }
-                
-                if (matInfo) matInfo.cantidad = qty;
+
+                // 2. Vectorizar automáticamente los nuevos materiales en Cloudflare Vectorize
+                let offset = 0;
+                while (offset < total) {
+                    if (btn) {
+                        btn.innerHTML = `<i class="fas fa-brain fa-spin"></i> Vectorizando IA (${Math.min(offset + 100, total)}/${total})...`;
+                    }
+                    const resVec = await fetch(`https://obrin-ia-proxy.christensenjosemanuel.workers.dev/api/admin/vectorizar?offset=${offset}`, {
+                        method: 'POST',
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    const vecData = await resVec.json();
+                    if (!resVec.ok || !vecData.siguienteOffset) break;
+                    offset = vecData.siguienteOffset;
+                }
+
+                showNotification(`✅ Base de datos D1 reemplazada por completo (${total} materiales cargados y vectorizados).`);
+            } catch (err) {
+                console.error("Error subiendo Excel a D1:", err);
+                showNotification("Error al subir Excel: " + (err.message || "Verifica tu sesión de Administrador"), true);
+            } finally {
+                inputEl.value = '';
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = origHtml;
+                }
+            }
+        };
+
+        window.updateMaterialTotal = function() {
+            let index = 0;
+            document.querySelectorAll('.mat-qty-input').forEach(input => {
+                const qty = Math.max(1, parseInt(input.value, 10) || 1);
+                if (window.materialesData[index]) {
+                    window.materialesData[index].cantidad = qty;
+                }
                 index++;
             });
 
-            if (nuevoTotal > 0) {
-                document.getElementById('price-val').innerText = "$" + nuevoTotal.toLocaleString('es-CL');
-            }
+            // Recalcular totales en Sodimac y Easy con las nuevas cantidades y elegir siempre el lugar más barato
+            let totalSod = 0;
+            let totalEasy = 0;
+            window.materialesData.forEach(it => {
+                const q = it.cantidad || 1;
+                totalSod += (it.precio_sodimac || 0) * q;
+                totalEasy += (it.precio_easy || 0) * q;
+            });
+            const masBarataConCantidades = (totalSod <= totalEasy) ? "Sodimac" : "Easy";
+            window.tiendaActivaSeleccionada = masBarataConCantidades;
+            window.renderMaterialsListForActiveStore(masBarataConCantidades);
         };
 
         window.changeQty = function(index, delta) {
             const input = document.getElementById(`qty-mat-${index}`);
             if (!input) return;
-            let newVal = parseInt(input.value) + delta;
+            let newVal = (parseInt(input.value, 10) || 1) + delta;
             if (newVal < 1) newVal = 1;
             input.value = newVal;
+            if (window.materialesData[index]) {
+                window.materialesData[index].cantidad = newVal;
+            }
             window.updateMaterialTotal();
         };
 
@@ -3165,74 +3888,14 @@
                 
                 document.getElementById('solution-val').innerText = resultObj.solucion;
                 
-                const materialsList = document.getElementById('materials-list');
-                materialsList.innerHTML = '';
-                
-                let sumaMateriales = 0;
-                let tienePrecios = false;
-                window.materialesData = [];
-
-                if (resultObj.materiales && Array.isArray(resultObj.materiales)) {
-                    resultObj.materiales.forEach((mat, index) => {
-                        const li = document.createElement('li');
-                        li.className = "leading-relaxed transition my-2 border-b border-slate-100 pb-2 last:border-0";
-                        
-                        const matchFormat = mat.match(/^(.*?) \[Valor Ref:\s*\$([\d.]+)\s*en\s*(.*?)\]/i);
-                        let matObj = { originalText: mat, precio: 0, cantidad: 1 };
-
-                        if (matchFormat) {
-                            const nombre = matchFormat[1].trim();
-                            const precioStr = matchFormat[2].trim();
-                            const tienda = matchFormat[3].replace(/\]$/, '').trim();
-                            
-                            const valorNumerico = parseInt(precioStr.replace(/\./g, ''), 10);
-                            if (!isNaN(valorNumerico)) {
-                                sumaMateriales += valorNumerico;
-                                tienePrecios = true;
-                                matObj.precio = valorNumerico;
-                            }
-                            
-                            li.innerHTML = `
-                                <div class="flex flex-col w-full gap-3">
-                                    <span class="font-medium text-slate-700 outline-none focus:bg-white focus:ring-1 focus:ring-slate-200 rounded w-full" contenteditable="true" data-mat-name>${nombre}</span>
-                                    <div class="flex items-center justify-between bg-slate-50 p-3 rounded-lg border border-slate-100">
-                                        <div class="flex flex-col w-1/3">
-                                            <span class="text-[0.55rem] text-slate-400 uppercase tracking-widest font-bold mb-0.5">Precio Unit.</span>
-                                            <span class="font-bold text-slate-800">$${precioStr}</span>
-                                            <span class="text-[0.5rem] bg-brand-100 text-brand-700 px-1.5 py-0.5 rounded uppercase tracking-widest font-bold mt-1 w-fit">${tienda}</span>
-                                        </div>
-                                        <div class="flex flex-col items-center w-1/3">
-                                            <div class="flex items-center bg-white rounded-md border border-slate-200 overflow-hidden shadow-sm">
-                                                <button type="button" class="px-2.5 py-1 text-slate-500 hover:bg-slate-100 hover:text-brand-600 transition font-bold" onclick="window.changeQty(${index}, -1)">-</button>
-                                                <input type="number" id="qty-mat-${index}" class="mat-qty-input w-10 text-center bg-transparent border-x border-slate-200 text-sm font-bold text-slate-800 outline-none p-0 hide-arrows" value="1" min="1" onchange="window.updateMaterialTotal()">
-                                                <button type="button" class="px-2.5 py-1 text-slate-500 hover:bg-slate-100 hover:text-brand-600 transition font-bold" onclick="window.changeQty(${index}, 1)">+</button>
-                                            </div>
-                                        </div>
-                                        <div class="flex flex-col items-end w-1/3">
-                                            <span class="text-[0.55rem] text-slate-400 uppercase tracking-widest font-bold mb-0.5">Total</span>
-                                            <span class="font-bold text-brand-600 text-base" id="subtotal-mat-${index}">$${precioStr}</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            `;
-                        } else {
-                            li.innerHTML = `
-                                <div class="flex flex-col w-full gap-2">
-                                    <span class="font-medium text-slate-700 outline-none focus:bg-white focus:ring-1 focus:ring-slate-200 rounded w-full" contenteditable="true" data-mat-name>${mat}</span>
-                                    <div class="flex justify-end">
-                                        <div class="flex items-center bg-white rounded-md border border-slate-200 overflow-hidden shadow-sm">
-                                            <button type="button" class="px-2.5 py-1 text-slate-500 hover:bg-slate-100 hover:text-brand-600 transition font-bold" onclick="window.changeQty(${index}, -1)">-</button>
-                                            <input type="number" id="qty-mat-${index}" class="mat-qty-input w-10 text-center bg-transparent border-x border-slate-200 text-sm font-bold text-slate-800 outline-none p-0 hide-arrows" value="1" min="1" onchange="window.updateMaterialTotal()">
-                                            <button type="button" class="px-2.5 py-1 text-slate-500 hover:bg-slate-100 hover:text-brand-600 transition font-bold" onclick="window.changeQty(${index}, 1)">+</button>
-                                        </div>
-                                    </div>
-                                </div>
-                            `;
-                        }
-                        window.materialesData.push(matObj);
-                        materialsList.appendChild(li);
-                    });
-                }
+                // Renderizar Materiales, Comparar Canasta Completa Sodimac vs Easy y Activar Ficha Técnica al Clic
+                window.renderMaterialsAndStoreComparison(
+                    resultObj.materiales || [],
+                    resultObj.materiales_detalle || null,
+                    resultObj.comparativa_tiendas || null,
+                    resultObj.precio_ref,
+                    resultObj.unidad_ref
+                );
 
                 const stepsList = document.getElementById('steps-list');
                 stepsList.innerHTML = '';
@@ -3250,17 +3913,6 @@
                 }
 
                 document.getElementById('time-val').innerText = resultObj.tiempo;
-                
-                const priceSubtitle = document.getElementById('price-subtitle');
-                if (tienePrecios) {
-                    document.getElementById('price-val').innerText = "$" + sumaMateriales.toLocaleString('es-CL');
-                    document.getElementById('unit-val').innerText = "Total Materiales";
-                    if (priceSubtitle) priceSubtitle.innerText = "Suma del costo de los materiales listados arriba (1 unidad c/u)";
-                } else {
-                    document.getElementById('price-val').innerText = resultObj.precio_ref || "A evaluar";
-                    document.getElementById('unit-val').innerText = resultObj.unidad_ref || "";
-                    if (priceSubtitle) priceSubtitle.innerText = "Valor de Mercado Competitivo";
-                }
                 
                 const finalPrice = document.getElementById('price-val').innerText;
                 const finalUnit = document.getElementById('unit-val').innerText;
@@ -3510,6 +4162,8 @@
                     unidad_ref: document.getElementById('unit-val').innerText,
                     tiempo: document.getElementById('time-val').innerText,
                     materiales: Array.from(document.getElementById('materials-list').children).map(li => li.innerHTML),
+                    materiales_detalle: window.materialesData || [],
+                    comparativa_tiendas: window.comparativaTiendasActual || null,
                     pasos: Array.from(document.getElementById('steps-list').children).map(li => li.innerHTML),
                     userNotes: document.getElementById('summary-notes').innerText,
                     location: finalWeatherLoc, temp: finalWeatherTemp, hum: finalWeatherHum,
@@ -3559,6 +4213,8 @@
                         }
                         return li.innerHTML;
                     }),
+                    materiales_detalle: window.materialesData || [],
+                    comparativa_tiendas: window.comparativaTiendasActual || null,
                     pasos: Array.from(document.getElementById('steps-list').children).map(li => li.innerHTML),
                     rating: currentRating,
                     comment: document.getElementById('rating-comment').value,
@@ -3856,89 +4512,13 @@
                 }
             }
             
-            const materialsList = document.getElementById('materials-list');
-            materialsList.innerHTML = '';
-            window.materialesData = [];
-            
-            if (data.materiales && Array.isArray(data.materiales)) {
-                data.materiales.forEach((mat, index) => {
-                    const li = document.createElement('li');
-                    li.className = "leading-relaxed transition my-2 border-b border-slate-100 pb-2 last:border-0";
-                    
-                    const esHtmlAntiguo = mat.includes('<div');
-                    let matObj = { originalText: mat, precio: 0, cantidad: 1 };
-                    
-                    if (esHtmlAntiguo) {
-                        li.innerHTML = mat;
-                        
-                        const btnMenos = li.querySelector('button:first-of-type');
-                        const btnMas = li.querySelector('button:last-of-type');
-                        const inputQty = li.querySelector('.mat-qty-input');
-                        
-                        if (btnMenos) btnMenos.onclick = () => window.changeQty(index, -1);
-                        if (btnMas) btnMas.onclick = () => window.changeQty(index, 1);
-                        if (inputQty) {
-                             inputQty.onchange = window.updateMaterialTotal;
-                             matObj.cantidad = parseInt(inputQty.value) || 1;
-                        }
-                        
-                        const precioSpan = li.querySelector('.text-slate-800.font-bold, .text-slate-900.font-bold');
-                        if (precioSpan) {
-                            const pMatch = precioSpan.innerText.replace(/\./g, '').match(/\d+/);
-                            if (pMatch) matObj.precio = parseInt(pMatch[0], 10);
-                        }
-                    } else {
-                        const matchFormat = mat.match(/^(.*?) \[Valor Ref:\s*\$([\d.]+)\s*en\s*(.*?)\]/i);
-                        if (matchFormat) {
-                            const nombre = matchFormat[1].trim();
-                            const precioStr = matchFormat[2].trim();
-                            const tienda = matchFormat[3].replace(/\]$/, '').trim();
-                            
-                            const valorNumerico = parseInt(precioStr.replace(/\./g, ''), 10);
-                            if (!isNaN(valorNumerico)) matObj.precio = valorNumerico;
-                            
-                            li.innerHTML = `
-                                <div class="flex flex-col w-full gap-3">
-                                    <span class="font-medium text-slate-700 outline-none focus:bg-white focus:ring-1 focus:ring-slate-200 rounded w-full" contenteditable="true" data-mat-name>${nombre}</span>
-                                    <div class="flex items-center justify-between bg-slate-50 p-3 rounded-lg border border-slate-100">
-                                        <div class="flex flex-col w-1/3">
-                                            <span class="text-[0.55rem] text-slate-400 uppercase tracking-widest font-bold mb-0.5">Precio Unit.</span>
-                                            <span class="font-bold text-slate-800">$${precioStr}</span>
-                                            <span class="text-[0.5rem] bg-brand-100 text-brand-700 px-1.5 py-0.5 rounded uppercase tracking-widest font-bold mt-1 w-fit">${tienda}</span>
-                                        </div>
-                                        <div class="flex flex-col items-center w-1/3">
-                                            <div class="flex items-center bg-white rounded-md border border-slate-200 overflow-hidden shadow-sm">
-                                                <button type="button" class="px-2.5 py-1 text-slate-500 hover:bg-slate-100 hover:text-brand-600 transition font-bold" onclick="window.changeQty(${index}, -1)">-</button>
-                                                <input type="number" id="qty-mat-${index}" class="mat-qty-input w-10 text-center bg-transparent border-x border-slate-200 text-sm font-bold text-slate-800 outline-none p-0 hide-arrows" value="1" min="1" onchange="window.updateMaterialTotal()">
-                                                <button type="button" class="px-2.5 py-1 text-slate-500 hover:bg-slate-100 hover:text-brand-600 transition font-bold" onclick="window.changeQty(${index}, 1)">+</button>
-                                            </div>
-                                        </div>
-                                        <div class="flex flex-col items-end w-1/3">
-                                            <span class="text-[0.55rem] text-slate-400 uppercase tracking-widest font-bold mb-0.5">Total</span>
-                                            <span class="font-bold text-brand-600 text-base" id="subtotal-mat-${index}">$${precioStr}</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            `;
-                        } else {
-                             li.innerHTML = `
-                                <div class="flex flex-col w-full gap-2">
-                                    <span class="font-medium text-slate-700 outline-none focus:bg-white focus:ring-1 focus:ring-slate-200 rounded w-full" contenteditable="true" data-mat-name>${mat}</span>
-                                    <div class="flex justify-end">
-                                        <div class="flex items-center bg-white rounded-md border border-slate-200 overflow-hidden shadow-sm">
-                                            <button type="button" class="px-2.5 py-1 text-slate-500 hover:bg-slate-100 hover:text-brand-600 transition font-bold" onclick="window.changeQty(${index}, -1)">-</button>
-                                            <input type="number" id="qty-mat-${index}" class="mat-qty-input w-10 text-center bg-transparent border-x border-slate-200 text-sm font-bold text-slate-800 outline-none p-0 hide-arrows" value="1" min="1" onchange="window.updateMaterialTotal()">
-                                            <button type="button" class="px-2.5 py-1 text-slate-500 hover:bg-slate-100 hover:text-brand-600 transition font-bold" onclick="window.changeQty(${index}, 1)">+</button>
-                                        </div>
-                                    </div>
-                                </div>
-                            `;
-                        }
-                    }
-                    window.materialesData.push(matObj);
-                    materialsList.appendChild(li);
-                });
-            }
+            window.renderMaterialsAndStoreComparison(
+                data.materiales || [],
+                data.materiales_detalle || null,
+                data.comparativa_tiendas || null,
+                data.precio_ref,
+                data.unidad_ref
+            );
 
             const stepsList = document.getElementById('steps-list');
             stepsList.innerHTML = '';
