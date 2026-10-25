@@ -761,9 +761,10 @@
                     <!-- FUNCIÓN 1: RAYOS X VISUALES (ANOTACIÓN AUTOMÁTICA FORENSE SOBRE LA FOTO) -->
                     <div id="xray-forensic-card" class="mb-6 bg-slate-950 rounded-xl overflow-hidden border border-slate-800 shadow-lg">
                         <div class="px-4 py-3 bg-slate-900 border-b border-slate-800 flex flex-wrap items-center justify-between gap-2">
-                            <div class="flex items-center gap-2">
+                            <div class="flex items-center gap-2 flex-wrap">
                                 <span class="w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse"></span>
                                 <span class="text-[0.65rem] font-bold uppercase tracking-widest text-white">🩻 Rayos X Visuales — Peritaje Forense IA</span>
+                                <span id="xray-source-badge" class="bg-emerald-600/90 text-white text-[0.58rem] font-bold px-2 py-0.5 rounded uppercase tracking-wider">Foto #2 · Detalle</span>
                                 <span id="xray-pin-indicator" class="hidden bg-indigo-600 text-white text-[0.6rem] font-bold px-2 py-0.5 rounded uppercase">Pin #1</span>
                             </div>
                             <button type="button" onclick="window.toggleXRayOverlay()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 text-[0.6rem] font-bold uppercase tracking-wider px-2.5 py-1 rounded border border-slate-700 transition">
@@ -884,7 +885,12 @@
                 </div>
 
                 <div id="rating-section" class="mt-6 bg-slate-50 p-5 rounded-xl border border-slate-200 shadow-sm">
-                    <p class="text-xs font-bold text-slate-600 uppercase tracking-wider mb-3 text-center">Califica este diagnóstico</p>
+                    <div id="history-autosave-badge" class="flex items-center justify-center gap-2 bg-emerald-50 border border-emerald-200 text-emerald-800 px-3 py-2 rounded-lg text-[0.68rem] font-bold mb-4">
+                        <i class="fas fa-check-circle text-emerald-600"></i>
+                        <span id="history-autosave-text">Guardado automáticamente en tu Historial de Usuario</span>
+                    </div>
+                    <p class="text-xs font-bold text-slate-700 uppercase tracking-wider mb-1 text-center">Entrenar Memoria RAG Institucional</p>
+                    <p class="text-[0.65rem] text-slate-500 text-center mb-3">Tu evaluación ya está en tu Historial. Usa el botón inferior únicamente si deseas almacenar este caso validado en la Memoria RAG.</p>
                     <div class="flex justify-center gap-2 mb-4" id="star-container">
                         <button class="star-btn text-4xl text-slate-300 hover:text-yellow-400 transition drop-shadow-sm" data-val="1">★</button>
                         <button class="star-btn text-4xl text-slate-300 hover:text-yellow-400 transition drop-shadow-sm" data-val="2">★</button>
@@ -892,8 +898,8 @@
                         <button class="star-btn text-4xl text-slate-300 hover:text-yellow-400 transition drop-shadow-sm" data-val="4">★</button>
                         <button class="star-btn text-4xl text-slate-300 hover:text-yellow-400 transition drop-shadow-sm" data-val="5">★</button>
                     </div>
-                    <textarea id="rating-comment" class="w-full p-3 bg-white rounded-lg border border-slate-200 text-sm focus:ring-1 focus:ring-slate-900 outline-none resize-none mb-3" rows="2" placeholder="Opcional: Deja un comentario sobre el resultado..."></textarea>
-                    <button id="submit-rating-btn" onclick="window.submitFeedbackAndSave()" class="w-full bg-slate-900 text-white py-3 rounded-lg text-xs font-bold uppercase tracking-widest hover:bg-slate-800 transition shadow-md">GUARDAR CALIFICACIÓN Y CAMBIOS</button>
+                    <textarea id="rating-comment" class="w-full p-3 bg-white rounded-lg border border-slate-200 text-sm focus:ring-1 focus:ring-slate-900 outline-none resize-none mb-3" rows="2" placeholder="Opcional: Notas técnicas para la Memoria RAG..."></textarea>
+                    <button id="submit-rating-btn" onclick="window.submitFeedbackAndSave()" class="w-full bg-slate-900 text-white py-3 rounded-lg text-xs font-bold uppercase tracking-widest hover:bg-slate-800 transition shadow-md">🧠 GUARDAR EN MEMORIA RAG</button>
                 </div>
 
                 <div class="flex gap-3 mt-6">
@@ -1357,9 +1363,13 @@
             }
 
             const srv = serverDetalleItem || {};
-            const pSod = Number(srv.precio_sodimac) || (parsedStore.toLowerCase() === 'sodimac' ? parsedPrice : 0);
-            const pEasy = Number(srv.precio_easy) || (parsedStore.toLowerCase() === 'easy' ? parsedPrice : 0);
+            let pSod = Number(srv.precio_sodimac) || (parsedStore.toLowerCase() === 'sodimac' ? parsedPrice : 0);
+            let pEasy = Number(srv.precio_easy) || (parsedStore.toLowerCase() === 'easy' ? parsedPrice : 0);
+            if (pSod <= 0 && pEasy > 0) pSod = pEasy;
+            if (pEasy <= 0 && pSod > 0) pEasy = pSod;
             const precioElegido = Number(srv.precio_elegido) || pSod || pEasy || parsedPrice || 0;
+            if (pSod <= 0 && precioElegido > 0) pSod = precioElegido;
+            if (pEasy <= 0 && precioElegido > 0) pEasy = precioElegido;
 
             return {
                 index: index,
@@ -1402,6 +1412,23 @@
                 return window.resolveMaterialTechnicalData(mat, idx, detArr[idx] || null);
             });
 
+            // Garantizar que ningún material quede con precio $0 en Sodimac o Easy (respaldo cruzado con promedio de canasta si viniera de un historial antiguo)
+            const conPrecioValido = window.materialesData.filter(it => it.precio_sodimac > 0 || it.precio_easy > 0);
+            const promedioCanastaSod = conPrecioValido.length > 0
+                ? Math.round(conPrecioValido.reduce((acc, it) => acc + (it.precio_sodimac || it.precio_easy), 0) / conPrecioValido.length)
+                : (window.extractPrice(window.ultimoPrecioRef) || 8990);
+            const promedioCanastaEasy = conPrecioValido.length > 0
+                ? Math.round(conPrecioValido.reduce((acc, it) => acc + (it.precio_easy || it.precio_sodimac), 0) / conPrecioValido.length)
+                : promedioCanastaSod;
+
+            window.materialesData.forEach(item => {
+                if (item.precio_sodimac <= 0 && item.precio_easy > 0) item.precio_sodimac = item.precio_easy;
+                if (item.precio_easy <= 0 && item.precio_sodimac > 0) item.precio_easy = item.precio_sodimac;
+                if (item.precio_sodimac <= 0) item.precio_sodimac = promedioCanastaSod;
+                if (item.precio_easy <= 0) item.precio_easy = promedioCanastaEasy;
+                if (!item.precio || item.precio <= 0) item.precio = item.precio_sodimac;
+            });
+
             // Calcular totales en Sodimac y en Easy para verificar cuál tienda tiene toda la lista más barata
             let totalSod = 0;
             let totalEasy = 0;
@@ -1436,6 +1463,7 @@
         window.selectStoreForMaterials = function(nombreTienda) {
             window.tiendaActivaSeleccionada = nombreTienda;
             window.renderMaterialsListForActiveStore();
+            if (window.scheduleAutoUpdateHistory) window.scheduleAutoUpdateHistory();
         };
 
         window.renderMaterialsListForActiveStore = function(tiendaGanadoraAuto) {
@@ -1797,8 +1825,16 @@
                         urlEasy = String(eqE['URL Directa'] || 'https://www.easy.cl').trim();
                     }
 
-                    const pSodNum = parseInt(pSodStr, 10) || 0;
-                    const pEasyNum = parseInt(pEasyStr, 10) || 0;
+                    let pSodNum = parseInt(pSodStr, 10) || 0;
+                    let pEasyNum = parseInt(pEasyStr, 10) || 0;
+                    if (pSodNum <= 0 && pEasyNum > 0) {
+                        pSodNum = pEasyNum;
+                        pSodStr = String(pEasyNum);
+                    }
+                    if (pEasyNum <= 0 && pSodNum > 0) {
+                        pEasyNum = pSodNum;
+                        pEasyStr = String(pSodNum);
+                    }
 
                     let tiendaEcon = String(row['Tienda Más Económica'] || row['tienda_mas_economica'] || '').trim();
                     let difClp = String(row['Diferencia (CLP)'] ?? row['diferencia_clp'] ?? '0').trim();
@@ -1929,6 +1965,7 @@
             const masBarataConCantidades = (totalSod <= totalEasy) ? "Sodimac" : "Easy";
             window.tiendaActivaSeleccionada = masBarataConCantidades;
             window.renderMaterialsListForActiveStore(masBarataConCantidades);
+            if (window.scheduleAutoUpdateHistory) window.scheduleAutoUpdateHistory();
         };
 
         window.changeQty = function(index, delta) {
@@ -2867,7 +2904,7 @@
             
             const rateBtn = document.getElementById('submit-rating-btn');
             if (rateBtn) {
-                rateBtn.innerHTML = 'GUARDAR CALIFICACIÓN Y CAMBIOS';
+                rateBtn.innerHTML = '🧠 GUARDAR EN MEMORIA RAG';
                 rateBtn.disabled = false;
                 rateBtn.classList.replace('bg-emerald-600', 'bg-slate-900');
                 rateBtn.classList.replace('hover:bg-emerald-500', 'hover:bg-slate-800');
@@ -2909,31 +2946,243 @@
         window.isRecordingVoice = false;
         window.whiteLabelConfig = JSON.parse(localStorage.getItem('obrin_whitelabel_config') || 'null');
 
-        // --- 1. RAYOS X VISUALES (PERITAJE FORENSE SOBRE LA FOTO) ---
+        // --- 1. RAYOS X VISUALES (PERITAJE FORENSE SOBRE LA FOTO 2 DE DETALLE O FOTO 1 GENERAL) ---
         window.getDefaultRayosX = function(patologiaTexto, superficieTexto) {
             return {
+                es_default: true,
                 grietas: [
-                    { puntos: [[0.22, 0.14], [0.34, 0.36], [0.39, 0.54], [0.52, 0.74], [0.61, 0.88]], etiqueta: "Grieta / Fisura Principal" }
+                    { puntos: [[0.32, 0.22], [0.38, 0.36], [0.44, 0.50], [0.50, 0.64], [0.56, 0.78]], etiqueta: "Grieta / Fisura Principal" }
                 ],
                 zonas_humedad: [
-                    { poligono: [[0.12, 0.58], [0.84, 0.56], [0.88, 0.92], [0.10, 0.93]], etiqueta: "Área de Eflorescencia / Desprendimiento" }
+                    { poligono: [[0.24, 0.32], [0.74, 0.32], [0.76, 0.78], [0.22, 0.78]], etiqueta: "Área de Patología / Daño" }
                 ],
                 etiquetas: [
-                    { x: 0.06, y: 0.16, target_x: 0.34, target_y: 0.36, texto: "Trazo de Grieta Estructural", color: "rojo" },
-                    { x: 0.54, y: 0.42, target_x: 0.52, target_y: 0.74, texto: (patologiaTexto || "Zona de Eflorescencia / Daño").substring(0, 34), color: "amarillo" }
+                    { x: 0.06, y: 0.14, target_x: 0.44, target_y: 0.50, texto: "Punto Crítico de Falla", color: "rojo" },
+                    { x: 0.52, y: 0.14, target_x: 0.50, target_y: 0.64, texto: (patologiaTexto || "Zona de Daño Detectada").substring(0, 34), color: "amarillo" }
                 ]
             };
+        };
+
+        // Refinamiento por Visión Computacional (Gradiente de Bordes + Contraste de Fisura/Mancha)
+        // para achuntarle con precisión exacta a los píxeles reales de la falla en la fotografía activa (Foto 2 o Foto 1)
+        window.refinarCoordenadasSobreFallaReal = function(ctx, W, H, rxOriginal) {
+            try {
+                const imgData = ctx.getImageData(0, 0, W, H).data;
+                const step = 4;
+                const gw = Math.floor(W / step);
+                const gh = Math.floor(H / step);
+                const lum = new Float32Array(gw * gh);
+                let sumLum = 0;
+
+                for (let gy = 0; gy < gh; gy++) {
+                    const py = gy * step;
+                    for (let gx = 0; gx < gw; gx++) {
+                        const px = gx * step;
+                        const idx = (py * W + px) * 4;
+                        const l = 0.299 * imgData[idx] + 0.587 * imgData[idx + 1] + 0.114 * imgData[idx + 2];
+                        lum[gy * gw + gx] = l;
+                        sumLum += l;
+                    }
+                }
+                const avgLum = sumLum / (gw * gh || 1);
+
+                // Mapa de saliencia de grieta/falla (gradiente local + oscuridad relativa respecto al entorno)
+                const crackScore = new Float32Array(gw * gh);
+                const damageScore = new Float32Array(gw * gh);
+                const marginX = Math.floor(gw * 0.08);
+                const marginY = Math.floor(gh * 0.08);
+
+                let peakX = 0.5, peakY = 0.5, maxScoreGlobal = -1;
+
+                for (let gy = marginY; gy < gh - marginY; gy++) {
+                    for (let gx = marginX; gx < gw - marginX; gx++) {
+                        const c = lum[gy * gw + gx];
+                        const l = lum[gy * gw + (gx - 1)];
+                        const r = lum[gy * gw + (gx + 1)];
+                        const u = lum[(gy - 1) * gw + gx];
+                        const d = lum[(gy + 1) * gw + gx];
+
+                        // Promedio local en radio de 3 celdas para detectar líneas oscuras o discontinuidades (fisuras/juntas/manchas)
+                        const localMean = (
+                            lum[(gy - 2) * gw + gx] + lum[(gy + 2) * gw + gx] +
+                            lum[gy * gw + (gx - 2)] + lum[gy * gw + (gx + 2)] +
+                            l + r + u + d
+                        ) * 0.125;
+
+                        const grad = Math.abs(r - l) + Math.abs(d - u);
+                        const darkness = Math.max(0, localMean - c);
+                        const contrast = Math.abs(c - avgLum);
+
+                        // Peso Gaussiano suave hacia el centro de encuadre para evitar bordes irrelevantes del marco
+                        const nx = gx / gw;
+                        const ny = gy / gh;
+                        const centerWeight = 1.0 - 0.35 * (Math.pow(nx - 0.5, 2) + Math.pow(ny - 0.5, 2));
+
+                        const cScore = (grad * 1.15 + darkness * 2.4) * centerWeight;
+                        const dScore = (grad * 0.85 + darkness * 1.4 + contrast * 0.45) * centerWeight;
+
+                        crackScore[gy * gw + gx] = cScore;
+                        damageScore[gy * gw + gx] = dScore;
+
+                        if (cScore > maxScoreGlobal) {
+                            maxScoreGlobal = cScore;
+                            peakX = nx;
+                            peakY = ny;
+                        }
+                    }
+                }
+
+                const clamp = (v, min, max) => Math.max(min, Math.min(max, v));
+                const rx = JSON.parse(JSON.stringify(rxOriginal));
+
+                // 1. Ajustar cada vértice de grieta hacia el píxel de mayor gradiente/oscuridad real en su vecindad
+                const radioBusquedaX = rx.es_default ? Math.floor(gw * 0.24) : Math.floor(gw * 0.12);
+                const radioBusquedaY = rx.es_default ? Math.floor(gh * 0.20) : Math.floor(gh * 0.10);
+
+                if (Array.isArray(rx.grietas) && rx.grietas.length > 0) {
+                    rx.grietas.forEach(g => {
+                        if (!Array.isArray(g.puntos) || g.puntos.length < 2) return;
+
+                        // Si venía de coordenadas default, centrar inicialmente sobre el pico real de anomalía visual
+                        if (rx.es_default) {
+                            const midIdx = Math.floor(g.puntos.length / 2);
+                            const dx = peakX - g.puntos[midIdx][0];
+                            const dy = peakY - g.puntos[midIdx][1];
+                            g.puntos = g.puntos.map(p => [clamp(p[0] + dx, 0.10, 0.90), clamp(p[1] + dy, 0.10, 0.90)]);
+                        }
+
+                        const nuevosPuntos = g.puntos.map((pt, idx) => {
+                            const startGx = clamp(Math.round(pt[0] * gw), marginX, gw - marginX - 1);
+                            const startGy = clamp(Math.round(pt[1] * gh), marginY, gh - marginY - 1);
+
+                            let bestGx = startGx;
+                            let bestGy = startGy;
+                            let bestVal = -1;
+
+                            const minGx = Math.max(marginX, startGx - radioBusquedaX);
+                            const maxGx = Math.min(gw - marginX - 1, startGx + radioBusquedaX);
+                            const minGy = Math.max(marginY, startGy - radioBusquedaY);
+                            const maxGy = Math.min(gh - marginY - 1, startGy + radioBusquedaY);
+
+                            for (let yy = minGy; yy <= maxGy; yy++) {
+                                for (let xx = minGx; xx <= maxGx; xx++) {
+                                    const distPen = 0.18 * Math.hypot(xx - startGx, yy - startGy);
+                                    const val = crackScore[yy * gw + xx] - distPen;
+                                    if (val > bestVal) {
+                                        bestVal = val;
+                                        bestGx = xx;
+                                        bestGy = yy;
+                                    }
+                                }
+                            }
+                            return [clamp(bestGx / gw, 0.06, 0.94), clamp(bestGy / gh, 0.06, 0.94)];
+                        });
+
+                        // Suavizado ligero para mantener continuidad natural sobre la fisura
+                        for (let i = 1; i < nuevosPuntos.length - 1; i++) {
+                            nuevosPuntos[i][0] = Number((0.2 * nuevosPuntos[i - 1][0] + 0.6 * nuevosPuntos[i][0] + 0.2 * nuevosPuntos[i + 1][0]).toFixed(3));
+                            nuevosPuntos[i][1] = Number((0.2 * nuevosPuntos[i - 1][1] + 0.6 * nuevosPuntos[i][1] + 0.2 * nuevosPuntos[i + 1][1]).toFixed(3));
+                        }
+                        g.puntos = nuevosPuntos;
+                    });
+                }
+
+                // 2. Ajustar el polígono de zona de daño/humedad alrededor del foco real de la patología
+                const primerTrazo = rx.grietas?.[0]?.puntos || [];
+                const puntoCentralGrieta = primerTrazo.length > 0
+                    ? primerTrazo[Math.floor(primerTrazo.length / 2)]
+                    : [peakX, peakY];
+
+                if (Array.isArray(rx.zonas_humedad) && rx.zonas_humedad.length > 0) {
+                    rx.zonas_humedad.forEach(z => {
+                        if (!Array.isArray(z.poligono) || z.poligono.length < 3) return;
+                        // Calcular centroide actual del polígono
+                        let cx = 0, cy = 0;
+                        z.poligono.forEach(p => { cx += p[0]; cy += p[1]; });
+                        cx /= z.poligono.length;
+                        cy /= z.poligono.length;
+
+                        // Buscar el centroide ponderado de mayor daño dentro de la región cercana
+                        const searchR = Math.floor(Math.min(gw, gh) * 0.22);
+                        const cgx = clamp(Math.round(cx * gw), marginX, gw - marginX - 1);
+                        const cgy = clamp(Math.round(cy * gh), marginY, gh - marginY - 1);
+                        let sumW = 0, wX = 0, wY = 0;
+                        for (let yy = Math.max(marginY, cgy - searchR); yy <= Math.min(gh - marginY - 1, cgy + searchR); yy++) {
+                            for (let xx = Math.max(marginX, cgx - searchR); xx <= Math.min(gw - marginX - 1, cgx + searchR); xx++) {
+                                const w = Math.pow(Math.max(0, damageScore[yy * gw + xx]), 2);
+                                sumW += w;
+                                wX += (xx / gw) * w;
+                                wY += (yy / gh) * w;
+                            }
+                        }
+                        const targetCx = sumW > 0 ? (0.55 * (wX / sumW) + 0.45 * puntoCentralGrieta[0]) : puntoCentralGrieta[0];
+                        const targetCy = sumW > 0 ? (0.55 * (wY / sumW) + 0.45 * puntoCentralGrieta[1]) : puntoCentralGrieta[1];
+                        const shiftX = (targetCx - cx) * 0.75;
+                        const shiftY = (targetCy - cy) * 0.75;
+
+                        z.poligono = z.poligono.map(p => [
+                            clamp(Number((p[0] + shiftX).toFixed(3)), 0.06, 0.94),
+                            clamp(Number((p[1] + shiftY).toFixed(3)), 0.06, 0.94)
+                        ]);
+                    });
+                }
+
+                // 3. Alinear las puntas de flecha (target_x, target_y) de las etiquetas exactamente sobre la grieta y zona refinadas
+                const poligonoPrincipal = rx.zonas_humedad?.[0]?.poligono || [];
+                let centroZona = [puntoCentralGrieta[0], clamp(puntoCentralGrieta[1] + 0.12, 0.15, 0.88)];
+                if (poligonoPrincipal.length >= 3) {
+                    let zx = 0, zy = 0;
+                    poligonoPrincipal.forEach(p => { zx += p[0]; zy += p[1]; });
+                    centroZona = [zx / poligonoPrincipal.length, zy / poligonoPrincipal.length];
+                }
+
+                if (Array.isArray(rx.etiquetas)) {
+                    rx.etiquetas.forEach((et, idx) => {
+                        const esRojo = (et.color || "rojo").toLowerCase().includes("rojo") || idx === 0;
+                        if (esRojo && primerTrazo.length > 0) {
+                            et.target_x = puntoCentralGrieta[0];
+                            et.target_y = puntoCentralGrieta[1];
+                            et.x = puntoCentralGrieta[0] > 0.52 ? clamp(puntoCentralGrieta[0] - 0.42, 0.04, 0.54) : clamp(puntoCentralGrieta[0] + 0.12, 0.08, 0.58);
+                            et.y = clamp(puntoCentralGrieta[1] - 0.18, 0.06, 0.82);
+                        } else {
+                            et.target_x = centroZona[0];
+                            et.target_y = centroZona[1];
+                            et.x = centroZona[0] > 0.52 ? clamp(centroZona[0] - 0.42, 0.04, 0.54) : clamp(centroZona[0] + 0.12, 0.08, 0.58);
+                            et.y = clamp(centroZona[1] + 0.14, 0.12, 0.88);
+                        }
+                    });
+                }
+
+                return rx;
+            } catch (err) {
+                console.warn("Aviso en refinamiento de píxeles Rayos X:", err);
+                return rxOriginal;
+            }
         };
 
         window.renderXRayForensicCanvas = function(rayosXObj) {
             const canvas = document.getElementById('xray-canvas');
             if (!canvas) return;
             const ctx = canvas.getContext('2d');
-            const srcImg = document.getElementById('summary-img1');
+
+            // REGLA SOLICITADA: Priorizar siempre la Foto 2 (Foto de Detalle de la falla);
+            // en caso de no estar la foto del detalle, trabajar con la Foto 1 (Foto General).
+            const img2El = document.getElementById('summary-img2');
+            const img1El = document.getElementById('summary-img1');
+            const usarFotoDetalle = Boolean(img2El && !img2El.classList.contains('hidden') && img2El.src && img2El.src.length > 100);
+            const srcImg = usarFotoDetalle ? img2El : img1El;
             if (!srcImg || !srcImg.src || srcImg.src.length < 50) return;
 
+            const sourceBadge = document.getElementById('xray-source-badge');
+            if (sourceBadge) {
+                sourceBadge.innerText = usarFotoDetalle ? '🔍 Foto #2 · Detalle de Falla' : '📷 Foto #1 · Vista General';
+                sourceBadge.className = usarFotoDetalle
+                    ? 'bg-emerald-600/90 text-white text-[0.58rem] font-bold px-2 py-0.5 rounded uppercase tracking-wider'
+                    : 'bg-sky-600/90 text-white text-[0.58rem] font-bold px-2 py-0.5 rounded uppercase tracking-wider';
+            }
+
             if (rayosXObj) window.currentRayosXData = rayosXObj;
-            const rx = window.currentRayosXData || window.getDefaultRayosX(
+            const rxBase = window.currentRayosXData || window.getDefaultRayosX(
                 document.getElementById('damage-val')?.innerText,
                 document.getElementById('surface-type')?.innerText
             );
@@ -2950,6 +3199,10 @@
                 ctx.drawImage(img, 0, 0, W, H);
 
                 if (!window.xrayOverlayVisible) return;
+
+                // Refinar las coordenadas sobre los píxeles reales de la foto seleccionada (Foto 2 o Foto 1)
+                const rx = window.refinarCoordenadasSobreFallaReal(ctx, W, H, rxBase);
+                window.currentRayosXData = rx;
 
                 // Oscurecer levemente el fondo para efecto Rayos X Forense
                 ctx.fillStyle = "rgba(15, 23, 42, 0.18)";
@@ -4143,69 +4396,168 @@
             return canvas.toDataURL('image/jpeg', 0.7);
         };
 
+        const sanitizeForFirestore = (obj) => {
+            return JSON.parse(JSON.stringify(obj, (k, v) => (v === undefined ? null : v)));
+        };
+
         window.autoSaveEvaluation = async function() {
             if (!auth || !auth.currentUser || !db) return;
-            const projectId = document.getElementById('project-selector').value;
-            if (!projectId) return;
 
             try {
+                const userId = auth.currentUser.uid;
                 const projSelector = document.getElementById('project-selector');
-                const diagnosticData = {
+                let projectId = projSelector ? projSelector.value : '';
+                let projectName = (projSelector && projSelector.selectedIndex >= 0 && projSelector.options[projSelector.selectedIndex])
+                    ? projSelector.options[projSelector.selectedIndex].text
+                    : 'Proyecto General';
+
+                // Si por algún motivo no había carpeta seleccionada o cargada aún, asegurar una carpeta por defecto para que SIEMPRE se guarde en el historial
+                if (!projectId) {
+                    const projectsRef = collection(db, 'artifacts', globalAppId, 'users', userId, 'proyectos');
+                    const projSnap = await getDocs(query(projectsRef, orderBy('createdAt', 'desc')));
+                    if (!projSnap.empty) {
+                        projectId = projSnap.docs[0].id;
+                        projectName = projSnap.docs[0].data().name || 'Proyecto General';
+                    } else {
+                        const nuevoProj = await addDoc(projectsRef, { name: 'Proyecto General', createdAt: new Date() });
+                        projectId = nuevoProj.id;
+                        projectName = 'Proyecto General';
+                    }
+                    if (projSelector) {
+                        await window.loadProjectsList();
+                        projSelector.value = projectId;
+                    }
+                }
+
+                const rawDiagnosticData = {
                     projectId: projectId,
-                    projectName: projSelector.options[projSelector.selectedIndex].text,
-                    superficie: document.getElementById('surface-type').innerText,
-                    nivel_dano: document.getElementById('complexity-badge').innerText,
-                    patologia: document.getElementById('damage-val').innerText,
-                    riesgo_futuro: document.getElementById('risk-val').innerText,
-                    solucion: document.getElementById('solution-val').innerText,
-                    precio_ref: document.getElementById('price-val').innerText,
-                    unidad_ref: document.getElementById('unit-val').innerText,
-                    tiempo: document.getElementById('time-val').innerText,
-                    materiales: Array.from(document.getElementById('materials-list').children).map(li => li.innerHTML),
+                    projectName: projectName,
+                    superficie: document.getElementById('surface-type')?.innerText || '',
+                    nivel_dano: document.getElementById('complexity-badge')?.innerText || '',
+                    patologia: document.getElementById('damage-val')?.innerText || '',
+                    riesgo_futuro: document.getElementById('risk-val')?.innerText || '',
+                    solucion: document.getElementById('solution-val')?.innerText || '',
+                    precio_ref: document.getElementById('price-val')?.innerText || '',
+                    unidad_ref: document.getElementById('unit-val')?.innerText || '',
+                    tiempo: document.getElementById('time-val')?.innerText || '',
+                    materiales: Array.from(document.getElementById('materials-list').children).map(li => {
+                        const qtyInput = li.querySelector('.mat-qty-input');
+                        if (qtyInput) qtyInput.setAttribute('value', qtyInput.value);
+                        return li.innerHTML;
+                    }),
                     materiales_detalle: window.materialesData || [],
                     comparativa_tiendas: window.comparativaTiendasActual || null,
                     pasos: Array.from(document.getElementById('steps-list').children).map(li => li.innerHTML),
-                    userNotes: document.getElementById('summary-notes').innerText,
-                    location: finalWeatherLoc, temp: finalWeatherTemp, hum: finalWeatherHum,
-                    img1: getCompressedBase64('summary-img1'), img2: getCompressedBase64('summary-img2'),
+                    userNotes: document.getElementById('summary-notes')?.innerText || '',
+                    location: finalWeatherLoc || '',
+                    temp: finalWeatherTemp || '',
+                    hum: finalWeatherHum || '',
+                    img1: getCompressedBase64('summary-img1'),
+                    img2: getCompressedBase64('summary-img2'),
                     rayos_x: window.currentRayosXData || null,
-                    rating: currentRating, comment: document.getElementById('rating-comment').value,
+                    rating: currentRating || 0,
+                    comment: document.getElementById('rating-comment')?.value || '',
                     seguimiento: {
                         paso_actual: 1,
                         estado_rechazado: false,
                         fechas: { "1": Date.now(), "2": null, "3": null, "4": null, "5": null }
-                    },
-                    createdAt: new Date(), updatedAt: new Date()
+                    }
                 };
 
-                const userId = auth.currentUser.uid;
+                const diagnosticData = sanitizeForFirestore(rawDiagnosticData);
+                diagnosticData.createdAt = new Date();
+                diagnosticData.updatedAt = new Date();
+
                 const evaluacionesRef = collection(db, 'artifacts', globalAppId, 'users', userId, 'evaluaciones');
                 const newDoc = await addDoc(evaluacionesRef, diagnosticData);
-                currentEditingDocId = newDoc.id; 
+                currentEditingDocId = newDoc.id;
+                window.historyDataCache[newDoc.id] = diagnosticData;
+
+                const autoText = document.getElementById('history-autosave-text');
+                if (autoText) {
+                    autoText.innerText = `Guardado automáticamente en tu Historial (${projectName})`;
+                }
+                showNotification("📁 Diagnóstico guardado automáticamente en tu Historial");
                 window.updateCounters();
             } catch (error) {
                 console.error("AutoSave Error:", error);
             }
         };
 
+        // Sincronización silenciosa en el historial del usuario cuando edita textos o cantidades (sin requerir apretar botón)
+        let autoUpdateHistoryTimer = null;
+        window.scheduleAutoUpdateHistory = function() {
+            if (!currentEditingDocId || !auth || !auth.currentUser || !db) return;
+            if (autoUpdateHistoryTimer) clearTimeout(autoUpdateHistoryTimer);
+            autoUpdateHistoryTimer = setTimeout(async () => {
+                try {
+                    const userId = auth.currentUser.uid;
+                    const updatePayload = sanitizeForFirestore({
+                        superficie: document.getElementById('surface-type')?.innerText || '',
+                        nivel_dano: document.getElementById('complexity-badge')?.innerText || '',
+                        patologia: document.getElementById('damage-val')?.innerText || '',
+                        riesgo_futuro: document.getElementById('risk-val')?.innerText || '',
+                        solucion: document.getElementById('solution-val')?.innerText || '',
+                        precio_ref: document.getElementById('price-val')?.innerText || '',
+                        unidad_ref: document.getElementById('unit-val')?.innerText || '',
+                        tiempo: document.getElementById('time-val')?.innerText || '',
+                        materiales: Array.from(document.getElementById('materials-list').children).map(li => {
+                            const qtyInput = li.querySelector('.mat-qty-input');
+                            if (qtyInput) qtyInput.setAttribute('value', qtyInput.value);
+                            return li.innerHTML;
+                        }),
+                        materiales_detalle: window.materialesData || [],
+                        comparativa_tiendas: window.comparativaTiendasActual || null,
+                        pasos: Array.from(document.getElementById('steps-list').children).map(li => li.innerHTML),
+                        rating: currentRating || 0,
+                        comment: document.getElementById('rating-comment')?.value || ''
+                    });
+                    updatePayload.updatedAt = new Date();
+
+                    const docRef = doc(db, 'artifacts', globalAppId, 'users', userId, 'evaluaciones', currentEditingDocId);
+                    await updateDoc(docRef, updatePayload);
+                    if (window.historyDataCache[currentEditingDocId]) {
+                        window.historyDataCache[currentEditingDocId] = {
+                            ...window.historyDataCache[currentEditingDocId],
+                            ...updatePayload
+                        };
+                    }
+                } catch (e) {
+                    console.warn("Auto-update historial:", e);
+                }
+            }, 700);
+        };
+
+        ['surface-type', 'complexity-badge', 'damage-val', 'risk-val', 'solution-val', 'price-val', 'unit-val', 'time-val', 'steps-list'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) {
+                el.addEventListener('input', () => window.scheduleAutoUpdateHistory());
+                el.addEventListener('blur', () => window.scheduleAutoUpdateHistory());
+            }
+        });
+
+        // BOTÓN EXCLUSIVO PARA ALMACENAR EL CASO EN LA MEMORIA RAG INSTITUCIONAL (CONOCIMIENTO EXPERTO + VECTORIZE)
         window.submitFeedbackAndSave = async function() {
             const btn = document.getElementById('submit-rating-btn');
             const originalText = btn.innerHTML;
-            btn.innerHTML = '⏳ Guardando...'; btn.disabled = true;
+            btn.innerHTML = '⏳ Almacenando en Memoria RAG...'; btn.disabled = true;
 
             try {
                 if (!auth || !auth.currentUser || !db) throw new Error("Debes iniciar sesión.");
-                if (!currentEditingDocId) throw new Error("No hay ficha activa para actualizar.");
+                if (!currentEditingDocId) {
+                    await window.autoSaveEvaluation();
+                }
+                const targetDocId = currentEditingDocId || ('RAG-' + Date.now());
 
-                const diagnosticData = {
-                    superficie: document.getElementById('surface-type').innerText,
-                    nivel_dano: document.getElementById('complexity-badge').innerText,
-                    patologia: document.getElementById('damage-val').innerText,
-                    riesgo_futuro: document.getElementById('risk-val').innerText,
-                    solucion: document.getElementById('solution-val').innerText,
-                    precio_ref: document.getElementById('price-val').innerText,
-                    unidad_ref: document.getElementById('unit-val').innerText,
-                    tiempo: document.getElementById('time-val').innerText,
+                const rawDiagnosticData = {
+                    superficie: document.getElementById('surface-type')?.innerText || '',
+                    nivel_dano: document.getElementById('complexity-badge')?.innerText || '',
+                    patologia: document.getElementById('damage-val')?.innerText || '',
+                    riesgo_futuro: document.getElementById('risk-val')?.innerText || '',
+                    solucion: document.getElementById('solution-val')?.innerText || '',
+                    precio_ref: document.getElementById('price-val')?.innerText || '',
+                    unidad_ref: document.getElementById('unit-val')?.innerText || '',
+                    tiempo: document.getElementById('time-val')?.innerText || '',
                     materiales: Array.from(document.getElementById('materials-list').children).map((li) => {
                         const qtyInput = li.querySelector('.mat-qty-input');
                         if (qtyInput) {
@@ -4216,14 +4568,21 @@
                     materiales_detalle: window.materialesData || [],
                     comparativa_tiendas: window.comparativaTiendasActual || null,
                     pasos: Array.from(document.getElementById('steps-list').children).map(li => li.innerHTML),
-                    rating: currentRating,
-                    comment: document.getElementById('rating-comment').value,
-                    updatedAt: new Date()
+                    rating: currentRating || 5,
+                    comment: document.getElementById('rating-comment')?.value || ''
                 };
 
-                const userId = auth.currentUser.uid;
-                const docRef = doc(db, 'artifacts', globalAppId, 'users', userId, 'evaluaciones', currentEditingDocId);
-                await updateDoc(docRef, diagnosticData);
+                const diagnosticData = sanitizeForFirestore(rawDiagnosticData);
+                diagnosticData.updatedAt = new Date();
+
+                // Sincronizar calificación/comentario también en la copia del historial del usuario si existe
+                if (currentEditingDocId) {
+                    try {
+                        const userId = auth.currentUser.uid;
+                        const docRef = doc(db, 'artifacts', globalAppId, 'users', userId, 'evaluaciones', currentEditingDocId);
+                        await updateDoc(docRef, diagnosticData);
+                    } catch (e) {}
+                }
 
                 let materialesPlanos = [];
                 document.querySelectorAll('#materials-list li').forEach(li => {
@@ -4237,26 +4596,26 @@
 
                 const pasosPlanos = Array.from(document.getElementById('steps-list').children).map(li => li.textContent.replace(/\s+/g, ' ').trim());
 
-                try {
-                    const expertRef = doc(db, 'artifacts', globalAppId, 'conocimiento_experto', currentEditingDocId);
-                    await setDoc(expertRef, {
-                        ...diagnosticData,
-                        materiales: materialesPlanos,
-                        pasos: pasosPlanos
-                    }, { merge: true });
-                } catch (e) {}
+                // 1. Guardar en Colección RAG de Conocimiento Experto en Firestore
+                const expertRef = doc(db, 'artifacts', globalAppId, 'conocimiento_experto', targetDocId);
+                await setDoc(expertRef, {
+                    ...diagnosticData,
+                    materiales: materialesPlanos,
+                    pasos: pasosPlanos,
+                    updatedAt: new Date()
+                }, { merge: true });
 
-                // --- ENVIAR AL CEREBRO PREDICTIVO (CLOUDFLARE WORKER) ---
+                // 2. Vectorizar en el Cerebro Predictivo RAG (Cloudflare Worker + Vectorize)
                 try {
                     const token = await auth.currentUser.getIdToken();
-                    fetch('https://obrin-ia-proxy.christensenjosemanuel.workers.dev/api/admin/guardar-caso', {
+                    await fetch('https://obrin-ia-proxy.christensenjosemanuel.workers.dev/api/admin/guardar-caso', {
                         method: 'POST',
                         headers: { 
                             'Content-Type': 'application/json',
                             'Authorization': `Bearer ${token}`
                         },
                         body: JSON.stringify({
-                            id: currentEditingDocId,
+                            id: targetDocId,
                             superficie: diagnosticData.superficie,
                             nivel_dano: diagnosticData.nivel_dano,
                             patologia: diagnosticData.patologia,
@@ -4266,24 +4625,25 @@
                             precio_ref: diagnosticData.precio_ref,
                             tiempo: diagnosticData.tiempo
                         })
-                    }).catch(e => console.warn("Vectorización en background pendiente", e));
+                    });
                 } catch (workerErr) {
-                    console.warn("Fallo al iniciar sincronización con Meta-Agente:", workerErr);
+                    console.warn("Aviso vectorización RAG en Worker:", workerErr);
                 }
 
-                btn.innerHTML = '✅ ¡Cambios Guardados!';
+                showNotification("🧠 Caso almacenado exitosamente en la Memoria RAG Institucional");
+                btn.innerHTML = '✅ ¡Almacenado en Memoria RAG!';
                 btn.classList.replace('bg-slate-900', 'bg-emerald-600');
                 btn.classList.replace('hover:bg-slate-800', 'hover:bg-emerald-500');
 
                 setTimeout(() => {
-                    btn.innerHTML = 'ACTUALIZAR FICHA GUARDADA';
+                    btn.innerHTML = '🧠 ACTUALIZAR EN MEMORIA RAG';
                     btn.disabled = false;
                     btn.classList.replace('bg-emerald-600', 'bg-slate-900');
                     btn.classList.replace('hover:bg-emerald-500', 'hover:bg-slate-800');
-                }, 2000);
+                }, 2200);
             } catch (error) {
-                console.error("Save Error:", error);
-                showNotification("Hubo un problema al guardar.", true);
+                console.error("RAG Save Error:", error);
+                showNotification("Hubo un problema al guardar en la Memoria RAG.", true);
                 btn.innerHTML = originalText; btn.disabled = false;
             }
         };
@@ -4452,12 +4812,18 @@
             if (data.img1) {
                 document.getElementById('summary-img1').src = data.img1;
                 document.getElementById('summary-img1').classList.remove('hidden');
-            } else { document.getElementById('summary-img1').classList.add('hidden'); }
+            } else {
+                document.getElementById('summary-img1').src = '';
+                document.getElementById('summary-img1').classList.add('hidden');
+            }
             
             if (data.img2) {
                 document.getElementById('summary-img2').src = data.img2;
                 document.getElementById('summary-img2').classList.remove('hidden');
-            } else { document.getElementById('summary-img2').classList.add('hidden'); }
+            } else {
+                document.getElementById('summary-img2').src = '';
+                document.getElementById('summary-img2').classList.add('hidden');
+            }
             
             if (data.userNotes) {
                 document.getElementById('summary-notes-container').classList.remove('hidden');
