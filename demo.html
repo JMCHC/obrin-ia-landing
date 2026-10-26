@@ -4330,11 +4330,13 @@
             try {
                 const userId = auth.currentUser.uid;
                 const projectsRef = collection(db, 'artifacts', globalAppId, 'users', userId, 'proyectos');
-                await addDoc(projectsRef, { name: name, createdAt: new Date() });
+                const newDocRef = await addDoc(projectsRef, { name: name, createdAt: new Date() });
                 input.value = '';
-                showNotification("Proyecto creado");
+                showNotification("Proyecto creado y seleccionado");
+                await window.loadProjectsList();
+                const sel = document.getElementById('project-selector');
+                if (sel) sel.value = newDocRef.id;
                 window.openHistory(); 
-                window.loadProjectsList(); 
             } catch (error) {
                 console.error("Error creating project:", error);
                 showNotification("Error al crear", true);
@@ -4383,28 +4385,61 @@
             } catch (error) { console.error("Error saving count:", error); }
         };
 
-        const getCompressedBase64 = (imgId) => {
-            const imgEl = document.getElementById(imgId);
-            if (!imgEl || !imgEl.src || imgEl.classList.contains('hidden') || imgEl.src.length < 100) return null;
-            const canvas = document.createElement('canvas');
-            const ctx = canvas.getContext('2d');
-            const maxW = 800;
-            const scale = Math.min(maxW / (imgEl.naturalWidth || maxW), 1);
-            canvas.width = (imgEl.naturalWidth || maxW) * scale;
-            canvas.height = (imgEl.naturalHeight || maxW) * scale;
-            ctx.drawImage(imgEl, 0, 0, canvas.width, canvas.height);
-            return canvas.toDataURL('image/jpeg', 0.7);
+        const getCompressedBase64 = (imgId, maxW = 550, quality = 0.62) => {
+            try {
+                const imgEl = document.getElementById(imgId);
+                if (!imgEl || !imgEl.src || imgEl.classList.contains('hidden') || imgEl.src.length < 100) return null;
+                const nw = imgEl.naturalWidth || imgEl.width || maxW;
+                const nh = imgEl.naturalHeight || imgEl.height || maxW;
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                const scale = Math.min(maxW / (nw || maxW), 1);
+                canvas.width = Math.max(1, Math.round(nw * scale));
+                canvas.height = Math.max(1, Math.round(nh * scale));
+                ctx.drawImage(imgEl, 0, 0, canvas.width, canvas.height);
+                return canvas.toDataURL('image/jpeg', quality);
+            } catch (e) {
+                return null;
+            }
         };
 
-        const sanitizeForFirestore = (obj) => {
-            return JSON.parse(JSON.stringify(obj, (k, v) => (v === undefined ? null : v)));
+        // Limpiador recursivo para Firebase Firestore:
+        // Firestore PROHÍBE estrictamente los arreglos anidados (ej: [[0.22, 0.14]] dentro de rayos_x) y los valores undefined/NaN.
+        const sanitizeForFirestore = (val) => {
+            if (val === undefined || val === null) return null;
+            if (typeof val === 'number') return Number.isFinite(val) ? val : 0;
+            if (typeof val === 'string' || typeof val === 'boolean') return val;
+            if (val instanceof Date) return val;
+            if (Array.isArray(val)) {
+                return val.map(item => {
+                    if (Array.isArray(item)) {
+                        // Convertir sub-arreglo [x, y] en objeto { x, y } para que Firestore jamás lance "Nested arrays are not supported"
+                        if (item.length === 2 && typeof item[0] === 'number' && typeof item[1] === 'number') {
+                            return { x: item[0], y: item[1] };
+                        }
+                        return JSON.stringify(item);
+                    }
+                    return sanitizeForFirestore(item);
+                });
+            }
+            if (typeof val === 'object') {
+                const out = {};
+                for (const k of Object.keys(val)) {
+                    const v = val[k];
+                    out[k] = v === undefined ? null : sanitizeForFirestore(v);
+                }
+                return out;
+            }
+            return String(val);
         };
 
         window.autoSaveEvaluation = async function() {
-            if (!auth || !auth.currentUser || !db) return;
+            const activeAuth = auth || window.authInstance;
+            const activeDb = db || window.db;
+            if (!activeAuth || !activeAuth.currentUser || !activeDb) return;
 
             try {
-                const userId = auth.currentUser.uid;
+                const userId = activeAuth.currentUser.uid;
                 const projSelector = document.getElementById('project-selector');
                 let projectId = projSelector ? projSelector.value : '';
                 let projectName = (projSelector && projSelector.selectedIndex >= 0 && projSelector.options[projSelector.selectedIndex])
@@ -4413,7 +4448,7 @@
 
                 // Si por algún motivo no había carpeta seleccionada o cargada aún, asegurar una carpeta por defecto para que SIEMPRE se guarde en el historial
                 if (!projectId) {
-                    const projectsRef = collection(db, 'artifacts', globalAppId, 'users', userId, 'proyectos');
+                    const projectsRef = collection(activeDb, 'artifacts', globalAppId, 'users', userId, 'proyectos');
                     const projSnap = await getDocs(query(projectsRef, orderBy('createdAt', 'desc')));
                     if (!projSnap.empty) {
                         projectId = projSnap.docs[0].id;
@@ -4452,9 +4487,10 @@
                     location: finalWeatherLoc || '',
                     temp: finalWeatherTemp || '',
                     hum: finalWeatherHum || '',
-                    img1: getCompressedBase64('summary-img1'),
-                    img2: getCompressedBase64('summary-img2'),
-                    rayos_x: window.currentRayosXData || null,
+                    img1: getCompressedBase64('summary-img1', 550, 0.62),
+                    img2: getCompressedBase64('summary-img2', 550, 0.62),
+                    // Guardar rayos_x serializado en JSON porque Firestore prohíbe arreglos anidados [[x,y]]
+                    rayos_x_json: window.currentRayosXData ? JSON.stringify(window.currentRayosXData) : null,
                     rating: currentRating || 0,
                     comment: document.getElementById('rating-comment')?.value || '',
                     seguimiento: {
@@ -4468,8 +4504,17 @@
                 diagnosticData.createdAt = new Date();
                 diagnosticData.updatedAt = new Date();
 
-                const evaluacionesRef = collection(db, 'artifacts', globalAppId, 'users', userId, 'evaluaciones');
-                const newDoc = await addDoc(evaluacionesRef, diagnosticData);
+                const evaluacionesRef = collection(activeDb, 'artifacts', globalAppId, 'users', userId, 'evaluaciones');
+                let newDoc;
+                try {
+                    newDoc = await addDoc(evaluacionesRef, diagnosticData);
+                } catch (firstErr) {
+                    console.warn("Reintentando guardado con imágenes ultra-comprimidas:", firstErr);
+                    diagnosticData.img1 = getCompressedBase64('summary-img1', 340, 0.45);
+                    diagnosticData.img2 = getCompressedBase64('summary-img2', 340, 0.45);
+                    newDoc = await addDoc(evaluacionesRef, diagnosticData);
+                }
+
                 currentEditingDocId = newDoc.id;
                 window.historyDataCache[newDoc.id] = diagnosticData;
 
@@ -4481,6 +4526,7 @@
                 window.updateCounters();
             } catch (error) {
                 console.error("AutoSave Error:", error);
+                showNotification("⚠️ Aviso al guardar en historial: " + (error.message || "Error de red"), true);
             }
         };
 
@@ -4853,7 +4899,11 @@
 
             document.getElementById('damage-val').innerText = data.patologia || '';
             window.xrayOverlayVisible = true;
-            window.renderXRayForensicCanvas(data.rayos_x || null);
+            let rxRestaurado = data.rayos_x || null;
+            if (data.rayos_x_json) {
+                try { rxRestaurado = JSON.parse(data.rayos_x_json); } catch (e) {}
+            }
+            window.renderXRayForensicCanvas(rxRestaurado);
             window.applyWhiteLabelBranding();
             
             if (data.riesgo_futuro) {
