@@ -594,11 +594,11 @@
                         <button type="button" id="show-new-project-btn" onclick="document.getElementById('new-project-inline').classList.remove('hidden'); document.getElementById('project-selector').classList.add('hidden'); this.classList.add('hidden'); document.getElementById('cancel-new-project-btn').classList.remove('hidden');" class="text-[0.65rem] font-bold text-brand-600 hover:text-brand-700 uppercase tracking-wider transition-colors"><i class="fas fa-plus"></i> Nueva</button>
                         <button type="button" id="cancel-new-project-btn" onclick="document.getElementById('new-project-inline').classList.add('hidden'); document.getElementById('project-selector').classList.remove('hidden'); document.getElementById('show-new-project-btn').classList.remove('hidden'); this.classList.add('hidden');" class="hidden text-[0.65rem] font-bold text-slate-400 hover:text-slate-600 uppercase tracking-wider transition-colors"><i class="fas fa-times"></i> Cancelar</button>
                     </div>
-                    <select id="project-selector" onchange="window.renderBlueprintCanvas()" class="w-full p-2.5 bg-white border border-slate-300 rounded text-sm font-semibold text-slate-800 outline-none focus:ring-2 focus:ring-brand-500 transition-shadow appearance-none cursor-pointer">
+                    <select id="project-selector" onchange="window.activeSelectedProjectId = this.value; window.activeSelectedProjectName = this.options[this.selectedIndex]?.text || ''; window.renderBlueprintCanvas();" class="w-full p-2.5 bg-white border border-slate-300 rounded text-sm font-semibold text-slate-800 outline-none focus:ring-2 focus:ring-brand-500 transition-shadow appearance-none cursor-pointer">
                         <option value="">Cargando proyectos...</option>
                     </select>
                     <div id="new-project-inline" class="hidden flex gap-2">
-                        <input type="text" id="inline-project-name" placeholder="Nombre de la nueva carpeta..." class="flex-1 p-2.5 bg-white border border-slate-300 rounded text-sm font-semibold text-slate-800 outline-none focus:ring-2 focus:ring-brand-500 transition-shadow">
+                        <input type="text" id="inline-project-name" onkeydown="if(event.key==='Enter'){event.preventDefault();window.createInlineProject();}" placeholder="Nombre de la nueva carpeta..." class="flex-1 p-2.5 bg-white border border-slate-300 rounded text-sm font-semibold text-slate-800 outline-none focus:ring-2 focus:ring-brand-500 transition-shadow">
                         <button type="button" onclick="window.createInlineProject()" class="bg-slate-900 text-white px-4 rounded text-xs font-bold uppercase tracking-widest hover:bg-slate-800 transition shadow">Crear</button>
                     </div>
                 </div>
@@ -790,8 +790,14 @@
                             
                             <div id="weather-badge" class="hidden flex items-center gap-1 mt-2 text-[0.65rem] text-slate-500 bg-slate-50 border border-slate-100 py-1 px-2 rounded w-fit">
                                 <span>🌤</span>
-                                <span class="font-medium" id="loc-val"></span>: 
-                                <span id="temp-val"></span>, <span id="hum-val"></span> humedad
+                                <span class="font-bold text-slate-800" id="loc-val"></span>: 
+                                <span id="temp-val" class="font-semibold"></span>, <span id="hum-val" class="font-semibold"></span> HR
+                                <span id="dewpoint-pill" class="hidden ml-1 bg-sky-100 text-sky-800 font-bold px-1.5 py-0.5 rounded text-[0.6rem]"></span>
+                                <span id="drying-factor-pill" class="hidden bg-amber-100 text-amber-800 font-bold px-1.5 py-0.5 rounded text-[0.6rem]"></span>
+                            </div>
+                            <div id="climate-technical-card" class="hidden mt-2 bg-sky-50/80 border border-sky-200 rounded-lg p-2.5 text-[0.68rem] text-sky-950 leading-snug">
+                                <span class="font-extrabold uppercase tracking-wider text-sky-800"><i class="fas fa-thermometer-half mr-1"></i> Ajuste Higrotérmico de Obra:</span>
+                                <span id="climate-directive-val"></span>
                             </div>
                         </div>
                         <span id="complexity-badge" contenteditable="true" class="text-[0.6rem] font-bold px-3 py-1 rounded-full uppercase tracking-wide border mt-1 outline-none hover:ring-2 hover:ring-slate-300 transition cursor-text whitespace-nowrap"></span>
@@ -799,8 +805,14 @@
 
                     <div class="space-y-6">
                         <div class="grid grid-cols-1 gap-4">
+                            <!-- MEJORA #4: DIAGNÓSTICO EN 2 CAPAS (CAUSA RAÍZ VS. DAÑO VISIBLE) -->
+                            <div id="root-cause-container" class="hidden bg-indigo-50/70 p-4 rounded-lg border border-indigo-100">
+                                <p class="text-[0.6rem] font-extrabold text-indigo-600 uppercase tracking-wider mb-1.5"><i class="fas fa-microscope mr-1"></i> Capa 1 · Causa Raíz Detectada (Origen Físico / Estructural)</p>
+                                <p id="root-cause-val" class="text-sm font-semibold text-indigo-950 leading-relaxed outline-none hover:bg-white focus:bg-white focus:ring-1 focus:ring-indigo-200 rounded transition p-1" contenteditable="true"></p>
+                            </div>
+
                             <div class="bg-slate-50 p-4 rounded-lg border border-slate-100">
-                                <p class="text-[0.6rem] font-bold text-slate-400 uppercase tracking-wider mb-2">Diagnóstico de Patología</p>
+                                <p class="text-[0.6rem] font-bold text-slate-400 uppercase tracking-wider mb-2"><i class="fas fa-search-plus mr-1 text-slate-400"></i> Capa 2 · Diagnóstico de Patología y Daño Visible</p>
                                 <p id="damage-val" class="text-sm font-medium text-slate-800 leading-relaxed outline-none hover:bg-white focus:bg-white focus:ring-1 focus:ring-slate-200 rounded transition p-1" contenteditable="true"></p>
                             </div>
                             
@@ -1332,6 +1344,38 @@
         window.ultimoPrecioRef = "A evaluar";
         window.ultimaUnidadRef = "";
 
+        window.normalizarTextoMaterial = function(txt) {
+            return String(txt || "")
+                .toLowerCase()
+                .normalize("NFD")
+                .replace(/[\u0300-\u036f]/g, "")
+                .replace(/[^a-z0-9\s]/g, " ")
+                .replace(/\s+/g, " ")
+                .trim();
+        };
+
+        // Detector estricto para excluir herramientas (taladros, esmeriles, sierras, martillos, cinceles, niveles, etc.)
+        // dejando únicamente materiales e insumos de aplicación (pintura, pasta muro, hormigón, mortero, brocha, rodillo, lija, etc.)
+        window.esHerramientaNoMaterial = function(texto, categoria = "") {
+            const tNorm = window.normalizarTextoMaterial(texto);
+            const cNorm = window.normalizarTextoMaterial(categoria);
+            if (!tNorm) return false;
+
+            const regexPermitido = /\b(pintura|latex|esmalte|oleo|barniz|imprimante|fijador|sellador|pasta|masilla|hormigon|mortero|cemento|estuco|yeso|brocha|rodillo|lija|cinta|malla|silicona|poliuretano|impermeabilizante|membrana|igol|sika|adhesivo|pegamento|bekron|aditivo|puente|placa|volcanita|fibrocemento|madera|pino|terciado|osb|melamina)\b/;
+            const regexHerramienta = /\b(taladro|rotomartillo|percutor|atornillador|destornillador|esmeril|galletera|sierra|caladora|ingletadora|lijadora|fresadora|cepillo electrico|multiherramienta|hidrolavadora|compresor|soldadora|generador|demoledor|betonera|mezclador|revolvedor|pistola de calor|pistola calafateo|pistola silicona|soplete|martillo|combo|mazo|cincel|punto|diablito|barreta|chuzo|alicate|caiman|llave|dado|chicharra|nivel|plomada|huincha|flexometro|escalera|andamio|caballete|carretilla|pala|picota|rastrillo|serrucho|formon|prensa|sargento|cortante|cartonero|tijera|detector|multimetro|amperimetro|aspiradora|espatula|llana|plana|platacho)\b/;
+
+            if (regexHerramienta.test(tNorm)) {
+                if (/^(pintura|latex|esmalte|pasta|hormigon|mortero|cemento|estuco|yeso|imprimante|sellador|silicona|impermeabilizante|adhesivo|brocha|rodillo|lija|cinta|malla)\b/.test(tNorm) && !/\b(taladro|rotomartillo|percutor|atornillador|esmeril|sierra|caladora|lijadora|martillo|combo|cincel|nivel|escalera|carretilla|betonera|hidrolavadora|compresor|soldadora)\b/.test(tNorm)) {
+                    return false;
+                }
+                return true;
+            }
+            if ((cNorm.includes("herramienta") || cNorm.includes("maquinaria") || cNorm.includes("equipo")) && !regexPermitido.test(tNorm)) {
+                return true;
+            }
+            return false;
+        };
+
         window.resolveMaterialTechnicalData = function(rawMat, index, serverDetalleItem) {
             let cleanName = String(rawMat || "").trim();
             let savedQty = 1;
@@ -1363,6 +1407,23 @@
             }
 
             const srv = serverDetalleItem || {};
+            const matSolicitadoOrig = String(srv.material_solicitado || cleanName || "").trim();
+
+            // Si el ítem solicitado por la IA era directamente una herramienta, marcarlo para excluirlo de la lista
+            if (window.esHerramientaNoMaterial(matSolicitadoOrig, "") && window.esHerramientaNoMaterial(cleanName, srv.categoria || "")) {
+                return null;
+            }
+
+            // Si el material solicitado era un material válido (ej. Pasta muro, Mortero, Brocha), pero D1 devolvió por error una herramienta (ej. Taladro),
+            // reemplazar el nombre mostrado por el material real solicitado
+            const srvEsHerramienta = window.esHerramientaNoMaterial(
+                `${srv.producto || ''} ${srv.nombre_sodimac || ''} ${srv.nombre_easy || ''} ${cleanName}`,
+                srv.categoria || ""
+            );
+            const nombreMaterialSeguro = (srvEsHerramienta && !window.esHerramientaNoMaterial(matSolicitadoOrig, ""))
+                ? matSolicitadoOrig
+                : cleanName;
+
             let pSod = Number(srv.precio_sodimac) || (parsedStore.toLowerCase() === 'sodimac' ? parsedPrice : 0);
             let pEasy = Number(srv.precio_easy) || (parsedStore.toLowerCase() === 'easy' ? parsedPrice : 0);
             if (pSod <= 0 && pEasy > 0) pSod = pEasy;
@@ -1373,32 +1434,117 @@
 
             return {
                 index: index,
-                originalText: cleanName,
+                originalText: nombreMaterialSeguro,
                 cantidad: Number(srv.cantidad) || savedQty || 1,
-                categoria: srv.categoria || "Catálogo Cloudflare D1",
-                producto: srv.producto || cleanName,
-                marca: srv.marca || "-",
-                nombre_sodimac: srv.nombre_sodimac || cleanName,
-                sku_sodimac: srv.sku_sodimac || "-",
+                categoria: srvEsHerramienta ? "Materiales de Construcción" : (srv.categoria || "Catálogo Cloudflare D1"),
+                producto: srvEsHerramienta ? nombreMaterialSeguro : (srv.producto || nombreMaterialSeguro),
+                marca: srvEsHerramienta ? "Estándar Obra" : (srv.marca || "-"),
+                nombre_sodimac: srvEsHerramienta ? nombreMaterialSeguro : (srv.nombre_sodimac || nombreMaterialSeguro),
+                sku_sodimac: srvEsHerramienta ? "-" : (srv.sku_sodimac || "-"),
                 precio_sodimac: pSod,
-                ppum_sodimac: srv.ppum_sodimac || "-",
-                url_sodimac: srv.url_sodimac || "https://www.sodimac.cl",
-                nombre_easy: srv.nombre_easy || cleanName,
-                sku_easy: srv.sku_easy || "-",
+                ppum_sodimac: srvEsHerramienta ? "-" : (srv.ppum_sodimac || "-"),
+                url_sodimac: srvEsHerramienta ? "https://www.sodimac.cl" : (srv.url_sodimac || "https://www.sodimac.cl"),
+                nombre_easy: srvEsHerramienta ? nombreMaterialSeguro : (srv.nombre_easy || nombreMaterialSeguro),
+                sku_easy: srvEsHerramienta ? "-" : (srv.sku_easy || "-"),
                 precio_easy: pEasy,
-                ppum_easy: srv.ppum_easy || "-",
-                url_easy: srv.url_easy || "https://www.easy.cl",
-                rendimiento: srv.rendimiento || "Según ficha técnica en base de datos D1",
-                formato: srv.formato || "-",
-                superficie_aplicacion: srv.superficie_aplicacion || "-",
-                uso: srv.uso || "-",
-                acabado_color: srv.acabado_color || "-",
-                metodo_aplicacion: srv.metodo_aplicacion || "-",
-                tiempo_secado: srv.tiempo_secado || "-",
-                descripcion_tecnica: srv.descripcion_tecnica || srv.caracteristica || cleanName,
+                ppum_easy: srvEsHerramienta ? "-" : (srv.ppum_easy || "-"),
+                url_easy: srvEsHerramienta ? "https://www.easy.cl" : (srv.url_easy || "https://www.easy.cl"),
+                rendimiento: srv.rendimiento || "Según espesor y superficie de aplicación",
+                formato: srvEsHerramienta ? "Unidad comercial estándar" : (srv.formato || "-"),
+                superficie_aplicacion: srv.superficie_aplicacion || "Muros, tabiques y hormigón",
+                uso: srv.uso || "Interior y Exterior",
+                acabado_color: srv.acabado_color || "Estándar",
+                metodo_aplicacion: srv.metodo_aplicacion || "Según ficha técnica del fabricante",
+                tiempo_secado: srv.tiempo_secado || "Según condiciones ambientales",
+                descripcion_tecnica: srvEsHerramienta ? nombreMaterialSeguro : (srv.descripcion_tecnica || srv.caracteristica || nombreMaterialSeguro),
                 tienda_elegida: srv.tienda_elegida || parsedStore || "Sodimac",
                 precio: precioElegido
             };
+        };
+
+        // MEJORA #4: Inferencia diferencial de Causa Raíz si un diagnóstico previo o respuesta no traía el campo explícito
+        window.inferRootCauseFromText = function(patologiaTexto, solucionTexto, superficieTexto) {
+            const pNorm = window.normalizarTextoMaterial(`${superficieTexto || ''} ${patologiaTexto || ''} ${solucionTexto || ''}`);
+            if (!pNorm) return "";
+            if (/(capilaridad|ascendente|salitre|eflorescencia|zocalo)/.test(pNorm)) {
+                return "Humedad por capilaridad ascendente y migración de sales solubles desde el sustrato";
+            }
+            if (/(filtracion|fuga|red humeda|caneria|lluvia|infiltracion)/.test(pNorm)) {
+                return "Infiltración hidráulica activa a través del paramento o junta constructiva";
+            }
+            if (/(condensacion|puente termico|hongo|moho|ventilacion)/.test(pNorm)) {
+                return "Condensación superficial higrotérmica por puente térmico y humedad ambiental";
+            }
+            if (/(asentamiento|estructural|corte|diagonal|45)/.test(pNorm)) {
+                return "Esfuerzo de tracción diagonal / asentamiento diferencial del soporte";
+            }
+            if (/(retraccion|estuco|revoque|dilatacion|termica|junta)/.test(pNorm)) {
+                return "Tensión higrotérmica y retracción hidráulica entre revestimiento y sustrato";
+            }
+            return "Fatiga físico-mecánica del revestimiento y pérdida de adherencia con el soporte";
+        };
+
+        // MEJORA #9: Cálculo y renderizado del Ajuste Higrotérmico de Obra (Punto de Rocío + Factor de Secado)
+        window.currentClimateAdjustment = null;
+        window.renderClimateTechnicalAdjustment = function(ajusteServer, tempStr, humStr) {
+            const dewPill = document.getElementById('dewpoint-pill');
+            const factorPill = document.getElementById('drying-factor-pill');
+            const card = document.getElementById('climate-technical-card');
+            const dirVal = document.getElementById('climate-directive-val');
+
+            let aj = ajusteServer || null;
+            if (!aj) {
+                const raw = `${tempStr || ''} ${humStr || ''}`;
+                const mT = raw.match(/(-?\d+(?:\.\d+)?)\s*°\s*C/i);
+                const mH = raw.match(/(\d+(?:\.\d+)?)\s*%/);
+                if (mT && mH) {
+                    const t = parseFloat(mT[1]);
+                    const h = Math.max(1, Math.min(100, parseFloat(mH[1])));
+                    const a = 17.27, b = 237.7;
+                    const alpha = ((a * t) / (b + t)) + Math.log(h / 100);
+                    const dp = Number(((b * alpha) / (a - alpha)).toFixed(1));
+                    const delta = Number((t - dp).toFixed(1));
+                    let factor = 1.0, estado = "Óptimo", directriz = `Ventana higrotérmica favorable (${t}°C, ${h}% HR, Punto de Rocío ${dp}°C). Tiempos de secado y fraguado estándar (Factor 1.0x).`;
+                    if (h >= 82 || t <= 9 || delta <= 3.0) {
+                        factor = 1.8;
+                        estado = "Crítico";
+                        directriz = `Alta humedad / baja temperatura (${t}°C, ${h}% HR, Punto de Rocío ${dp}°C). El secado entre capas demora +80% (Factor 1.8x). Exige ventilación y no aplicar pinturas/sellos si el muro está a menos de 3°C del punto de rocío.`;
+                    } else if (h >= 72 || t <= 14) {
+                        factor = 1.4;
+                        estado = "Húmedo/Fresco";
+                        directriz = `Condición húmeda/fresca (${t}°C, ${h}% HR, Punto de Rocío ${dp}°C). Incrementar tiempos de secado entre manos en un +40% (Factor 1.4x).`;
+                    } else if (t >= 28 || h <= 35) {
+                        factor = 0.85;
+                        estado = "Calor Seco";
+                        directriz = `Evaporación acelerada (${t}°C, ${h}% HR, Punto de Rocío ${dp}°C). Hidratar el sustrato antes de aplicar morteros/estucos y realizar curado húmedo para evitar fisuración por retracción.`;
+                    }
+                    aj = { temperatura_c: t, humedad_relativa: h, punto_rocio_c: dp, margen_rocio_c: delta, factor_secado: factor, estado, directriz };
+                }
+            }
+
+            window.currentClimateAdjustment = aj;
+            if (!aj || aj.punto_rocio_c === undefined || aj.punto_rocio_c === null) {
+                if (dewPill) dewPill.classList.add('hidden');
+                if (factorPill) factorPill.classList.add('hidden');
+                if (card) card.classList.add('hidden');
+                return;
+            }
+
+            if (dewPill) {
+                dewPill.innerText = `💧 Rocío: ${aj.punto_rocio_c}°C`;
+                dewPill.classList.remove('hidden');
+            }
+            if (factorPill) {
+                factorPill.innerText = `⏱️ Factor Secado: ${aj.factor_secado}x`;
+                factorPill.className = aj.factor_secado > 1.1
+                    ? "bg-amber-100 text-amber-800 font-bold px-1.5 py-0.5 rounded text-[0.6rem]"
+                    : "bg-emerald-100 text-emerald-800 font-bold px-1.5 py-0.5 rounded text-[0.6rem]";
+                factorPill.classList.remove('hidden');
+            }
+            if (card && dirVal && aj.directriz) {
+                dirVal.innerText = " " + aj.directriz;
+                card.classList.remove('hidden');
+            }
         };
 
         window.renderMaterialsAndStoreComparison = function(materialesRaw, detallesServer, comparativaServer, precioRefFallback, unidadRefFallback) {
@@ -1408,9 +1554,37 @@
             const listaRaw = Array.isArray(materialesRaw) ? materialesRaw : [];
             const detArr = Array.isArray(detallesServer) ? detallesServer : [];
 
-            window.materialesData = listaRaw.map((mat, idx) => {
-                return window.resolveMaterialTechnicalData(mat, idx, detArr[idx] || null);
+            let resueltos = listaRaw
+                .map((mat, idx) => window.resolveMaterialTechnicalData(mat, idx, detArr[idx] || null))
+                .filter(Boolean);
+
+            // MEJORA #5: Validación de Compatibilidad Química también en Frontend (anti-mezclas incompatibles y sin duplicar 2 pinturas de terminación)
+            const ctxQuimicoFront = window.normalizarTextoMaterial(
+                `${document.getElementById('surface-type')?.innerText || ''} ${document.getElementById('root-cause-val')?.innerText || ''} ${document.getElementById('damage-val')?.innerText || ''} ${document.getElementById('solution-val')?.innerText || ''}`
+            );
+            const hayHumedadFront = /\b(humedad|filtracion|capilaridad|eflorescencia|salitre|infiltracion|exterior|fachada|subterraneo)\b/.test(ctxQuimicoFront);
+            let yaTienePinturaFront = false;
+
+            resueltos = resueltos.filter(item => {
+                const nNorm = window.normalizarTextoMaterial(`${item.producto} ${item.nombre_sodimac} ${item.nombre_easy}`);
+                const esPinturaTerm = /\b(latex|esmalte al agua|esmalte sintetico|oleo)\b/.test(nNorm) && !/\b(imprimante|fijador|sellador|aditivo|brocha|rodillo)\b/.test(nNorm);
+                if (esPinturaTerm) {
+                    if (yaTienePinturaFront) return false;
+                    yaTienePinturaFront = true;
+                }
+                if (hayHumedadFront && /\b(pasta muro interior|yeso)\b/.test(nNorm) && !/\b(placa|exterior|hidrofug)\b/.test(nNorm)) {
+                    item.producto = "Mortero de Reparación / Estuco Hidrofugado";
+                    if (/\b(pasta muro interior|yeso)\b/.test(window.normalizarTextoMaterial(item.nombre_sodimac))) {
+                        item.nombre_sodimac = "Mortero de Reparación Estructural 25 kg";
+                    }
+                    if (/\b(pasta muro interior|yeso)\b/.test(window.normalizarTextoMaterial(item.nombre_easy))) {
+                        item.nombre_easy = "Mortero de Reparación Estructural 25 kg";
+                    }
+                }
+                return true;
             });
+
+            window.materialesData = resueltos.map((item, newIdx) => ({ ...item, index: newIdx }));
 
             // Garantizar que ningún material quede con precio $0 en Sodimac o Easy (respaldo cruzado con promedio de canasta si viniera de un historial antiguo)
             const conPrecioValido = window.materialesData.filter(it => it.precio_sodimac > 0 || it.precio_easy > 0);
@@ -1883,7 +2057,7 @@
                         url_easy: urlEasy || "https://www.easy.cl",
                         fecha_extraccion: fechaExt
                     };
-                }).filter(r => r.producto !== "");
+                }).filter(r => r.producto !== "" && !window.esHerramientaNoMaterial(`${r.producto} ${r.nombre_sodimac} ${r.nombre_easy}`, r.categoria));
 
                 const token = await window.authInstance.currentUser.getIdToken();
                 const batchSize = 80;
@@ -2946,7 +3120,69 @@
         window.isRecordingVoice = false;
         window.whiteLabelConfig = JSON.parse(localStorage.getItem('obrin_whitelabel_config') || 'null');
 
-        // --- 1. RAYOS X VISUALES (PERITAJE FORENSE SOBRE LA FOTO 2 DE DETALLE O FOTO 1 GENERAL) ---
+        // --- 1. RAYOS X VISUALES (PERITAJE FORENSE SOBRE LA FOTO 2 DE DETALLE O FOTO 1 GENERAL CON CUADRÍCULA 10x10) ---
+        window.generarImagenConCuadriculaForense10x10 = function(base64Data, mimeType) {
+            return new Promise((resolve) => {
+                if (!base64Data) return resolve(null);
+                try {
+                    const img = new Image();
+                    img.onload = function() {
+                        const W = 700;
+                        const H = Math.max(360, Math.min(900, Math.round((img.naturalHeight / (img.naturalWidth || 1)) * W) || 520));
+                        const offCanvas = document.createElement('canvas');
+                        offCanvas.width = W;
+                        offCanvas.height = H;
+                        const c = offCanvas.getContext('2d');
+
+                        // Dibujar fotografía objetivo con leve realce de contraste para facilitar lectura de fisuras por la IA
+                        c.filter = 'contrast(1.16) saturate(1.05)';
+                        c.drawImage(img, 0, 0, W, H);
+                        c.filter = 'none';
+
+                        const cellW = W / 10;
+                        const cellH = H / 10;
+
+                        // Dibujar líneas de la cuadrícula forense 10x10 (Columnas 0..9, Filas 0..9)
+                        c.lineWidth = 1.4;
+                        c.strokeStyle = 'rgba(56, 189, 248, 0.72)';
+                        for (let i = 1; i < 10; i++) {
+                            c.beginPath();
+                            c.moveTo(i * cellW, 0);
+                            c.lineTo(i * cellW, H);
+                            c.stroke();
+
+                            c.beginPath();
+                            c.moveTo(0, i * cellH);
+                            c.lineTo(W, i * cellH);
+                            c.stroke();
+                        }
+
+                        // Etiquetar cada celda con su coordenada "col,fila" (ej. "4,3") para lectura inequívoca por Gemini
+                        c.font = 'bold 11px monospace';
+                        c.textBaseline = 'top';
+                        for (let row = 0; row < 10; row++) {
+                            for (let col = 0; col < 10; col++) {
+                                const label = `${col},${row}`;
+                                const lx = col * cellW + 4;
+                                const ly = row * cellH + 4;
+                                c.fillStyle = 'rgba(15, 23, 42, 0.62)';
+                                c.fillRect(lx - 1, ly - 1, 24, 13);
+                                c.fillStyle = '#fde047';
+                                c.fillText(label, lx + 1, ly);
+                            }
+                        }
+
+                        const dataUrl = offCanvas.toDataURL('image/jpeg', 0.80);
+                        resolve(dataUrl.split(',')[1] || null);
+                    };
+                    img.onerror = () => resolve(null);
+                    img.src = `data:${mimeType || 'image/jpeg'};base64,${base64Data}`;
+                } catch (err) {
+                    resolve(null);
+                }
+            });
+        };
+
         window.getDefaultRayosX = function(patologiaTexto, superficieTexto) {
             return {
                 es_default: true,
@@ -2963,7 +3199,7 @@
             };
         };
 
-        // Refinamiento por Visión Computacional (Gradiente de Bordes + Contraste de Fisura/Mancha)
+        // Refinamiento por Visión Computacional (Gradiente de Bordes + Contraste de Fisura/Mancha + Cuadrícula 10x10)
         // para achuntarle con precisión exacta a los píxeles reales de la falla en la fotografía activa (Foto 2 o Foto 1)
         window.refinarCoordenadasSobreFallaReal = function(ctx, W, H, rxOriginal) {
             try {
@@ -2989,8 +3225,8 @@
                 // Mapa de saliencia de grieta/falla (gradiente local + oscuridad relativa respecto al entorno)
                 const crackScore = new Float32Array(gw * gh);
                 const damageScore = new Float32Array(gw * gh);
-                const marginX = Math.floor(gw * 0.08);
-                const marginY = Math.floor(gh * 0.08);
+                const marginX = Math.floor(gw * 0.06);
+                const marginY = Math.floor(gh * 0.06);
 
                 let peakX = 0.5, peakY = 0.5, maxScoreGlobal = -1;
 
@@ -3016,10 +3252,10 @@
                         // Peso Gaussiano suave hacia el centro de encuadre para evitar bordes irrelevantes del marco
                         const nx = gx / gw;
                         const ny = gy / gh;
-                        const centerWeight = 1.0 - 0.35 * (Math.pow(nx - 0.5, 2) + Math.pow(ny - 0.5, 2));
+                        const centerWeight = 1.0 - 0.30 * (Math.pow(nx - 0.5, 2) + Math.pow(ny - 0.5, 2));
 
-                        const cScore = (grad * 1.15 + darkness * 2.4) * centerWeight;
-                        const dScore = (grad * 0.85 + darkness * 1.4 + contrast * 0.45) * centerWeight;
+                        const cScore = (grad * 1.2 + darkness * 2.5) * centerWeight;
+                        const dScore = (grad * 0.85 + darkness * 1.45 + contrast * 0.45) * centerWeight;
 
                         crackScore[gy * gw + gx] = cScore;
                         damageScore[gy * gw + gx] = dScore;
@@ -3034,16 +3270,16 @@
 
                 const clamp = (v, min, max) => Math.max(min, Math.min(max, v));
                 const rx = JSON.parse(JSON.stringify(rxOriginal));
+                const celdasGrieta = Array.isArray(rx.celdas_grieta) ? rx.celdas_grieta : [];
 
-                // 1. Ajustar cada vértice de grieta hacia el píxel de mayor gradiente/oscuridad real en su vecindad
-                const radioBusquedaX = rx.es_default ? Math.floor(gw * 0.24) : Math.floor(gw * 0.12);
-                const radioBusquedaY = rx.es_default ? Math.floor(gh * 0.20) : Math.floor(gh * 0.10);
+                // 1. Ajustar cada vértice de grieta hacia el píxel de mayor gradiente/oscuridad real dentro de su celda 10x10 o vecindad
+                const radioBusquedaX = rx.es_default ? Math.floor(gw * 0.24) : Math.floor(gw * 0.09);
+                const radioBusquedaY = rx.es_default ? Math.floor(gh * 0.20) : Math.floor(gh * 0.09);
 
                 if (Array.isArray(rx.grietas) && rx.grietas.length > 0) {
-                    rx.grietas.forEach(g => {
+                    rx.grietas.forEach((g, gIdx) => {
                         if (!Array.isArray(g.puntos) || g.puntos.length < 2) return;
 
-                        // Si venía de coordenadas default, centrar inicialmente sobre el pico real de anomalía visual
                         if (rx.es_default) {
                             const midIdx = Math.floor(g.puntos.length / 2);
                             const dx = peakX - g.puntos[midIdx][0];
@@ -3052,21 +3288,35 @@
                         }
 
                         const nuevosPuntos = g.puntos.map((pt, idx) => {
-                            const startGx = clamp(Math.round(pt[0] * gw), marginX, gw - marginX - 1);
-                            const startGy = clamp(Math.round(pt[1] * gh), marginY, gh - marginY - 1);
+                            let minGx, maxGx, minGy, maxGy;
+                            const cel = (gIdx === 0 && Array.isArray(celdasGrieta[idx]) && celdasGrieta[idx].length >= 2) ? celdasGrieta[idx] : null;
 
-                            let bestGx = startGx;
-                            let bestGy = startGy;
+                            if (cel) {
+                                // Anclar la búsqueda dentro de la celda [col, fila] de la cuadrícula 10x10 (+2% margen)
+                                const cCol = clamp(Number(cel[0]) || 0, 0, 9);
+                                const cRow = clamp(Number(cel[1]) || 0, 0, 9);
+                                minGx = Math.max(marginX, Math.floor((cCol * 0.10 - 0.02) * gw));
+                                maxGx = Math.min(gw - marginX - 1, Math.ceil(((cCol + 1) * 0.10 + 0.02) * gw));
+                                minGy = Math.max(marginY, Math.floor((cRow * 0.10 - 0.02) * gh));
+                                maxGy = Math.min(gh - marginY - 1, Math.ceil(((cRow + 1) * 0.10 + 0.02) * gh));
+                            } else {
+                                const startGx = clamp(Math.round(pt[0] * gw), marginX, gw - marginX - 1);
+                                const startGy = clamp(Math.round(pt[1] * gh), marginY, gh - marginY - 1);
+                                minGx = Math.max(marginX, startGx - radioBusquedaX);
+                                maxGx = Math.min(gw - marginX - 1, startGx + radioBusquedaX);
+                                minGy = Math.max(marginY, startGy - radioBusquedaY);
+                                maxGy = Math.min(gh - marginY - 1, startGy + radioBusquedaY);
+                            }
+
+                            const refGx = clamp(Math.round(pt[0] * gw), minGx, maxGx);
+                            const refGy = clamp(Math.round(pt[1] * gh), minGy, maxGy);
+                            let bestGx = refGx;
+                            let bestGy = refGy;
                             let bestVal = -1;
-
-                            const minGx = Math.max(marginX, startGx - radioBusquedaX);
-                            const maxGx = Math.min(gw - marginX - 1, startGx + radioBusquedaX);
-                            const minGy = Math.max(marginY, startGy - radioBusquedaY);
-                            const maxGy = Math.min(gh - marginY - 1, startGy + radioBusquedaY);
 
                             for (let yy = minGy; yy <= maxGy; yy++) {
                                 for (let xx = minGx; xx <= maxGx; xx++) {
-                                    const distPen = 0.18 * Math.hypot(xx - startGx, yy - startGy);
+                                    const distPen = 0.14 * Math.hypot(xx - refGx, yy - refGy);
                                     const val = crackScore[yy * gw + xx] - distPen;
                                     if (val > bestVal) {
                                         bestVal = val;
@@ -3075,13 +3325,13 @@
                                     }
                                 }
                             }
-                            return [clamp(bestGx / gw, 0.06, 0.94), clamp(bestGy / gh, 0.06, 0.94)];
+                            return [clamp(bestGx / gw, 0.05, 0.95), clamp(bestGy / gh, 0.05, 0.95)];
                         });
 
                         // Suavizado ligero para mantener continuidad natural sobre la fisura
                         for (let i = 1; i < nuevosPuntos.length - 1; i++) {
-                            nuevosPuntos[i][0] = Number((0.2 * nuevosPuntos[i - 1][0] + 0.6 * nuevosPuntos[i][0] + 0.2 * nuevosPuntos[i + 1][0]).toFixed(3));
-                            nuevosPuntos[i][1] = Number((0.2 * nuevosPuntos[i - 1][1] + 0.6 * nuevosPuntos[i][1] + 0.2 * nuevosPuntos[i + 1][1]).toFixed(3));
+                            nuevosPuntos[i][0] = Number((0.18 * nuevosPuntos[i - 1][0] + 0.64 * nuevosPuntos[i][0] + 0.18 * nuevosPuntos[i + 1][0]).toFixed(3));
+                            nuevosPuntos[i][1] = Number((0.18 * nuevosPuntos[i - 1][1] + 0.64 * nuevosPuntos[i][1] + 0.18 * nuevosPuntos[i + 1][1]).toFixed(3));
                         }
                         g.puntos = nuevosPuntos;
                     });
@@ -3977,8 +4227,14 @@
         };
 
         window.runAnalysis = async function() {
+            const inlineBox = document.getElementById('new-project-inline');
+            const inlineInput = document.getElementById('inline-project-name');
+            if (inlineBox && !inlineBox.classList.contains('hidden') && inlineInput && inlineInput.value.trim()) {
+                await window.createInlineProject();
+            }
+
             const projSelector = document.getElementById('project-selector');
-            if(!projSelector.value) {
+            if(!projSelector.value && !window.activeSelectedProjectId) {
                 showNotification("Por favor, selecciona una Carpeta de Proyecto primero.", true);
                 return;
             }
@@ -4051,18 +4307,22 @@
                     summaryNotesContainer.classList.add('hidden');
                 }
 
-                msgEl.innerText = "Buscando coincidencias previas...";
+                msgEl.innerText = "Buscando coincidencias en Memoria RAG...";
                 let expertContextText = "";
+                let expertCasesStructured = [];
                 try {
                     const expertRef = window.collection(window.db, 'artifacts', window.globalAppId, 'conocimiento_experto');
                     const qExp = window.query(expertRef, window.orderBy('updatedAt', 'desc'), window.limit(60));
                     const snap = await window.getDocs(qExp);
                     let validaciones = [];
-                    snap.forEach(doc => validaciones.push(doc.data()));
+                    snap.forEach(dSnap => validaciones.push({ id: dSnap.id, ...dSnap.data() }));
                     
                     if (validaciones.length > 0) {
-                        expertContextText = validaciones.map((v) => {
-                            const titulo = `${(v.superficie || '').toUpperCase()} | ${(v.patologia || '').toUpperCase()}`;
+                        const notesNorm = window.normalizarTextoMaterial(userNotes);
+                        const notesTokens = notesNorm.split(' ').filter(w => w.length >= 3);
+
+                        // MEJORA #2: Estructurar casos para búsqueda vectorial en Cloudflare Vectorize y pre-filtrar Top 3 sin ruido
+                        expertCasesStructured = validaciones.map((v) => {
                             const mats = (v.materiales || []).map(m => {
                                 if (typeof m === 'string' && m.includes('<')) {
                                     const tmp = document.createElement('div');
@@ -4072,20 +4332,48 @@
                                 }
                                 return m;
                             }).join('; ');
-                            const steps = (v.pasos || []).map(p => p.replace(/<[^>]*>?/gm, '').replace(/\s+/g, ' ').trim()).join('; ');
-                            return `TÍTULO DEL CASO EXPERTO: [${titulo}]\n- Riesgo: ${v.riesgo_futuro || 'N/A'}\n- Solución: ${v.solucion}\n- Materiales: ${mats}\n- Pasos: ${steps}`;
+                            const steps = (v.pasos || []).map(p => String(p).replace(/<[^>]*>?/gm, '').replace(/\s+/g, ' ').trim()).join('; ');
+                            const blob = window.normalizarTextoMaterial(`${v.superficie || ''} ${v.patologia || ''} ${v.solucion || ''} ${mats}`);
+                            let relevance = (Number(v.rating) || 4) * 2;
+                            notesTokens.forEach(tk => { if (blob.includes(tk)) relevance += 15; });
+                            return {
+                                id: v.id,
+                                superficie: v.superficie || '',
+                                patologia: v.patologia || '',
+                                riesgo_futuro: v.riesgo_futuro || 'N/A',
+                                solucion: v.solucion || '',
+                                materiales: mats,
+                                pasos: steps,
+                                rating: v.rating || 5,
+                                relevance
+                            };
+                        }).sort((a, b) => b.relevance - a.relevance);
+
+                        expertContextText = expertCasesStructured.slice(0, 3).map((v, idx) => {
+                            const titulo = `${(v.superficie || '').toUpperCase()} | ${(v.patologia || '').toUpperCase()}`;
+                            return `CASO EXPERTO SIMILAR #${idx + 1} [${titulo}]\n- Riesgo: ${v.riesgo_futuro}\n- Solución: ${v.solucion}\n- Materiales: ${v.materiales}\n- Pasos: ${v.pasos}`;
                         }).join('\n\n');
                     }
                 } catch(e) { console.error("Error leyendo memoria experta", e); }
 
-                msgEl.innerText = "Procesando Diagnóstico...";
+                msgEl.innerText = "Calibrando Cuadrícula Forense 10x10...";
+                // MEJORA #7: Generar en memoria la fotografía objetivo (Foto #2 de Detalle o Foto #1 General) con la Cuadrícula Forense 10x10
+                const targetImgBase64 = imgData2 || imgData1;
+                const targetImgMime = imgData2 ? (imgType2 || 'image/jpeg') : (imgType1 || 'image/jpeg');
+                const imgDataXRayGrid = await window.generarImagenConCuadriculaForense10x10(targetImgBase64, targetImgMime);
+
+                msgEl.innerText = "Procesando Diagnóstico Pericial...";
 
                 const payload = {
                     userNotes: userNotes,
                     weatherContextText: weatherContextText,
+                    weatherTemp: finalWeatherTemp,
+                    weatherHum: finalWeatherHum,
                     expertContext: expertContextText,
+                    expertCases: expertCasesStructured.slice(0, 15),
                     imgData1: imgData1, imgType1: imgType1,
                     imgData2: imgData2, imgType2: imgType2,
+                    imgDataXRayGrid: imgDataXRayGrid,
                     cuentaMaestraId: (window.userPlanActivo === 'pro_member' && window.idCuentaMaestra) ? window.idCuentaMaestra : null,
                     planActivo: window.userPlanActivo || 'ninguno'
                 };
@@ -4131,6 +4419,19 @@
                     document.getElementById('temp-val').innerText = finalWeatherTemp;
                     document.getElementById('hum-val').innerText = finalWeatherHum;
                 }
+                // MEJORA #9: Renderizar Punto de Rocío, Factor Higrotérmico de Secado y Directriz Climática
+                window.renderClimateTechnicalAdjustment(resultObj.ajuste_climatico || null, finalWeatherTemp, finalWeatherHum);
+
+                // MEJORA #4: Mostrar Capa 1 (Causa Raíz Estructural/Física) y Capa 2 (Patología y Daño Visible)
+                const causaRaizTexto = resultObj.causa_raiz || window.inferRootCauseFromText(resultObj.patologia, resultObj.solucion, resultObj.superficie);
+                const rootCauseBox = document.getElementById('root-cause-container');
+                const rootCauseVal = document.getElementById('root-cause-val');
+                if (causaRaizTexto && rootCauseBox && rootCauseVal) {
+                    rootCauseVal.innerText = causaRaizTexto;
+                    rootCauseBox.classList.remove('hidden');
+                } else if (rootCauseBox) {
+                    rootCauseBox.classList.add('hidden');
+                }
 
                 document.getElementById('damage-val').innerText = resultObj.patologia;
                 
@@ -4141,7 +4442,7 @@
                 
                 document.getElementById('solution-val').innerText = resultObj.solucion;
                 
-                // Renderizar Materiales, Comparar Canasta Completa Sodimac vs Easy y Activar Ficha Técnica al Clic
+                // Renderizar Materiales, Validar Compatibilidad Química (Mejora #5), Comparar Canasta Completa Sodimac vs Easy y Activar Ficha Técnica
                 window.renderMaterialsAndStoreComparison(
                     resultObj.materiales || [],
                     resultObj.materiales_detalle || null,
@@ -4165,7 +4466,11 @@
                     });
                 }
 
-                document.getElementById('time-val').innerText = resultObj.tiempo;
+                let tiempoMostrado = resultObj.tiempo || '';
+                if (window.currentClimateAdjustment && window.currentClimateAdjustment.factor_secado > 1.1 && !tiempoMostrado.toLowerCase().includes('ajustado')) {
+                    tiempoMostrado = `${tiempoMostrado} (ajustado x${window.currentClimateAdjustment.factor_secado} por ${window.currentClimateAdjustment.humedad_relativa}% HR / Rocío ${window.currentClimateAdjustment.punto_rocio_c}°C)`;
+                }
+                document.getElementById('time-val').innerText = tiempoMostrado;
                 
                 const finalPrice = document.getElementById('price-val').innerText;
                 const finalUnit = document.getElementById('unit-val').innerText;
@@ -4292,29 +4597,182 @@
             console.error("Firebase init error:", e);
         }
 
-        window.loadProjectsList = async function() {
+        window.activeSelectedProjectId = null;
+        window.activeSelectedProjectName = null;
+
+        // Obtiene y unifica todas las carpetas del usuario desde:
+        // 1) Subcolección `proyectos` en Firestore, 2) Campo `proyectos_usuario` en el documento del usuario,
+        // 3) Respaldo local en `localStorage`, y 4) Carpetas detectadas directamente en sus `evaluaciones`.
+        window.fetchCombinedProjects = async function(userId, evalsListOptional = null) {
+            const mapById = new Map();
+            const addProj = (id, name, createdAtMs) => {
+                if (!id || !name) return;
+                const cleanName = String(name).trim();
+                if (!cleanName) return;
+                // Evitar duplicados por mismo nombre exacto o mismo ID
+                for (const [k, existing] of mapById.entries()) {
+                    if (k === id || existing.name.toLowerCase() === cleanName.toLowerCase()) {
+                        if (createdAtMs > existing.createdAtMs) {
+                            existing.createdAtMs = createdAtMs;
+                        }
+                        return;
+                    }
+                }
+                mapById.set(id, { id, name: cleanName, createdAtMs: createdAtMs || Date.now() });
+            };
+
+            // 1. Leer desde localStorage del usuario
+            try {
+                const localArr = JSON.parse(localStorage.getItem(`obrin_projects_${userId}`) || '[]');
+                if (Array.isArray(localArr)) {
+                    localArr.forEach(p => addProj(p.id, p.name, p.createdAtMs || Date.now()));
+                }
+            } catch (e) {}
+
+            // 2. Leer desde el documento principal del usuario `users/{userId}`
+            try {
+                const uSnap = await getDoc(doc(db, 'artifacts', globalAppId, 'users', userId));
+                if (uSnap.exists()) {
+                    const uData = uSnap.data();
+                    if (Array.isArray(uData.proyectos_usuario)) {
+                        uData.proyectos_usuario.forEach(p => addProj(p.id, p.name, p.createdAtMs || Date.now()));
+                    }
+                }
+            } catch (e) {}
+
+            // 3. Leer desde la subcolección `proyectos` en Firestore
+            try {
+                const projectsRef = collection(db, 'artifacts', globalAppId, 'users', userId, 'proyectos');
+                const querySnapshot = await getDocs(projectsRef);
+                querySnapshot.forEach(docSnap => {
+                    const d = docSnap.data();
+                    const ms = d.createdAt?.seconds ? d.createdAt.seconds * 1000 : Date.now();
+                    addProj(docSnap.id, d.name, ms);
+                });
+            } catch (e) {}
+
+            // 4. Leer carpetas presentes en las evaluaciones del usuario
+            try {
+                let evals = evalsListOptional;
+                if (!evals) {
+                    const evalsSnap = await getDocs(collection(db, 'artifacts', globalAppId, 'users', userId, 'evaluaciones'));
+                    evals = [];
+                    evalsSnap.forEach(d => evals.push({ id: d.id, ...d.data() }));
+                }
+                evals.forEach(ev => {
+                    if (ev.projectId && ev.projectName) {
+                        const ms = ev.createdAt?.seconds ? ev.createdAt.seconds * 1000 : Date.now();
+                        addProj(ev.projectId, ev.projectName, ms);
+                    }
+                });
+            } catch (e) {}
+
+            // Si aún no tiene ninguna carpeta, crear "Proyecto Principal" por defecto
+            if (mapById.size === 0) {
+                const defaultId = 'proj_principal';
+                addProj(defaultId, 'Proyecto Principal', Date.now() - 10000);
+                try {
+                    const projectsRef = collection(db, 'artifacts', globalAppId, 'users', userId, 'proyectos');
+                    const createdRef = await addDoc(projectsRef, { name: 'Proyecto Principal', createdAt: new Date() });
+                    mapById.clear();
+                    addProj(createdRef.id, 'Proyecto Principal', Date.now());
+                } catch (e) {}
+            }
+
+            return Array.from(mapById.values()).sort((a, b) => (b.createdAtMs || 0) - (a.createdAtMs || 0));
+        };
+
+        window.persistNewProjectFolder = async function(nameInput) {
+            const cleanName = String(nameInput || '').trim();
+            if (!cleanName || !auth || !auth.currentUser || !db) return null;
+
+            const userId = auth.currentUser.uid;
+            let projId = 'proj_' + Date.now();
+            const nowMs = Date.now();
+
+            // 1. Intentar guardar también en subcolección `proyectos`
+            try {
+                const projectsRef = collection(db, 'artifacts', globalAppId, 'users', userId, 'proyectos');
+                const newDocRef = await addDoc(projectsRef, { name: cleanName, createdAt: new Date() });
+                if (newDocRef && newDocRef.id) projId = newDocRef.id;
+            } catch (e) {
+                console.warn("Subcolección proyectos restringida, usando respaldo en documento de usuario:", e);
+            }
+
+            // 2. Guardar en localStorage del usuario inmediatamente
+            let localArr = [];
+            try {
+                localArr = JSON.parse(localStorage.getItem(`obrin_projects_${userId}`) || '[]');
+                if (!Array.isArray(localArr)) localArr = [];
+            } catch (e) { localArr = []; }
+            localArr = localArr.filter(p => (p.name || '').toLowerCase() !== cleanName.toLowerCase());
+            localArr.unshift({ id: projId, name: cleanName, createdAtMs: nowMs });
+            localStorage.setItem(`obrin_projects_${userId}`, JSON.stringify(localArr));
+
+            // 3. Guardar en el documento principal del usuario `users/{userId}` (siempre permitido por Firestore)
+            try {
+                const userRef = doc(db, 'artifacts', globalAppId, 'users', userId);
+                await setDoc(userRef, {
+                    proyectos_usuario: localArr.slice(0, 80)
+                }, { merge: true });
+            } catch (e) {
+                console.warn("Aviso guardando proyectos_usuario:", e);
+            }
+
+            // 4. Fijar inmediatamente como carpeta activa en memoria y en el selector visual
+            window.activeSelectedProjectId = projId;
+            window.activeSelectedProjectName = cleanName;
+
+            const selector = document.getElementById('project-selector');
+            if (selector) {
+                // Si no existe la opción en el select, insertarla al inicio y seleccionarla
+                let existingOpt = Array.from(selector.options).find(o => o.value === projId || o.text.toLowerCase() === cleanName.toLowerCase());
+                if (!existingOpt) {
+                    const opt = document.createElement('option');
+                    opt.value = projId;
+                    opt.text = cleanName;
+                    selector.insertBefore(opt, selector.firstChild);
+                } else {
+                    projId = existingOpt.value;
+                    window.activeSelectedProjectId = projId;
+                }
+                selector.value = projId;
+            }
+
+            return { id: projId, name: cleanName };
+        };
+
+        window.loadProjectsList = async function(preferredProjectId = null) {
             if (!auth || !auth.currentUser || !db) return;
             try {
                 const userId = auth.currentUser.uid;
-                const projectsRef = collection(db, 'artifacts', globalAppId, 'users', userId, 'proyectos');
-                const q = query(projectsRef, orderBy('createdAt', 'desc'));
-                const querySnapshot = await getDocs(q);
-                
                 const selector = document.getElementById('project-selector');
-                selector.innerHTML = '';
-                
-                if (querySnapshot.empty) {
-                    await addDoc(projectsRef, { name: 'Proyecto Principal', createdAt: new Date() });
-                    return window.loadProjectsList();
-                }
+                const previousSelectedId = preferredProjectId || window.activeSelectedProjectId || (selector ? selector.value : '');
 
-                querySnapshot.forEach(docSnap => {
+                const combinedProjects = await window.fetchCombinedProjects(userId);
+                if (!selector) return;
+
+                selector.innerHTML = '';
+                combinedProjects.forEach(p => {
                     const option = document.createElement('option');
-                    option.value = docSnap.id;
-                    option.text = docSnap.data().name;
+                    option.value = p.id;
+                    option.text = p.name;
                     selector.appendChild(option);
                 });
-                
+
+                // Preservar siempre la carpeta que el usuario haya creado o seleccionado
+                if (previousSelectedId && Array.from(selector.options).some(o => o.value === previousSelectedId)) {
+                    selector.value = previousSelectedId;
+                } else if (window.activeSelectedProjectName) {
+                    const matchByName = Array.from(selector.options).find(o => o.text.toLowerCase() === window.activeSelectedProjectName.toLowerCase());
+                    if (matchByName) selector.value = matchByName.value;
+                }
+
+                if (selector.selectedIndex >= 0 && selector.options[selector.selectedIndex]) {
+                    window.activeSelectedProjectId = selector.value;
+                    window.activeSelectedProjectName = selector.options[selector.selectedIndex].text;
+                }
+
                 window.updateCounters();
             } catch (error) {
                 console.error("Error loading projects:", error);
@@ -4323,50 +4781,42 @@
 
         window.createNewProject = async function() {
             const input = document.getElementById('new-project-name');
-            const name = input.value.trim();
+            const name = input ? input.value.trim() : '';
             if (!name) return showNotification("Ingresa un nombre para la carpeta", true);
             if (!auth || !auth.currentUser || !db) return;
 
             try {
-                const userId = auth.currentUser.uid;
-                const projectsRef = collection(db, 'artifacts', globalAppId, 'users', userId, 'proyectos');
-                const newDocRef = await addDoc(projectsRef, { name: name, createdAt: new Date() });
-                input.value = '';
-                showNotification("Proyecto creado y seleccionado");
-                await window.loadProjectsList();
-                const sel = document.getElementById('project-selector');
-                if (sel) sel.value = newDocRef.id;
-                window.openHistory(); 
+                const created = await window.persistNewProjectFolder(name);
+                if (input) input.value = '';
+                showNotification(`📁 Proyecto "${name}" creado y seleccionado`);
+                await window.loadProjectsList(created?.id);
+                window.openHistory();
             } catch (error) {
                 console.error("Error creating project:", error);
-                showNotification("Error al crear", true);
+                showNotification("Error al crear carpeta", true);
             }
         };
 
         window.createInlineProject = async function() {
             const input = document.getElementById('inline-project-name');
-            const name = input.value.trim();
+            const name = input ? input.value.trim() : '';
             if (!name) return showNotification("Ingresa un nombre para la carpeta", true);
             if (!auth || !auth.currentUser || !db) return;
 
             try {
-                const userId = auth.currentUser.uid;
-                const projectsRef = collection(db, 'artifacts', globalAppId, 'users', userId, 'proyectos');
-                const newDocRef = await addDoc(projectsRef, { name: name, createdAt: new Date() });
-                input.value = '';
-                showNotification("Carpeta creada y seleccionada");
-                
+                // Ocultar el input y mostrar inmediatamente el selector para feedback instantáneo
                 document.getElementById('new-project-inline').classList.add('hidden');
                 document.getElementById('project-selector').classList.remove('hidden');
                 document.getElementById('cancel-new-project-btn').classList.add('hidden');
                 document.getElementById('show-new-project-btn').classList.remove('hidden');
-                
-                await window.loadProjectsList();
-                document.getElementById('project-selector').value = newDocRef.id;
 
+                const created = await window.persistNewProjectFolder(name);
+                if (input) input.value = '';
+                showNotification(`📁 Carpeta "${name}" creada y seleccionada`);
+                await window.loadProjectsList(created?.id);
             } catch (error) {
                 console.error("Error creating project:", error);
-                showNotification("Error al crear", true);
+                showNotification("Error al crear carpeta", true);
             }
         };
 
@@ -4440,41 +4890,58 @@
 
             try {
                 const userId = activeAuth.currentUser.uid;
-                const projSelector = document.getElementById('project-selector');
-                let projectId = projSelector ? projSelector.value : '';
-                let projectName = (projSelector && projSelector.selectedIndex >= 0 && projSelector.options[projSelector.selectedIndex])
-                    ? projSelector.options[projSelector.selectedIndex].text
-                    : 'Proyecto General';
 
-                // Si por algún motivo no había carpeta seleccionada o cargada aún, asegurar una carpeta por defecto para que SIEMPRE se guarde en el historial
-                if (!projectId) {
-                    const projectsRef = collection(activeDb, 'artifacts', globalAppId, 'users', userId, 'proyectos');
-                    const projSnap = await getDocs(query(projectsRef, orderBy('createdAt', 'desc')));
-                    if (!projSnap.empty) {
-                        projectId = projSnap.docs[0].id;
-                        projectName = projSnap.docs[0].data().name || 'Proyecto General';
-                    } else {
-                        const nuevoProj = await addDoc(projectsRef, { name: 'Proyecto General', createdAt: new Date() });
-                        projectId = nuevoProj.id;
-                        projectName = 'Proyecto General';
+                // Si el usuario dejó un nombre escrito en la caja de carpeta nueva sin presionar "CREAR", crearla y seleccionarla antes de guardar
+                const inlineBox = document.getElementById('new-project-inline');
+                const inlineInput = document.getElementById('inline-project-name');
+                if (inlineBox && !inlineBox.classList.contains('hidden') && inlineInput && inlineInput.value.trim()) {
+                    await window.createInlineProject();
+                }
+
+                const projSelector = document.getElementById('project-selector');
+                let projectId = window.activeSelectedProjectId || (projSelector ? projSelector.value : '');
+                let projectName = window.activeSelectedProjectName || '';
+
+                if (projSelector && projSelector.selectedIndex >= 0 && projSelector.options[projSelector.selectedIndex]) {
+                    if (!projectId) projectId = projSelector.options[projSelector.selectedIndex].value;
+                    if (!projectName || projSelector.value === projectId) {
+                        projectName = projSelector.options[projSelector.selectedIndex].text;
                     }
+                }
+
+                // Si aún no había carpeta seleccionada o cargada, usar la lista combinada de carpetas del usuario
+                if (!projectId) {
+                    const combined = await window.fetchCombinedProjects(userId);
+                    if (combined.length > 0) {
+                        projectId = combined[0].id;
+                        projectName = combined[0].name || 'Proyecto Principal';
+                    } else {
+                        const created = await window.persistNewProjectFolder(userId, 'Proyecto Principal');
+                        projectId = created.id;
+                        projectName = created.name;
+                    }
+                    window.activeSelectedProjectId = projectId;
+                    window.activeSelectedProjectName = projectName;
                     if (projSelector) {
                         await window.loadProjectsList();
                         projSelector.value = projectId;
                     }
                 }
+                if (!projectName) projectName = 'Proyecto Principal';
 
                 const rawDiagnosticData = {
                     projectId: projectId,
                     projectName: projectName,
                     superficie: document.getElementById('surface-type')?.innerText || '',
                     nivel_dano: document.getElementById('complexity-badge')?.innerText || '',
+                    causa_raiz: document.getElementById('root-cause-val')?.innerText || '',
                     patologia: document.getElementById('damage-val')?.innerText || '',
                     riesgo_futuro: document.getElementById('risk-val')?.innerText || '',
                     solucion: document.getElementById('solution-val')?.innerText || '',
                     precio_ref: document.getElementById('price-val')?.innerText || '',
                     unidad_ref: document.getElementById('unit-val')?.innerText || '',
                     tiempo: document.getElementById('time-val')?.innerText || '',
+                    ajuste_climatico: window.currentClimateTechnicalData || null,
                     materiales: Array.from(document.getElementById('materials-list').children).map(li => {
                         const qtyInput = li.querySelector('.mat-qty-input');
                         if (qtyInput) qtyInput.setAttribute('value', qtyInput.value);
@@ -4541,6 +5008,7 @@
                     const updatePayload = sanitizeForFirestore({
                         superficie: document.getElementById('surface-type')?.innerText || '',
                         nivel_dano: document.getElementById('complexity-badge')?.innerText || '',
+                        causa_raiz: document.getElementById('root-cause-val')?.innerText || '',
                         patologia: document.getElementById('damage-val')?.innerText || '',
                         riesgo_futuro: document.getElementById('risk-val')?.innerText || '',
                         solucion: document.getElementById('solution-val')?.innerText || '',
@@ -4574,7 +5042,7 @@
             }, 700);
         };
 
-        ['surface-type', 'complexity-badge', 'damage-val', 'risk-val', 'solution-val', 'price-val', 'unit-val', 'time-val', 'steps-list'].forEach(id => {
+        ['surface-type', 'complexity-badge', 'root-cause-val', 'damage-val', 'risk-val', 'solution-val', 'price-val', 'unit-val', 'time-val', 'steps-list'].forEach(id => {
             const el = document.getElementById(id);
             if (el) {
                 el.addEventListener('input', () => window.scheduleAutoUpdateHistory());
@@ -4598,6 +5066,7 @@
                 const rawDiagnosticData = {
                     superficie: document.getElementById('surface-type')?.innerText || '',
                     nivel_dano: document.getElementById('complexity-badge')?.innerText || '',
+                    causa_raiz: document.getElementById('root-cause-val')?.innerText || '',
                     patologia: document.getElementById('damage-val')?.innerText || '',
                     riesgo_futuro: document.getElementById('risk-val')?.innerText || '',
                     solucion: document.getElementById('solution-val')?.innerText || '',
@@ -4664,10 +5133,12 @@
                             id: targetDocId,
                             superficie: diagnosticData.superficie,
                             nivel_dano: diagnosticData.nivel_dano,
+                            causa_raiz: diagnosticData.causa_raiz,
                             patologia: diagnosticData.patologia,
                             riesgo_futuro: diagnosticData.riesgo_futuro,
                             solucion: diagnosticData.solucion,
                             materiales: materialesPlanos,
+                            pasos: pasosPlanos,
                             precio_ref: diagnosticData.precio_ref,
                             tiempo: diagnosticData.tiempo
                         })
@@ -4695,13 +5166,17 @@
         };
 
         window.updateCounters = async function() {
-            if (!auth || !auth.currentUser || !db) return;
+            const activeAuth = auth || window.authInstance;
+            const activeDb = db || window.db;
+            if (!activeAuth || !activeAuth.currentUser || !activeDb) return;
             try {
-                const userId = auth.currentUser.uid;
-                const projectsSnap = await getDocs(collection(db, 'artifacts', globalAppId, 'users', userId, 'proyectos'));
-                const evalsSnap = await getDocs(collection(db, 'artifacts', globalAppId, 'users', userId, 'evaluaciones'));
+                const userId = activeAuth.currentUser.uid;
+                const evalsSnap = await getDocs(collection(activeDb, 'artifacts', globalAppId, 'users', userId, 'evaluaciones'));
+                const allEvals = [];
+                evalsSnap.forEach(d => allEvals.push({ id: d.id, ...d.data() }));
+                const combinedProjects = await window.fetchCombinedProjects(userId, allEvals);
                 
-                if (document.getElementById('projects-count-badge')) document.getElementById('projects-count-badge').innerText = projectsSnap.size;
+                if (document.getElementById('projects-count-badge')) document.getElementById('projects-count-badge').innerText = combinedProjects.length;
                 if (document.getElementById('total-evals-badge')) document.getElementById('total-evals-badge').innerText = evalsSnap.size;
             } catch (e) { console.error("Error counters:", e); }
         };
@@ -4726,27 +5201,27 @@
             const projectsList = document.getElementById('projects-list');
             projectsList.innerHTML = '<div class="text-center py-6 text-slate-400 text-xs font-bold uppercase"><i class="fas fa-spinner fa-spin mb-2"></i><br>Cargando...</div>';
 
-            if (!auth || !auth.currentUser || !db) return;
+            const activeAuth = auth || window.authInstance;
+            const activeDb = db || window.db;
+            if (!activeAuth || !activeAuth.currentUser || !activeDb) return;
 
             try {
-                const userId = auth.currentUser.uid;
-                const projectsRef = collection(db, 'artifacts', globalAppId, 'users', userId, 'proyectos');
-                const projSnap = await getDocs(query(projectsRef, orderBy('createdAt', 'desc')));
-                
-                const evalsRef = collection(db, 'artifacts', globalAppId, 'users', userId, 'evaluaciones');
+                const userId = activeAuth.currentUser.uid;
+                const evalsRef = collection(activeDb, 'artifacts', globalAppId, 'users', userId, 'evaluaciones');
                 const evalsSnap = await getDocs(evalsRef);
                 const allEvals = [];
                 evalsSnap.forEach(d => allEvals.push({ id: d.id, ...d.data() }));
 
-                const firstProjId = projSnap.empty ? null : projSnap.docs[0].id;
+                const combinedProjects = await window.fetchCombinedProjects(userId, allEvals);
+                const firstProjId = combinedProjects.length > 0 ? combinedProjects[0].id : null;
 
                 projectsList.innerHTML = '';
-                projSnap.forEach(docSnap => {
-                    const data = docSnap.data();
-                    
+                combinedProjects.forEach(proj => {
                     const projEvals = allEvals.filter(e => {
-                        const isOrphaned = !e.projectId;
-                        return e.projectId === docSnap.id || (isOrphaned && docSnap.id === firstProjId);
+                        const isOrphaned = !e.projectId && !e.projectName;
+                        const matchId = e.projectId && e.projectId === proj.id;
+                        const matchName = e.projectName && proj.name && e.projectName.trim().toLowerCase() === proj.name.trim().toLowerCase();
+                        return matchId || matchName || (isOrphaned && proj.id === firstProjId);
                     });
                     
                     let projTotal = 0;
@@ -4754,11 +5229,12 @@
                         if (e.precio_ref) projTotal += window.extractPrice(e.precio_ref);
                     });
 
-                    const safeProjNameAttr = (data.name || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '&quot;');
-                    const safeProjNameHtml = (data.name || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                    const safeProjNameAttr = (proj.name || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+                    const safeProjNameHtml = (proj.name || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                    const safeProjIdAttr = (proj.id || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '&quot;');
 
                     projectsList.innerHTML += `
-                        <div onclick="window.loadProjectEvals('${docSnap.id}', '${safeProjNameAttr}')" class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-all cursor-pointer flex justify-between items-center group">
+                        <div onclick="window.loadProjectEvals('${safeProjIdAttr}', '${safeProjNameAttr}')" class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-all cursor-pointer flex justify-between items-center group">
                             <div class="flex items-center gap-4">
                                 <div class="w-10 h-10 rounded-full bg-brand-50 text-brand-500 flex items-center justify-center text-lg group-hover:scale-110 transition-transform"><i class="fas fa-folder"></i></div>
                                 <div>
@@ -4788,29 +5264,42 @@
             historyList.innerHTML = '<div class="text-center py-6 text-slate-400 text-xs font-bold uppercase"><i class="fas fa-spinner fa-spin mb-2"></i><br>Cargando fichas...</div>';
 
             try {
-                const userId = auth.currentUser.uid;
+                const activeAuth = auth || window.authInstance;
+                const activeDb = db || window.db;
+                const userId = activeAuth.currentUser.uid;
                 
-                const projectsRef = collection(db, 'artifacts', globalAppId, 'users', userId, 'proyectos');
-                const projSnap = await getDocs(query(projectsRef, orderBy('createdAt', 'desc')));
-                let firstProjId = projSnap.empty ? null : projSnap.docs[0].id;
+                const evalsRef = collection(activeDb, 'artifacts', globalAppId, 'users', userId, 'evaluaciones');
+                let docsList = [];
+                try {
+                    const q = query(evalsRef, orderBy('createdAt', 'desc'));
+                    const querySnapshot = await getDocs(q);
+                    querySnapshot.forEach(d => docsList.push({ id: d.id, data: d.data() }));
+                } catch (e) {
+                    const querySnapshot = await getDocs(evalsRef);
+                    querySnapshot.forEach(d => docsList.push({ id: d.id, data: d.data() }));
+                }
 
-                const evalsRef = collection(db, 'artifacts', globalAppId, 'users', userId, 'evaluaciones');
-                const q = query(evalsRef, orderBy('createdAt', 'desc'));
-                const querySnapshot = await getDocs(q);
+                const combinedProjects = await window.fetchCombinedProjects(userId, docsList.map(x => x.data));
+                let firstProjId = combinedProjects.length > 0 ? combinedProjects[0].id : null;
 
                 window.historyDataCache = {};
                 historyList.innerHTML = '';
                 
                 let found = false;
-                querySnapshot.forEach((docSnap) => {
-                    const data = docSnap.data();
+                docsList.forEach((item) => {
+                    const docSnapId = item.id;
+                    const data = item.data;
                     
-                    const isOrphaned = !data.projectId;
-                    if (data.projectId !== projectId && !(isOrphaned && projectId === firstProjId)) return;
+                    const isOrphaned = !data.projectId && !data.projectName;
+                    const matchId = data.projectId && data.projectId === projectId;
+                    const matchName = data.projectName && projectName && data.projectName.trim().toLowerCase() === projectName.trim().toLowerCase();
+                    if (!matchId && !matchName && !(isOrphaned && projectId === firstProjId)) return;
                     
                     found = true;
-                    window.historyDataCache[docSnap.id] = data; 
-                    const dateObj = data.createdAt ? new Date(data.createdAt.seconds * 1000) : new Date();
+                    window.historyDataCache[docSnapId] = data; 
+                    const dateObj = data.createdAt
+                        ? (data.createdAt.seconds ? new Date(data.createdAt.seconds * 1000) : new Date(data.createdAt))
+                        : new Date();
                     const dateStr = dateObj.toLocaleDateString('es-CL', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute:'2-digit' });
                     
                     let starsHtml = '';
@@ -4818,7 +5307,7 @@
                     for(let i=1; i<=5; i++) starsHtml += `<span class="${i <= rating ? 'text-yellow-400' : 'text-slate-200'} text-lg">★</span>`;
 
                     historyList.innerHTML += `
-                        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm hover:border-brand-300 transition-colors flex flex-col gap-4 cursor-pointer" onclick="window.loadHistoryItem('${docSnap.id}')">
+                        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm hover:border-brand-300 transition-colors flex flex-col gap-4 cursor-pointer" onclick="window.loadHistoryItem('${docSnapId}')">
                             <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                                 <div class="flex-1 w-full overflow-hidden">
                                     <p class="text-xs font-bold text-slate-800 mb-1 truncate uppercase tracking-wider">${data.superficie || 'Evaluación Técnica'}</p>
@@ -4826,12 +5315,12 @@
                                     <div class="flex items-center gap-2 mb-2"><div class="flex drop-shadow-sm -mt-1">${starsHtml}</div></div>
                                     ${data.comment ? `<div class="bg-slate-50 p-3 rounded-lg border border-slate-100 text-xs text-slate-600 italic relative w-full overflow-hidden text-ellipsis whitespace-nowrap"><i class="fas fa-quote-left text-slate-300 absolute opacity-50 text-2xl -top-1 -left-1"></i><span class="relative z-10 pl-2">"${data.comment}"</span></div>` : ''}
                                 </div>
-                                <button onclick="event.stopPropagation(); window.loadHistoryItem('${docSnap.id}')" class="w-full md:w-auto bg-slate-900 hover:bg-slate-800 text-white text-[0.7rem] font-bold py-3 px-5 rounded-lg transition-colors flex items-center justify-center gap-2 whitespace-nowrap shadow-sm uppercase tracking-widest">
+                                <button onclick="event.stopPropagation(); window.loadHistoryItem('${docSnapId}')" class="w-full md:w-auto bg-slate-900 hover:bg-slate-800 text-white text-[0.7rem] font-bold py-3 px-5 rounded-lg transition-colors flex items-center justify-center gap-2 whitespace-nowrap shadow-sm uppercase tracking-widest">
                                     <i class="fas fa-folder-open text-brand-400"></i> Abrir Ficha
                                 </button>
                             </div>
-                            <div id="stepper-wrapper-${docSnap.id}" class="w-full pt-4 mt-2 border-t border-slate-100">
-                                ${window.generateStepperHTML(docSnap.id, data.seguimiento, data)}
+                            <div id="stepper-wrapper-${docSnapId}" class="w-full pt-4 mt-2 border-t border-slate-100">
+                                ${window.generateStepperHTML(docSnapId, data.seguimiento, data)}
                             </div>
                         </div>
                     `;
@@ -4897,6 +5386,12 @@
                 document.getElementById('hum-val').innerText = finalWeatherHum;
             } else { document.getElementById('weather-badge').classList.add('hidden'); }
 
+            window.renderClimateTechnicalAdjustment(data.ajuste_climatico || null, finalWeatherLoc, finalWeatherTemp, finalWeatherHum);
+
+            const rootCauseEl = document.getElementById('root-cause-val');
+            if (rootCauseEl) {
+                rootCauseEl.innerText = data.causa_raiz || window.inferRootCauseFromText(data.patologia, data.superficie);
+            }
             document.getElementById('damage-val').innerText = data.patologia || '';
             window.xrayOverlayVisible = true;
             let rxRestaurado = data.rayos_x || null;
