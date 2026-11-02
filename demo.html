@@ -1355,11 +1355,14 @@
         };
 
         // Detector estricto para excluir herramientas (taladros, esmeriles, sierras, martillos, cinceles, niveles, etc.)
-        // dejando únicamente materiales e insumos de aplicación (pintura, pasta muro, hormigón, mortero, brocha, rodillo, lija, etc.)
+        // y basura de Marketplace (globos, cangrejos, calcetines, planchas de ropa, etc.)
         window.esHerramientaNoMaterial = function(texto, categoria = "") {
             const tNorm = window.normalizarTextoMaterial(texto);
             const cNorm = window.normalizarTextoMaterial(categoria);
             if (!tNorm) return false;
+
+            const regexBasuraMarketplace = /\b(globo|cangrejo|cumpleanos|fiesta|juguete|calcetin|calcetines|mediven|compresion|estabilizador de muneca|vendaje|venda|herida|antebrazo|brazo|ortoped|plancha de ropa|plancha a vapor|vaporizador|aeroglide|ursus trotter|oster|polera|pantalon|silla ergonomica|escritorio|biblioteca|nordico|jarra brita|rotuladora|brother tze|mudanza|embalaje|cola fria escolar|pritt|monami|proarte|guantes? impermeables? termicos? de moto|rodilleras? neopreno|termoventilador|parabrisas|auto camper|insonorizantes? auto|mejorador de suelo|agricola|cultivos|saco papero|carro de mano plegable)\b/;
+            if (regexBasuraMarketplace.test(tNorm)) return true;
 
             const regexPermitido = /\b(pintura|latex|esmalte|oleo|barniz|imprimante|fijador|sellador|pasta|masilla|hormigon|mortero|cemento|estuco|yeso|brocha|rodillo|lija|cinta|malla|silicona|poliuretano|impermeabilizante|membrana|igol|sika|adhesivo|pegamento|bekron|aditivo|puente|placa|volcanita|fibrocemento|madera|pino|terciado|osb|melamina)\b/;
             const regexHerramienta = /\b(taladro|rotomartillo|percutor|atornillador|destornillador|esmeril|galletera|sierra|caladora|ingletadora|lijadora|fresadora|cepillo electrico|multiherramienta|hidrolavadora|compresor|soldadora|generador|demoledor|betonera|mezclador|revolvedor|pistola de calor|pistola calafateo|pistola silicona|soplete|martillo|combo|mazo|cincel|punto|diablito|barreta|chuzo|alicate|caiman|llave|dado|chicharra|nivel|plomada|huincha|flexometro|escalera|andamio|caballete|carretilla|pala|picota|rastrillo|serrucho|formon|prensa|sargento|cortante|cartonero|tijera|detector|multimetro|amperimetro|aspiradora|espatula|llana|plana|platacho)\b/;
@@ -1370,7 +1373,244 @@
                 }
                 return true;
             }
-            if ((cNorm.includes("herramienta") || cNorm.includes("maquinaria") || cNorm.includes("equipo")) && !regexPermitido.test(tNorm)) {
+            if ((cNorm.includes("herramienta") || cNorm.includes("maquinaria") || cNorm.includes("equipo") || cNorm.includes("escalera")) && !regexPermitido.test(tNorm)) {
+                return true;
+            }
+            return false;
+        };
+
+        // Catálogo curado de respaldo directo de Cloudflare D1 (Sodimac vs Easy) para sanear cualquier producto incongruente
+        window.CATALOGO_RESPALDO_CONGRUENTE_D1 = {
+            imprimante_sellador: {
+                categoria: "Cemento, morteros y aditivos > Aditivos",
+                producto: "Aditivo Adherente e Imprimante Sellador para Morteros 1 Litro",
+                marca: "SIKA",
+                nombre_sodimac: "Aditivo Adherente Para Morteros Revestimientos 1 Litro",
+                sku_sodimac: "110310790",
+                precio_sodimac: 9390,
+                ppum_sodimac: "$9.390 / L",
+                url_sodimac: "https://www.sodimac.cl",
+                nombre_easy: "Aditivo adherencia 1 litro Sika látex Sika",
+                sku_easy: "199911",
+                precio_easy: 10350,
+                ppum_easy: "$10.350 / L",
+                url_easy: "https://www.easy.cl",
+                rendimiento: "0,20 a 0,25 L/m² como imprimante sellador y promotor de adherencia",
+                formato: "1 Litro",
+                superficie_aplicacion: "Muros de hormigón armado, estucos y albañilería",
+                uso: "Interior y Exterior / Subterráneos",
+                acabado_color: "Blanco lechoso / Transparente al secar",
+                metodo_aplicacion: "Brocha, rodillo o diluido en lechada de imprimación",
+                tiempo_secado: "2 a 4 horas según humedad relativa",
+                descripcion_tecnica: "Emulsión acrílica sintética para imprimación selladora de porosidad y puente de adherencia en muros con humedad."
+            },
+            impermeabilizante: {
+                categoria: "Cemento, morteros y aditivos > Morteros",
+                producto: "Mortero Impermeabilizante y Barrera Contra Capilaridad Sikalisto 25 kg",
+                marca: "SIKA",
+                nombre_sodimac: "Mortero Reparación Impermeable y Expansivo Sikalisto Saco 25 Kg",
+                sku_sodimac: "110311215",
+                precio_sodimac: 12490,
+                ppum_sodimac: "$499 / kg",
+                url_sodimac: "https://www.sodimac.cl",
+                nombre_easy: "Sikalisto Mortero Impermeable Barrera Humedad Saco 25 Kg",
+                sku_easy: "205031",
+                precio_easy: 14990,
+                ppum_easy: "$599 / kg",
+                url_easy: "https://www.easy.cl",
+                rendimiento: "Saco 25 kg rinde ~1,3 a 1,5 m² en espesor 1 cm (barrera contra humedad ascendente)",
+                formato: "Saco 25 kg",
+                superficie_aplicacion: "Muros perimetrales de hormigón armado, subterráneos y zócalos",
+                uso: "Interior y Exterior / Presión positiva y negativa",
+                acabado_color: "Gris cementicio",
+                metodo_aplicacion: "Llana metálica o brocha de cerdas duras sobre sustrato saturado",
+                tiempo_secado: "24 a 48 horas de curado húmedo",
+                descripcion_tecnica: "Mortero predosificado impermeable para bloqueo de humedad por capilaridad ascendente y filtraciones en hormigón."
+            },
+            puente_adherencia: {
+                categoria: "Cemento, morteros y aditivos > Aditivos",
+                producto: "Puente de Adherencia Acrílico / Epóxico Colmafix 32 Sika",
+                marca: "SIKA",
+                nombre_sodimac: "Aditivo Adherencia Morteros Latex 4.5 Litros",
+                sku_sodimac: "110310833",
+                precio_sodimac: 39590,
+                ppum_sodimac: "$8.798 / L",
+                url_sodimac: "https://www.sodimac.cl/sodimac-cl/articulo/110310804/aditivo-adherencia-morteros-latex-4-5-litros?exp=so_com",
+                nombre_easy: "Puente de adherencia 1 kg colmafix 32 sika",
+                sku_easy: "205008",
+                precio_easy: 21750,
+                ppum_easy: "$21.750 / kg",
+                url_easy: "https://www.easy.cl/puente-de-adherencia-1-kg-colmafix-32-sika-205008/p",
+                rendimiento: "0,20 a 0,30 L/m² en puentes adherentes | 1% del peso del cemento",
+                formato: "1 kg / 4,5 L",
+                superficie_aplicacion: "Hormigones, Morteros y Estucos",
+                uso: "Interior y Exterior / Obra Profesional",
+                acabado_color: "Aditivos",
+                metodo_aplicacion: "Brocha, rodillo o lechada de adherencia sobre hormigón firme",
+                tiempo_secado: "Aplicación de mortero fresco sobre puente táctil",
+                descripcion_tecnica: "Puente de adherencia estructural para asegurar el anclaje monolítico entre el hormigón antiguo y el mortero de reparación."
+            },
+            mortero_reparacion: {
+                categoria: "Cemento, morteros y aditivos > Morteros",
+                producto: "Mortero de Reparación Estructural sin Retracción Sikarep 25 kg",
+                marca: "SIKA",
+                nombre_sodimac: "Mortero para Reparación Estructural de Hormigón Sikarep Saco 25 kg",
+                sku_sodimac: "110311150",
+                precio_sodimac: 13990,
+                ppum_sodimac: "$560 / kg",
+                url_sodimac: "https://www.sodimac.cl",
+                nombre_easy: "Mortero reparación hormigón 25 kg Presec",
+                sku_easy: "119402",
+                precio_easy: 15990,
+                ppum_easy: "$640 / kg",
+                url_easy: "https://www.easy.cl",
+                rendimiento: "Saco 25 kg rinde ~1,2 a 1,5 m² en espesor 1 cm (~1,9 kg/m²/mm)",
+                formato: "Saco 25 kg",
+                superficie_aplicacion: "Muros de hormigón armado, pilares, vigas, losas y estucos",
+                uso: "Interior y Exterior / Reparación Estructural",
+                acabado_color: "Gris",
+                metodo_aplicacion: "Aplicación manual con plana, llana metálica o platacho",
+                tiempo_secado: "Fraguado inicial 4-6 h | Curado completo 72 horas",
+                descripcion_tecnica: "Mortero tixotrópico de alta resistencia mecánica y compensación de retracción para restitución de recubrimiento de hormigón."
+            },
+            esmalte_antihongos: {
+                categoria: "Pinturas y Terminaciones > Pinturas látex y esmaltes al agua",
+                producto: "Esmalte al Agua Antihongos Semibrillante 1 Galón Blanco",
+                marca: "SIPA / KOLOR",
+                nombre_sodimac: "Esmalte al Agua 1 galón(es) Semibrillante Blanco Antihongos",
+                sku_sodimac: "120411890",
+                precio_sodimac: 27990,
+                ppum_sodimac: "$7.395 / L",
+                url_sodimac: "https://www.sodimac.cl",
+                nombre_easy: "Esmalte al agua 1 galón blanco semibrillo antihongos Sipa",
+                sku_easy: "1049218",
+                precio_easy: 30680,
+                ppum_easy: "$8.105 / L",
+                url_easy: "https://www.easy.cl",
+                rendimiento: "35 a 40 m² por galón por mano (2 manos recomendadas)",
+                formato: "1 Galón (3,785 L)",
+                superficie_aplicacion: "Muros interiores y exteriores de hormigón, estuco y mortero",
+                uso: "Interior y Exterior / Zonas húmedas y subterráneos",
+                acabado_color: "Blanco Semibrillante Lavable Antihongos",
+                metodo_aplicacion: "Rodillo de chiporro o brocha profesional en 2 manos",
+                tiempo_secado: "Secado al tacto 1-2 h | Repintado 6 a 8 horas según HR",
+                descripcion_tecnica: "Esmalte al agua acrílico de película transpirable y fungicida activo contra proliferación de moho y humedad."
+            },
+            accesorios_pintura: {
+                categoria: "Pinturas y Terminaciones > Brochas, rodillos y accesorios de pintura",
+                producto: "Kit de Aplicación Rodillo Chiporro + Brocha + Lija al Agua",
+                marca: "LIZCAL",
+                nombre_sodimac: "Kit para pintura bandeja + rodillo + brocha Lizcal Mimbral",
+                sku_sodimac: "115890214",
+                precio_sodimac: 7990,
+                ppum_sodimac: "$7.990 / set",
+                url_sodimac: "https://www.sodimac.cl",
+                nombre_easy: "Set pintura rodillo + brocha + bandeja Estampa",
+                sku_easy: "1088412",
+                precio_easy: 7490,
+                ppum_easy: "$7.490 / set",
+                url_easy: "https://www.easy.cl",
+                rendimiento: "50 a 120 m² de aplicación de imprimantes y pinturas",
+                formato: "Set Completo de Aplicación",
+                superficie_aplicacion: "Muros de hormigón, estuco y tabiquería",
+                uso: "Interior y Exterior",
+                acabado_color: "Profesional",
+                metodo_aplicacion: "Aplicación manual de imprimantes y esmaltes",
+                tiempo_secado: "Lavable y reutilizable",
+                descripcion_tecnica: "Insumos de aplicación para imprimación selladora y terminación de esmalte al agua antihongos."
+            },
+            sellador_elastico: {
+                categoria: "Químicos, Sellantes y Adhesivos > Siliconas, sellantes y espumas expansivas",
+                producto: "Sellador Elástico de Poliuretano Sikaflex-11 FC / 1A",
+                marca: "SIKA",
+                nombre_sodimac: "Sellador poliuretano gris Sikaflex 1A 600 ml",
+                sku_sodimac: "110315420",
+                precio_sodimac: 16660,
+                ppum_sodimac: "$27.767 / L",
+                url_sodimac: "https://www.sodimac.cl",
+                nombre_easy: "Sellador adhesivo poliuretano Sikaflex 11-FC blanco 300 ml",
+                sku_easy: "205119",
+                precio_easy: 11990,
+                ppum_easy: "$39.967 / L",
+                url_easy: "https://www.easy.cl",
+                rendimiento: "3 a 6 metros lineales por cartucho en junta o fisura 1x1 cm",
+                formato: "Cartucho 300 ml / Manga 600 ml",
+                superficie_aplicacion: "Grietas activas, encuentros de muros y juntas de dilatación",
+                uso: "Interior y Exterior",
+                acabado_color: "Gris / Blanco Pintable",
+                metodo_aplicacion: "Aplicación en cordón continuo sobre ranura limpia",
+                tiempo_secado: "Curado 3 mm cada 24 horas",
+                descripcion_tecnica: "Sellador elástico monocomponente a base de poliuretano para sellado impermeable de fisuras y juntas."
+            },
+            cinta_malla: {
+                categoria: "Tabiquería > Cintas y pastas para junturas",
+                producto: "Cinta Malla de Fibra de Vidrio Autoadhesiva 50 mm x 45 m",
+                marca: "VOLCÁN",
+                nombre_sodimac: "Cinta fibra vidrio juntas 50mm x 45 m",
+                sku_sodimac: "105112340",
+                precio_sodimac: 3890,
+                ppum_sodimac: "$86 / m",
+                url_sodimac: "https://www.sodimac.cl",
+                nombre_easy: "Cinta para juntas yeso cartón 5 cm x 45 m",
+                sku_easy: "1058891",
+                precio_easy: 4850,
+                ppum_easy: "$108 / m",
+                url_easy: "https://www.easy.cl",
+                rendimiento: "45 metros lineales de refuerzo de juntas y fisuras",
+                formato: "Rollo 50 mm x 45 m",
+                superficie_aplicacion: "Refuerzo de fisuras en estucos, morteros y tabiques",
+                uso: "Interior y Exterior",
+                acabado_color: "Blanco tramado",
+                metodo_aplicacion: "Embutida sobre primera capa fresca de pasta o mortero",
+                tiempo_secado: "Inmediato (autoadhesiva)",
+                descripcion_tecnica: "Malla de fibra de vidrio alcalirresistente para absorber tensiones de retracción en reparaciones."
+            },
+            pasta_masilla: {
+                categoria: "Tabiquería > Cintas y pastas para junturas",
+                producto: "Pasta Muro / Masilla Base para Juntas y Enlucido Interior",
+                marca: "VOLCÁN",
+                nombre_sodimac: "Pasta multiuso Volcastic 15 kg Saco",
+                sku_sodimac: "102344110",
+                precio_sodimac: 18590,
+                ppum_sodimac: "$1.239 / kg",
+                url_sodimac: "https://www.sodimac.cl",
+                nombre_easy: "Masilla Base Para Juntas Pro 25 Kg Construcción Reparación",
+                sku_easy: "1039812",
+                precio_easy: 20990,
+                ppum_easy: "$840 / kg",
+                url_easy: "https://www.easy.cl",
+                rendimiento: "1,0 a 1,5 kg/m² en alisado y retape de muros interiores secos",
+                formato: "15 kg / 25 kg",
+                superficie_aplicacion: "Muros interiores secos y tabiquería de yeso-cartón",
+                uso: "Interior seco",
+                acabado_color: "Blanco liso",
+                metodo_aplicacion: "Aplicación manual en capas delgadas",
+                tiempo_secado: "4 a 6 horas entre manos",
+                descripcion_tecnica: "Compuesto de alisado y terminación para superficies interiores sin humedad activa."
+            }
+        };
+
+        // Detector de productos incongruentes (ej: sifón, bisagra de mueble, tirador, globo de cangrejo, panel LED en diagnóstico de muro/hormigón)
+        window.esItemIncongruenteConDiagnostico = function(item, contextoDiagNorm) {
+            if (!item) return true;
+            const textoItem = window.normalizarTextoMaterial(
+                `${item.producto || ''} ${item.nombre_sodimac || ''} ${item.nombre_easy || ''} ${item.originalText || ''} ${item.categoria || ''} ${item.superficie_aplicacion || ''}`
+            );
+            // 1. Basura de Marketplace o SKUs contaminados conocidos
+            if (/\b(globo|cangrejo|mkaxel0tkh|mkotuh2584|mk78488p2s|mk7r49bp2s|191150|1344167|ferromir|hoffens|zumba|calcetin|mediven|plancha de ropa|plancha a vapor|ursus trotter|aeroglide|oster|silla ergonomica|polera|vendaje|herida|antebrazo)\b/.test(textoItem)) {
+                return true;
+            }
+            // 2. Si el diagnóstico trata sobre muros, hormigón, losas, estuco, humedad, capilaridad o fisuras (y no pide gasfitería, muebles ni iluminación)
+            const diagPideGasfiteria = /\b(lavatorio|lavaplatos|lavamanos|inodoro|wc|sifon|griferia|llave de paso)\b/.test(contextoDiagNorm);
+            if (!diagPideGasfiteria && /\b(sifon|lavatorio|lavaplatos|lavamanos|inodoro|urinario|receptaculo|griferia|monomando|llave de paso|llave bola|destapador|fosa septica|redes de agua fria)\b/.test(textoItem)) {
+                return true;
+            }
+            const diagPideMuebles = /\b(mueble|bisagra|tirador|cerradura|picaporte|closets?)\b/.test(contextoDiagNorm);
+            if (!diagPideMuebles && /\b(bisagra|tirador|mueble|muebles|picaporte|pasador|aldaba|cerradura|cerrojo|manilla|pestillo|reten|push to open|quincalleria|placas? de reparacion)\b/.test(textoItem)) {
+                return true;
+            }
+            const diagPideIluminacion = /\b(luminaria|iluminacion|panel led|ampolleta|foco|reflector|tablero electrico|interruptor|enchufe)\b/.test(contextoDiagNorm);
+            if (!diagPideIluminacion && /\b(panel led|ampolleta|tubo led|foco|reflector|proyector|linterna|guirnalda|luz de emergencia|interruptor|enchufe|alargador|biselado redondo|tonos de luz|panel cerco)\b/.test(textoItem)) {
                 return true;
             }
             return false;
@@ -1558,33 +1798,91 @@
                 .map((mat, idx) => window.resolveMaterialTechnicalData(mat, idx, detArr[idx] || null))
                 .filter(Boolean);
 
-            // MEJORA #5: Validación de Compatibilidad Química también en Frontend (anti-mezclas incompatibles y sin duplicar 2 pinturas de terminación)
+            // Contexto completo del diagnóstico y procedimiento operativo para validar congruencia constructiva y química
+            const pasosTextoActual = Array.from(document.getElementById('steps-list')?.children || []).map(li => li.innerText || '').join(' ');
             const ctxQuimicoFront = window.normalizarTextoMaterial(
-                `${document.getElementById('surface-type')?.innerText || ''} ${document.getElementById('root-cause-val')?.innerText || ''} ${document.getElementById('damage-val')?.innerText || ''} ${document.getElementById('solution-val')?.innerText || ''}`
+                `${document.getElementById('surface-type')?.innerText || ''} ${document.getElementById('root-cause-val')?.innerText || ''} ${document.getElementById('damage-val')?.innerText || ''} ${document.getElementById('solution-val')?.innerText || ''} ${pasosTextoActual}`
             );
             const hayHumedadFront = /\b(humedad|filtracion|capilaridad|eflorescencia|salitre|infiltracion|exterior|fachada|subterraneo)\b/.test(ctxQuimicoFront);
+
+            // Sanear automáticamente cualquier producto incongruente (ej: sifón, bisagra, globo de cangrejo, tirador de mueble, panel LED)
+            const catalogoRespaldo = window.CATALOGO_RESPALDO_CONGRUENTE_D1 || {};
+            const familiasUsadas = new Set();
+            let huboSaneamientoIncongruente = false;
+
+            // Determinar qué familias ya están válidamente presentes en la lista
+            resueltos.forEach(item => {
+                if (!window.esItemIncongruenteConDiagnostico(item, ctxQuimicoFront)) {
+                    const t = window.normalizarTextoMaterial(`${item.producto} ${item.nombre_sodimac} ${item.nombre_easy}`);
+                    if (/\b(puente|colmafix|adherencia)\b/.test(t)) familiasUsadas.add('puente_adherencia');
+                    else if (/\b(impermeabilizante|sikalisto|impermeable|membrana)\b/.test(t)) familiasUsadas.add('impermeabilizante');
+                    else if (/\b(mortero|sikarep|estuco)\b/.test(t)) familiasUsadas.add('mortero_reparacion');
+                    else if (/\b(esmalte|latex|pintura)\b/.test(t)) familiasUsadas.add('esmalte_antihongos');
+                    else if (/\b(imprimante|aditivo adherente)\b/.test(t)) familiasUsadas.add('imprimante_sellador');
+                    else if (/\b(brocha|rodillo|kit para pintura|set pintura)\b/.test(t)) familiasUsadas.add('accesorios_pintura');
+                    else if (/\b(sikaflex|poliuretano|silicona)\b/.test(t)) familiasUsadas.add('sellador_elastico');
+                    else if (/\b(cinta|fibra vidrio)\b/.test(t)) familiasUsadas.add('cinta_malla');
+                }
+            });
+
+            // Orden de prioridad de familias según el diagnóstico actual para reemplazar ítems corruptos/incongruentes
+            const ordenFamiliasSegunDiagnostico = hayHumedadFront
+                ? ['imprimante_sellador', 'impermeabilizante', 'puente_adherencia', 'mortero_reparacion', 'esmalte_antihongos', 'accesorios_pintura', 'sellador_elastico']
+                : ['imprimante_sellador', 'puente_adherencia', 'mortero_reparacion', 'pasta_masilla', 'cinta_malla', 'esmalte_antihongos', 'accesorios_pintura', 'sellador_elastico'];
+
+            resueltos = resueltos.map((item, idx) => {
+                if (!window.esItemIncongruenteConDiagnostico(item, ctxQuimicoFront)) {
+                    return item;
+                }
+                huboSaneamientoIncongruente = true;
+                const solOrigNorm = window.normalizarTextoMaterial((detArr[idx] && detArr[idx].material_solicitado) || item.originalText || '');
+                let claveReemplazo = null;
+
+                if (/\b(puente|colmafix|adherencia)\b/.test(solOrigNorm) && !familiasUsadas.has('puente_adherencia')) claveReemplazo = 'puente_adherencia';
+                else if (/\b(impermeabilizante|impermeable|cristalin|capilaridad)\b/.test(solOrigNorm) && !familiasUsadas.has('impermeabilizante')) claveReemplazo = 'impermeabilizante';
+                else if (/\b(mortero|sikarep|estuco|hormigon)\b/.test(solOrigNorm) && !familiasUsadas.has('mortero_reparacion')) claveReemplazo = 'mortero_reparacion';
+                else if (/\b(imprimante|sellador|fijador)\b/.test(solOrigNorm) && !familiasUsadas.has('imprimante_sellador')) claveReemplazo = 'imprimante_sellador';
+                else if (/\b(esmalte|latex|pintura|antihongos)\b/.test(solOrigNorm) && !familiasUsadas.has('esmalte_antihongos')) claveReemplazo = 'esmalte_antihongos';
+                else if (/\b(brocha|rodillo|lija)\b/.test(solOrigNorm) && !familiasUsadas.has('accesorios_pintura')) claveReemplazo = 'accesorios_pintura';
+                else if (/\b(poliuretano|sikaflex|silicona)\b/.test(solOrigNorm) && !familiasUsadas.has('sellador_elastico')) claveReemplazo = 'sellador_elastico';
+                else if (/\b(cinta|malla)\b/.test(solOrigNorm) && !familiasUsadas.has('cinta_malla')) claveReemplazo = 'cinta_malla';
+
+                if (!claveReemplazo) {
+                    claveReemplazo = ordenFamiliasSegunDiagnostico.find(f => !familiasUsadas.has(f)) || 'mortero_reparacion';
+                }
+                familiasUsadas.add(claveReemplazo);
+
+                const fichaLimpia = catalogoRespaldo[claveReemplazo] || catalogoRespaldo.mortero_reparacion;
+                return {
+                    ...item,
+                    ...fichaLimpia,
+                    originalText: fichaLimpia.nombre_sodimac,
+                    cantidad: item.cantidad || 1,
+                    precio: fichaLimpia.precio_sodimac
+                };
+            });
+
+            // MEJORA #5: Validación de Compatibilidad Química también en Frontend (anti-mezclas incompatibles y sin duplicar 2 pinturas de terminación)
             let yaTienePinturaFront = false;
 
             resueltos = resueltos.filter(item => {
                 const nNorm = window.normalizarTextoMaterial(`${item.producto} ${item.nombre_sodimac} ${item.nombre_easy}`);
-                const esPinturaTerm = /\b(latex|esmalte al agua|esmalte sintetico|oleo)\b/.test(nNorm) && !/\b(imprimante|fijador|sellador|aditivo|brocha|rodillo)\b/.test(nNorm);
+                const esPinturaTerm = /\b(latex|esmalte al agua|esmalte sintetico|oleo)\b/.test(nNorm) && !/\b(imprimante|fijador|sellador|aditivo|brocha|rodillo|puente|colmafix)\b/.test(nNorm);
                 if (esPinturaTerm) {
                     if (yaTienePinturaFront) return false;
                     yaTienePinturaFront = true;
                 }
                 if (hayHumedadFront && /\b(pasta muro interior|yeso)\b/.test(nNorm) && !/\b(placa|exterior|hidrofug)\b/.test(nNorm)) {
-                    item.producto = "Mortero de Reparación / Estuco Hidrofugado";
-                    if (/\b(pasta muro interior|yeso)\b/.test(window.normalizarTextoMaterial(item.nombre_sodimac))) {
-                        item.nombre_sodimac = "Mortero de Reparación Estructural 25 kg";
-                    }
-                    if (/\b(pasta muro interior|yeso)\b/.test(window.normalizarTextoMaterial(item.nombre_easy))) {
-                        item.nombre_easy = "Mortero de Reparación Estructural 25 kg";
-                    }
+                    const fichaMortero = catalogoRespaldo.mortero_reparacion;
+                    if (fichaMortero) Object.assign(item, fichaMortero);
                 }
                 return true;
             });
 
             window.materialesData = resueltos.map((item, newIdx) => ({ ...item, index: newIdx }));
+            if (huboSaneamientoIncongruente && window.scheduleAutoUpdateHistory) {
+                setTimeout(() => window.scheduleAutoUpdateHistory(), 400);
+            }
 
             // Garantizar que ningún material quede con precio $0 en Sodimac o Easy (respaldo cruzado con promedio de canasta si viniera de un historial antiguo)
             const conPrecioValido = window.materialesData.filter(it => it.precio_sodimac > 0 || it.precio_easy > 0);
@@ -4441,15 +4739,6 @@
                 }
                 
                 document.getElementById('solution-val').innerText = resultObj.solucion;
-                
-                // Renderizar Materiales, Validar Compatibilidad Química (Mejora #5), Comparar Canasta Completa Sodimac vs Easy y Activar Ficha Técnica
-                window.renderMaterialsAndStoreComparison(
-                    resultObj.materiales || [],
-                    resultObj.materiales_detalle || null,
-                    resultObj.comparativa_tiendas || null,
-                    resultObj.precio_ref,
-                    resultObj.unidad_ref
-                );
 
                 const stepsList = document.getElementById('steps-list');
                 stepsList.innerHTML = '';
@@ -4465,6 +4754,15 @@
                         stepsList.appendChild(li);
                     });
                 }
+
+                // Renderizar Materiales, Validar Congruencia y Compatibilidad Química (Mejora #5), Comparar Canasta Completa Sodimac vs Easy y Activar Ficha Técnica
+                window.renderMaterialsAndStoreComparison(
+                    resultObj.materiales || [],
+                    resultObj.materiales_detalle || null,
+                    resultObj.comparativa_tiendas || null,
+                    resultObj.precio_ref,
+                    resultObj.unidad_ref
+                );
 
                 let tiempoMostrado = resultObj.tiempo || '';
                 if (window.currentClimateAdjustment && window.currentClimateAdjustment.factor_secado > 1.1 && !tiempoMostrado.toLowerCase().includes('ajustado')) {
@@ -5423,14 +5721,6 @@
                 }
             }
             
-            window.renderMaterialsAndStoreComparison(
-                data.materiales || [],
-                data.materiales_detalle || null,
-                data.comparativa_tiendas || null,
-                data.precio_ref,
-                data.unidad_ref
-            );
-
             const stepsList = document.getElementById('steps-list');
             stepsList.innerHTML = '';
             if (data.pasos && Array.isArray(data.pasos)) {
@@ -5442,6 +5732,14 @@
                     stepsList.appendChild(li);
                 });
             }
+
+            window.renderMaterialsAndStoreComparison(
+                data.materiales || [],
+                data.materiales_detalle || null,
+                data.comparativa_tiendas || null,
+                data.precio_ref,
+                data.unidad_ref
+            );
 
             currentRating = data.rating || 0;
             document.querySelectorAll('.star-btn').forEach(s => {
