@@ -191,11 +191,11 @@
             document.getElementById('location-options').style.display = 'none';
             
             // Mostrar mensaje final (Interesado, pero casual)
-            document.getElementById('message').innerHTML = `¡Genial! Nos vemos hoy en Cassis <b>${lugar}</b>.<br><br>Tengo muchas ganas de conocerte y pasar un rato muy lindo juntos. 😊`;
+            document.getElementById('message').innerHTML = `¡Genial! Nos vemos hoy en el Cassis <b>${lugar}</b>.<br><br>No voy a preguntarte las típicas cosas aburridas...👀`;
             
             // Configurar el link de WhatsApp con el lugar elegido
             const telefono = "56992582669";
-            const textoWs = `¡Holaa! Confirmo que iremos a tomar helado en Cassis ${lugar} hoy 🍦🩷💙`;
+            const textoWs = `¡Holaa! Confirmo que iremos a tomar helado al Cassis ${lugar} hoy 🍦🩷💙`;
             document.getElementById('btn-wa').href = `https://api.whatsapp.com/send?phone=${telefono}&text=${encodeURIComponent(textoWs)}`;
             
             // Mostrar el botón de WhatsApp
