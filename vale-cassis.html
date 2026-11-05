@@ -11,12 +11,14 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
+            min-height: 100vh; /* Permite que la página crezca si el contenido es más alto */
+            padding: 20px; /* Evita que la tarjeta quede pegada a los bordes */
+            box-sizing: border-box;
             background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%);
             font-family: 'Poppins', sans-serif;
             text-align: center;
             margin: 0;
-            overflow: hidden; /* Evita que el botón 'No' cree barras de desplazamiento al escapar */
+            overflow-x: hidden; /* Evita el scroll horizontal cuando el botón escapa */
         }
         .card {
             background: rgba(255, 255, 255, 0.95);
@@ -76,6 +78,7 @@
         #btn-no {
             background-color: #f1f5f9;
             color: #64748b;
+            position: relative; /* Posición inicial */
         }
     </style>
 </head>
@@ -86,7 +89,7 @@
         
         <h1 id="title">Una Dulce Petición</h1>
         <p id="message">
-            Estimada Emilia,<br><br>
+            Estimada Valentina,<br><br>
             Por medio de la presente misiva, tengo el profundo honor de extenderte una cordial y afectuosa invitación para compartir un exquisito helado el día de hoy en la ilustre heladería Cassis.<br><br>
             ¿Aceptarías concederme el privilegio de tu compañía esta tarde?
         </p>
@@ -99,14 +102,14 @@
 
     <script>
         function escapar(btn) {
-            // Cambia el botón a posición fija para que se mueva por toda la pantalla
+            // Cambia el botón a posición fija para que no modifique el scroll de la página al moverse
             btn.style.position = 'fixed';
             
-            // Calcula límites seguros para que el botón no se salga de la ventana
+            // Calcula límites seguros respecto al tamaño de la pantalla visible
             const anchoVentana = window.innerWidth - btn.offsetWidth - 20;
             const altoVentana = window.innerHeight - btn.offsetHeight - 20;
             
-            // Genera coordenadas aleatorias
+            // Genera coordenadas aleatorias dentro de la vista actual
             const nuevoX = Math.max(10, Math.floor(Math.random() * anchoVentana));
             const nuevoY = Math.max(10, Math.floor(Math.random() * altoVentana));
             
