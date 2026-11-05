@@ -81,14 +81,34 @@
             position: relative;
         }
         
-        /* Estilos para el nuevo botón de WhatsApp */
+        /* Estilos para las opciones de lugares */
+        #location-options {
+            display: none; /* Oculto inicialmente */
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        .location-btn {
+            background-color: #f8fafc;
+            color: #0369a1;
+            border: 2px solid #bae6fd;
+            padding: 12px 20px;
+            border-radius: 15px;
+        }
+        .location-btn:hover {
+            background-color: #e0f2fe;
+            border-color: #7dd3fc;
+            transform: translateY(-2px);
+        }
+
+        /* Estilos para el botón de WhatsApp */
         #wa-container {
             display: none; /* Oculto inicialmente */
             margin-top: 10px;
         }
         #btn-wa {
             display: inline-block;
-            background-color: #25D366; /* Verde WhatsApp */
+            background-color: #25D366;
             color: white;
             padding: 12px 30px;
             font-size: 16px;
@@ -122,9 +142,15 @@
             <button id="btn-no" onmouseover="escapar(this)" ontouchstart="escapar(this)">No</button>
         </div>
 
+        <!-- Contenedor de opciones de lugar -->
+        <div id="location-options">
+            <button class="location-btn" onclick="seleccionarLugar('Parque Arauco')">📍 Cassis Parque Arauco</button>
+            <button class="location-btn" onclick="seleccionarLugar('Mallplaza Los Dominicos')">📍 Cassis Los Dominicos</button>
+        </div>
+
         <!-- Contenedor del botón de confirmación por WhatsApp -->
         <div id="wa-container">
-            <a id="btn-wa" href="https://api.whatsapp.com/send?phone=56992582669&text=%C2%A1Hola!%20Confirmo%20que%20asistir%C3%A9%20a%20tomar%20helado%20en%20Cassis%20hoy%20%F0%9F%8D%A6%E2%9D%A4%EF%B8%8F" target="_blank">Confirmo que asistiré</a>
+            <a id="btn-wa" href="#" target="_blank">Confirmo que asistiré</a>
         </div>
     </div>
 
@@ -146,12 +172,29 @@
             document.getElementById('title').innerText = "¡Excelente elección!";
             document.getElementById('title').style.color = "#047857";
             
-            document.getElementById('message').innerHTML = "Nos vemos hoy en Cassis para disfrutar de un gran momento.<br><br>¿Puedo abrazarte y no soltarte? ❤️";
+            // Preguntar por la sucursal
+            document.getElementById('message').innerHTML = "¿A cuál sucursal prefieres que vayamos hoy?";
             
             document.getElementById('stitch-img').src = "https://lh3.googleusercontent.com/pw/AP1GczOZuIdMZFAywb8FyOe0dk9zzvR84hoe5B-c7zNq6kfWH_tGo2_LIX92Fk7Ske0uPtiwrfqs2wUu0kDPJw3UDKooyqIFTU0EuMKBlsSjfv8LvVJyS5f7uAExrrsceNLTeiflQln_lmaDp2fB0QhDQ6Bk7Q=w433-h599-s-no-gm?authuser=0";
             
-            // Oculta los botones iniciales y muestra el de WhatsApp
+            // Ocultar botones iniciales y mostrar las opciones de lugar
             document.querySelector('.buttons').style.display = 'none';
+            document.getElementById('location-options').style.display = 'flex';
+        }
+
+        function seleccionarLugar(lugar) {
+            // Ocultar los botones de selección
+            document.getElementById('location-options').style.display = 'none';
+            
+            // Mostrar mensaje final romántico
+            document.getElementById('message').innerHTML = `Nos vemos hoy en Cassis <b>${lugar}</b> para disfrutar de un gran momento.<br><br>¿Puedo abrazarte y no soltarte? ❤️`;
+            
+            // Configurar el link de WhatsApp con el lugar elegido
+            const telefono = "56992582669";
+            const textoWs = `¡Hola! Confirmo que asistiré a tomar helado en Cassis ${lugar} hoy 🍦❤️`;
+            document.getElementById('btn-wa').href = `https://api.whatsapp.com/send?phone=${telefono}&text=${encodeURIComponent(textoWs)}`;
+            
+            // Mostrar el botón de WhatsApp
             document.getElementById('wa-container').style.display = 'block';
         }
     </script>
