@@ -201,7 +201,7 @@
         <h1 id="title">¡Una dulce invitación!</h1>
         <p id="message">
             Hola Valentina,<br><br>
-            Me encantaría que nos conociéramos y qué mejor forma de hacerlo que compartiendo un buen helado hoy en Cassis.<br><br>
+            Me encantaría que nos conociéramos y qué mejor forma de hacerlo que compartiendo un buen helado hoy en el Cassis.<br><br>
             ¿Te animas a acompañarme esta tarde?
         </p>
         
@@ -264,10 +264,10 @@
         function seleccionarLugar(lugar) {
             document.getElementById('location-options').style.display = 'none';
             
-            document.getElementById('message').innerHTML = `¡Genial! Nos vemos hoy en Cassis <b>${lugar}</b>.<br><br>Tengo muchas ganas de conocerte y pasar un rato muy lindo juntos. 😊`;
+            document.getElementById('message').innerHTML = `¡Genial! Nos vemos hoy en el Cassis <b>${lugar}</b>.<br><br>No voy a preguntarte las típicas cosas aburridas...👀`;
             
             const telefono = "56992582669";
-            const textoWs = `¡Holaa! Confirmo que iremos a tomar helado en Cassis ${lugar} hoy 🍦🩷💙`;
+            const textoWs = `¡Holaa! Confirmo que iremos a tomar helado en el Cassis ${lugar} hoy 🍦🩷💙`;
             document.getElementById('btn-wa').href = `https://api.whatsapp.com/send?phone=${telefono}&text=${encodeURIComponent(textoWs)}`;
             
             document.getElementById('wa-container').style.display = 'block';
