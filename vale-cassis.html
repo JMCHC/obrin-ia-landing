@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Una Invitación Especial</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Poppins:wght@300;400;500&display=swap');
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%);
+            font-family: 'Poppins', sans-serif;
+            text-align: center;
+            margin: 0;
+            overflow: hidden; /* Evita que el botón 'No' cree barras de desplazamiento al escapar */
+        }
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 40px;
+            border-radius: 24px;
+            box-shadow: 0 15px 35px rgba(0, 40, 100, 0.1);
+            max-width: 420px;
+            position: relative;
+            z-index: 10;
+        }
+        img {
+            width: 220px;
+            height: auto;
+            border-radius: 16px;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+            transition: opacity 0.4s ease;
+        }
+        h1 {
+            color: #0369a1;
+            font-family: 'Playfair Display', serif;
+            font-size: 28px;
+            margin-bottom: 15px;
+        }
+        p {
+            color: #475569;
+            font-size: 15px;
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+        .buttons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            position: relative;
+            height: 50px;
+        }
+        button {
+            padding: 12px 30px;
+            font-size: 16px;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            font-weight: 500;
+            font-family: 'Poppins', sans-serif;
+            transition: transform 0.2s, background-color 0.3s;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        #btn-yes {
+            background-color: #0284c7;
+            color: white;
+        }
+        #btn-yes:hover {
+            background-color: #0369a1;
+            transform: scale(1.05);
+        }
+        #btn-no {
+            background-color: #f1f5f9;
+            color: #64748b;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="card" id="card">
+        <img id="stitch-img" src="https://lh3.googleusercontent.com/pw/AP1GczNIp1Ani-brp_2W6kXfFAXUvHLd31Q97El4BsifdbOiCMZhcVg7ihWArZg-PhLwbz0FltxPapiR4P203ZcZCx3sQW2ukdxnkmE1-zTebBvmD9lPb5doCXrIIKvkNl5ewrzaBu99xofUoNjDWEyKjYvFYQ=w451-h599-s-no-gm?authuser=0" alt="Stitch con Helado">
+        
+        <h1 id="title">Una Dulce Petición</h1>
+        <p id="message">
+            Estimada Emilia,<br><br>
+            Por medio de la presente misiva, tengo el profundo honor de extenderte una cordial y afectuosa invitación para compartir un exquisito helado el día de hoy en la ilustre heladería Cassis.<br><br>
+            ¿Aceptarías concederme el privilegio de tu compañía esta tarde?
+        </p>
+        
+        <div class="buttons">
+            <button id="btn-yes" onclick="aceptar()">Sí, acepto</button>
+            <button id="btn-no" onmouseover="escapar(this)" ontouchstart="escapar(this)">No</button>
+        </div>
+    </div>
+
+    <script>
+        function escapar(btn) {
+            // Cambia el botón a posición fija para que se mueva por toda la pantalla
+            btn.style.position = 'fixed';
+            
+            // Calcula límites seguros para que el botón no se salga de la ventana
+            const anchoVentana = window.innerWidth - btn.offsetWidth - 20;
+            const altoVentana = window.innerHeight - btn.offsetHeight - 20;
+            
+            // Genera coordenadas aleatorias
+            const nuevoX = Math.max(10, Math.floor(Math.random() * anchoVentana));
+            const nuevoY = Math.max(10, Math.floor(Math.random() * altoVentana));
+            
+            // Aplica las nuevas coordenadas
+            btn.style.left = nuevoX + 'px';
+            btn.style.top = nuevoY + 'px';
+        }
+
+        function aceptar() {
+            // Actualizar textos y diseño al aceptar
+            document.getElementById('title').innerText = "¡Excelente elección!";
+            document.getElementById('title').style.color = "#047857";
+            
+            document.getElementById('message').innerHTML = "Nos vemos hoy en Cassis para disfrutar de un gran momento.<br><br>¿Puedo abrazarte y no soltarte? ❤️";
+            
+            // Cambiar a la imagen de Stitch feliz
+            document.getElementById('stitch-img').src = "https://lh3.googleusercontent.com/pw/AP1GczOZuIdMZFAywb8FyOe0dk9zzvR84hoe5B-c7zNq6kfWH_tGo2_LIX92Fk7Ske0uPtiwrfqs2wUu0kDPJw3UDKooyqIFTU0EuMKBlsSjfv8LvVJyS5f7uAExrrsceNLTeiflQln_lmaDp2fB0QhDQ6Bk7Q=w433-h599-s-no-gm?authuser=0";
+            
+            // Ocultar los botones
+            document.querySelector('.buttons').style.display = 'none';
+        }
+    </script>
+</body>
+</html>
