@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pase VIP Anti-Estrés</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&family=Poppins:wght@300;500;700&display=swap');
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .ticket-container {
+            background: #ffffff;
+            width: 100%;
+            max-width: 380px;
+            border-radius: 12px;
+            position: relative;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        /* Efecto de borde troquelado de ticket */
+        .ticket-container::before, .ticket-container::after {
+            content: '';
+            position: absolute;
+            top: 55%;
+            width: 30px;
+            height: 30px;
+            background: #162032;
+            border-radius: 50%;
+            transform: translateY(-50%);
+            z-index: 2;
+        }
+        .ticket-container::before { left: -15px; }
+        .ticket-container::after { right: -15px; }
+
+        .ticket-header {
+            background: #0284c7; /* Azul más relajante */
+            color: white;
+            padding: 25px 20px;
+            text-align: center;
+        }
+        .ticket-header h1 {
+            margin: 0;
+            font-size: 22px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+        .ticket-header p {
+            margin: 5px 0 0 0;
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .ticket-body {
+            padding: 40px 30px;
+            text-align: center;
+            border-bottom: 2px dashed #cbd5e1;
+            min-height: 180px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .barcode-section {
+            font-family: 'Courier Prime', monospace;
+            color: #334155;
+            transition: all 0.5s ease;
+        }
+
+        .barcode {
+            font-size: 40px;
+            letter-spacing: -2px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: #0f172a;
+        }
+
+        /* Sección que se revela */
+        .revealed-plan {
+            display: none;
+            opacity: 0;
+            transition: opacity 1s ease;
+        }
+        .revealed-plan h2 {
+            color: #0f172a;
+            font-size: 20px;
+            margin-bottom: 10px;
+        }
+        .revealed-plan p {
+            color: #475569;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        .highlight {
+            background: #bae6fd;
+            padding: 3px 10px;
+            border-radius: 6px;
+            font-weight: 700;
+            color: #0369a1;
+            display: inline-block;
+            margin-bottom: 10px;
+        }
+
+        .ticket-footer {
+            padding: 25px;
+            text-align: center;
+            background: #f8fafc;
+        }
+
+        button {
+            background-color: #0f172a;
+            color: white;
+            border: none;
+            padding: 14px 30px;
+            border-radius: 30px;
+            font-size: 16px;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.2);
+        }
+        button:hover {
+            background-color: #334155;
+            transform: translateY(-2px);
+        }
+
+        /* Animación de escaneo */
+        .scan-line {
+            display: none;
+            width: 100%;
+            height: 3px;
+            background-color: #0284c7;
+            position: absolute;
+            top: 0;
+            left: 0;
+            box-shadow: 0 0 10px #0284c7;
+            animation: scan 1.5s ease-in-out infinite;
+        }
+
+        @keyframes scan {
+            0% { top: 10%; opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { top: 90%; opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="ticket-container">
+        <div class="scan-line" id="scanner"></div>
+        
+        <div class="ticket-header">
+            <h1>Pase Anti-Estrés</h1>
+            <p>Válido para: Valentina</p>
+        </div>
+
+        <div class="ticket-body">
+            <div class="barcode-section" id="barcode-view">
+                <div class="barcode">||| ||||| || |||</div>
+                <p>Pase encriptado.<br>Requiere escaneo para revelar el plan.</p>
+            </div>
+
+            <div class="revealed-plan" id="plan-view">
+                <h2>¡Validación Exitosa! ✨</h2>
+                <span class="highlight">Destino: Oasis Arcade (Aire Acondicionado ❄️)</span>
+                <p>Sé que se viene una semana de locura con pruebas y controles, y como mañana harán 32°, este pase te garantiza un último respiro: cero calor, juegos, competencia sana y desconexión total antes del caos.</p>
+            </div>
+        </div>
+
+        <div class="ticket-footer">
+            <button id="action-btn" onclick="escanearBoleto()">Escanear Pase</button>
+        </div>
+    </div>
+
+    <script>
+        function escanearBoleto() {
+            const btn = document.getElementById('action-btn');
+            const scanner = document.getElementById('scanner');
+            const barcodeView = document.getElementById('barcode-view');
+            const planView = document.getElementById('plan-view');
+
+            btn.innerText = "Analizando condiciones...";
+            btn.style.backgroundColor = "#0284c7";
+            btn.disabled = true;
+
+            scanner.style.display = "block";
+
+            setTimeout(() => {
+                scanner.style.display = "none";
+                barcodeView.style.display = "none";
+                
+                planView.style.display = "block";
+                setTimeout(() => {
+                    planView.style.opacity = "1";
+                }, 50);
+
+                btn.innerText = "Confirmar Asistencia 🚀";
+                btn.style.backgroundColor = "#10b981"; 
+                btn.disabled = false;
+                
+                btn.onclick = function() {
+                    const telefono = "56992582669";
+                    const mensaje = "¡Pase Anti-Estrés escaneado! ❄️ Me parece un plan perfecto antes de la semana de pruebas. ¡Prepárate para perder en los juegos! 👾";
+                    window.location.href = `https://api.whatsapp.com/send?phone=${telefono}&text=${encodeURIComponent(mensaje)}`;
+                };
+            }, 2500); 
+        }
+    </script>
+</body>
+</html>
