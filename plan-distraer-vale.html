@@ -12,7 +12,6 @@
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            /* Fondo en tonos turquesa y menta suaves */
             background: linear-gradient(135deg, #e6fffa 0%, #b2f5ea 100%);
             font-family: 'Poppins', sans-serif;
             margin: 0;
@@ -30,7 +29,6 @@
             overflow: hidden;
         }
 
-        /* Efecto de borde troquelado de ticket */
         .ticket-container::before, .ticket-container::after {
             content: '';
             position: absolute;
@@ -46,7 +44,7 @@
         .ticket-container::after { right: -15px; }
 
         .ticket-header {
-            background: #14b8a6; /* Turquesa principal */
+            background: #14b8a6;
             color: white;
             padding: 25px 20px;
             text-align: center;
@@ -90,7 +88,6 @@
             color: #64748b;
         }
 
-        /* Sección que se revela */
         .revealed-plan {
             display: none;
             opacity: 0;
@@ -142,7 +139,6 @@
             transform: translateY(-2px);
         }
 
-        /* Animación de escaneo */
         .scan-line {
             display: none;
             width: 100%;
@@ -165,8 +161,8 @@
 </head>
 <body>
 
-    <!-- Etiqueta de audio oculta -->
-    <audio id="musica-fondo" src="shawn.mp3" preload="auto"></audio>
+    <!-- Reproductor oculto apuntando a "Summer Of Love.mp3" -->
+    <audio id="musica-fondo" src="Summer Of Love.mp3" preload="auto"></audio>
 
     <div class="ticket-container">
         <div class="scan-line" id="scanner"></div>
@@ -203,10 +199,9 @@
             const planView = document.getElementById('plan-view');
             const musica = document.getElementById('musica-fondo');
 
-            // Reproducir música y configurar volumen
+            // Configurar el volumen y reproducir la canción
             musica.volume = 0.5;
-            // Si elegiste una canción donde lo mejor está un poco más adelante, puedes usar: musica.currentTime = 10; 
-            musica.play();
+            musica.play().catch(e => console.log("El navegador requiere interacción previa para el audio", e));
 
             btn.innerText = "Abriendo sorpresa...";
             btn.style.backgroundColor = "#ccfbf1";
