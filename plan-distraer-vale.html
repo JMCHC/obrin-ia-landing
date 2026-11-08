@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pase solo para Vale</title>
+    <title>Pase para Vale</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&family=Playfair+Display:ital,wght@0,600&family=Poppins:wght@300;500;700&display=swap');
 
@@ -15,9 +15,9 @@
             background: linear-gradient(135deg, #e6fffa 0%, #b2f5ea 100%);
             font-family: 'Poppins', sans-serif;
             margin: 0;
-            padding: 20px;
+            padding: 40px 20px; /* Un poco más de padding arriba y abajo para el scroll */
             box-sizing: border-box;
-            overflow: hidden;
+            overflow-x: hidden; /* Evita el scroll horizontal, pero PERMITE el vertical */
         }
 
         /* --- ESTILOS DE LA PORTADA DE STITCH --- */
@@ -40,8 +40,7 @@
         #portada-stitch img {
             width: 250px;
             height: auto;
-            border-radius: 20px; /* Bordes suaves para la foto */
-            /* Animación para que Stitch flote suavemente */
+            border-radius: 20px;
             animation: flotar 3s ease-in-out infinite;
             filter: drop-shadow(0 10px 15px rgba(20, 184, 166, 0.3));
         }
@@ -78,7 +77,7 @@
             100% { transform: scale(1); }
         }
 
-        /* --- ESTILOS DEL TICKET (Oculto inicialmente) --- */
+        /* --- ESTILOS DEL TICKET --- */
         .ticket-container {
             background: #ffffff;
             width: 100%;
@@ -86,14 +85,13 @@
             border-radius: 16px;
             position: relative;
             box-shadow: 0 15px 35px rgba(20, 184, 166, 0.25);
-            /* Oculto al cargar la página */
             opacity: 0;
             visibility: hidden;
             transform: scale(0.9);
             transition: all 0.8s ease;
+            margin: auto; /* Ayuda a centrar con el scroll */
         }
 
-        /* Clase que se añade al hacer clic en Stitch */
         .ticket-container.visible {
             opacity: 1;
             visibility: visible;
@@ -271,27 +269,22 @@
     </div>
 
     <script>
-        // Función que se ejecuta al tocar a Stitch
         function abrirCarta() {
             const portada = document.getElementById('portada-stitch');
             const ticket = document.getElementById('ticket');
             const musica = document.getElementById('musica-fondo');
 
-            // 1. Iniciar la música (ahora no se bloqueará porque ella interactuó con la pantalla)
             musica.volume = 0.5;
             musica.play().catch(e => console.log("El navegador requiere interacción previa para el audio", e));
 
-            // 2. Desvanecer la portada de Stitch
             portada.style.opacity = '0';
             
-            // 3. Después de que se desvanezca, ocultarla y mostrar el ticket
             setTimeout(() => {
                 portada.style.visibility = 'hidden';
-                ticket.classList.add('visible'); // Esta clase activa la animación de entrada
+                ticket.classList.add('visible'); 
             }, 800);
         }
 
-        // Función que se ejecuta al presionar "Revelar Plan" en el ticket
         function escanearBoleto() {
             const btn = document.getElementById('action-btn');
             const scanner = document.getElementById('scanner');
