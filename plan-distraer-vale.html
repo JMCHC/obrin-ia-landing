@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pase de Rescate</title>
+    <title>Pase solo para Vale</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&family=Poppins:wght@300;500;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&family=Playfair+Display:ital,wght@0,600&family=Poppins:wght@300;500;700&display=swap');
 
         body {
             display: flex;
@@ -17,16 +17,87 @@
             margin: 0;
             padding: 20px;
             box-sizing: border-box;
+            overflow: hidden;
         }
 
+        /* --- ESTILOS DE LA PORTADA DE STITCH --- */
+        #portada-stitch {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #e6fffa 0%, #b2f5ea 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            transition: opacity 0.8s ease, visibility 0.8s ease;
+            cursor: pointer;
+        }
+
+        #portada-stitch img {
+            width: 250px;
+            height: auto;
+            border-radius: 20px; /* Bordes suaves para la foto */
+            /* Animación para que Stitch flote suavemente */
+            animation: flotar 3s ease-in-out infinite;
+            filter: drop-shadow(0 10px 15px rgba(20, 184, 166, 0.3));
+        }
+
+        #portada-stitch h2 {
+            color: #0f766e;
+            font-family: 'Playfair Display', serif;
+            margin-top: 30px;
+            font-size: 28px;
+            letter-spacing: 1px;
+        }
+
+        #portada-stitch p {
+            color: #0f766e;
+            font-size: 14px;
+            font-weight: 500;
+            background: #ccfbf1;
+            padding: 10px 20px;
+            border-radius: 30px;
+            margin-top: 10px;
+            box-shadow: 0 4px 10px rgba(20, 184, 166, 0.2);
+            animation: latido 2s infinite;
+        }
+
+        @keyframes flotar {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-15px); }
+            100% { transform: translateY(0px); }
+        }
+
+        @keyframes latido {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        /* --- ESTILOS DEL TICKET (Oculto inicialmente) --- */
         .ticket-container {
             background: #ffffff;
             width: 100%;
             max-width: 380px;
             border-radius: 16px;
             position: relative;
-            box-shadow: 0 15px 35px rgba(20, 184, 166, 0.15);
-            overflow: hidden;
+            box-shadow: 0 15px 35px rgba(20, 184, 166, 0.25);
+            /* Oculto al cargar la página */
+            opacity: 0;
+            visibility: hidden;
+            transform: scale(0.9);
+            transition: all 0.8s ease;
+        }
+
+        /* Clase que se añade al hacer clic en Stitch */
+        .ticket-container.visible {
+            opacity: 1;
+            visibility: visible;
+            transform: scale(1);
         }
 
         .ticket-container::before, .ticket-container::after {
@@ -161,10 +232,18 @@
 </head>
 <body>
 
-    <!-- Reproductor oculto apuntando a "Summer Of Love.mp3" -->
+    <!-- Reproductor de audio -->
     <audio id="musica-fondo" src="Summer Of Love.mp3" preload="auto"></audio>
 
-    <div class="ticket-container">
+    <!-- PORTADA: Stitch sosteniendo la carta (con enlace directo) -->
+    <div id="portada-stitch" onclick="abrirCarta()">
+        <img src="https://lh3.googleusercontent.com/pw/AP1GczN0y915BRqR7Jqlv5IL6T-heegvSVHG3HugmGm240kQTERWNJipBuJ6nbOABQ-L2dLHqob8RkXZTvhozKi49qYE7nFTmsgNRYSi5Fhf3sAuD-VTVnn13G-ynAGwY-BgyV5Hfyxx9vWEZxkqnuafSu6Tmw=w609-h426-s-no-gm?authuser=0" alt="Stitch con una carta">
+        <h2>Para Valentina 💌</h2>
+        <p>Toca a Stitch para abrir</p>
+    </div>
+
+    <!-- TICKET DE INVITACIÓN -->
+    <div class="ticket-container" id="ticket">
         <div class="scan-line" id="scanner"></div>
         
         <div class="ticket-header">
@@ -192,16 +271,32 @@
     </div>
 
     <script>
+        // Función que se ejecuta al tocar a Stitch
+        function abrirCarta() {
+            const portada = document.getElementById('portada-stitch');
+            const ticket = document.getElementById('ticket');
+            const musica = document.getElementById('musica-fondo');
+
+            // 1. Iniciar la música (ahora no se bloqueará porque ella interactuó con la pantalla)
+            musica.volume = 0.5;
+            musica.play().catch(e => console.log("El navegador requiere interacción previa para el audio", e));
+
+            // 2. Desvanecer la portada de Stitch
+            portada.style.opacity = '0';
+            
+            // 3. Después de que se desvanezca, ocultarla y mostrar el ticket
+            setTimeout(() => {
+                portada.style.visibility = 'hidden';
+                ticket.classList.add('visible'); // Esta clase activa la animación de entrada
+            }, 800);
+        }
+
+        // Función que se ejecuta al presionar "Revelar Plan" en el ticket
         function escanearBoleto() {
             const btn = document.getElementById('action-btn');
             const scanner = document.getElementById('scanner');
             const barcodeView = document.getElementById('barcode-view');
             const planView = document.getElementById('plan-view');
-            const musica = document.getElementById('musica-fondo');
-
-            // Configurar el volumen y reproducir la canción
-            musica.volume = 0.5;
-            musica.play().catch(e => console.log("El navegador requiere interacción previa para el audio", e));
 
             btn.innerText = "Abriendo sorpresa...";
             btn.style.backgroundColor = "#ccfbf1";
