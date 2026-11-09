@@ -78,6 +78,10 @@
             margin-bottom: 10px;
             display: block;
         }
+        
+        .pending-date {
+            color: #f59e0b; /* Color ámbar para destacar que está pendiente */
+        }
 
         .memory-card h3 {
             margin: 0 0 10px 0;
@@ -106,6 +110,14 @@
 
         .btn-ver:hover {
             background-color: #0d9488;
+        }
+        
+        .btn-pendiente {
+            background-color: #f59e0b;
+        }
+        
+        .btn-pendiente:hover {
+            background-color: #d97706;
         }
 
         /* Estilos para el capítulo bloqueado */
@@ -148,24 +160,22 @@
 
     <div class="timeline">
         
-        <!-- Capítulo 1: Cassis -->
+        <!-- Capítulo 1: Cassis (Pendiente) -->
         <div class="memory-card">
-            <span class="memory-date">Capítulo I</span>
+            <span class="memory-date pending-date">Invitación I (En Pausa ⏳)</span>
             <img src="https://lh3.googleusercontent.com/pw/AP1GczNIp1Ani-brp_2W6kXfFAXUvHLd31Q97El4BsifdbOiCMZhcVg7ihWArZg-PhLwbz0FltxPapiR4P203ZcZCx3sQW2ukdxnkmE1-zTebBvmD9lPb5doCXrIIKvkNl5ewrzaBu99xofUoNjDWEyKjYvFYQ=w451-h599-s-no-gm?authuser=0" alt="Stitch Helado">
-            <h3>La Primera Cita 🍦</h3>
-            <p>El día que el botón "No" se volvió imposible de atrapar y compartimos nuestro primer helado en Cassis.</p>
-            <!-- CAMBIA "cassis.html" POR EL NOMBRE EXACTO DE TU PRIMER ARCHIVO -->
-            <a href="cassis.html" class="btn-ver">Volver a vivirlo</a>
+            <h3>La Promesa del Helado 🍦</h3>
+            <p>Nuestra primera invitación oficial. El tiempo no nos acompañó ese día, ¡pero la promesa de ir a Cassis sigue intacta!</p>
+            <a href="vale-cassis.html" class="btn-ver btn-pendiente">Ver invitación original</a>
         </div>
 
-        <!-- Capítulo 2: Happyland -->
+        <!-- Capítulo 2: Happyland (Completado) -->
         <div class="memory-card">
-            <span class="memory-date">Capítulo II</span>
+            <span class="memory-date">Invitación II (¡Misión Cumplida! ✨)</span>
             <img src="https://lh3.googleusercontent.com/pw/AP1GczN0y915BRqR7Jqlv5IL6T-heegvSVHG3HugmGm240kQTERWNJipBuJ6nbOABQ-L2dLHqob8RkXZTvhozKi49qYE7nFTmsgNRYSi5Fhf3sAuD-VTVnn13G-ynAGwY-BgyV5Hfyxx9vWEZxkqnuafSu6Tmw=w609-h426-s-no-gm?authuser=0" alt="Stitch Carta">
             <h3>El Pase Anti-Estrés 👾</h3>
-            <p>Un rescate VIP de los 32 grados para competir y desconectar en el arcade de Happyland.</p>
-            <!-- CAMBIA "happyland.html" POR EL NOMBRE EXACTO DE TU SEGUNDO ARCHIVO -->
-            <a href="happyland.html" class="btn-ver">Volver a vivirlo</a>
+            <p>Un rescate VIP de los 32 grados para competir y desconectar de todo en el arcade de Happyland.</p>
+            <a href="plan-distraer-vale.html" class="btn-ver">Volver a vivirlo</a>
         </div>
 
         <!-- Próximo Capítulo (Bloqueado) -->
