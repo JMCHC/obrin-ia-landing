@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nuestras Aventuras</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;1,600&family=Poppins:wght@300;400;500;700&display=swap');
+
+        body {
+            background: linear-gradient(135deg, #fdf4ff 0%, #ccfbf1 100%);
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 40px 20px;
+            min-height: 100vh;
+            box-sizing: border-box;
+            color: #0f766e;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 50px;
+            animation: fadeInDown 1s ease;
+        }
+
+        .header h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 36px;
+            color: #0d9488;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 16px;
+            color: #475569;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .timeline {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .memory-card {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 20px;
+            padding: 25px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(20, 184, 166, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .memory-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(20, 184, 166, 0.2);
+        }
+
+        .memory-card img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+
+        .memory-date {
+            font-size: 12px;
+            font-weight: 700;
+            color: #14b8a6;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .memory-card h3 {
+            margin: 0 0 10px 0;
+            font-size: 20px;
+            color: #0f766e;
+        }
+
+        .memory-card p {
+            font-size: 14px;
+            color: #64748b;
+            line-height: 1.5;
+            margin-bottom: 20px;
+        }
+
+        .btn-ver {
+            display: inline-block;
+            background-color: #14b8a6;
+            color: white;
+            padding: 10px 24px;
+            border-radius: 20px;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 14px;
+            transition: background-color 0.3s ease;
+        }
+
+        .btn-ver:hover {
+            background-color: #0d9488;
+        }
+
+        /* Estilos para el capítulo bloqueado */
+        .memory-card.locked {
+            background: rgba(255, 255, 255, 0.5);
+            border: 2px dashed #99f6e4;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 380px;
+        }
+
+        .locked-icon {
+            font-size: 40px;
+            margin-bottom: 15px;
+            opacity: 0.5;
+        }
+
+        .locked h3 {
+            color: #94a3b8;
+        }
+
+        .locked p {
+            color: #94a3b8;
+        }
+
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>El Baúl de los Recuerdos ✨</h1>
+        <p>Un espacio digital diseñado exclusivamente para Valentina, donde guardamos los capítulos de nuestra historia.</p>
+    </div>
+
+    <div class="timeline">
+        
+        <!-- Capítulo 1: Cassis -->
+        <div class="memory-card">
+            <span class="memory-date">Capítulo I</span>
+            <img src="https://lh3.googleusercontent.com/pw/AP1GczNIp1Ani-brp_2W6kXfFAXUvHLd31Q97El4BsifdbOiCMZhcVg7ihWArZg-PhLwbz0FltxPapiR4P203ZcZCx3sQW2ukdxnkmE1-zTebBvmD9lPb5doCXrIIKvkNl5ewrzaBu99xofUoNjDWEyKjYvFYQ=w451-h599-s-no-gm?authuser=0" alt="Stitch Helado">
+            <h3>La Primera Cita 🍦</h3>
+            <p>El día que el botón "No" se volvió imposible de atrapar y compartimos nuestro primer helado en Cassis.</p>
+            <!-- CAMBIA "cassis.html" POR EL NOMBRE EXACTO DE TU PRIMER ARCHIVO -->
+            <a href="cassis.html" class="btn-ver">Volver a vivirlo</a>
+        </div>
+
+        <!-- Capítulo 2: Happyland -->
+        <div class="memory-card">
+            <span class="memory-date">Capítulo II</span>
+            <img src="https://lh3.googleusercontent.com/pw/AP1GczN0y915BRqR7Jqlv5IL6T-heegvSVHG3HugmGm240kQTERWNJipBuJ6nbOABQ-L2dLHqob8RkXZTvhozKi49qYE7nFTmsgNRYSi5Fhf3sAuD-VTVnn13G-ynAGwY-BgyV5Hfyxx9vWEZxkqnuafSu6Tmw=w609-h426-s-no-gm?authuser=0" alt="Stitch Carta">
+            <h3>El Pase Anti-Estrés 👾</h3>
+            <p>Un rescate VIP de los 32 grados para competir y desconectar en el arcade de Happyland.</p>
+            <!-- CAMBIA "happyland.html" POR EL NOMBRE EXACTO DE TU SEGUNDO ARCHIVO -->
+            <a href="happyland.html" class="btn-ver">Volver a vivirlo</a>
+        </div>
+
+        <!-- Próximo Capítulo (Bloqueado) -->
+        <div class="memory-card locked">
+            <div class="locked-icon">🔒</div>
+            <h3>Próxima Aventura</h3>
+            <p>Aún escribiéndose...</p>
+        </div>
+
+    </div>
+
+</body>
+</html>
