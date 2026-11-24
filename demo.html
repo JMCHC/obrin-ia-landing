@@ -94,14 +94,23 @@
 
         .stepper-container { position: relative; width: 100%; cursor: default; }
         .stepper-line { position: absolute; top: 12px; left: 0; right: 0; height: 3px; background-color: #e2e8f0; z-index: 0; }
-        .stepper-line-fill { position: absolute; top: 12px; left: 0; height: 3px; background-color: #ea580c; z-index: 0; transition: width 0.4s ease; }
+        .stepper-line-fill { position: absolute; top: 12px; left: 0; height: 3px; background-color: #ea580c; z-index: 0; transition: width 0.4s ease, background-color 0.3s ease; }
         .stepper-line-red { background-color: #ef4444; }
+        .stepper-line-green { background-color: #10b981; }
         .step-dot { width: 26px; height: 26px; border-radius: 50%; background-color: white; border: 2px solid #cbd5e1; display: flex; justify-content: center; align-items: center; cursor: pointer; transition: all 0.3s; position: relative; z-index: 10; box-shadow: 0 0 0 4px white; color: #94a3b8; }
         .step-dot:hover { transform: scale(1.15); border-color: #fb923c; color: #fb923c; }
         .step-dot.active { border-color: #ea580c; background-color: #ea580c; color: white; }
         .step-dot.active:hover { border-color: #c2410c; background-color: #c2410c; }
         .step-dot.rejected { border-color: #ef4444; background-color: #ef4444; color: white; }
+        .step-dot.delayed { border-color: #dc2626; background-color: #dc2626; color: white; box-shadow: 0 0 0 4px #fee2e2; }
+        .step-dot.completed-green { border-color: #10b981; background-color: #10b981; color: white; }
         .step-time { position: absolute; top: -18px; font-size: 0.55rem; font-weight: 700; color: #64748b; background: white; padding: 1px 5px; border-radius: 4px; border: 1px solid #e2e8f0; transform: translateX(-50%); z-index: 5; white-space: nowrap; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+        .step-time-delayed { color: #b91c1c; background: #fef2f2; border-color: #fecaca; }
+        @keyframes alertPulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.45); }
+            50% { box-shadow: 0 0 0 6px rgba(220, 38, 38, 0); }
+        }
+        .delay-alert-badge { animation: alertPulse 1.8s infinite; }
         
         /* Scrollbar del historial */
         .custom-scrollbar::-webkit-scrollbar { width: 4px; }
@@ -896,6 +905,9 @@
                     </div>
                 </div>
 
+                <!-- BARRA DE SEGUIMIENTO Y BITÁCORA DE AVANCE DE OBRA EN LA FICHA -->
+                <div id="result-progress-wrapper" class="hidden mt-6"></div>
+
                 <div id="rating-section" class="mt-6 bg-slate-50 p-5 rounded-xl border border-slate-200 shadow-sm">
                     <div id="history-autosave-badge" class="flex items-center justify-center gap-2 bg-emerald-50 border border-emerald-200 text-emerald-800 px-3 py-2 rounded-lg text-[0.68rem] font-bold mb-4">
                         <i class="fas fa-check-circle text-emerald-600"></i>
@@ -1133,6 +1145,31 @@
                 <button type="button" onclick="window.closeMaterialDetailModal()" class="bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold uppercase tracking-wider px-5 py-2 rounded-lg transition">
                     Cerrar Ficha
                 </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- VISOR LIGHTBOX PARA FOTOS DE AVANCE DE OBRA -->
+    <div id="avance-lightbox-modal" class="hidden fixed inset-0 bg-slate-950/90 backdrop-blur-sm z-[220] items-center justify-center p-4" onclick="if(event.target === this) window.closeAvanceLightbox()">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden border border-slate-200 flex flex-col max-h-[90vh]">
+            <div class="px-5 py-3.5 bg-slate-900 text-white flex items-center justify-between gap-3">
+                <div class="min-w-0">
+                    <div class="flex items-center gap-2">
+                        <span id="lightbox-etapa" class="bg-brand-500 text-white text-[0.6rem] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full">Ejecución</span>
+                        <span id="lightbox-pct" class="bg-white/15 text-white text-[0.6rem] font-bold px-2 py-0.5 rounded-full">75%</span>
+                    </div>
+                    <p id="lightbox-meta" class="text-[0.65rem] text-slate-300 mt-1 truncate"></p>
+                </div>
+                <button type="button" onclick="window.closeAvanceLightbox()" class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition shrink-0">
+                    <i class="fas fa-times text-sm"></i>
+                </button>
+            </div>
+            <div class="bg-slate-950 flex items-center justify-center p-3 overflow-hidden">
+                <img id="lightbox-img" src="" alt="Foto de avance" class="max-h-[58vh] w-auto object-contain rounded-lg">
+            </div>
+            <div class="p-4 bg-slate-50 border-t border-slate-200 text-left">
+                <p class="text-[0.6rem] font-bold uppercase tracking-widest text-slate-400 mb-1">Comentario de Avance</p>
+                <p id="lightbox-comment" class="text-xs sm:text-sm text-slate-700 leading-relaxed"></p>
             </div>
         </div>
     </div>
@@ -3035,27 +3072,455 @@
             return `⏱️ +${minutes}m`;
         };
 
-        window.generateStepperHTML = function(docId, seguimiento, rawData) {
+        window.formatDurationShort = function(diffMs) {
+            const diff = Math.max(0, Number(diffMs) || 0);
+            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+            const minutes = Math.floor((diff / 1000 / 60) % 60);
+            if (days > 0) return `${days}d ${hours}h`;
+            if (hours > 0) return `${hours}h ${minutes}m`;
+            return `${minutes}m`;
+        };
+
+        window.escapeSeguimientoHtml = function(str) {
+            return String(str || '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        };
+
+        // Parsea el rango máximo estimado del diagnóstico (ej: "2 a 3 días", "3-5 días", "24 a 48 horas", "1 a 2 semanas")
+        window.parseDiagnosticRangeMs = function(tiempoStr) {
+            const raw = String(tiempoStr || '').trim();
+            if (!raw) return null;
+            // Priorizar la porción previa a paréntesis explicativos como "(ajustado x1.35 por ...)"
+            const baseText = raw.split('(')[0].trim() || raw;
+            const norm = baseText.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+
+            const unitToMs = (u) => {
+                if (/^mes/.test(u)) return 30 * 24 * 60 * 60 * 1000;
+                if (/^sem/.test(u)) return 7 * 24 * 60 * 60 * 1000;
+                if (/^(dia|d\b)/.test(u)) return 24 * 60 * 60 * 1000;
+                if (/^(hora|hr|h\b)/.test(u)) return 60 * 60 * 1000;
+                if (/^min/.test(u)) return 60 * 1000;
+                return 24 * 60 * 60 * 1000;
+            };
+
+            const rangeMatch = norm.match(/(\d+(?:[.,]\d+)?)\s*(?:a|-|–|y|hasta)\s*(\d+(?:[.,]\d+)?)\s*(horas?|hrs?|h|dias?|d|semanas?|sem|meses?|mes)\b/);
+            if (rangeMatch) {
+                const maxVal = parseFloat(rangeMatch[2].replace(',', '.'));
+                const mult = unitToMs(rangeMatch[3]);
+                if (Number.isFinite(maxVal) && maxVal > 0) {
+                    return { maxMs: maxVal * mult, rangeLabel: baseText };
+                }
+            }
+
+            const singleMatch = norm.match(/(\d+(?:[.,]\d+)?)\s*(horas?|hrs?|h|dias?|d|semanas?|sem|meses?|mes)\b/);
+            if (singleMatch) {
+                const val = parseFloat(singleMatch[1].replace(',', '.'));
+                const mult = unitToMs(singleMatch[2]);
+                if (Number.isFinite(val) && val > 0) {
+                    return { maxMs: val * mult, rangeLabel: baseText };
+                }
+            }
+
+            if (/\bmedio\s+dia\b/.test(norm)) return { maxMs: 12 * 60 * 60 * 1000, rangeLabel: baseText };
+            if (/\buna?\s+dia\b/.test(norm)) return { maxMs: 24 * 60 * 60 * 1000, rangeLabel: baseText };
+            if (/\buna\s+semana\b/.test(norm)) return { maxMs: 7 * 24 * 60 * 60 * 1000, rangeLabel: baseText };
+            return null;
+        };
+
+        // Evalúa si el tiempo transcurrido supera el rango indicado por el diagnóstico
+        window.evaluateDelayStatus = function(seguimiento, rawData) {
+            const paso = (seguimiento && seguimiento.paso_actual) ? Number(seguimiento.paso_actual) : 1;
+            const isRej = Boolean(seguimiento && seguimiento.estado_rechazado);
+            const fechas = (seguimiento && seguimiento.fechas) ? seguimiento.fechas : {};
+            const createdAtMs = rawData && rawData.createdAt
+                ? (rawData.createdAt.seconds ? rawData.createdAt.seconds * 1000 : new Date(rawData.createdAt).getTime())
+                : Date.now();
+            const startStep1Ms = Number(fechas["1"]) || createdAtMs;
+            const startExecMs = fechas["4"] ? Number(fechas["4"]) : null;
+            const endMs = fechas["5"] ? Number(fechas["5"]) : null;
+            const nowMs = Date.now();
+
+            const parsed = window.parseDiagnosticRangeMs(rawData ? rawData.tiempo : '');
+            // En Ejecución (paso 4) se mide la duración de la ejecución; en etapas previas, el tiempo acumulado desde la evaluación
+            const activeStartMs = (paso === 4 && startExecMs) ? startExecMs : startStep1Ms;
+            const referenceElapsedMs = (paso === 5 && endMs)
+                ? Math.max(0, endMs - (startExecMs || startStep1Ms))
+                : Math.max(0, nowMs - activeStartMs);
+
+            let isDelayed = false;
+            let overrunMs = 0;
+            let finishedLate = false;
+
+            if (parsed && !isRej) {
+                if (paso < 5 && referenceElapsedMs > parsed.maxMs) {
+                    isDelayed = true;
+                    overrunMs = referenceElapsedMs - parsed.maxMs;
+                } else if (paso === 5 && referenceElapsedMs > parsed.maxMs) {
+                    finishedLate = true;
+                    overrunMs = referenceElapsedMs - parsed.maxMs;
+                }
+            }
+
+            return {
+                isDelayed,
+                finishedLate,
+                activeElapsedMs: referenceElapsedMs,
+                activeElapsedText: window.formatDurationShort(referenceElapsedMs),
+                overrunText: overrunMs > 0 ? window.formatDurationShort(overrunMs) : '',
+                rangeLabel: parsed ? parsed.rangeLabel : (rawData && rawData.tiempo ? String(rawData.tiempo).split('(')[0].trim() : ''),
+                hasRange: Boolean(parsed),
+                contextLabel: paso === 4 ? 'en ejecución' : 'desde evaluación'
+            };
+        };
+
+        window.getSeguimientoPercentage = function(seguimiento) {
+            const paso = (seguimiento && seguimiento.paso_actual) ? Number(seguimiento.paso_actual) : 1;
+            if (seguimiento && typeof seguimiento.porcentaje_avance === 'number' && Number.isFinite(seguimiento.porcentaje_avance)) {
+                return Math.max(0, Math.min(100, Math.round(seguimiento.porcentaje_avance)));
+            }
+            const defaults = { 1: 0, 2: 25, 3: 50, 4: 75, 5: 100 };
+            return defaults[paso] !== undefined ? defaults[paso] : 0;
+        };
+
+        window.expandedStepperIds = window.expandedStepperIds || new Set();
+        window.pendingAvancePhotos = window.pendingAvancePhotos || {};
+
+        window.refreshStepperEverywhere = function(docId) {
+            const data = window.historyDataCache[docId];
+            if (!data) return;
+            const listWrapper = document.getElementById(`stepper-wrapper-${docId}`);
+            if (listWrapper) {
+                listWrapper.innerHTML = window.generateStepperHTML(docId, data.seguimiento, data, '');
+            }
+            const resultWrapper = document.getElementById('result-progress-wrapper');
+            if (resultWrapper && currentEditingDocId === docId) {
+                resultWrapper.classList.remove('hidden');
+                resultWrapper.innerHTML = window.generateStepperHTML(docId, data.seguimiento, data, 'res_');
+            }
+        };
+
+        window.persistSeguimientoToFirestore = async function(docId, newSeguimiento) {
+            const activeAuth = auth || window.authInstance;
+            const activeDb = db || window.db;
+            const userId = window.currentUserId || activeAuth?.currentUser?.uid;
+            if (!userId || !activeDb) throw new Error("No hay usuario activo.");
+
+            const docRef = window.doc(activeDb, 'artifacts', window.globalAppId, 'users', userId, 'evaluaciones', docId);
+            try {
+                await window.updateDoc(docRef, { seguimiento: newSeguimiento, updatedAt: new Date() });
+            } catch (err) {
+                // Si el documento supera 1 MB por exceso de fotos acumuladas, recomprimir fotos antiguas de avance y reintentar
+                const msg = String(err && err.message ? err.message : '');
+                if (/size|exceeds|too large|1048576/i.test(msg) && Array.isArray(newSeguimiento.avances)) {
+                    const slimAvances = [];
+                    for (const av of newSeguimiento.avances) {
+                        let imgCopy = av.img || null;
+                        if (imgCopy && imgCopy.includes('base64,')) {
+                            const rawB64 = imgCopy.split(',')[1];
+                            const recompressed = (typeof window.comprimirBase64ParaAPI === 'function')
+                                ? await window.comprimirBase64ParaAPI(rawB64, 'image/jpeg', 380, 0.45)
+                                : rawB64;
+                            imgCopy = `data:image/jpeg;base64,${recompressed}`;
+                        }
+                        slimAvances.push({ ...av, img: imgCopy });
+                    }
+                    newSeguimiento.avances = slimAvances;
+                    await window.updateDoc(docRef, { seguimiento: newSeguimiento, updatedAt: new Date() });
+                } else {
+                    throw err;
+                }
+            }
+
+            try {
+                const expertRef = window.doc(activeDb, 'artifacts', window.globalAppId, 'conocimiento_experto', docId);
+                // Guardar seguimiento liviano (sin imágenes base64 pesadas) en memoria RAG si ya existe ese doc
+                const expertSeg = {
+                    paso_actual: newSeguimiento.paso_actual,
+                    estado_rechazado: Boolean(newSeguimiento.estado_rechazado),
+                    fechas: newSeguimiento.fechas || {},
+                    porcentaje_avance: window.getSeguimientoPercentage(newSeguimiento),
+                    total_avances: Array.isArray(newSeguimiento.avances) ? newSeguimiento.avances.length : 0
+                };
+                await window.setDoc(expertRef, { seguimiento: expertSeg }, { merge: true });
+            } catch (e) {}
+        };
+
+        window.toggleStepperDrawer = function(docId, event) {
+            if (event) { event.stopPropagation(); event.preventDefault(); }
+            if (window.expandedStepperIds.has(docId)) {
+                window.expandedStepperIds.delete(docId);
+            } else {
+                window.expandedStepperIds.add(docId);
+            }
+            window.refreshStepperEverywhere(docId);
+        };
+
+        window.previewAvancePercentage = function(uidKey, val) {
+            const lbl = document.getElementById(`avance-pct-val-${uidKey}`);
+            if (lbl) lbl.innerText = `${val}%`;
+        };
+
+        window.saveAvancePercentage = async function(docId, val, event) {
+            if (event) { event.stopPropagation(); event.preventDefault(); }
+            const data = window.historyDataCache[docId];
+            if (!data) return;
+            const pct = Math.max(0, Math.min(100, Math.round(Number(val) || 0)));
+            const baseSeg = data.seguimiento || {
+                paso_actual: 1,
+                estado_rechazado: false,
+                fechas: { "1": (data.createdAt ? (data.createdAt.seconds ? data.createdAt.seconds * 1000 : new Date(data.createdAt).getTime()) : Date.now()) },
+                avances: []
+            };
+            let nextPaso = baseSeg.paso_actual || 1;
+            const nextFechas = { ...(baseSeg.fechas || {}) };
+            if (pct === 100 && nextPaso < 5 && !baseSeg.estado_rechazado) {
+                nextPaso = 5;
+                nextFechas["5"] = Date.now();
+            }
+            const newSeguimiento = {
+                ...baseSeg,
+                paso_actual: nextPaso,
+                fechas: nextFechas,
+                porcentaje_avance: pct,
+                avances: Array.isArray(baseSeg.avances) ? baseSeg.avances : []
+            };
+            window.historyDataCache[docId].seguimiento = newSeguimiento;
+            window.refreshStepperEverywhere(docId);
+            try {
+                await window.persistSeguimientoToFirestore(docId, newSeguimiento);
+                showNotification(`📊 Avance actualizado a ${pct}%`);
+            } catch (err) {
+                console.error(err);
+                showNotification("Error al guardar porcentaje de avance", true);
+            }
+        };
+
+        window.handleAvancePhotoSelect = function(docId, uidKey, input, event) {
+            if (event) event.stopPropagation();
+            const file = input && input.files && input.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                const rawUrl = e.target.result;
+                const rawB64 = rawUrl.split(',')[1];
+                const compressedB64 = (typeof window.comprimirBase64ParaAPI === 'function')
+                    ? await window.comprimirBase64ParaAPI(rawB64, file.type || 'image/jpeg', 560, 0.58)
+                    : rawB64;
+                const finalDataUrl = `data:image/jpeg;base64,${compressedB64}`;
+                window.pendingAvancePhotos[docId] = finalDataUrl;
+                const prevBox = document.getElementById(`avance-preview-box-${uidKey}`);
+                const prevImg = document.getElementById(`avance-preview-img-${uidKey}`);
+                if (prevBox && prevImg) {
+                    prevImg.src = finalDataUrl;
+                    prevBox.classList.remove('hidden');
+                }
+            };
+            reader.readAsDataURL(file);
+        };
+
+        window.clearPendingAvancePhoto = function(docId, uidKey, event) {
+            if (event) { event.stopPropagation(); event.preventDefault(); }
+            delete window.pendingAvancePhotos[docId];
+            const prevBox = document.getElementById(`avance-preview-box-${uidKey}`);
+            const prevImg = document.getElementById(`avance-preview-img-${uidKey}`);
+            const fileInp = document.getElementById(`avance-file-${uidKey}`);
+            if (prevImg) prevImg.src = '';
+            if (prevBox) prevBox.classList.add('hidden');
+            if (fileInp) fileInp.value = '';
+        };
+
+        window.submitAvanceUpdate = async function(docId, uidKey, event) {
+            if (event) { event.stopPropagation(); event.preventDefault(); }
+            const data = window.historyDataCache[docId];
+            if (!data) return;
+
+            const commentEl = document.getElementById(`avance-comment-${uidKey}`);
+            const sliderEl = document.getElementById(`avance-slider-${uidKey}`);
+            const comentario = commentEl ? commentEl.value.trim() : '';
+            const pendingImg = window.pendingAvancePhotos[docId] || null;
+            const sliderPct = sliderEl ? Math.max(0, Math.min(100, Math.round(Number(sliderEl.value)))) : window.getSeguimientoPercentage(data.seguimiento);
+
+            if (!comentario && !pendingImg) {
+                return showNotification("Sube una foto o escribe un comentario de avance antes de guardar.", true);
+            }
+
+            const btn = document.getElementById(`avance-submit-btn-${uidKey}`);
+            if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Guardando...'; }
+
+            const baseSeg = data.seguimiento || {
+                paso_actual: 1,
+                estado_rechazado: false,
+                fechas: { "1": (data.createdAt ? (data.createdAt.seconds ? data.createdAt.seconds * 1000 : new Date(data.createdAt).getTime()) : Date.now()) },
+                avances: []
+            };
+            const labels = ["Evaluado", "Revisión", "Aprobado", "Ejecución", "Finalizado"];
+            const curPaso = baseSeg.paso_actual || 1;
+            const etapaName = baseSeg.estado_rechazado ? "Rechazado" : (labels[curPaso - 1] || "En Curso");
+
+            const activeAuth = auth || window.authInstance;
+            const autor = (activeAuth && activeAuth.currentUser)
+                ? (activeAuth.currentUser.displayName || activeAuth.currentUser.email || 'Profesional')
+                : 'Profesional';
+
+            const nuevoRegistro = {
+                id: 'av_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
+                fecha: Date.now(),
+                paso: curPaso,
+                etapa: etapaName,
+                porcentaje: sliderPct,
+                comentario: comentario,
+                img: pendingImg,
+                autor: autor
+            };
+
+            const nextFechas = { ...(baseSeg.fechas || {}) };
+            let nextPaso = curPaso;
+            if (sliderPct === 100 && nextPaso < 5 && !baseSeg.estado_rechazado) {
+                nextPaso = 5;
+                nextFechas["5"] = Date.now();
+            }
+
+            const prevAvances = Array.isArray(baseSeg.avances) ? baseSeg.avances : [];
+            const newSeguimiento = {
+                ...baseSeg,
+                paso_actual: nextPaso,
+                fechas: nextFechas,
+                porcentaje_avance: sliderPct,
+                avances: [nuevoRegistro, ...prevAvances]
+            };
+
+            delete window.pendingAvancePhotos[docId];
+            window.historyDataCache[docId].seguimiento = newSeguimiento;
+            window.expandedStepperIds.add(docId);
+
+            try {
+                await window.persistSeguimientoToFirestore(docId, newSeguimiento);
+                window.refreshStepperEverywhere(docId);
+                showNotification("📸 Avance de obra registrado con éxito");
+            } catch (err) {
+                console.error("Error guardando avance:", err);
+                showNotification("No se pudo guardar el avance en la nube.", true);
+                window.refreshStepperEverywhere(docId);
+            }
+        };
+
+        window.deleteAvanceItem = async function(docId, avanceId, event) {
+            if (event) { event.stopPropagation(); event.preventDefault(); }
+            if (!confirm("¿Eliminar este registro de avance de la bitácora?")) return;
+            const data = window.historyDataCache[docId];
+            if (!data || !data.seguimiento) return;
+
+            const updatedAvances = (data.seguimiento.avances || []).filter(a => a.id !== avanceId);
+            const newSeguimiento = { ...data.seguimiento, avances: updatedAvances };
+            window.historyDataCache[docId].seguimiento = newSeguimiento;
+            window.refreshStepperEverywhere(docId);
+
+            try {
+                await window.persistSeguimientoToFirestore(docId, newSeguimiento);
+                showNotification("Registro eliminado de la bitácora");
+            } catch (err) {
+                console.error(err);
+                showNotification("Error al eliminar el registro", true);
+            }
+        };
+
+        window.openAvanceLightbox = function(docId, avanceId, event) {
+            if (event) { event.stopPropagation(); event.preventDefault(); }
+            const data = window.historyDataCache[docId];
+            if (!data || !data.seguimiento || !Array.isArray(data.seguimiento.avances)) return;
+            const av = data.seguimiento.avances.find(a => a.id === avanceId);
+            if (!av || !av.img) return;
+
+            const modal = document.getElementById('avance-lightbox-modal');
+            document.getElementById('lightbox-img').src = av.img;
+            document.getElementById('lightbox-etapa').innerText = av.etapa || 'Avance';
+            document.getElementById('lightbox-pct').innerText = `${typeof av.porcentaje === 'number' ? av.porcentaje : 0}%`;
+            const fechaStr = av.fecha ? new Date(av.fecha).toLocaleDateString('es-CL', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '';
+            document.getElementById('lightbox-meta').innerText = `${av.autor || 'Equipo de Obra'} · ${fechaStr}`;
+            document.getElementById('lightbox-comment').innerText = av.comentario || 'Sin comentario adicional.';
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        };
+
+        window.closeAvanceLightbox = function() {
+            const modal = document.getElementById('avance-lightbox-modal');
+            if (!modal) return;
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        };
+
+        window.generateStepperHTML = function(docId, seguimiento, rawData, contextPrefix = '') {
             if (!seguimiento) {
                 seguimiento = {
                     paso_actual: 1,
                     estado_rechazado: false,
-                    fechas: { "1": (rawData.createdAt ? rawData.createdAt.seconds * 1000 : Date.now()) }
+                    fechas: { "1": (rawData.createdAt ? (rawData.createdAt.seconds ? rawData.createdAt.seconds * 1000 : new Date(rawData.createdAt).getTime()) : Date.now()) },
+                    porcentaje_avance: 0,
+                    avances: []
                 };
             }
             
             const paso = seguimiento.paso_actual || 1;
-            const isRej = seguimiento.estado_rechazado || false;
+            const isRej = Boolean(seguimiento.estado_rechazado);
             const fechas = seguimiento.fechas || {};
-            
+            const avances = Array.isArray(seguimiento.avances) ? seguimiento.avances : [];
+            const pct = window.getSeguimientoPercentage(seguimiento);
+            const delayInfo = window.evaluateDelayStatus(seguimiento, rawData || {});
+            const uidKey = `${contextPrefix}${docId}`;
+            const isExpanded = window.expandedStepperIds.has(docId);
+
             const labels = ["Evaluado", "Revisión", "Aprobado", "Ejecución", "Finalizado"];
             const rejectedLabel = "Rechazado";
 
-            let html = `<div class="stepper-container w-full relative mt-8 mb-2 px-2" onclick="event.stopPropagation()">`;
+            const containerTheme = delayInfo.isDelayed
+                ? 'bg-red-50/70 border-red-300 shadow-sm'
+                : (isRej ? 'bg-red-50/30 border-red-200' : (paso === 5 ? 'bg-emerald-50/40 border-emerald-200' : 'bg-slate-50/70 border-slate-200/80'));
+
+            let statusPill = '';
+            if (delayInfo.isDelayed) {
+                statusPill = `<span class="delay-alert-badge inline-flex items-center gap-1.5 bg-red-600 text-white text-[0.6rem] font-extrabold uppercase tracking-wider px-2.5 py-1 rounded-full shadow-sm"><i class="fas fa-exclamation-triangle"></i> ALERTA DEMORA (+${window.escapeSeguimientoHtml(delayInfo.overrunText)} sobre rango)</span>`;
+            } else if (isRej) {
+                statusPill = `<span class="inline-flex items-center gap-1 bg-red-100 text-red-700 border border-red-200 text-[0.6rem] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full"><i class="fas fa-times-circle"></i> Rechazado</span>`;
+            } else if (paso === 5) {
+                statusPill = delayInfo.finishedLate
+                    ? `<span class="inline-flex items-center gap-1 bg-amber-100 text-amber-800 border border-amber-200 text-[0.6rem] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full"><i class="fas fa-check-circle"></i> Finalizado (+${window.escapeSeguimientoHtml(delayInfo.overrunText)} extra)</span>`
+                    : `<span class="inline-flex items-center gap-1 bg-emerald-100 text-emerald-700 border border-emerald-200 text-[0.6rem] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full"><i class="fas fa-check-circle"></i> Finalizado en plazo</span>`;
+            } else {
+                statusPill = `<span class="inline-flex items-center gap-1 bg-white text-slate-600 border border-slate-200 text-[0.6rem] font-bold px-2.5 py-0.5 rounded-full"><i class="far fa-clock text-brand-500"></i> En curso (${window.escapeSeguimientoHtml(delayInfo.contextLabel)}): ${window.escapeSeguimientoHtml(delayInfo.activeElapsedText)}</span>`;
+            }
+
+            const pctBadgeClass = delayInfo.isDelayed || isRej
+                ? 'bg-red-100 text-red-700 border-red-200'
+                : (pct >= 100 ? 'bg-emerald-100 text-emerald-700 border-emerald-200' : 'bg-brand-100 text-brand-700 border-brand-200');
+
+            let html = `<div class="rounded-xl border p-3.5 transition-all ${containerTheme}" onclick="event.stopPropagation()">`;
+
+            // Encabezado: Porcentaje + Plazo Diagnóstico + Alerta Roja de Demora
+            html += `
+                <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+                    <div class="flex flex-wrap items-center gap-2">
+                        <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full border text-[0.65rem] font-extrabold uppercase tracking-wider ${pctBadgeClass}">
+                            <i class="fas fa-tasks text-[0.6rem]"></i> Avance: ${pct}%
+                        </span>
+                        ${delayInfo.rangeLabel ? `<span class="text-[0.6rem] font-semibold text-slate-500 bg-white border border-slate-200 px-2 py-0.5 rounded-full"><i class="fas fa-hourglass-half text-slate-400 mr-1"></i>Plazo diag: ${window.escapeSeguimientoHtml(delayInfo.rangeLabel)}</span>` : ''}
+                    </div>
+                    <div class="flex items-center gap-1.5">${statusPill}</div>
+                </div>
+            `;
+
+            // Barra de 5 hitos
+            html += `<div class="stepper-container w-full relative mt-6 mb-3 px-2">`;
             html += `<div class="stepper-line shadow-inner"></div>`;
             
-            let fillWidth = (paso - 1) * 25;
-            let fillClass = isRej ? 'stepper-line-fill stepper-line-red shadow-sm' : 'stepper-line-fill shadow-sm';
+            let fillWidth = isRej ? (paso - 1) * 25 : pct;
+            let fillClass = (isRej || delayInfo.isDelayed)
+                ? 'stepper-line-fill stepper-line-red shadow-sm'
+                : (pct >= 100 ? 'stepper-line-fill stepper-line-green shadow-sm' : 'stepper-line-fill shadow-sm');
             html += `<div class="${fillClass}" style="width: ${fillWidth}%;"></div>`;
 
             for (let i = 2; i <= 5; i++) {
@@ -3065,23 +3530,41 @@
                 }
             }
 
+            if (paso < 5 && !isRej) {
+                const liveLeft = Math.min(92, (paso - 1) * 25 + 6);
+                const liveClass = delayInfo.isDelayed ? 'step-time step-time-delayed font-extrabold' : 'step-time';
+                html += `<div class="${liveClass}" style="left: ${liveLeft}%;" title="Tiempo transcurrido en etapa actual">${delayInfo.isDelayed ? '🚨' : '⏱️'} ${window.escapeSeguimientoHtml(delayInfo.activeElapsedText)}</div>`;
+            }
+
             html += `<div class="flex justify-between relative z-10">`;
             for (let i = 1; i <= 5; i++) {
                 let dotClass = "step-dot";
                 let icon = '';
                 let labelText = labels[i-1];
+                let textClass = 'text-slate-400';
                 
                 if (i < paso) {
-                    dotClass += " active";
+                    dotClass += (paso === 5 && !delayInfo.finishedLate) ? " completed-green" : " active";
                     icon = '<i class="fas fa-check text-[10px]"></i>';
+                    textClass = (paso === 5 && !delayInfo.finishedLate) ? 'text-emerald-600' : 'text-brand-600';
                 } else if (i === paso) {
                     if (isRej) {
                         dotClass += " rejected";
                         icon = '<i class="fas fa-times text-[10px]"></i>';
                         labelText = (i === 3) ? rejectedLabel : labelText;
+                        textClass = 'text-red-600';
+                    } else if (delayInfo.isDelayed) {
+                        dotClass += " delayed";
+                        icon = `<span class="text-[10px] font-bold">${i}</span>`;
+                        textClass = 'text-red-600';
+                    } else if (paso === 5) {
+                        dotClass += " completed-green";
+                        icon = '<i class="fas fa-check text-[10px]"></i>';
+                        textClass = 'text-emerald-600';
                     } else {
                         dotClass += " active";
                         icon = `<span class="text-[10px] font-bold">${i}</span>`;
+                        textClass = 'text-brand-600';
                     }
                 } else {
                     icon = `<span class="text-[10px] font-bold">${i}</span>`;
@@ -3100,11 +3583,122 @@
                         <div class="${dotClass}" ${onClick} title="Marcar como ${labelText}">
                             ${icon}
                         </div>
-                        <div class="mt-1 text-[10px] font-bold ${i<=paso ? (isRej && i===paso ? 'text-red-500' : 'text-brand-600') : 'text-slate-400'}">${labelText}</div>
+                        <div class="mt-1 text-[10px] font-bold ${textClass}">${labelText}</div>
                     </div>
                 `;
             }
             html += `</div></div>`;
+
+            // Franja compacta inferior: miniaturas de fotos de cómo va quedando + comentarios + botón abrir bitácora
+            const fotosAvances = avances.filter(a => a && a.img);
+            const comentariosCount = avances.filter(a => a && a.comentario).length;
+            const ultimoAvance = avances[0] || null;
+            let thumbsHtml = '';
+            if (fotosAvances.length > 0) {
+                thumbsHtml = `<div class="flex items-center gap-1.5">`;
+                fotosAvances.slice(0, 4).forEach(av => {
+                    thumbsHtml += `<img src="${av.img}" onclick="window.openAvanceLightbox('${docId}', '${av.id}', event)" title="Ver foto de avance (${av.etapa || ''} ${av.porcentaje || 0}%)" class="w-8 h-8 rounded-md object-cover border border-slate-300 hover:border-brand-500 hover:scale-110 transition cursor-pointer shadow-xs">`;
+                });
+                if (fotosAvances.length > 4) {
+                    thumbsHtml += `<span class="text-[0.6rem] font-bold bg-slate-200 text-slate-700 px-1.5 py-0.5 rounded">+${fotosAvances.length - 4}</span>`;
+                }
+                thumbsHtml += `</div>`;
+            }
+
+            html += `
+                <div class="mt-3 pt-2.5 border-t border-slate-200/70 flex flex-wrap items-center justify-between gap-2">
+                    <div class="flex items-center gap-2.5 min-w-0 flex-1">
+                        ${thumbsHtml}
+                        <div class="min-w-0 flex-1">
+                            ${ultimoAvance
+                                ? `<p class="text-[0.65rem] text-slate-600 truncate"><span class="font-bold text-slate-800">${fotosAvances.length} foto(s) · ${comentariosCount} nota(s)</span>${ultimoAvance.comentario ? ` — "${window.escapeSeguimientoHtml(ultimoAvance.comentario)}"` : ''}</p>`
+                                : `<p class="text-[0.65rem] text-slate-400 italic">Sin fotos ni notas de avance registradas aún.</p>`
+                            }
+                        </div>
+                    </div>
+                    <button type="button" onclick="window.toggleStepperDrawer('${docId}', event)" class="shrink-0 ${isExpanded ? 'bg-slate-800 text-white' : 'bg-white hover:bg-brand-50 text-slate-700 hover:text-brand-700 border border-slate-200 hover:border-brand-300'} text-[0.65rem] font-bold px-3 py-1.5 rounded-lg transition shadow-xs flex items-center gap-1.5">
+                        <i class="fas fa-camera text-brand-500"></i>
+                        <span>${isExpanded ? 'Ocultar Bitácora' : `Fotos y Avance (${avances.length})`}</span>
+                        <i class="fas fa-chevron-${isExpanded ? 'up' : 'down'} text-[0.55rem]"></i>
+                    </button>
+                </div>
+            `;
+
+            // Drawer expandible: Slider de %, subir foto de avance, comentario e historial de avances
+            if (isExpanded) {
+                const pendingImg = window.pendingAvancePhotos[docId] || '';
+                let timelineHtml = '';
+                if (avances.length === 0) {
+                    timelineHtml = `<p class="text-[0.68rem] text-slate-400 italic text-center py-3">Sube la primera fotografía de cómo va quedando la reparación o registra un comentario de obra.</p>`;
+                } else {
+                    timelineHtml = `<div class="space-y-2.5 max-h-60 overflow-y-auto custom-scrollbar pr-1">` + avances.map(av => {
+                        const fStr = av.fecha ? new Date(av.fecha).toLocaleDateString('es-CL', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }) : '';
+                        return `
+                            <div class="bg-white border border-slate-200 rounded-lg p-2.5 flex items-start gap-2.5 shadow-2xs">
+                                ${av.img ? `<img src="${av.img}" onclick="window.openAvanceLightbox('${docId}', '${av.id}', event)" class="w-14 h-14 rounded-lg object-cover border border-slate-200 shrink-0 cursor-pointer hover:opacity-90 transition" title="Ampliar fotografía">` : `<div class="w-10 h-10 rounded-lg bg-slate-100 text-slate-400 flex items-center justify-center shrink-0"><i class="fas fa-comment-dots text-sm"></i></div>`}
+                                <div class="min-w-0 flex-1">
+                                    <div class="flex items-center justify-between gap-2">
+                                        <div class="flex flex-wrap items-center gap-1.5">
+                                            <span class="bg-brand-50 text-brand-700 border border-brand-200 text-[0.55rem] font-bold uppercase px-1.5 py-0.5 rounded">${window.escapeSeguimientoHtml(av.etapa || 'Avance')}</span>
+                                            <span class="bg-slate-100 text-slate-700 text-[0.55rem] font-bold px-1.5 py-0.5 rounded">${typeof av.porcentaje === 'number' ? av.porcentaje : 0}%</span>
+                                            <span class="text-[0.58rem] text-slate-400">${fStr}</span>
+                                        </div>
+                                        <button type="button" onclick="window.deleteAvanceItem('${docId}', '${av.id}', event)" class="text-slate-300 hover:text-red-500 text-xs transition" title="Eliminar registro"><i class="fas fa-trash-alt"></i></button>
+                                    </div>
+                                    ${av.comentario ? `<p class="text-xs text-slate-700 mt-1 leading-snug break-words">${window.escapeSeguimientoHtml(av.comentario)}</p>` : ''}
+                                    <p class="text-[0.55rem] text-slate-400 mt-1"><i class="fas fa-user-hard-hat mr-1"></i>${window.escapeSeguimientoHtml(av.autor || 'Equipo')}</p>
+                                </div>
+                            </div>
+                        `;
+                    }).join('') + `</div>`;
+                }
+
+                html += `
+                    <div id="stepper-drawer-${uidKey}" class="mt-3 pt-3 border-t border-slate-200 space-y-3 text-left">
+                        <!-- Control de Porcentaje de Avance -->
+                        <div class="bg-white border border-slate-200 rounded-lg p-3">
+                            <div class="flex items-center justify-between gap-2 mb-1.5">
+                                <label class="text-[0.65rem] font-bold uppercase tracking-wider text-slate-700">Porcentaje de Avance Físico</label>
+                                <span id="avance-pct-val-${uidKey}" class="text-sm font-extrabold text-brand-600">${pct}%</span>
+                            </div>
+                            <input id="avance-slider-${uidKey}" type="range" min="0" max="100" step="5" value="${pct}" oninput="window.previewAvancePercentage('${uidKey}', this.value)" class="w-full accent-orange-600 cursor-pointer h-2 bg-slate-200 rounded-lg">
+                            <div class="flex flex-wrap items-center justify-between gap-1.5 mt-2">
+                                <div class="flex items-center gap-1">
+                                    ${[25, 50, 75, 90, 100].map(p => `<button type="button" onclick="document.getElementById('avance-slider-${uidKey}').value=${p}; window.previewAvancePercentage('${uidKey}', ${p}); window.saveAvancePercentage('${docId}', ${p}, event);" class="text-[0.6rem] font-bold px-2 py-0.5 rounded border ${pct === p ? 'bg-brand-600 text-white border-brand-600' : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100'} transition">${p}%</button>`).join('')}
+                                </div>
+                                <button type="button" onclick="window.saveAvancePercentage('${docId}', document.getElementById('avance-slider-${uidKey}').value, event)" class="bg-slate-900 hover:bg-slate-800 text-white text-[0.6rem] font-bold uppercase tracking-wider px-2.5 py-1 rounded transition">Actualizar %</button>
+                            </div>
+                        </div>
+
+                        <!-- Subir Foto de Cómo Va Quedando + Comentario -->
+                        <div class="bg-white border border-slate-200 rounded-lg p-3 space-y-2.5">
+                            <p class="text-[0.65rem] font-bold uppercase tracking-wider text-slate-700"><i class="fas fa-camera text-brand-500 mr-1"></i> Subir Foto de Cómo Va Quedando y Comentario</p>
+                            <div class="flex flex-wrap items-center gap-2">
+                                <input type="file" id="avance-file-${uidKey}" accept="image/*" class="hidden" onchange="window.handleAvancePhotoSelect('${docId}', '${uidKey}', this, event)">
+                                <button type="button" onclick="document.getElementById('avance-file-${uidKey}').click()" class="bg-brand-50 hover:bg-brand-100 text-brand-700 border border-brand-200 text-xs font-bold px-3 py-2 rounded-lg transition flex items-center gap-1.5">
+                                    <i class="fas fa-cloud-upload-alt"></i> Elegir / Tomar Foto
+                                </button>
+                                <div id="avance-preview-box-${uidKey}" class="${pendingImg ? '' : 'hidden'} relative inline-flex items-center gap-2">
+                                    <img id="avance-preview-img-${uidKey}" src="${pendingImg}" class="w-11 h-11 rounded-lg object-cover border border-brand-300 shadow-xs">
+                                    <button type="button" onclick="window.clearPendingAvancePhoto('${docId}', '${uidKey}', event)" class="w-5 h-5 rounded-full bg-red-500 text-white text-[10px] flex items-center justify-center hover:bg-red-600" title="Quitar foto"><i class="fas fa-times"></i></button>
+                                </div>
+                            </div>
+                            <textarea id="avance-comment-${uidKey}" rows="2" placeholder="Escribe un comentario técnico de avance (ej: Se reparó fisura y se aplicó puente de adherencia, secando)..." class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-700 outline-none focus:ring-1 focus:ring-brand-500 resize-none"></textarea>
+                            <button id="avance-submit-btn-${uidKey}" type="button" onclick="window.submitAvanceUpdate('${docId}', '${uidKey}', event)" class="w-full bg-brand-600 hover:bg-brand-500 text-white text-[0.68rem] font-bold uppercase tracking-widest py-2.5 rounded-lg transition shadow-sm flex items-center justify-center gap-1.5">
+                                <i class="fas fa-save"></i> Guardar Foto y Comentario de Avance
+                            </button>
+                        </div>
+
+                        <!-- Bitácora Histórica de Avances -->
+                        <div>
+                            <p class="text-[0.6rem] font-bold uppercase tracking-widest text-slate-500 mb-2">Bitácora de Avances (${avances.length})</p>
+                            ${timelineHtml}
+                        </div>
+                    </div>
+                `;
+            }
+
+            html += `</div>`;
             return html;
         }
 
@@ -3114,7 +3708,13 @@
             const data = window.historyDataCache[docId];
             if (!data) return;
             
-            let seg = data.seguimiento || { paso_actual: 1, estado_rechazado: false, fechas: { "1": (data.createdAt ? data.createdAt.seconds * 1000 : Date.now()) } };
+            let seg = data.seguimiento || {
+                paso_actual: 1,
+                estado_rechazado: false,
+                fechas: { "1": (data.createdAt ? (data.createdAt.seconds ? data.createdAt.seconds * 1000 : new Date(data.createdAt).getTime()) : Date.now()) },
+                porcentaje_avance: 0,
+                avances: []
+            };
             
             if (seg.estado_rechazado && targetStep > 3) {
                 return showNotification("El presupuesto está rechazado. Primero debes aprobarlo (paso 3).", true);
@@ -3135,29 +3735,20 @@
                 }
             }
 
+            const stepDefaultPct = { 1: 0, 2: 25, 3: 50, 4: 75, 5: 100 };
             const newSeguimiento = {
                 paso_actual: targetStep,
                 estado_rechazado: isRejected,
-                fechas: nuevasFechas
+                fechas: nuevasFechas,
+                porcentaje_avance: isRejected ? (seg.porcentaje_avance || 0) : (stepDefaultPct[targetStep] ?? 0),
+                avances: Array.isArray(seg.avances) ? seg.avances : []
             };
 
             window.historyDataCache[docId].seguimiento = newSeguimiento;
-            const wrapper = document.getElementById(`stepper-wrapper-${docId}`);
-            if(wrapper) {
-                wrapper.innerHTML = window.generateStepperHTML(docId, newSeguimiento, data);
-            }
+            window.refreshStepperEverywhere(docId);
 
             try {
-                const userId = window.currentUserId;
-                if(!userId) throw new Error("No hay usuario activo.");
-
-                const docRef = window.doc(window.db, 'artifacts', window.globalAppId, 'users', userId, 'evaluaciones', docId);
-                await window.updateDoc(docRef, { seguimiento: newSeguimiento });
-                
-                try {
-                     const expertRef = window.doc(window.db, 'artifacts', window.globalAppId, 'conocimiento_experto', docId);
-                     await window.setDoc(expertRef, { seguimiento: newSeguimiento }, { merge: true });
-                } catch(e) {}
+                await window.persistSeguimientoToFirestore(docId, newSeguimiento);
                 
                 if (isRejected) {
                     showNotification("Presupuesto Rechazado y archivado", true);
@@ -3356,6 +3947,8 @@
             window.resetLocation();
             
             document.getElementById('result-wrapper').classList.add('hidden');
+            const resProg = document.getElementById('result-progress-wrapper');
+            if (resProg) { resProg.classList.add('hidden'); resProg.innerHTML = ''; }
             document.getElementById('preview-box').classList.add('hidden');
             document.getElementById('input-section').classList.remove('hidden');
             document.getElementById('weather-badge').classList.add('hidden');
@@ -5331,7 +5924,9 @@
                     seguimiento: {
                         paso_actual: 1,
                         estado_rechazado: false,
-                        fechas: { "1": Date.now(), "2": null, "3": null, "4": null, "5": null }
+                        fechas: { "1": Date.now(), "2": null, "3": null, "4": null, "5": null },
+                        porcentaje_avance: 0,
+                        avances: []
                     }
                 };
 
@@ -5352,6 +5947,7 @@
 
                 currentEditingDocId = newDoc.id;
                 window.historyDataCache[newDoc.id] = diagnosticData;
+                window.refreshStepperEverywhere(newDoc.id);
 
                 const autoText = document.getElementById('history-autosave-text');
                 if (autoText) {
@@ -5403,6 +5999,7 @@
                             ...window.historyDataCache[currentEditingDocId],
                             ...updatePayload
                         };
+                        window.refreshStepperEverywhere(currentEditingDocId);
                     }
                 } catch (e) {
                     console.warn("Auto-update historial:", e);
@@ -5827,6 +6424,8 @@
             rateBtn.classList.replace('bg-emerald-600', 'bg-slate-900');
             rateBtn.classList.replace('hover:bg-emerald-500', 'hover:bg-slate-800');
             document.getElementById('rating-section').classList.remove('hidden');
+
+            window.refreshStepperEverywhere(docId);
             
             window.scrollTo({ top: 0, behavior: 'smooth' });
         };
