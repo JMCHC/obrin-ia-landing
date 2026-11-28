@@ -123,77 +123,103 @@
         .hide-arrows { -moz-appearance: textfield; }
     </style>
 </head>
-<body class="bg-slate-50 min-h-screen flex items-center justify-center p-4 relative">
+<body class="bg-slate-50 min-h-screen flex flex-col items-center p-3 sm:p-5 relative">
 
-    <!-- BARRA DE ESTADO: MODO SUBTERRÁNEO 100% OFFLINE Y COLA DE SINCRONIZACIÓN -->
-    <div class="fixed top-4 left-4 z-40 flex items-center gap-2 flex-wrap">
-        <button id="subterraneo-toggle-btn" type="button" onclick="window.toggleSubterraneoMode()" class="flex items-center gap-2 bg-white/90 backdrop-blur-md px-3.5 py-2 rounded-full shadow-sm border border-emerald-200 hover:bg-white transition-all text-xs font-bold text-slate-700" title="Activar Modo Subterráneo (-2, -3) sin señal para encolar diagnósticos">
-            <span id="net-status-dot" class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
-            <span id="net-status-text">4G/5G Online</span>
-        </button>
-        <button id="offline-queue-header-btn" type="button" onclick="window.scrollToOfflineQueue()" class="hidden items-center gap-1.5 bg-amber-500 hover:bg-amber-600 text-white px-3 py-2 rounded-full shadow-md text-[0.65rem] font-bold uppercase tracking-wider transition">
-            <i class="fas fa-satellite-dish"></i> Cola Offline: <span id="offline-queue-count-pill">0</span>
-        </button>
-    </div>
+    <!-- BARRA SUPERIOR UNIFICADA Y LIMPIA -->
+    <header id="app-topbar" class="w-full max-w-4xl mb-4 bg-white/95 backdrop-blur-md border border-slate-200/80 rounded-2xl px-3.5 py-2.5 shadow-sm sticky top-3 z-40 flex flex-wrap items-center justify-between gap-2">
+        <div class="flex items-center gap-2.5 min-w-0">
+            <img id="main-brand-logo" src="https://lh3.googleusercontent.com/pw/AP1GczOsQ9BjTC3dTk0RxKlbaZtHDeSwbqF3-buuEPA6QHBnWKNK4GkHQpfHPUJkVSbHPN7QEXrwUL5qVDwk5vLhsbpcLCLP3NCezheTURsZUCAOwnL0h1NtlHKbrEHkrsdquexu32SfFSdxlqHT1c36shbDMQ=w599-h599-s-no-gm?authuser=0" alt="Logo Obrín IA" class="h-8 w-auto object-contain shrink-0">
+            <div class="hidden sm:block leading-tight">
+                <h2 id="main-brand-title" class="text-sm font-extrabold text-slate-900 tracking-tight">Obrín IA</h2>
+                <p id="main-brand-subtitle" class="hidden text-[0.6rem] text-slate-400">Diagnóstico Constructivo</p>
+            </div>
+            <div class="h-5 w-px bg-slate-200 hidden sm:block"></div>
+            <button id="subterraneo-toggle-btn" type="button" onclick="window.toggleSubterraneoMode()" class="flex items-center gap-1.5 bg-slate-50 hover:bg-slate-100 px-2.5 py-1.5 rounded-full border border-emerald-200 transition-all text-[0.68rem] font-bold text-slate-700 shrink-0" title="Activar Modo Subterráneo (-2, -3) sin señal para encolar diagnósticos">
+                <span id="net-status-dot" class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span id="net-status-text">4G/5G Online</span>
+            </button>
+            <button id="offline-queue-header-btn" type="button" onclick="window.scrollToOfflineQueue()" class="hidden items-center gap-1 bg-amber-500 hover:bg-amber-600 text-white px-2.5 py-1.5 rounded-full shadow-sm text-[0.62rem] font-bold uppercase tracking-wider transition shrink-0">
+                <i class="fas fa-satellite-dish"></i> <span id="offline-queue-count-pill">0</span>
+            </button>
+        </div>
 
-    <header class="absolute top-4 right-4 z-40">
-        <div id="auth-section" class="flex items-center gap-4 relative">
-            <button id="user-menu-btn" class="hidden items-center gap-3 bg-white/80 backdrop-blur-md px-4 py-2 rounded-full shadow-sm border border-slate-200 hover:bg-white transition-all">
-                <div class="w-6 h-6 bg-emerald-100 rounded-full flex items-center justify-center">
-                    <i class="fas fa-user text-emerald-600 text-[10px]"></i>
-                </div>
-                <span id="user-email" class="text-xs font-semibold text-slate-700"></span>
-                <i class="fas fa-bars text-slate-400 ml-1 text-xs"></i>
+        <div class="flex items-center gap-2 ml-auto">
+            <!-- Acceso directo a Proyectos + Semáforo de Demoras -->
+            <button id="topbar-projects-btn" type="button" onclick="window.openHistory()" class="flex items-center gap-1.5 bg-slate-100 hover:bg-slate-200/80 text-slate-800 px-3 py-1.5 rounded-full border border-slate-200 text-[0.68rem] font-bold transition shrink-0" title="Abrir Carpetas de Proyecto y Seguimiento">
+                <i class="fas fa-folder-open text-brand-500"></i>
+                <span class="hidden sm:inline">Proyectos</span>
+                <span id="header-delay-badge" class="hidden bg-red-600 text-white text-[0.58rem] font-extrabold px-1.5 py-0.5 rounded-full leading-none">0</span>
             </button>
 
-            <div id="user-dropdown" class="hidden absolute top-full right-0 mt-2 w-56 bg-white rounded-xl shadow-xl border border-slate-100 overflow-hidden z-50">
-                <div class="p-3 border-b border-slate-100 bg-slate-50">
-                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Conectado como</p>
-                    <p id="dropdown-user-name" class="text-xs font-semibold text-slate-800 truncate"></p>
+            <!-- Monitor compacto de Tokens -->
+            <div onclick="window.openWallet()" title="Ver Billetera y Planes" class="cursor-pointer bg-slate-50 hover:bg-brand-50 border border-slate-200 hover:border-brand-200 rounded-xl px-2.5 py-1 transition flex flex-col justify-center min-w-[96px] max-w-[165px]">
+                <div class="flex items-center gap-1 text-[0.6rem] font-bold text-slate-600 leading-tight">
+                    <i class="fas fa-coins text-brand-500 shrink-0"></i>
+                    <span id="porcentaje-texto" class="font-mono truncate">0 / 0</span>
                 </div>
-                <button onclick="window.openHistory()" class="w-full text-left px-4 py-3 text-xs text-slate-700 hover:bg-slate-50 hover:text-brand-600 font-medium transition-colors flex items-center justify-between">
-                    <span class="flex items-center gap-2"><i class="fas fa-history w-4"></i> Mi Historial</span>
-                    <i class="fas fa-chevron-right text-[10px] text-slate-300"></i>
-                </button>
-                <div class="w-full text-left px-4 py-2.5 text-xs text-slate-500 bg-slate-50 flex items-center justify-between border-t border-slate-100">
-                    <span class="flex items-center gap-2"><i class="fas fa-folder w-4"></i> Proyectos</span>
-                    <span id="projects-count-badge" class="font-bold text-slate-700">0</span>
+                <div class="fondo-barra h-1 mt-1">
+                    <div id="barra-progreso" class="relleno-barra"></div>
                 </div>
-                <div class="w-full text-left px-4 py-2.5 text-xs text-slate-500 bg-slate-50 flex items-center justify-between border-t border-slate-100">
-                    <span class="flex items-center gap-2"><i class="fas fa-file-invoice w-4"></i> Evaluaciones Totales</span>
-                    <span id="total-evals-badge" class="font-bold text-slate-700">0</span>
-                </div>
-                
-                <button id="wallet-menu-btn" onclick="window.openWallet()" class="w-full text-left px-4 py-3 text-xs text-brand-600 hover:bg-brand-50 font-bold transition-colors flex items-center justify-between border-t border-slate-100">
-                    <span class="flex items-center gap-2"><i class="fas fa-wallet w-4"></i> Mi Billetera</span>
-                    <i class="fas fa-plus-circle text-brand-500"></i>
-                </button>
-
-                <button id="whitelabel-menu-btn" onclick="window.openWhiteLabelModal()" class="w-full text-left px-4 py-3 text-xs text-purple-700 hover:bg-purple-50 font-bold transition-colors flex items-center justify-between border-t border-slate-100">
-                    <span class="flex items-center gap-2"><i class="fas fa-paint-roller w-4"></i> Marca Blanca (Pro)</span>
-                    <span class="text-[0.55rem] bg-purple-100 text-purple-700 px-1.5 py-0.5 rounded uppercase">Logo/Firma</span>
-                </button>
-
-                <button id="team-admin-btn" onclick="window.openTeamManager()" class="hidden w-full text-left px-4 py-3 text-xs text-indigo-600 hover:bg-indigo-50 font-bold transition-colors items-center gap-2 border-t border-slate-100">
-                    <i class="fas fa-users w-4"></i> Administrar Equipo (50)
-                </button>
-                
-                <button id="admin-dashboard-btn" onclick="window.openAdminDashboard()" class="hidden w-full text-left px-4 py-3 text-xs text-brand-600 hover:bg-brand-50 font-bold transition-colors flex items-center gap-2 border-t border-slate-100">
-                    <i class="fas fa-shield-alt w-4"></i> Panel de Administración
-                </button>
-
-                <button id="install-app-btn" class="hidden w-full text-left px-4 py-3 text-xs text-emerald-600 hover:bg-emerald-50 font-bold transition-colors flex items-center gap-2 border-t border-slate-100">
-                    <i class="fas fa-download w-4"></i> Instalar App
-                </button>
-
-                <button id="sign-out-btn" class="w-full text-left px-4 py-3 text-xs text-red-500 hover:bg-red-50 font-bold transition-colors flex items-center gap-2 border-t border-slate-100">
-                    <i class="fas fa-sign-out-alt w-4"></i> Cerrar Sesión
-                </button>
             </div>
 
-            <button id="auth-btn" class="hidden bg-slate-900 hover:bg-slate-800 text-white text-[0.65rem] font-bold py-2.5 px-5 rounded-full shadow transition-colors flex items-center gap-2 tracking-widest uppercase">
-                <i class="fas fa-sign-in-alt"></i> Acceder
-            </button>
+            <div id="auth-section" class="flex items-center gap-2 relative">
+                <button id="user-menu-btn" class="hidden items-center gap-2 bg-white px-2.5 py-1.5 rounded-full border border-slate-200 hover:border-slate-300 transition-all shadow-2xs">
+                    <div class="w-5 h-5 bg-emerald-100 rounded-full flex items-center justify-center shrink-0">
+                        <i class="fas fa-user text-emerald-600 text-[9px]"></i>
+                    </div>
+                    <span id="user-email" class="text-[0.7rem] font-semibold text-slate-700 max-w-[90px] sm:max-w-[140px] truncate hidden md:inline"></span>
+                    <i class="fas fa-bars text-slate-400 text-[10px]"></i>
+                </button>
+
+                <div id="user-dropdown" class="hidden absolute top-full right-0 mt-2 w-60 bg-white rounded-xl shadow-xl border border-slate-100 overflow-hidden z-50">
+                    <div class="p-3 border-b border-slate-100 bg-slate-50">
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Conectado como</p>
+                        <p id="dropdown-user-name" class="text-xs font-semibold text-slate-800 truncate"></p>
+                    </div>
+                    <button onclick="window.openHistory()" class="w-full text-left px-4 py-3 text-xs text-slate-700 hover:bg-slate-50 hover:text-brand-600 font-medium transition-colors flex items-center justify-between">
+                        <span class="flex items-center gap-2"><i class="fas fa-history w-4"></i> Mis Proyectos</span>
+                        <i class="fas fa-chevron-right text-[10px] text-slate-300"></i>
+                    </button>
+                    <div class="w-full text-left px-4 py-2 text-xs text-slate-500 bg-slate-50 flex items-center justify-between border-t border-slate-100">
+                        <span class="flex items-center gap-2"><i class="fas fa-folder w-4"></i> Carpetas</span>
+                        <span id="projects-count-badge" class="font-bold text-slate-700">0</span>
+                    </div>
+                    <div class="w-full text-left px-4 py-2 text-xs text-slate-500 bg-slate-50 flex items-center justify-between border-t border-slate-100">
+                        <span class="flex items-center gap-2"><i class="fas fa-file-invoice w-4"></i> Evaluaciones Totales</span>
+                        <span id="total-evals-badge" class="font-bold text-slate-700">0</span>
+                    </div>
+                    
+                    <button id="wallet-menu-btn" onclick="window.openWallet()" class="w-full text-left px-4 py-3 text-xs text-brand-600 hover:bg-brand-50 font-bold transition-colors flex items-center justify-between border-t border-slate-100">
+                        <span class="flex items-center gap-2"><i class="fas fa-wallet w-4"></i> Mi Billetera</span>
+                        <i class="fas fa-plus-circle text-brand-500"></i>
+                    </button>
+
+                    <button id="whitelabel-menu-btn" onclick="window.openWhiteLabelModal()" class="w-full text-left px-4 py-3 text-xs text-purple-700 hover:bg-purple-50 font-bold transition-colors flex items-center justify-between border-t border-slate-100">
+                        <span class="flex items-center gap-2"><i class="fas fa-paint-roller w-4"></i> Marca Blanca (Pro)</span>
+                        <span class="text-[0.55rem] bg-purple-100 text-purple-700 px-1.5 py-0.5 rounded uppercase">Logo/Firma</span>
+                    </button>
+
+                    <button id="team-admin-btn" onclick="window.openTeamManager()" class="hidden w-full text-left px-4 py-3 text-xs text-indigo-600 hover:bg-indigo-50 font-bold transition-colors items-center gap-2 border-t border-slate-100">
+                        <i class="fas fa-users w-4"></i> Administrar Equipo (50)
+                    </button>
+                    
+                    <button id="admin-dashboard-btn" onclick="window.openAdminDashboard()" class="hidden w-full text-left px-4 py-3 text-xs text-brand-600 hover:bg-brand-50 font-bold transition-colors flex items-center gap-2 border-t border-slate-100">
+                        <i class="fas fa-shield-alt w-4"></i> Panel de Administración
+                    </button>
+
+                    <button id="install-app-btn" class="hidden w-full text-left px-4 py-3 text-xs text-emerald-600 hover:bg-emerald-50 font-bold transition-colors flex items-center gap-2 border-t border-slate-100">
+                        <i class="fas fa-download w-4"></i> Instalar App
+                    </button>
+
+                    <button id="sign-out-btn" class="w-full text-left px-4 py-3 text-xs text-red-500 hover:bg-red-50 font-bold transition-colors flex items-center gap-2 border-t border-slate-100">
+                        <i class="fas fa-sign-out-alt w-4"></i> Cerrar Sesión
+                    </button>
+                </div>
+
+                <button id="auth-btn" class="hidden bg-slate-900 hover:bg-slate-800 text-white text-[0.65rem] font-bold py-2 px-4 rounded-full shadow transition-colors flex items-center gap-2 tracking-widest uppercase">
+                    <i class="fas fa-sign-in-alt"></i> Acceder
+                </button>
+            </div>
         </div>
     </header>
 
@@ -575,135 +601,135 @@
         </div>
     </div>
 
-    <div id="main-app-container" class="hidden w-full max-w-4xl mt-12 md:mt-0">
-        <div class="text-center mb-10">
-            <!-- LOGO PRINCIPAL (SOPORTA MARCA BLANCA DINÁMICA) -->
-            <img id="main-brand-logo" src="https://lh3.googleusercontent.com/pw/AP1GczOsQ9BjTC3dTk0RxKlbaZtHDeSwbqF3-buuEPA6QHBnWKNK4GkHQpfHPUJkVSbHPN7QEXrwUL5qVDwk5vLhsbpcLCLP3NCezheTURsZUCAOwnL0h1NtlHKbrEHkrsdquexu32SfFSdxlqHT1c36shbDMQ=w599-h599-s-no-gm?authuser=0" alt="Logo Obrín IA" class="h-28 md:h-36 lg:h-48 mx-auto mb-6 object-contain">
-            <h2 id="main-brand-title" class="text-4xl font-light text-slate-900 mb-4 tracking-tight">Evaluación Técnica</h2>
-            <p id="main-brand-subtitle" class="text-gray-500 font-light text-base max-w-lg mx-auto">Tecnología de vanguardia para el diagnóstico constructivo y valoración de proyectos residenciales de alto estándar.</p>
-            
-            <div class="contenedor-barra mx-auto mt-6 cursor-pointer hover:opacity-80 transition" onclick="window.openWallet()" title="Ver Billetera">
-                <div class="texto-barra text-slate-400">
-                    <span class="flex items-center gap-1"><i class="fas fa-coins text-brand-500"></i> Monitor de Tokens</span>
-                    <span id="porcentaje-texto" class="font-mono">0 / 0</span>
-                </div>
-                <div class="fondo-barra shadow-inner">
-                    <div id="barra-progreso" class="relleno-barra shadow-sm"></div>
-                </div>
-            </div>
-        </div>
-        
-        <div id="obrin-pro-root" class="bg-white p-8 md:p-10 rounded-2xl shadow-2xl border border-gray-100 relative overflow-hidden max-w-2xl mx-auto">
+    <div id="main-app-container" class="hidden w-full max-w-4xl">
+        <div id="obrin-pro-root" class="bg-white p-5 sm:p-8 rounded-2xl shadow-xl border border-slate-200/80 relative overflow-hidden max-w-3xl mx-auto">
             <div id="top-corporate-bar" class="top-0 left-0 w-full h-1 absolute bg-slate-900"></div>
             
-            <div id="input-section" class="space-y-6">
-                <div class="bg-slate-50 border border-slate-200 rounded-lg p-4 mb-2">
-                    <div class="flex justify-between items-center mb-2">
-                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider"><i class="fas fa-folder text-brand-500 mr-1"></i> Carpeta de Proyecto Activa</label>
-                        <button type="button" id="show-new-project-btn" onclick="document.getElementById('new-project-inline').classList.remove('hidden'); document.getElementById('project-selector').classList.add('hidden'); this.classList.add('hidden'); document.getElementById('cancel-new-project-btn').classList.remove('hidden');" class="text-[0.65rem] font-bold text-brand-600 hover:text-brand-700 uppercase tracking-wider transition-colors"><i class="fas fa-plus"></i> Nueva</button>
-                        <button type="button" id="cancel-new-project-btn" onclick="document.getElementById('new-project-inline').classList.add('hidden'); document.getElementById('project-selector').classList.remove('hidden'); document.getElementById('show-new-project-btn').classList.remove('hidden'); this.classList.add('hidden');" class="hidden text-[0.65rem] font-bold text-slate-400 hover:text-slate-600 uppercase tracking-wider transition-colors"><i class="fas fa-times"></i> Cancelar</button>
+            <!-- CAPTURA ENFOCADA Y LIMPIA -->
+            <div id="input-section" class="space-y-5">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100">
+                    <div>
+                        <span class="text-[0.6rem] font-bold text-brand-600 uppercase tracking-widest">Inspección en Terreno</span>
+                        <h1 class="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">Nueva Evaluación Técnica</h1>
                     </div>
-                    <select id="project-selector" onchange="window.activeSelectedProjectId = this.value; window.activeSelectedProjectName = this.options[this.selectedIndex]?.text || ''; window.renderBlueprintCanvas();" class="w-full p-2.5 bg-white border border-slate-300 rounded text-sm font-semibold text-slate-800 outline-none focus:ring-2 focus:ring-brand-500 transition-shadow appearance-none cursor-pointer">
-                        <option value="">Cargando proyectos...</option>
-                    </select>
-                    <div id="new-project-inline" class="hidden flex gap-2">
-                        <input type="text" id="inline-project-name" onkeydown="if(event.key==='Enter'){event.preventDefault();window.createInlineProject();}" placeholder="Nombre de la nueva carpeta..." class="flex-1 p-2.5 bg-white border border-slate-300 rounded text-sm font-semibold text-slate-800 outline-none focus:ring-2 focus:ring-brand-500 transition-shadow">
-                        <button type="button" onclick="window.createInlineProject()" class="bg-slate-900 text-white px-4 rounded text-xs font-bold uppercase tracking-widest hover:bg-slate-800 transition shadow">Crear</button>
+                    <div class="w-full sm:w-64">
+                        <div class="flex items-center justify-between mb-1">
+                            <label class="text-[0.6rem] font-bold text-slate-400 uppercase tracking-wider"><i class="fas fa-folder text-brand-500 mr-1"></i> Carpeta</label>
+                            <button type="button" id="show-new-project-btn" onclick="document.getElementById('new-project-inline').classList.remove('hidden'); document.getElementById('project-selector').classList.add('hidden'); this.classList.add('hidden'); document.getElementById('cancel-new-project-btn').classList.remove('hidden');" class="text-[0.6rem] font-bold text-brand-600 hover:text-brand-700 uppercase tracking-wider transition-colors"><i class="fas fa-plus"></i> Nueva</button>
+                            <button type="button" id="cancel-new-project-btn" onclick="document.getElementById('new-project-inline').classList.add('hidden'); document.getElementById('project-selector').classList.remove('hidden'); document.getElementById('show-new-project-btn').classList.remove('hidden'); this.classList.add('hidden');" class="hidden text-[0.6rem] font-bold text-slate-400 hover:text-slate-600 uppercase tracking-wider transition-colors"><i class="fas fa-times"></i> Cancelar</button>
+                        </div>
+                        <select id="project-selector" onchange="window.activeSelectedProjectId = this.value; window.activeSelectedProjectName = this.options[this.selectedIndex]?.text || ''; window.renderBlueprintCanvas();" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold text-slate-800 outline-none focus:ring-2 focus:ring-brand-500 transition-shadow cursor-pointer">
+                            <option value="">Cargando proyectos...</option>
+                        </select>
+                        <div id="new-project-inline" class="hidden flex gap-1.5">
+                            <input type="text" id="inline-project-name" onkeydown="if(event.key==='Enter'){event.preventDefault();window.createInlineProject();}" placeholder="Nueva carpeta..." class="flex-1 px-2.5 py-2 bg-slate-50 border border-slate-300 rounded-lg text-xs font-semibold text-slate-800 outline-none focus:ring-2 focus:ring-brand-500">
+                            <button type="button" onclick="window.createInlineProject()" class="bg-slate-900 text-white px-3 rounded-lg text-[0.65rem] font-bold uppercase tracking-wider hover:bg-slate-800 transition">Crear</button>
+                        </div>
                     </div>
                 </div>
 
-                <!-- FUNCIÓN 2: MAPEO SOBRE PLANOS (PINES GEORREFERENCIADOS EN PLANTA) -->
-                <details id="blueprint-details" class="group bg-slate-50 border border-slate-200 rounded-xl overflow-hidden transition-all">
-                    <summary class="flex items-center justify-between p-4 cursor-pointer select-none hover:bg-slate-100/70 transition">
-                        <div class="flex items-center gap-2.5">
-                            <span class="w-7 h-7 rounded-lg bg-indigo-100 text-indigo-700 flex items-center justify-center text-xs font-bold"><i class="fas fa-map-marked-alt"></i></span>
-                            <div>
-                                <p class="text-xs font-bold text-slate-800 uppercase tracking-wider">Mapeo sobre Plano de Planta (Pines Georreferenciados)</p>
-                                <p id="blueprint-pin-status" class="text-[0.65rem] text-slate-500">Sube el plano PDF/Imagen del piso y marca con el dedo la ubicación del daño (Pin #1, Pin #2...)</p>
-                            </div>
+                <!-- PASO 1: FOTOGRAFÍAS DEL DAÑO -->
+                <div>
+                    <div class="flex items-center justify-between mb-2">
+                        <label class="text-xs font-bold text-slate-700 uppercase tracking-wider">1. Fotografía del Problema</label>
+                        <span class="text-[0.62rem] text-slate-400 font-medium">Foto general obligatoria · Detalle opcional</span>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3.5">
+                        <div class="upload-box h-40 sm:h-44 group cursor-pointer" id="box1">
+                            <img id="capture-thumb-1" src="" alt="Vista General" class="hidden absolute inset-0 w-full h-full object-cover z-0">
+                            <button type="button" id="clear1" class="hidden absolute top-2 right-2 z-20 bg-white/95 border border-slate-200 text-slate-500 hover:text-red-500 hover:border-red-200 rounded-full w-6 h-6 flex items-center justify-center text-[0.65rem] shadow transition-colors" onclick="window.clearFile(event, 1)">✕</button>
+                            <span class="text-3xl mb-2 text-slate-300 group-hover:text-brand-600 transition relative z-10" id="icon1">📷</span>
+                            <span class="hidden relative z-10 bg-emerald-600/90 text-white text-[0.6rem] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full shadow" id="check1"><i class="fas fa-check mr-1"></i> Vista General</span>
+                            <span id="label-box-1" class="text-[0.65rem] font-bold text-slate-400 uppercase tracking-widest group-hover:text-slate-600 transition relative z-10">Vista General</span>
+                            <input type="file" id="file1" accept="image/*" class="absolute inset-0 z-10 opacity-0 cursor-pointer w-full h-full" onchange="window.handleFile(this, 1)">
                         </div>
-                        <span class="text-slate-400 text-xs transition-transform group-open:rotate-180">▼</span>
-                    </summary>
-                    <div class="p-4 pt-2 border-t border-slate-200 bg-white space-y-3">
+                        <div class="upload-box h-40 sm:h-44 group cursor-pointer" id="box2">
+                            <img id="capture-thumb-2" src="" alt="Detalle Macro" class="hidden absolute inset-0 w-full h-full object-cover z-0">
+                            <button type="button" id="clear2" class="hidden absolute top-2 right-2 z-20 bg-white/95 border border-slate-200 text-slate-500 hover:text-red-500 hover:border-red-200 rounded-full w-6 h-6 flex items-center justify-center text-[0.65rem] shadow transition-colors" onclick="window.clearFile(event, 2)">✕</button>
+                            <span class="text-3xl mb-2 text-slate-300 group-hover:text-brand-600 transition relative z-10" id="icon2">🔍</span>
+                            <span class="hidden relative z-10 bg-emerald-600/90 text-white text-[0.6rem] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full shadow" id="check2"><i class="fas fa-check mr-1"></i> Detalle / Macro</span>
+                            <span id="label-box-2" class="text-[0.65rem] font-bold text-slate-400 uppercase tracking-widest group-hover:text-slate-600 transition relative z-10">Detalle (Opcional)</span>
+                            <input type="file" id="file2" accept="image/*" class="absolute inset-0 z-10 opacity-0 cursor-pointer w-full h-full" onchange="window.handleFile(this, 2)">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PASO 2: OBSERVACIONES Y VOZ -->
+                <div>
+                    <div class="flex justify-between items-center mb-2">
+                        <label class="text-xs font-bold text-slate-700 uppercase tracking-wider">2. Notas de Terreno <span class="text-slate-400 font-normal normal-case">(opcional)</span></label>
+                        <button type="button" id="voice-record-btn" onclick="window.toggleVoiceRecording()" class="inline-flex items-center gap-1.5 bg-slate-100 hover:bg-red-50 text-slate-700 hover:text-red-600 border border-slate-200 px-3 py-1 rounded-full text-[0.62rem] font-bold uppercase tracking-wider transition">
+                            <i class="fas fa-microphone text-red-500"></i> <span id="voice-record-label">Dictar / Voz</span>
+                        </button>
+                    </div>
+                    <textarea id="userNotes" class="w-full p-3.5 bg-slate-50 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-brand-500 focus:bg-white resize-none transition outline-none" rows="2" placeholder="Ej: Muro subterráneo -2 con filtración activa tras lluvias..."></textarea>
+                    <div id="voice-note-indicator" class="hidden mt-2 p-2.5 bg-amber-50 border border-amber-200 rounded-lg flex items-center justify-between text-xs text-amber-900">
+                        <span class="font-semibold flex items-center gap-2"><i class="fas fa-volume-up text-amber-600"></i> Nota de voz adjunta</span>
+                        <audio id="voice-note-player" controls class="h-7 max-w-[180px]"></audio>
+                    </div>
+                </div>
+
+                <!-- HERRAMIENTAS OPCIONALES EN TERRENO (DESPLEGABLES SIN RUIDO VISUAL) -->
+                <div class="space-y-3">
+                    <div class="flex flex-wrap items-center gap-2">
+                        <span class="text-[0.62rem] font-bold text-slate-400 uppercase tracking-wider mr-1">Opciones:</span>
+                        <button type="button" id="toggle-weather-pill" onclick="window.toggleCaptureDrawer('weather')" class="inline-flex items-center gap-1.5 bg-slate-100 hover:bg-slate-200/70 text-slate-700 border border-slate-200 px-3 py-1.5 rounded-full text-[0.68rem] font-bold transition">
+                            <i class="fas fa-cloud-sun text-brand-500"></i> <span id="weather-pill-label">Clima y Ubicación</span>
+                        </button>
+                        <button type="button" id="toggle-blueprint-pill" onclick="window.toggleCaptureDrawer('blueprint')" class="inline-flex items-center gap-1.5 bg-slate-100 hover:bg-slate-200/70 text-slate-700 border border-slate-200 px-3 py-1.5 rounded-full text-[0.68rem] font-bold transition">
+                            <i class="fas fa-map-pin text-indigo-500"></i> <span id="blueprint-pill-label">Plano de Planta (Pin)</span>
+                        </button>
+                    </div>
+
+                    <!-- DRAWER CLIMA (OCULTO HASTA QUE SE TOCA) -->
+                    <div id="weather-drawer-box" class="hidden bg-slate-50 border border-slate-200 rounded-xl p-3.5 space-y-2">
+                        <div class="flex gap-2" id="location-input-group">
+                            <input type="text" id="userLocation" class="w-full p-2.5 bg-white rounded-lg border border-slate-200 text-xs focus:ring-1 focus:ring-slate-900 transition outline-none" placeholder="Ej: Santiago, Viña del Mar..." oninput="window.toggleLocationBtn(this.value)" onkeypress="if(event.key === 'Enter') { event.preventDefault(); window.fetchLocationAndWeather(); }">
+                            <button type="button" id="getLocationBtn" onclick="window.fetchLocationAndWeather()" class="bg-slate-900 text-white px-3.5 rounded-lg text-xs font-bold transition hover:bg-slate-800 flex items-center justify-center whitespace-nowrap shadow-sm">
+                                📍 Detectar
+                            </button>
+                        </div>
+                        <div id="locationStatus" class="hidden w-full text-xs text-slate-700 bg-emerald-50 border border-emerald-200 p-2.5 rounded-lg flex items-center justify-between gap-3">
+                            <div class="flex items-center gap-2.5">
+                                <span class="text-emerald-600 text-lg">✓</span>
+                                <div>
+                                    <p class="font-bold text-slate-800 text-xs" id="ui-city-name">Ciudad</p>
+                                    <p id="ui-weather-desc" class="text-[0.68rem]">Cargando...</p>
+                                </div>
+                            </div>
+                            <button type="button" onclick="window.resetLocation()" class="text-slate-400 hover:text-red-500 transition font-bold px-2">✕</button>
+                        </div>
+                    </div>
+
+                    <!-- DRAWER PLANO DE PLANTA (OCULTO HASTA QUE SE TOCA) -->
+                    <div id="blueprint-drawer-box" class="hidden bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-3">
                         <div class="flex flex-wrap items-center justify-between gap-2">
                             <label class="inline-flex items-center gap-2 bg-slate-900 hover:bg-slate-800 text-white text-[0.65rem] font-bold uppercase tracking-wider px-3.5 py-2 rounded-lg cursor-pointer transition shadow-sm">
                                 <i class="fas fa-file-pdf"></i> Subir Plano (PDF o Imagen)
                                 <input type="file" id="blueprint-file-input" accept="application/pdf,image/*" class="hidden" onchange="window.handleBlueprintUpload(this)">
                             </label>
                             <button type="button" onclick="window.loadSampleBlueprint()" class="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 text-[0.65rem] font-bold uppercase tracking-wider px-3 py-2 rounded-lg transition">
-                                <i class="fas fa-drafting-compass mr-1"></i> Cargar Plano Tipo Demo
+                                <i class="fas fa-drafting-compass mr-1"></i> Plano Demo
                             </button>
                             <button type="button" onclick="window.clearProjectPins()" class="text-[0.6rem] font-bold text-slate-400 hover:text-red-500 uppercase tracking-wider px-2 py-1 transition">
                                 Limpiar Pines
                             </button>
                         </div>
-                        <div id="blueprint-canvas-wrapper" class="relative w-full bg-slate-100 border-2 border-dashed border-slate-300 rounded-xl overflow-hidden flex items-center justify-center" style="min-height: 220px;">
+                        <div id="blueprint-canvas-wrapper" class="relative w-full bg-slate-100 border-2 border-dashed border-slate-300 rounded-xl overflow-hidden flex items-center justify-center" style="min-height: 200px;">
                             <canvas id="blueprint-canvas" width="700" height="440" onclick="window.placePinOnBlueprint(event)" class="w-full h-auto cursor-crosshair block"></canvas>
                         </div>
-                        <div class="flex items-center justify-between text-[0.65rem] text-slate-500 bg-slate-50 px-3 py-2 rounded-lg border border-slate-100">
-                            <span><i class="fas fa-hand-pointer text-brand-500 mr-1"></i> Toca sobre el plano para posicionar el <strong>Pin de esta evaluación</strong>.</span>
+                        <div class="flex items-center justify-between text-[0.65rem] text-slate-500 bg-white px-3 py-2 rounded-lg border border-slate-200">
+                            <span><i class="fas fa-hand-pointer text-brand-500 mr-1"></i> Toca el plano para marcar el Pin.</span>
                             <span id="active-pin-coords" class="font-mono font-bold text-indigo-700">Sin Pin seleccionado</span>
-                        </div>
-                    </div>
-                </details>
-
-                <div class="grid grid-cols-2 gap-4">
-                    <div class="upload-box h-36 group cursor-pointer" id="box1">
-                        <button type="button" id="clear1" class="hidden absolute top-2 right-2 z-20 bg-white border border-slate-200 text-slate-400 hover:text-red-500 hover:border-red-200 rounded-full w-6 h-6 flex items-center justify-center text-[0.6rem] shadow-sm transition-colors" onclick="window.clearFile(event, 1)">✕</button>
-                        <span class="text-3xl mb-2 text-slate-300 group-hover:text-brand-600 transition" id="icon1">📷</span>
-                        <span class="text-emerald-600 text-2xl hidden" id="check1">✓</span>
-                        <span class="text-[0.65rem] font-bold text-slate-400 uppercase tracking-widest group-hover:text-slate-600 transition">Vista General</span>
-                        <input type="file" id="file1" accept="image/*" class="absolute inset-0 z-10 opacity-0 cursor-pointer w-full h-full" onchange="window.handleFile(this, 1)">
-                    </div>
-                    <div class="upload-box h-36 group cursor-pointer" id="box2">
-                        <button type="button" id="clear2" class="hidden absolute top-2 right-2 z-20 bg-white border border-slate-200 text-slate-400 hover:text-red-500 hover:border-red-200 rounded-full w-6 h-6 flex items-center justify-center text-[0.6rem] shadow-sm transition-colors" onclick="window.clearFile(event, 2)">✕</button>
-                        <span class="text-3xl mb-2 text-slate-300 group-hover:text-brand-600 transition" id="icon2">🔍</span>
-                        <span class="text-emerald-600 text-2xl hidden" id="check2">✓</span>
-                        <span class="text-[0.65rem] font-bold text-slate-400 uppercase tracking-widest group-hover:text-slate-600 transition">Detalle / Macro</span>
-                        <input type="file" id="file2" accept="image/*" class="absolute inset-0 z-10 opacity-0 cursor-pointer w-full h-full" onchange="window.handleFile(this, 2)">
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-1 gap-4">
-                    <div>
-                        <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Entorno y Clima (Opcional)</label>
-                        <div class="flex gap-2 mb-2" id="location-input-group">
-                            <input type="text" id="userLocation" class="w-full p-3 bg-slate-50 rounded-lg border border-slate-200 text-sm focus:ring-1 focus:ring-slate-900 focus:border-slate-900 transition outline-none" placeholder="Ej: Santiago, Viña del Mar..." oninput="window.toggleLocationBtn(this.value)" onkeypress="if(event.key === 'Enter') { event.preventDefault(); window.fetchLocationAndWeather(); }">
-                            <button type="button" id="getLocationBtn" onclick="window.fetchLocationAndWeather()" class="bg-slate-900 text-white px-4 rounded-lg text-sm font-medium transition hover:bg-slate-800 flex items-center justify-center whitespace-nowrap shadow-sm">
-                                📍 Detectar
-                            </button>
-                        </div>
-                        
-                        <div id="locationStatus" class="hidden w-full text-xs text-slate-700 bg-emerald-50 border border-emerald-200 p-3 rounded-lg flex items-center justify-between gap-3 mb-2">
-                            <div class="flex items-center gap-3">
-                                <span class="text-emerald-600 text-xl">✓</span>
-                                <div>
-                                    <p class="font-bold text-slate-800" id="ui-city-name">Ciudad</p>
-                                    <p id="ui-weather-desc">Cargando...</p>
-                                </div>
-                            </div>
-                            <button onclick="window.resetLocation()" class="text-slate-400 hover:text-red-500 transition font-bold px-2">✕</button>
-                        </div>
-                    </div>
-                    
-                    <div>
-                        <div class="flex justify-between items-center mb-2">
-                            <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider">Observaciones y Nota de Voz en Terreno</label>
-                            <button type="button" id="voice-record-btn" onclick="window.toggleVoiceRecording()" class="inline-flex items-center gap-1.5 bg-slate-100 hover:bg-red-50 text-slate-700 hover:text-red-600 border border-slate-200 px-3 py-1 rounded-full text-[0.65rem] font-bold uppercase tracking-wider transition">
-                                <i class="fas fa-microphone text-red-500"></i> <span id="voice-record-label">Grabar Nota de Voz</span>
-                            </button>
-                        </div>
-                        <textarea id="userNotes" class="w-full p-4 bg-slate-50 rounded-lg border border-slate-200 text-sm focus:ring-1 focus:ring-slate-900 focus:border-slate-900 resize-none transition outline-none" rows="2" placeholder="Describa el requerimiento o dicte con el micrófono (ej: 'Subterráneo -2, filtración activa en muro cortina')..."></textarea>
-                        <div id="voice-note-indicator" class="hidden mt-2 p-2.5 bg-amber-50 border border-amber-200 rounded-lg flex items-center justify-between text-xs text-amber-900">
-                            <span class="font-semibold flex items-center gap-2"><i class="fas fa-volume-up text-amber-600"></i> Nota de voz adjunta para sincronización</span>
-                            <audio id="voice-note-player" controls class="h-7 max-w-[180px]"></audio>
                         </div>
                     </div>
                 </div>
                 
-                <button id="analyzeBtn" type="button" class="w-full bg-slate-900 text-white py-4 rounded-lg font-medium text-xs tracking-[0.15em] uppercase opacity-50 pointer-events-none transition hover:bg-slate-800 shadow-lg" onclick="window.runAnalysis()">Iniciar Análisis Técnico</button>
+                <button id="analyzeBtn" type="button" class="w-full bg-slate-900 text-white py-4 rounded-xl font-bold text-xs tracking-[0.15em] uppercase opacity-50 pointer-events-none transition hover:bg-slate-800 shadow-lg" onclick="window.runAnalysis()">
+                    <i class="fas fa-bolt text-brand-400 mr-1.5"></i> Iniciar Diagnóstico Técnico
+                </button>
 
-                <!-- FUNCIÓN 3: COLA DE SINCRONIZACIÓN MODO SUBTERRÁNEO 100% OFFLINE -->
+                <!-- COLA DE SINCRONIZACIÓN MODO SUBTERRÁNEO 100% OFFLINE -->
                 <div id="offline-queue-panel" class="hidden bg-amber-50/90 border-2 border-amber-300 rounded-xl p-4 space-y-3 shadow-sm">
                     <div class="flex items-center justify-between">
                         <div class="flex items-center gap-2.5">
@@ -711,12 +737,12 @@
                                 <i class="fas fa-satellite-dish"></i>
                             </div>
                             <div>
-                                <h4 class="text-xs font-bold text-amber-950 uppercase tracking-wider">Cola de Sincronización Subterránea (<span id="offline-queue-total">0</span> pendientes)</h4>
-                                <p class="text-[0.65rem] text-amber-800">Capturas guardadas localmente sin señal (-2, -3). Se procesarán automáticamente al detectar 4G/5G.</p>
+                                <h4 class="text-xs font-bold text-amber-950 uppercase tracking-wider">Cola Offline (<span id="offline-queue-total">0</span> pendientes)</h4>
+                                <p class="text-[0.65rem] text-amber-800">Capturas guardadas sin señal. Se procesarán al detectar 4G/5G.</p>
                             </div>
                         </div>
                         <button type="button" id="sync-now-btn" onclick="window.processOfflineQueue()" class="bg-amber-600 hover:bg-amber-700 text-white text-[0.65rem] font-bold uppercase tracking-widest px-3.5 py-2 rounded-lg shadow transition whitespace-nowrap">
-                            <i class="fas fa-sync-alt mr-1"></i> Sincronizar Ahora
+                            <i class="fas fa-sync-alt mr-1"></i> Sincronizar
                         </button>
                     </div>
                     <div id="offline-queue-list" class="space-y-2 max-h-44 overflow-y-auto pr-1"></div>
@@ -736,18 +762,14 @@
             </div>
 
             <div id="result-wrapper" class="hidden">
-                <div id="result" class="text-left bg-white overflow-hidden pb-4 relative">
+                <div id="result" class="text-left bg-white overflow-hidden pb-2 relative">
                     
-                    <div id="edit-hint" class="hidden bg-blue-50 text-blue-600 text-[0.65rem] font-bold uppercase tracking-widest p-2 rounded text-center mb-4 border border-blue-100 shadow-sm">
-                        <i class="fas fa-edit"></i> Puedes hacer clic en los textos para modificarlos a mano
-                    </div>
-
                     <div id="pdf-header" class="hidden border-b-2 border-slate-900 pb-4 mb-6 flex justify-between items-center">
                         <div class="flex items-center gap-3">
                             <img id="pdf-wl-logo" src="" class="hidden h-12 object-contain">
                             <div>
                                 <h1 id="pdf-wl-title" class="text-2xl font-serif text-slate-900 tracking-tight">Obrín IA</h1>
-                                <p id="pdf-wl-subtitle" class="text-[0.65rem] uppercase tracking-widest text-slate-500 font-bold">Reporte de Evaluación Técnica Forense</p>
+                                <p id="pdf-wl-subtitle" class="text-[0.65rem] uppercase tracking-widest text-slate-500 font-bold">Reporte de Evaluación Técnica</p>
                             </div>
                         </div>
                         <div id="pdf-pin-badge" class="hidden bg-red-600 text-white text-xs font-bold px-3 py-1.5 rounded-lg uppercase tracking-wider">
@@ -755,187 +777,211 @@
                         </div>
                     </div>
 
-                    <div id="user-request-summary" class="hidden mb-6 bg-slate-50 p-4 rounded-lg border border-slate-100">
-                        <p class="text-[0.6rem] font-bold text-slate-400 uppercase tracking-wider mb-3">Evidencia Proporcionada</p>
-                        <div class="flex gap-4 mb-3">
-                            <img id="summary-img1" class="hidden w-32 h-32 object-cover rounded-lg border border-slate-200 shadow-sm">
-                            <img id="summary-img2" class="hidden w-32 h-32 object-cover rounded-lg border border-slate-200 shadow-sm">
-                        </div>
-                        <div id="summary-notes-container" class="hidden">
-                            <p class="text-[0.6rem] font-bold text-slate-400 uppercase tracking-wider mb-1">Observaciones del Usuario</p>
-                            <p id="summary-notes" class="text-sm text-slate-700 italic outline-none hover:bg-white focus:bg-white focus:ring-1 focus:ring-slate-200 rounded transition p-1" contenteditable="true"></p>
-                        </div>
-                    </div>
-
-                    <!-- FUNCIÓN 1: RAYOS X VISUALES (ANOTACIÓN AUTOMÁTICA FORENSE SOBRE LA FOTO) -->
-                    <div id="xray-forensic-card" class="mb-6 bg-slate-950 rounded-xl overflow-hidden border border-slate-800 shadow-lg">
-                        <div class="px-4 py-3 bg-slate-900 border-b border-slate-800 flex flex-wrap items-center justify-between gap-2">
-                            <div class="flex items-center gap-2 flex-wrap">
-                                <span class="w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse"></span>
-                                <span class="text-[0.65rem] font-bold uppercase tracking-widest text-white">🩻 Rayos X Visuales — Peritaje Forense IA</span>
-                                <span id="xray-source-badge" class="bg-emerald-600/90 text-white text-[0.58rem] font-bold px-2 py-0.5 rounded uppercase tracking-wider">Foto #2 · Detalle</span>
-                                <span id="xray-pin-indicator" class="hidden bg-indigo-600 text-white text-[0.6rem] font-bold px-2 py-0.5 rounded uppercase">Pin #1</span>
-                            </div>
-                            <button type="button" onclick="window.toggleXRayOverlay()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 text-[0.6rem] font-bold uppercase tracking-wider px-2.5 py-1 rounded border border-slate-700 transition">
-                                <i class="fas fa-eye mr-1"></i> Alternar Capa Forense
-                            </button>
-                        </div>
-                        <div class="relative w-full flex items-center justify-center bg-slate-950 p-2">
-                            <canvas id="xray-canvas" width="680" height="440" class="w-full h-auto max-h-[380px] object-contain rounded"></canvas>
-                        </div>
-                        <div class="px-4 py-2.5 bg-slate-900/90 border-t border-slate-800 flex flex-wrap items-center justify-between gap-3 text-[0.6rem] text-slate-300">
-                            <div class="flex items-center gap-4">
-                                <span class="flex items-center gap-1.5"><span class="w-3 h-1 bg-red-500 inline-block rounded"></span> Trazo Rojo: Recorrido Grieta / Fisura</span>
-                                <span class="flex items-center gap-1.5"><span class="w-3 h-3 bg-yellow-400/50 border border-yellow-400 inline-block rounded-sm"></span> Sombreado Amarillo: Eflorescencia / Desprendimiento</span>
-                            </div>
-                            <span class="text-slate-400 font-mono">Escala Pericial 1:1</span>
-                        </div>
-                    </div>
-
-                    <div class="flex justify-between items-start border-b border-slate-100 pb-4 mb-4">
-                        <div class="w-full">
-                            <p class="text-[0.6rem] text-slate-400 uppercase tracking-widest mb-1">Elemento Analizado</p>
-                            <div id="surface-type" class="font-serif text-xl text-slate-900 outline-none hover:bg-slate-50 focus:bg-white focus:ring-1 focus:ring-slate-200 rounded transition p-1 -ml-1 w-full" contenteditable="true"></div>
-                            
-                            <div id="weather-badge" class="hidden flex items-center gap-1 mt-2 text-[0.65rem] text-slate-500 bg-slate-50 border border-slate-100 py-1 px-2 rounded w-fit">
-                                <span>🌤</span>
-                                <span class="font-bold text-slate-800" id="loc-val"></span>: 
-                                <span id="temp-val" class="font-semibold"></span>, <span id="hum-val" class="font-semibold"></span> HR
-                                <span id="dewpoint-pill" class="hidden ml-1 bg-sky-100 text-sky-800 font-bold px-1.5 py-0.5 rounded text-[0.6rem]"></span>
-                                <span id="drying-factor-pill" class="hidden bg-amber-100 text-amber-800 font-bold px-1.5 py-0.5 rounded text-[0.6rem]"></span>
-                            </div>
-                            <div id="climate-technical-card" class="hidden mt-2 bg-sky-50/80 border border-sky-200 rounded-lg p-2.5 text-[0.68rem] text-sky-950 leading-snug">
-                                <span class="font-extrabold uppercase tracking-wider text-sky-800"><i class="fas fa-thermometer-half mr-1"></i> Ajuste Higrotérmico de Obra:</span>
-                                <span id="climate-directive-val"></span>
-                            </div>
-                        </div>
-                        <span id="complexity-badge" contenteditable="true" class="text-[0.6rem] font-bold px-3 py-1 rounded-full uppercase tracking-wide border mt-1 outline-none hover:ring-2 hover:ring-slate-300 transition cursor-text whitespace-nowrap"></span>
-                    </div>
-
-                    <div class="space-y-6">
-                        <div class="grid grid-cols-1 gap-4">
-                            <!-- MEJORA #4: DIAGNÓSTICO EN 2 CAPAS (CAUSA RAÍZ VS. DAÑO VISIBLE) -->
-                            <div id="root-cause-container" class="hidden bg-indigo-50/70 p-4 rounded-lg border border-indigo-100">
-                                <p class="text-[0.6rem] font-extrabold text-indigo-600 uppercase tracking-wider mb-1.5"><i class="fas fa-microscope mr-1"></i> Capa 1 · Causa Raíz Detectada (Origen Físico / Estructural)</p>
-                                <p id="root-cause-val" class="text-sm font-semibold text-indigo-950 leading-relaxed outline-none hover:bg-white focus:bg-white focus:ring-1 focus:ring-indigo-200 rounded transition p-1" contenteditable="true"></p>
-                            </div>
-
-                            <div class="bg-slate-50 p-4 rounded-lg border border-slate-100">
-                                <p class="text-[0.6rem] font-bold text-slate-400 uppercase tracking-wider mb-2"><i class="fas fa-search-plus mr-1 text-slate-400"></i> Capa 2 · Diagnóstico de Patología y Daño Visible</p>
-                                <p id="damage-val" class="text-sm font-medium text-slate-800 leading-relaxed outline-none hover:bg-white focus:bg-white focus:ring-1 focus:ring-slate-200 rounded transition p-1" contenteditable="true"></p>
-                            </div>
-                            
-                            <!-- TARJETA: PROYECCIÓN DE RIESGO Y FALLA -->
-                            <div id="risk-container" class="bg-red-50 p-4 rounded-lg border border-red-100 hidden mt-4">
-                                <p class="text-[0.6rem] font-bold text-red-500 uppercase tracking-wider mb-2"><i class="fas fa-exclamation-triangle"></i> Proyección de Riesgo y Falla</p>
-                                <p id="risk-val" class="text-sm font-medium text-red-900 leading-relaxed outline-none hover:bg-white focus:bg-white focus:ring-1 focus:ring-red-200 rounded transition p-1" contenteditable="true"></p>
-                            </div>
-                            
-                            <div class="bg-slate-50 p-4 rounded-lg border border-slate-100">
-                                <p class="text-[0.6rem] font-bold text-slate-400 uppercase tracking-wider mb-2">Propuesta Técnica de Intervención</p>
-                                <p id="solution-val" class="text-sm text-slate-600 leading-relaxed outline-none hover:bg-white focus:bg-white focus:ring-1 focus:ring-slate-200 rounded transition p-1" contenteditable="true"></p>
-                            </div>
-                        </div>
-
-                        <div class="space-y-3 mt-4">
-                            <details id="det-materials" open class="group bg-white border border-slate-200 rounded-lg open:bg-slate-50 transition-all duration-300 shadow-sm">
-                                <summary class="flex items-center justify-between p-4 cursor-pointer font-bold text-[0.65rem] uppercase tracking-wider text-slate-600 hover:text-brand-600 transition-colors">
-                                    <div class="flex items-center gap-2"><span class="text-lg">📦</span> Especificación de Materiales (Comparador Sodimac vs. Easy)</div>
-                                    <span class="text-slate-400 transition-transform duration-300 group-open:-rotate-180">▼</span>
-                                </summary>
-                                <div class="p-4 pt-1 space-y-3">
-                                    <!-- BANNER DE COMPARACIÓN DE CANASTA COMPLETA (SODIMAC VS EASY) -->
-                                    <div id="store-comparison-banner" class="hidden rounded-xl border border-slate-200 bg-white p-3.5 shadow-sm"></div>
-                                    <div class="flex items-center gap-2 bg-blue-50/80 border border-blue-100 text-blue-700 px-3 py-2 rounded-lg text-[0.65rem] font-semibold">
-                                        <i class="fas fa-hand-pointer text-blue-500"></i>
-                                        <span>Haz clic sobre cualquier material de la lista para ver su <strong>descripción del producto, rendimiento, superficie/material y ficha técnica completa</strong>.</span>
-                                    </div>
-                                    <ul id="materials-list" class="list-none pl-1 text-sm text-slate-600 space-y-2.5"></ul>
+                    <!-- RESUMEN EJECUTIVO SUPERIOR (SIEMPRE VISIBLE) -->
+                    <div class="border-b border-slate-100 pb-4 mb-4">
+                        <div class="flex justify-between items-start gap-3">
+                            <div class="w-full min-w-0">
+                                <div class="flex flex-wrap items-center gap-2 mb-1">
+                                    <span class="text-[0.6rem] text-slate-400 uppercase tracking-widest font-bold">Elemento Analizado</span>
+                                    <span id="edit-hint" class="hidden text-[0.58rem] font-semibold text-blue-600 bg-blue-50 border border-blue-100 px-2 py-0.5 rounded-full">
+                                        <i class="fas fa-pen text-[0.5rem] mr-1"></i>Editable al hacer clic
+                                    </span>
                                 </div>
-                            </details>
-
-                            <details id="det-steps" class="group bg-white border border-slate-200 rounded-lg open:bg-slate-50 transition-all duration-300 shadow-sm">
-                                <summary class="flex items-center justify-between p-4 cursor-pointer font-bold text-[0.65rem] uppercase tracking-wider text-slate-600 hover:text-brand-600 transition-colors">
-                                    <div class="flex items-center gap-2"><span class="text-lg">📋</span> Procedimiento Operativo</div>
-                                    <span class="text-slate-400 transition-transform duration-300 group-open:-rotate-180">▼</span>
-                                </summary>
-                                <div class="p-4 pt-1">
-                                    <ol id="steps-list" class="list-decimal pl-5 text-sm text-slate-600 space-y-3 marker:font-bold marker:text-slate-400"></ol>
+                                <div id="surface-type" class="font-serif text-xl sm:text-2xl text-slate-900 outline-none hover:bg-slate-50 focus:bg-white focus:ring-1 focus:ring-slate-200 rounded transition p-1 -ml-1 w-full" contenteditable="true"></div>
+                                
+                                <div id="weather-badge" class="hidden flex items-center flex-wrap gap-1.5 mt-2 text-[0.65rem] text-slate-500 bg-slate-50 border border-slate-100 py-1 px-2.5 rounded-lg w-fit">
+                                    <span>🌤</span>
+                                    <span class="font-bold text-slate-800" id="loc-val"></span>: 
+                                    <span id="temp-val" class="font-semibold"></span>, <span id="hum-val" class="font-semibold"></span> HR
+                                    <span id="dewpoint-pill" class="hidden ml-1 bg-sky-100 text-sky-800 font-bold px-1.5 py-0.5 rounded text-[0.6rem]"></span>
+                                    <span id="drying-factor-pill" class="hidden bg-amber-100 text-amber-800 font-bold px-1.5 py-0.5 rounded text-[0.6rem]"></span>
                                 </div>
-                            </details>
+                                <div id="climate-technical-card" class="hidden mt-2 bg-sky-50/80 border border-sky-200 rounded-lg p-2.5 text-[0.68rem] text-sky-950 leading-snug">
+                                    <span class="font-extrabold uppercase tracking-wider text-sky-800"><i class="fas fa-thermometer-half mr-1"></i> Ajuste Climático:</span>
+                                    <span id="climate-directive-val"></span>
+                                </div>
+                            </div>
+                            <span id="complexity-badge" contenteditable="true" class="text-[0.6rem] font-bold px-3 py-1 rounded-full uppercase tracking-wide border mt-1 outline-none hover:ring-2 hover:ring-slate-300 transition cursor-text whitespace-nowrap shrink-0"></span>
+                        </div>
+
+                        <!-- 2 TARJETAS KPI CLAVE: COSTO MATERIALES + PLAZO -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-4">
+                            <div class="bg-slate-900 p-4 rounded-xl text-white relative overflow-hidden">
+                                <div class="absolute top-0 right-0 w-24 h-24 bg-brand-600 rounded-full blur-[45px] opacity-20"></div>
+                                <div class="relative z-10 flex justify-between items-center mb-1">
+                                    <p class="text-[0.58rem] text-brand-400 uppercase tracking-widest font-bold">Inversión Materiales</p>
+                                    <span class="bg-white/10 text-white text-[0.55rem] px-1.5 py-0.5 rounded border border-white/10 uppercase">CLP</span>
+                                </div>
+                                <div class="relative z-10 flex items-baseline gap-2 flex-wrap">
+                                    <p class="font-serif text-2xl tracking-tight leading-none text-white"><span id="price-val" contenteditable="true" class="outline-none hover:bg-slate-800 focus:bg-slate-800 focus:ring-1 focus:ring-slate-500 rounded transition px-1 inline-block"></span></p>
+                                    <p id="unit-val" contenteditable="true" class="text-[0.6rem] text-slate-300 font-semibold uppercase tracking-wider outline-none hover:bg-slate-800 rounded px-1 inline-block"></p>
+                                </div>
+                                <p id="price-subtitle" class="relative z-10 text-[0.58rem] text-slate-400 mt-1.5 truncate">Valor de Mercado Competitivo</p>
+                            </div>
+                            <div class="bg-slate-50 border border-slate-200 p-4 rounded-xl flex flex-col justify-center">
+                                <p class="text-[0.58rem] text-slate-400 uppercase tracking-widest font-bold mb-1"><i class="far fa-clock text-brand-500 mr-1"></i> Ejecución Estimada</p>
+                                <span id="time-val" contenteditable="true" class="text-sm sm:text-base font-bold text-slate-800 outline-none hover:bg-white focus:bg-white focus:ring-1 focus:ring-slate-200 rounded transition px-1 block"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- BARRA DE PESTAÑAS LIMPIA PARA NAVEGAR SIN SATURACIÓN -->
+                    <div id="result-tabs-nav" class="grid grid-cols-4 gap-1 bg-slate-100 p-1 rounded-xl mb-5">
+                        <button type="button" data-result-tab="diagnostico" onclick="window.switchResultTab('diagnostico')" class="result-tab-btn bg-white text-slate-900 shadow-xs text-[0.65rem] sm:text-xs font-bold py-2 px-1.5 rounded-lg transition flex items-center justify-center gap-1.5">
+                            <i class="fas fa-stethoscope text-brand-500"></i> <span class="truncate">Diagnóstico</span>
+                        </button>
+                        <button type="button" data-result-tab="materiales" onclick="window.switchResultTab('materiales')" class="result-tab-btn text-slate-500 hover:text-slate-800 text-[0.65rem] sm:text-xs font-bold py-2 px-1.5 rounded-lg transition flex items-center justify-center gap-1.5">
+                            <i class="fas fa-boxes text-slate-400"></i> <span class="truncate">Materiales</span>
+                            <span id="materials-count-badge" class="bg-slate-200 text-slate-700 text-[0.55rem] font-extrabold px-1.5 py-0.5 rounded-full">0</span>
+                        </button>
+                        <button type="button" data-result-tab="evidencia" onclick="window.switchResultTab('evidencia')" class="result-tab-btn text-slate-500 hover:text-slate-800 text-[0.65rem] sm:text-xs font-bold py-2 px-1.5 rounded-lg transition flex items-center justify-center gap-1.5">
+                            <i class="fas fa-camera text-slate-400"></i> <span class="truncate">Evidencia</span>
+                        </button>
+                        <button type="button" data-result-tab="avance" onclick="window.switchResultTab('avance')" class="result-tab-btn text-slate-500 hover:text-slate-800 text-[0.65rem] sm:text-xs font-bold py-2 px-1.5 rounded-lg transition flex items-center justify-center gap-1.5 relative">
+                            <i class="fas fa-tasks text-slate-400"></i> <span class="truncate">Avance</span>
+                            <span id="tab-avance-alert-dot" class="hidden w-2 h-2 rounded-full bg-red-600 animate-ping"></span>
+                        </button>
+                    </div>
+
+                    <!-- TAB 1: DIAGNÓSTICO Y PROCEDIMIENTO -->
+                    <div id="tab-panel-diagnostico" class="result-tab-panel space-y-4">
+                        <div id="root-cause-container" class="hidden bg-indigo-50/70 p-4 rounded-xl border border-indigo-100">
+                            <p class="text-[0.6rem] font-extrabold text-indigo-600 uppercase tracking-wider mb-1"><i class="fas fa-microscope mr-1"></i> Causa Raíz (Origen)</p>
+                            <p id="root-cause-val" class="text-sm font-semibold text-indigo-950 leading-relaxed outline-none hover:bg-white focus:bg-white focus:ring-1 focus:ring-indigo-200 rounded transition p-1" contenteditable="true"></p>
+                        </div>
+
+                        <div class="bg-slate-50 p-4 rounded-xl border border-slate-100">
+                            <p class="text-[0.6rem] font-bold text-slate-400 uppercase tracking-wider mb-1.5"><i class="fas fa-search-plus mr-1 text-slate-400"></i> Patología y Daño Visible</p>
+                            <p id="damage-val" class="text-sm font-medium text-slate-800 leading-relaxed outline-none hover:bg-white focus:bg-white focus:ring-1 focus:ring-slate-200 rounded transition p-1" contenteditable="true"></p>
                         </div>
                         
-                        <div class="bg-slate-900 p-6 rounded-xl text-white relative overflow-hidden mt-6">
-                            <div class="absolute top-0 right-0 w-32 h-32 bg-brand-600 rounded-full blur-[60px] opacity-20"></div>
-                            
-                            <div class="relative z-10 flex justify-between items-start">
-                                <div>
-                                    <p class="text-[0.6rem] text-brand-400 uppercase tracking-widest font-bold mb-1">Inversión Unitaria Referencial</p>
-                                    <p id="price-subtitle" class="text-[0.6rem] text-slate-400 mb-3">Valor de Mercado Competitivo</p>
+                        <div id="risk-container" class="bg-red-50 p-4 rounded-xl border border-red-100 hidden">
+                            <p class="text-[0.6rem] font-bold text-red-500 uppercase tracking-wider mb-1.5"><i class="fas fa-exclamation-triangle mr-1"></i> Riesgo a Futuro si no se Repara</p>
+                            <p id="risk-val" class="text-sm font-medium text-red-900 leading-relaxed outline-none hover:bg-white focus:bg-white focus:ring-1 focus:ring-red-200 rounded transition p-1" contenteditable="true"></p>
+                        </div>
+                        
+                        <div class="bg-slate-50 p-4 rounded-xl border border-slate-100">
+                            <p class="text-[0.6rem] font-bold text-slate-400 uppercase tracking-wider mb-1.5"><i class="fas fa-wrench mr-1 text-slate-400"></i> Propuesta Técnica de Reparación</p>
+                            <p id="solution-val" class="text-sm text-slate-700 leading-relaxed outline-none hover:bg-white focus:bg-white focus:ring-1 focus:ring-slate-200 rounded transition p-1" contenteditable="true"></p>
+                        </div>
+
+                        <details id="det-steps" open class="group bg-white border border-slate-200 rounded-xl open:bg-slate-50 transition-all duration-300 shadow-2xs">
+                            <summary class="flex items-center justify-between p-4 cursor-pointer font-bold text-[0.65rem] uppercase tracking-wider text-slate-600 hover:text-brand-600 transition-colors">
+                                <div class="flex items-center gap-2"><span class="text-base">📋</span> Procedimiento Paso a Paso</div>
+                                <span class="text-slate-400 transition-transform duration-300 group-open:-rotate-180">▼</span>
+                            </summary>
+                            <div class="p-4 pt-1">
+                                <ol id="steps-list" class="list-decimal pl-5 text-sm text-slate-600 space-y-2.5 marker:font-bold marker:text-slate-400"></ol>
+                            </div>
+                        </details>
+                    </div>
+
+                    <!-- TAB 2: MATERIALES Y COMPARADOR SODIMAC VS EASY -->
+                    <div id="tab-panel-materiales" class="result-tab-panel hidden space-y-3">
+                        <details id="det-materials" open class="group bg-white border border-slate-200 rounded-xl open:bg-slate-50 transition-all duration-300 shadow-2xs">
+                            <summary class="flex items-center justify-between p-4 cursor-pointer font-bold text-[0.65rem] uppercase tracking-wider text-slate-600 hover:text-brand-600 transition-colors">
+                                <div class="flex items-center gap-2"><span class="text-base">📦</span> Materiales y Precios (Sodimac vs Easy)</div>
+                                <span class="text-slate-400 transition-transform duration-300 group-open:-rotate-180">▼</span>
+                            </summary>
+                            <div class="p-4 pt-1 space-y-3">
+                                <div id="store-comparison-banner" class="hidden rounded-xl border border-slate-200 bg-white p-3.5 shadow-sm"></div>
+                                <div class="flex items-center gap-2 bg-blue-50/80 border border-blue-100 text-blue-700 px-3 py-2 rounded-lg text-[0.65rem] font-semibold">
+                                    <i class="fas fa-hand-pointer text-blue-500"></i>
+                                    <span>Toca cualquier material para ver su <strong>ficha técnica, rendimiento y superficie</strong>.</span>
                                 </div>
-                                <span class="bg-white/10 text-white text-[0.55rem] px-2 py-0.5 rounded border border-white/10 uppercase tracking-wider">CLP</span>
+                                <ul id="materials-list" class="list-none pl-1 text-sm text-slate-600 space-y-2.5"></ul>
                             </div>
-                            
-                            <div class="relative z-10 mt-2 flex items-baseline gap-2">
-                                <p class="font-serif text-3xl tracking-tight leading-none text-white"><span id="price-val" contenteditable="true" class="outline-none hover:bg-slate-800 focus:bg-slate-800 focus:ring-1 focus:ring-slate-500 rounded transition px-1 inline-block"></span></p>
-                                <p id="unit-val" contenteditable="true" class="text-[0.65rem] text-slate-400 font-medium uppercase tracking-widest outline-none hover:bg-slate-800 focus:bg-slate-800 focus:ring-1 focus:ring-slate-500 rounded transition px-1 inline-block"></p>
+                        </details>
+                    </div>
+
+                    <!-- TAB 3: EVIDENCIA VISUAL Y MARCACIÓN -->
+                    <div id="tab-panel-evidencia" class="result-tab-panel hidden space-y-4">
+                        <div id="xray-forensic-card" class="bg-slate-950 rounded-xl overflow-hidden border border-slate-800 shadow-lg">
+                            <div class="px-4 py-3 bg-slate-900 border-b border-slate-800 flex flex-wrap items-center justify-between gap-2">
+                                <div class="flex items-center gap-2 flex-wrap">
+                                    <span class="w-2.5 h-2.5 rounded-full bg-brand-500"></span>
+                                    <span class="text-[0.65rem] font-bold uppercase tracking-widest text-white">Marcación Visual del Daño</span>
+                                    <span id="xray-source-badge" class="bg-emerald-600/90 text-white text-[0.58rem] font-bold px-2 py-0.5 rounded uppercase tracking-wider">Foto #2 · Detalle</span>
+                                    <span id="xray-pin-indicator" class="hidden bg-indigo-600 text-white text-[0.6rem] font-bold px-2 py-0.5 rounded uppercase">Pin #1</span>
+                                </div>
+                                <button type="button" onclick="window.toggleXRayOverlay()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 text-[0.6rem] font-bold uppercase tracking-wider px-2.5 py-1 rounded border border-slate-700 transition">
+                                    <i class="fas fa-eye mr-1"></i> Alternar Capa
+                                </button>
+                            </div>
+                            <div class="relative w-full flex items-center justify-center bg-slate-950 p-2">
+                                <canvas id="xray-canvas" width="680" height="440" class="w-full h-auto max-h-[380px] object-contain rounded"></canvas>
+                            </div>
+                            <div class="px-4 py-2.5 bg-slate-900/90 border-t border-slate-800 flex flex-wrap items-center justify-between gap-3 text-[0.6rem] text-slate-300">
+                                <div class="flex items-center gap-4">
+                                    <span class="flex items-center gap-1.5"><span class="w-3 h-1 bg-red-500 inline-block rounded"></span> Fisura / Grieta</span>
+                                    <span class="flex items-center gap-1.5"><span class="w-3 h-3 bg-yellow-400/50 border border-yellow-400 inline-block rounded-sm"></span> Área Afectada</span>
+                                </div>
                             </div>
                         </div>
 
-                        <div class="flex items-center justify-between pt-2">
-                            <div class="flex items-center gap-2 text-xs text-slate-500 w-full">
-                                <span class="text-lg">⏱️</span> 
-                                <span class="font-medium whitespace-nowrap">Ejecución Estimada:</span>
-                                <span id="time-val" contenteditable="true" class="outline-none hover:bg-slate-50 focus:bg-white focus:ring-1 focus:ring-slate-200 rounded transition px-1 w-full block"></span>
+                        <div id="user-request-summary" class="hidden bg-slate-50 p-4 rounded-xl border border-slate-200/80">
+                            <p class="text-[0.6rem] font-bold text-slate-400 uppercase tracking-wider mb-3">Fotografías Originales y Notas</p>
+                            <div class="flex gap-3 mb-3">
+                                <img id="summary-img1" class="hidden w-28 h-28 object-cover rounded-lg border border-slate-200 shadow-sm">
+                                <img id="summary-img2" class="hidden w-28 h-28 object-cover rounded-lg border border-slate-200 shadow-sm">
+                            </div>
+                            <div id="summary-notes-container" class="hidden">
+                                <p class="text-[0.6rem] font-bold text-slate-400 uppercase tracking-wider mb-1">Observaciones en Terreno</p>
+                                <p id="summary-notes" class="text-sm text-slate-700 italic outline-none hover:bg-white focus:bg-white focus:ring-1 focus:ring-slate-200 rounded transition p-1" contenteditable="true"></p>
                             </div>
                         </div>
+                    </div>
 
-                        <!-- PIE DE REPORTE Y FIRMA DIGITALIZADA (MARCA BLANCA WHITE-LABEL) -->
-                        <div id="whitelabel-report-footer" class="hidden mt-6 pt-5 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-4">
-                            <div>
-                                <p id="wl-footer-company" class="text-xs font-bold text-slate-800 uppercase tracking-wider"></p>
-                                <p id="wl-footer-inspector" class="text-[0.65rem] text-slate-500 mt-0.5"></p>
-                                <p id="wl-footer-powered" class="text-[0.55rem] text-slate-400 uppercase tracking-widest mt-1 font-semibold">Powered by Obrín IA</p>
+                    <!-- TAB 4: AVANCE DE OBRA, BITÁCORA Y MEMORIA EXPERTA -->
+                    <div id="tab-panel-avance" class="result-tab-panel hidden space-y-5">
+                        <div id="result-progress-wrapper" class="hidden"></div>
+
+                        <div id="rating-section" class="bg-slate-50 p-4 rounded-xl border border-slate-200 shadow-2xs">
+                            <div id="history-autosave-badge" class="flex items-center justify-center gap-2 bg-emerald-50 border border-emerald-200 text-emerald-800 px-3 py-1.5 rounded-lg text-[0.65rem] font-bold mb-3">
+                                <i class="fas fa-check-circle text-emerald-600"></i>
+                                <span id="history-autosave-text">Guardado automáticamente en tu Historial</span>
                             </div>
-                            <div class="text-center">
-                                <img id="wl-footer-signature-img" src="" class="hidden h-14 mx-auto object-contain border-b border-slate-300 pb-1">
-                                <p class="text-[0.55rem] text-slate-400 uppercase tracking-widest mt-1 font-bold">Firma Profesional Responsable</p>
+                            <p class="text-xs font-bold text-slate-700 uppercase tracking-wider mb-1 text-center">Validar Solución (Memoria RAG)</p>
+                            <div class="flex justify-center gap-2 mb-3" id="star-container">
+                                <button class="star-btn text-3xl text-slate-300 hover:text-yellow-400 transition" data-val="1">★</button>
+                                <button class="star-btn text-3xl text-slate-300 hover:text-yellow-400 transition" data-val="2">★</button>
+                                <button class="star-btn text-3xl text-slate-300 hover:text-yellow-400 transition" data-val="3">★</button>
+                                <button class="star-btn text-3xl text-slate-300 hover:text-yellow-400 transition" data-val="4">★</button>
+                                <button class="star-btn text-3xl text-slate-300 hover:text-yellow-400 transition" data-val="5">★</button>
                             </div>
+                            <textarea id="rating-comment" class="w-full p-2.5 bg-white rounded-lg border border-slate-200 text-xs focus:ring-1 focus:ring-slate-900 outline-none resize-none mb-2.5" rows="2" placeholder="Opcional: Comentario técnico sobre esta ficha..."></textarea>
+                            <button id="submit-rating-btn" onclick="window.submitFeedbackAndSave()" class="w-full bg-slate-900 text-white py-2.5 rounded-lg text-[0.68rem] font-bold uppercase tracking-widest hover:bg-slate-800 transition shadow-sm">🧠 Guardar Caso Validado en Memoria IA</button>
+                        </div>
+                    </div>
+
+                    <!-- PIE DE REPORTE Y FIRMA DIGITALIZADA (MARCA BLANCA WHITE-LABEL) -->
+                    <div id="whitelabel-report-footer" class="hidden mt-6 pt-5 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-4">
+                        <div>
+                            <p id="wl-footer-company" class="text-xs font-bold text-slate-800 uppercase tracking-wider"></p>
+                            <p id="wl-footer-inspector" class="text-[0.65rem] text-slate-500 mt-0.5"></p>
+                            <p id="wl-footer-powered" class="text-[0.55rem] text-slate-400 uppercase tracking-widest mt-1 font-semibold">Powered by Obrín IA</p>
+                        </div>
+                        <div class="text-center">
+                            <img id="wl-footer-signature-img" src="" class="hidden h-14 mx-auto object-contain border-b border-slate-300 pb-1">
+                            <p class="text-[0.55rem] text-slate-400 uppercase tracking-widest mt-1 font-bold">Firma Profesional Responsable</p>
                         </div>
                     </div>
                 </div>
 
-                <!-- BARRA DE SEGUIMIENTO Y BITÁCORA DE AVANCE DE OBRA EN LA FICHA -->
-                <div id="result-progress-wrapper" class="hidden mt-6"></div>
-
-                <div id="rating-section" class="mt-6 bg-slate-50 p-5 rounded-xl border border-slate-200 shadow-sm">
-                    <div id="history-autosave-badge" class="flex items-center justify-center gap-2 bg-emerald-50 border border-emerald-200 text-emerald-800 px-3 py-2 rounded-lg text-[0.68rem] font-bold mb-4">
-                        <i class="fas fa-check-circle text-emerald-600"></i>
-                        <span id="history-autosave-text">Guardado automáticamente en tu Historial de Usuario</span>
-                    </div>
-                    <p class="text-xs font-bold text-slate-700 uppercase tracking-wider mb-1 text-center">Entrenar Memoria RAG Institucional</p>
-                    <p class="text-[0.65rem] text-slate-500 text-center mb-3">Tu evaluación ya está en tu Historial. Usa el botón inferior únicamente si deseas almacenar este caso validado en la Memoria RAG.</p>
-                    <div class="flex justify-center gap-2 mb-4" id="star-container">
-                        <button class="star-btn text-4xl text-slate-300 hover:text-yellow-400 transition drop-shadow-sm" data-val="1">★</button>
-                        <button class="star-btn text-4xl text-slate-300 hover:text-yellow-400 transition drop-shadow-sm" data-val="2">★</button>
-                        <button class="star-btn text-4xl text-slate-300 hover:text-yellow-400 transition drop-shadow-sm" data-val="3">★</button>
-                        <button class="star-btn text-4xl text-slate-300 hover:text-yellow-400 transition drop-shadow-sm" data-val="4">★</button>
-                        <button class="star-btn text-4xl text-slate-300 hover:text-yellow-400 transition drop-shadow-sm" data-val="5">★</button>
-                    </div>
-                    <textarea id="rating-comment" class="w-full p-3 bg-white rounded-lg border border-slate-200 text-sm focus:ring-1 focus:ring-slate-900 outline-none resize-none mb-3" rows="2" placeholder="Opcional: Notas técnicas para la Memoria RAG..."></textarea>
-                    <button id="submit-rating-btn" onclick="window.submitFeedbackAndSave()" class="w-full bg-slate-900 text-white py-3 rounded-lg text-xs font-bold uppercase tracking-widest hover:bg-slate-800 transition shadow-md">🧠 GUARDAR EN MEMORIA RAG</button>
-                </div>
-
-                <div class="flex gap-3 mt-6">
-                    <button id="pdf-btn" onclick="window.generatePDF()" class="w-1/3 bg-slate-100 hover:bg-slate-200 text-slate-800 text-center py-4 rounded-lg font-bold text-xs uppercase tracking-widest transition shadow-sm flex items-center justify-center gap-2">
-                        📄 Reporte
+                <!-- BARRA DE ACCIONES INFERIOR: ENVIAR A BODEGA / PDF / EXCEL / NUEVA -->
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 mt-5 pt-4 border-t border-slate-100">
+                    <button type="button" onclick="window.shareMaterialSummary()" class="col-span-2 sm:col-span-2 bg-emerald-600 hover:bg-emerald-500 text-white text-center py-3.5 px-4 rounded-xl font-bold text-xs uppercase tracking-wider transition shadow-md flex items-center justify-center gap-2">
+                        <i class="fab fa-whatsapp text-base"></i> Enviar Lista a Obra / Bodega
                     </button>
-                    <button id="excel-btn-pro" onclick="window.exportToExcel()" class="w-2/3 bg-brand-600 hover:bg-brand-500 text-white text-center py-4 rounded-lg font-bold text-xs uppercase tracking-widest transition shadow-lg hover:shadow-brand-500/20 flex items-center justify-center gap-2">
-                        <i class="fas fa-file-excel"></i> Exportar a Excel
+                    <button id="pdf-btn" onclick="window.generatePDF()" class="bg-slate-100 hover:bg-slate-200 text-slate-800 text-center py-3.5 px-3 rounded-xl font-bold text-xs uppercase tracking-wider transition flex items-center justify-center gap-1.5">
+                        <i class="fas fa-file-pdf text-red-500"></i> PDF
+                    </button>
+                    <button id="excel-btn-pro" onclick="window.exportToExcel()" class="bg-brand-600 hover:bg-brand-500 text-white text-center py-3.5 px-3 rounded-xl font-bold text-xs uppercase tracking-wider transition shadow-sm flex items-center justify-center gap-1.5">
+                        <i class="fas fa-file-excel"></i> Excel
                     </button>
                 </div>
                 
-                <button id="resetBtn" class="w-full py-3 text-xs text-slate-400 mt-4 font-medium hover:text-slate-600 transition tracking-wide uppercase" onclick="window.resetUI()">Realizar Nueva Evaluación</button>
+                <button id="resetBtn" class="w-full py-2.5 text-xs text-slate-400 mt-3 font-semibold hover:text-slate-700 transition tracking-wider uppercase" onclick="window.resetUI()">+ Realizar Nueva Evaluación</button>
             </div>
         </div>
     </div>
@@ -968,7 +1014,32 @@
                 <div id="projects-list" class="space-y-3"></div>
             </div>
 
-            <div id="evaluations-view" class="hidden p-6 overflow-y-auto flex-1 space-y-4 bg-slate-50/50">
+            <div id="evaluations-view" class="hidden p-4 sm:p-6 overflow-y-auto flex-1 space-y-4 bg-slate-50/50">
+                <div id="project-summary-bar" class="hidden bg-white rounded-xl border border-slate-200 p-3.5 shadow-2xs space-y-3">
+                    <div class="grid grid-cols-3 gap-2 text-center">
+                        <div class="bg-slate-50 rounded-lg p-2 border border-slate-100">
+                            <p class="text-[0.55rem] font-bold uppercase tracking-wider text-slate-400">Avance Promedio</p>
+                            <p id="proj-kpi-avg" class="text-sm font-extrabold text-brand-600">0%</p>
+                        </div>
+                        <div class="bg-slate-50 rounded-lg p-2 border border-slate-100">
+                            <p class="text-[0.55rem] font-bold uppercase tracking-wider text-slate-400">En Atraso</p>
+                            <p id="proj-kpi-delayed" class="text-sm font-extrabold text-red-600">0</p>
+                        </div>
+                        <div class="bg-slate-50 rounded-lg p-2 border border-slate-100">
+                            <p class="text-[0.55rem] font-bold uppercase tracking-wider text-slate-400">Inversión</p>
+                            <p id="proj-kpi-total" class="text-sm font-extrabold text-slate-800">$0</p>
+                        </div>
+                    </div>
+                    <div class="flex flex-col sm:flex-row gap-2">
+                        <input type="text" id="project-eval-search" oninput="window.renderFilteredProjectEvals()" placeholder="Buscar partida o daño..." class="flex-1 px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs outline-none focus:ring-1 focus:ring-brand-500">
+                        <div class="flex items-center gap-1 overflow-x-auto no-scrollbar">
+                            <button type="button" data-pfilter="all" onclick="window.setProjectEvalFilter('all')" class="proj-filter-btn bg-slate-900 text-white text-[0.6rem] font-bold px-2.5 py-1 rounded-full whitespace-nowrap transition">Todos</button>
+                            <button type="button" data-pfilter="delayed" onclick="window.setProjectEvalFilter('delayed')" class="proj-filter-btn bg-slate-100 text-slate-600 hover:bg-red-50 hover:text-red-700 text-[0.6rem] font-bold px-2.5 py-1 rounded-full whitespace-nowrap transition">🚨 Atraso</button>
+                            <button type="button" data-pfilter="active" onclick="window.setProjectEvalFilter('active')" class="proj-filter-btn bg-slate-100 text-slate-600 hover:bg-brand-50 hover:text-brand-700 text-[0.6rem] font-bold px-2.5 py-1 rounded-full whitespace-nowrap transition">⚙️ En Curso</button>
+                            <button type="button" data-pfilter="done" onclick="window.setProjectEvalFilter('done')" class="proj-filter-btn bg-slate-100 text-slate-600 hover:bg-emerald-50 hover:text-emerald-700 text-[0.6rem] font-bold px-2.5 py-1 rounded-full whitespace-nowrap transition">✅ Listos</button>
+                        </div>
+                    </div>
+                </div>
                 <div id="history-list" class="space-y-4"></div>
             </div>
         </div>
@@ -2150,12 +2221,17 @@
                 materialsList.appendChild(li);
             });
 
+            const matCountBadge = document.getElementById('materials-count-badge');
+            if (matCountBadge) {
+                matCountBadge.innerText = window.materialesData.length;
+            }
+
             const priceSubtitle = document.getElementById('price-subtitle');
             if (sumaActiva > 0) {
                 document.getElementById('price-val').innerText = "$" + sumaActiva.toLocaleString('es-CL');
                 document.getElementById('unit-val').innerText = `Total Materiales en ${tiendaActiva}`;
                 if (priceSubtitle) {
-                    priceSubtitle.innerText = `Lista completa valorizada en ${tiendaActiva} (${tiendaActiva === tiendaMasEconomica ? 'Tienda más barata verificada entre Sodimac y Easy' : `Comparado con ${tiendaMasEconomica}: $${(tiendaMasEconomica === 'Sodimac' ? totalSodimac : totalEasy).toLocaleString('es-CL')}`})`;
+                    priceSubtitle.innerText = `Lista valorizada en ${tiendaActiva} (${tiendaActiva === tiendaMasEconomica ? 'Mejor opción Sodimac vs Easy' : `Comparado con ${tiendaMasEconomica}: $${(tiendaMasEconomica === 'Sodimac' ? totalSodimac : totalEasy).toLocaleString('es-CL')}`})`;
                 }
             } else {
                 document.getElementById('price-val').innerText = window.ultimoPrecioRef || "A evaluar";
@@ -2612,16 +2688,19 @@
                 barra.style.width = `${porcentaje}%`;
                 
                 let limiteTexto = '';
-                if (maxTokens === 15000000) limiteTexto = ' / 15.000.000 (Pro)';
-                else if (maxTokens === 2500000) limiteTexto = ' / 2.500.000 (Plus)';
-                else if (maxTokens === 1000000) limiteTexto = ' / 1.000.000 (Básico)';
+                if (maxTokens === 15000000) limiteTexto = ' · Pro';
+                else if (maxTokens === 2500000) limiteTexto = ' · Plus';
+                else if (maxTokens === 1000000) limiteTexto = ' · Básico';
                 else if (window.userPlanActivo === 'cortesia') {
-                    limiteTexto = safeTokens > 0 ? ' / 10.000 (1 Pregunta de Cortesía)' : ' (Cortesía Utilizada)';
+                    limiteTexto = safeTokens > 0 ? ' · Cortesía' : ' (Agotado)';
                 }
-                else if (maxTokens === 10000) limiteTexto = ' / 10.000 (Pase 1 Diagnóstico)';
-                else limiteTexto = ' (Sin Plan Activo)';
+                else if (maxTokens === 10000) limiteTexto = ' · Prueba';
+                else limiteTexto = ' (Sin Plan)';
                 
                 texto.innerText = `${safeTokens.toLocaleString('es-CL')} Tks${limiteTexto}`;
+                if (texto.parentElement && texto.parentElement.parentElement) {
+                    texto.parentElement.parentElement.title = `Saldo: ${safeTokens.toLocaleString('es-CL')} / ${(maxTokens || 0).toLocaleString('es-CL')} Tokens`;
+                }
                 
                 if (porcentaje > 50) barra.style.backgroundColor = "#10b981"; 
                 else if (porcentaje > 20) barra.style.backgroundColor = "#f59e0b"; 
@@ -3201,6 +3280,15 @@
             if (resultWrapper && currentEditingDocId === docId) {
                 resultWrapper.classList.remove('hidden');
                 resultWrapper.innerHTML = window.generateStepperHTML(docId, data.seguimiento, data, 'res_');
+                const delayInfo = window.evaluateDelayStatus(data.seguimiento, data);
+                const tabDot = document.getElementById('tab-avance-alert-dot');
+                if (tabDot) {
+                    if (delayInfo.isDelayed) tabDot.classList.remove('hidden');
+                    else tabDot.classList.add('hidden');
+                }
+            }
+            if (typeof window.refreshProjectSummaryKPIs === 'function' && window.currentProjectDocsList) {
+                window.refreshProjectSummaryKPIs();
             }
         };
 
@@ -3807,6 +3895,13 @@
                         document.getElementById('summary-img2').src = displayDataUrl;
                         document.getElementById('summary-img2').classList.remove('hidden');
                     }
+                    const thumbEl = document.getElementById(`capture-thumb-${n}`);
+                    const lblEl = document.getElementById(`label-box-${n}`);
+                    if (thumbEl) {
+                        thumbEl.src = displayDataUrl;
+                        thumbEl.classList.remove('hidden');
+                    }
+                    if (lblEl) lblEl.classList.add('hidden');
                     document.getElementById(`box${n}`).classList.add('filled');
                     document.getElementById(`icon${n}`).classList.add('hidden');
                     document.getElementById(`check${n}`).classList.remove('hidden');
@@ -3830,6 +3925,10 @@
             document.getElementById(`icon${n}`).classList.remove('hidden');
             document.getElementById(`check${n}`).classList.add('hidden');
             document.getElementById(`clear${n}`).classList.add('hidden');
+            const thumbEl = document.getElementById(`capture-thumb-${n}`);
+            const lblEl = document.getElementById(`label-box-${n}`);
+            if (thumbEl) { thumbEl.src = ''; thumbEl.classList.add('hidden'); }
+            if (lblEl) lblEl.classList.remove('hidden');
             
             if (n === 1) {
                 imgData1 = null; imgType1 = null;
@@ -3843,6 +3942,97 @@
                 document.getElementById('summary-img2').src = '';
                 document.getElementById('summary-img2').classList.add('hidden');
             }
+        };
+
+        window.toggleCaptureDrawer = function(which) {
+            const wBox = document.getElementById('weather-drawer-box');
+            const bBox = document.getElementById('blueprint-drawer-box');
+            const wPill = document.getElementById('toggle-weather-pill');
+            const bPill = document.getElementById('toggle-blueprint-pill');
+            if (which === 'weather' && wBox) {
+                const opening = wBox.classList.contains('hidden');
+                wBox.classList.toggle('hidden');
+                if (bBox && opening) bBox.classList.add('hidden');
+                if (wPill) wPill.classList.toggle('border-brand-400', opening);
+                if (bPill && opening) bPill.classList.remove('border-indigo-400');
+            } else if (which === 'blueprint' && bBox) {
+                const opening = bBox.classList.contains('hidden');
+                bBox.classList.toggle('hidden');
+                if (wBox && opening) wBox.classList.add('hidden');
+                if (bPill) bPill.classList.toggle('border-indigo-400', opening);
+                if (wPill && opening) wPill.classList.remove('border-brand-400');
+                if (opening && typeof window.renderBlueprintCanvas === 'function') {
+                    setTimeout(() => window.renderBlueprintCanvas(), 40);
+                }
+            }
+        };
+
+        window.activeResultTab = 'diagnostico';
+        window.switchResultTab = function(tabName) {
+            window.activeResultTab = tabName;
+            document.querySelectorAll('.result-tab-panel').forEach(el => el.classList.add('hidden'));
+            const target = document.getElementById(`tab-panel-${tabName}`);
+            if (target) target.classList.remove('hidden');
+
+            document.querySelectorAll('.result-tab-btn').forEach(btn => {
+                const isActive = btn.getAttribute('data-result-tab') === tabName;
+                if (isActive) {
+                    btn.className = "result-tab-btn bg-white text-slate-900 shadow-xs text-[0.65rem] sm:text-xs font-bold py-2 px-1.5 rounded-lg transition flex items-center justify-center gap-1.5";
+                } else {
+                    btn.className = "result-tab-btn text-slate-500 hover:text-slate-800 text-[0.65rem] sm:text-xs font-bold py-2 px-1.5 rounded-lg transition flex items-center justify-center gap-1.5 relative";
+                }
+            });
+        };
+
+        // Enviar lista de compra y resumen técnico directo a Bodega / Adquisiciones / WhatsApp en 1 clic
+        window.shareMaterialSummary = async function() {
+            const projSel = document.getElementById('project-selector');
+            const projName = (projSel && projSel.selectedIndex >= 0) ? projSel.options[projSel.selectedIndex].text : 'Proyecto Obrín IA';
+            const superficie = document.getElementById('surface-type')?.innerText?.trim() || 'Elemento constructivo';
+            const patologia = document.getElementById('damage-val')?.innerText?.trim() || '';
+            const price = document.getElementById('price-val')?.innerText?.trim() || '';
+            const unit = document.getElementById('unit-val')?.innerText?.trim() || '';
+            const tienda = window.tiendaActivaSeleccionada || 'Sodimac';
+
+            const matLines = [];
+            if (Array.isArray(window.materialesData) && window.materialesData.length > 0) {
+                window.materialesData.forEach((m, idx) => {
+                    const qty = m.cantidad || 1;
+                    const esEasy = tienda === 'Easy';
+                    const nom = esEasy ? (m.nombre_easy || m.producto) : (m.nombre_sodimac || m.producto);
+                    const sku = esEasy ? m.sku_easy : m.sku_sodimac;
+                    const pUnit = esEasy ? (m.precio_easy || 0) : (m.precio_sodimac || 0);
+                    const sub = pUnit * qty;
+                    matLines.push(`${idx + 1}. ${qty}x ${nom}${sku && sku !== '-' ? ` (SKU ${sku})` : ''} — $${sub.toLocaleString('es-CL')}`);
+                });
+            }
+
+            const msg = [
+                `📋 *REQUERIMIENTO DE MATERIALES — OBRÍN IA*`,
+                `📁 *Proyecto:* ${projName}`,
+                `🧱 *Elemento:* ${superficie}`,
+                patologia ? `🔎 *Diagnóstico:* ${patologia}` : '',
+                '',
+                `🛒 *Lista de Compra (${tienda}):*`,
+                matLines.length > 0 ? matLines.join('\n') : '• Revisar lista en ficha adjunta',
+                '',
+                `💰 *Total Estimado:* ${price} ${unit}`.trim()
+            ].filter(Boolean).join('\n');
+
+            try {
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    await navigator.clipboard.writeText(msg);
+                    showNotification("📋 Lista copiada al portapapeles y lista para enviar");
+                }
+            } catch (e) {}
+
+            if (navigator.share) {
+                try {
+                    await navigator.share({ title: `Materiales: ${superficie}`, text: msg });
+                    return;
+                } catch (e) {}
+            }
+            window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
         };
 
         window.toggleLocationBtn = function(val) {
@@ -3887,6 +4077,8 @@
                     statusBox.classList.remove('hidden');
                     document.getElementById('ui-city-name').innerText = city;
                     document.getElementById('ui-weather-desc').innerText = `${temp}, ${hum} de humedad ambiental`;
+                    const wPill = document.getElementById('weather-pill-label');
+                    if (wPill) wPill.innerText = `✅ ${city} (${temp})`;
                 } catch(e) {
                     showNotification("Error consultando el clima local.", true);
                     btn.innerHTML = originalBtnHtml; btn.disabled = false;
@@ -3938,6 +4130,8 @@
             document.getElementById('location-input-group').classList.remove('hidden');
             const btn = document.getElementById('getLocationBtn');
             btn.innerHTML = `📍 Detectar`; btn.disabled = false;
+            const wPill = document.getElementById('weather-pill-label');
+            if (wPill) wPill.innerText = "Clima y Ubicación";
         };
 
         window.resetUI = function() {
@@ -3949,6 +4143,11 @@
             document.getElementById('result-wrapper').classList.add('hidden');
             const resProg = document.getElementById('result-progress-wrapper');
             if (resProg) { resProg.classList.add('hidden'); resProg.innerHTML = ''; }
+            const tabDot = document.getElementById('tab-avance-alert-dot');
+            if (tabDot) tabDot.classList.add('hidden');
+            document.getElementById('weather-drawer-box')?.classList.add('hidden');
+            document.getElementById('blueprint-drawer-box')?.classList.add('hidden');
+            if (typeof window.switchResultTab === 'function') window.switchResultTab('diagnostico');
             document.getElementById('preview-box').classList.add('hidden');
             document.getElementById('input-section').classList.remove('hidden');
             document.getElementById('weather-badge').classList.add('hidden');
@@ -3994,6 +4193,10 @@
                 document.getElementById(`icon${n}`).classList.remove('hidden');
                 document.getElementById(`check${n}`).classList.add('hidden');
                 document.getElementById(`clear${n}`).classList.add('hidden');
+                const tEl = document.getElementById(`capture-thumb-${n}`);
+                const lEl = document.getElementById(`label-box-${n}`);
+                if (tEl) { tEl.src = ''; tEl.classList.add('hidden'); }
+                if (lEl) lEl.classList.remove('hidden');
             });
             
             const btn = document.getElementById('analyzeBtn');
@@ -4631,6 +4834,8 @@
             if (coordsEl) {
                 coordsEl.innerText = `📍 ${window.activeDraftPin.label} (X: ${Math.round(relX * 100)}%, Y: ${Math.round(relY * 100)}%)`;
             }
+            const bpPill = document.getElementById('blueprint-pill-label');
+            if (bpPill) bpPill.innerText = `✅ ${window.activeDraftPin.label} en Plano`;
             window.renderBlueprintCanvas();
         };
 
@@ -4643,6 +4848,8 @@
             window.activeDraftPin = null;
             const coordsEl = document.getElementById('active-pin-coords');
             if (coordsEl) coordsEl.innerText = "Sin Pin seleccionado";
+            const bpPill = document.getElementById('blueprint-pill-label');
+            if (bpPill) bpPill.innerText = "Plano de Planta (Pin)";
             window.renderBlueprintCanvas();
         };
 
@@ -5083,6 +5290,12 @@
             const summary = document.getElementById('user-request-summary');
             const ratingSec = document.getElementById('rating-section');
             const hint = document.getElementById('edit-hint');
+            const tabsNav = document.getElementById('result-tabs-nav');
+            const tabDiag = document.getElementById('tab-panel-diagnostico');
+            const tabMat = document.getElementById('tab-panel-materiales');
+            const tabEv = document.getElementById('tab-panel-evidencia');
+            const tabAv = document.getElementById('tab-panel-avance');
+            const prevActiveTab = window.activeResultTab || 'diagnostico';
             
             const details = element.querySelectorAll('details');
             details.forEach(d => d.setAttribute('open', 'true'));
@@ -5090,6 +5303,11 @@
             window.applyWhiteLabelBranding();
             header.classList.remove('hidden');
             summary.classList.remove('hidden');
+            if (tabsNav) tabsNav.classList.add('hidden');
+            if (tabDiag) tabDiag.classList.remove('hidden');
+            if (tabMat) tabMat.classList.remove('hidden');
+            if (tabEv) tabEv.classList.remove('hidden');
+            if (tabAv) tabAv.classList.add('hidden');
             element.classList.add('pdf-export-mode');
             if(ratingSec) ratingSec.classList.add('hidden');
             if(hint) hint.classList.add('hidden');
@@ -5147,7 +5365,8 @@
                 showNotification("Hubo un problema al generar el PDF.", true);
             } finally {
                 header.classList.add('hidden');
-                summary.classList.add('hidden');
+                if (tabsNav) tabsNav.classList.remove('hidden');
+                if (typeof window.switchResultTab === 'function') window.switchResultTab(prevActiveTab);
                 element.classList.remove('pdf-export-mode');
                 if(ratingSec) ratingSec.classList.remove('hidden');
                 if(hint) hint.classList.remove('hidden');
@@ -5481,6 +5700,9 @@
                 document.getElementById('preview-box').classList.add('hidden');
                 document.getElementById('result-wrapper').classList.remove('hidden');
                 document.getElementById('edit-hint').classList.remove('hidden');
+                if (typeof window.switchResultTab === 'function') window.switchResultTab('diagnostico');
+                const bpPillReset = document.getElementById('blueprint-pill-label');
+                if (bpPillReset) bpPillReset.innerText = "Plano de Planta (Pin)";
 
                 if (window.autoSaveEvaluation) {
                     await window.autoSaveEvaluation();
@@ -6138,11 +6360,28 @@
                 const userId = activeAuth.currentUser.uid;
                 const evalsSnap = await getDocs(collection(activeDb, 'artifacts', globalAppId, 'users', userId, 'evaluaciones'));
                 const allEvals = [];
-                evalsSnap.forEach(d => allEvals.push({ id: d.id, ...d.data() }));
+                let delayedTotalCount = 0;
+                evalsSnap.forEach(d => {
+                    const ev = { id: d.id, ...d.data() };
+                    allEvals.push(ev);
+                    if (typeof window.evaluateDelayStatus === 'function') {
+                        const dl = window.evaluateDelayStatus(ev.seguimiento, ev);
+                        if (dl && dl.isDelayed) delayedTotalCount++;
+                    }
+                });
                 const combinedProjects = await window.fetchCombinedProjects(userId, allEvals);
                 
                 if (document.getElementById('projects-count-badge')) document.getElementById('projects-count-badge').innerText = combinedProjects.length;
                 if (document.getElementById('total-evals-badge')) document.getElementById('total-evals-badge').innerText = evalsSnap.size;
+                const hDelayBadge = document.getElementById('header-delay-badge');
+                if (hDelayBadge) {
+                    if (delayedTotalCount > 0) {
+                        hDelayBadge.innerText = `${delayedTotalCount} 🚨`;
+                        hDelayBadge.classList.remove('hidden');
+                    } else {
+                        hDelayBadge.classList.add('hidden');
+                    }
+                }
             } catch (e) { console.error("Error counters:", e); }
         };
 
@@ -6218,15 +6457,123 @@
             } catch (error) { console.error(error); projectsList.innerHTML = 'Error al cargar.'; }
         };
 
+        window.currentProjectFilter = 'all';
+        window.currentProjectDocsList = [];
+
+        window.setProjectEvalFilter = function(filterKey) {
+            window.currentProjectFilter = filterKey || 'all';
+            document.querySelectorAll('.proj-filter-btn').forEach(btn => {
+                const active = btn.getAttribute('data-pfilter') === window.currentProjectFilter;
+                btn.className = active
+                    ? 'proj-filter-btn bg-slate-900 text-white text-[0.6rem] font-bold px-2.5 py-1 rounded-full whitespace-nowrap transition'
+                    : 'proj-filter-btn bg-slate-100 text-slate-600 hover:bg-slate-200 text-[0.6rem] font-bold px-2.5 py-1 rounded-full whitespace-nowrap transition';
+            });
+            window.renderFilteredProjectEvals();
+        };
+
+        window.refreshProjectSummaryKPIs = function() {
+            const items = window.currentProjectDocsList || [];
+            const summaryBar = document.getElementById('project-summary-bar');
+            if (!summaryBar) return;
+            if (items.length === 0) {
+                summaryBar.classList.add('hidden');
+                return;
+            }
+            summaryBar.classList.remove('hidden');
+            let sumPct = 0;
+            let delayedCount = 0;
+            let sumPrice = 0;
+            items.forEach(item => {
+                const liveData = window.historyDataCache[item.id] || item.data;
+                sumPct += window.getSeguimientoPercentage(liveData.seguimiento);
+                if (window.evaluateDelayStatus(liveData.seguimiento, liveData).isDelayed) delayedCount++;
+                if (liveData.precio_ref) sumPrice += window.extractPrice(liveData.precio_ref);
+            });
+            const avgPct = Math.round(sumPct / items.length);
+            const avgEl = document.getElementById('proj-kpi-avg');
+            const delEl = document.getElementById('proj-kpi-delayed');
+            const totEl = document.getElementById('proj-kpi-total');
+            if (avgEl) avgEl.innerText = `${avgPct}%`;
+            if (delEl) delEl.innerText = delayedCount;
+            if (totEl) totEl.innerText = `$${sumPrice.toLocaleString('es-CL')}`;
+        };
+
+        window.renderFilteredProjectEvals = function() {
+            const historyList = document.getElementById('history-list');
+            if (!historyList) return;
+            const searchQ = (document.getElementById('project-eval-search')?.value || '').trim().toLowerCase();
+            const filterKey = window.currentProjectFilter || 'all';
+
+            window.refreshProjectSummaryKPIs();
+
+            const filtered = (window.currentProjectDocsList || []).filter(item => {
+                const data = window.historyDataCache[item.id] || item.data;
+                const seg = data.seguimiento || { paso_actual: 1 };
+                const paso = seg.paso_actual || 1;
+                const delayInfo = window.evaluateDelayStatus(seg, data);
+
+                if (filterKey === 'delayed' && !delayInfo.isDelayed) return false;
+                if (filterKey === 'active' && (paso >= 5 || seg.estado_rechazado)) return false;
+                if (filterKey === 'done' && paso < 5) return false;
+
+                if (searchQ) {
+                    const blob = `${data.superficie || ''} ${data.patologia || ''} ${data.comment || ''} ${data.userNotes || ''}`.toLowerCase();
+                    if (!blob.includes(searchQ)) return false;
+                }
+                return true;
+            });
+
+            if (filtered.length === 0) {
+                historyList.innerHTML = `<div class="text-center py-10 text-slate-400"><p class="text-xs font-semibold">${(window.currentProjectDocsList || []).length === 0 ? 'No hay evaluaciones en esta carpeta.' : 'Ninguna evaluación coincide con el filtro actual.'}</p></div>`;
+                return;
+            }
+
+            historyList.innerHTML = '';
+            filtered.forEach(item => {
+                const docSnapId = item.id;
+                const data = window.historyDataCache[docSnapId] || item.data;
+                const dateObj = data.createdAt
+                    ? (data.createdAt.seconds ? new Date(data.createdAt.seconds * 1000) : new Date(data.createdAt))
+                    : new Date();
+                const dateStr = dateObj.toLocaleDateString('es-CL', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute:'2-digit' });
+                
+                let starsHtml = '';
+                const rating = data.rating || 0;
+                for(let i=1; i<=5; i++) starsHtml += `<span class="${i <= rating ? 'text-yellow-400' : 'text-slate-200'} text-base">★</span>`;
+
+                historyList.innerHTML += `
+                    <div class="bg-white p-4 sm:p-5 rounded-xl border border-slate-200 shadow-sm hover:border-brand-300 transition-colors flex flex-col gap-3.5 cursor-pointer" onclick="window.loadHistoryItem('${docSnapId}')">
+                        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
+                            <div class="flex-1 w-full overflow-hidden">
+                                <p class="text-xs font-bold text-slate-800 mb-0.5 truncate uppercase tracking-wider">${data.superficie || 'Evaluación Técnica'}</p>
+                                <p class="text-[0.65rem] font-bold text-brand-500 uppercase tracking-widest mb-1"><i class="far fa-clock"></i> ${dateStr}</p>
+                                <div class="flex items-center gap-2 mb-1.5"><div class="flex drop-shadow-sm">${starsHtml}</div></div>
+                                ${data.comment ? `<div class="bg-slate-50 p-2.5 rounded-lg border border-slate-100 text-xs text-slate-600 italic relative w-full overflow-hidden text-ellipsis whitespace-nowrap"><span class="relative z-10">"${window.escapeSeguimientoHtml(data.comment)}"</span></div>` : ''}
+                            </div>
+                            <button onclick="event.stopPropagation(); window.loadHistoryItem('${docSnapId}')" class="w-full md:w-auto bg-slate-900 hover:bg-slate-800 text-white text-[0.68rem] font-bold py-2.5 px-4 rounded-lg transition-colors flex items-center justify-center gap-2 whitespace-nowrap shadow-sm uppercase tracking-widest">
+                                <i class="fas fa-folder-open text-brand-400"></i> Abrir Ficha
+                            </button>
+                        </div>
+                        <div id="stepper-wrapper-${docSnapId}" class="w-full pt-3 border-t border-slate-100">
+                            ${window.generateStepperHTML(docSnapId, data.seguimiento, data)}
+                        </div>
+                    </div>
+                `;
+            });
+        };
+
         window.loadProjectEvals = async function(projectId, projectName) {
             document.getElementById('projects-view').classList.add('hidden');
             document.getElementById('evaluations-view').classList.remove('hidden');
             document.getElementById('back-to-projects-btn').classList.remove('hidden');
             document.getElementById('history-title').innerHTML = `<i class="fas fa-folder text-brand-500"></i> ${projectName}`;
-            document.getElementById('history-subtitle').innerText = 'Selecciona una ficha para abrirla y editarla.';
+            document.getElementById('history-subtitle').innerText = 'Control de avance, alertas de demora y fichas.';
 
             const historyList = document.getElementById('history-list');
             historyList.innerHTML = '<div class="text-center py-6 text-slate-400 text-xs font-bold uppercase"><i class="fas fa-spinner fa-spin mb-2"></i><br>Cargando fichas...</div>';
+            const searchInp = document.getElementById('project-eval-search');
+            if (searchInp) searchInp.value = '';
+            window.currentProjectFilter = 'all';
 
             try {
                 const activeAuth = auth || window.authInstance;
@@ -6248,9 +6595,8 @@
                 let firstProjId = combinedProjects.length > 0 ? combinedProjects[0].id : null;
 
                 window.historyDataCache = {};
-                historyList.innerHTML = '';
-                
-                let found = false;
+                window.currentProjectDocsList = [];
+
                 docsList.forEach((item) => {
                     const docSnapId = item.id;
                     const data = item.data;
@@ -6260,38 +6606,11 @@
                     const matchName = data.projectName && projectName && data.projectName.trim().toLowerCase() === projectName.trim().toLowerCase();
                     if (!matchId && !matchName && !(isOrphaned && projectId === firstProjId)) return;
                     
-                    found = true;
-                    window.historyDataCache[docSnapId] = data; 
-                    const dateObj = data.createdAt
-                        ? (data.createdAt.seconds ? new Date(data.createdAt.seconds * 1000) : new Date(data.createdAt))
-                        : new Date();
-                    const dateStr = dateObj.toLocaleDateString('es-CL', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute:'2-digit' });
-                    
-                    let starsHtml = '';
-                    const rating = data.rating || 0;
-                    for(let i=1; i<=5; i++) starsHtml += `<span class="${i <= rating ? 'text-yellow-400' : 'text-slate-200'} text-lg">★</span>`;
-
-                    historyList.innerHTML += `
-                        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm hover:border-brand-300 transition-colors flex flex-col gap-4 cursor-pointer" onclick="window.loadHistoryItem('${docSnapId}')">
-                            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                                <div class="flex-1 w-full overflow-hidden">
-                                    <p class="text-xs font-bold text-slate-800 mb-1 truncate uppercase tracking-wider">${data.superficie || 'Evaluación Técnica'}</p>
-                                    <p class="text-[0.65rem] font-bold text-brand-500 uppercase tracking-widest mb-1.5"><i class="far fa-clock"></i> ${dateStr}</p>
-                                    <div class="flex items-center gap-2 mb-2"><div class="flex drop-shadow-sm -mt-1">${starsHtml}</div></div>
-                                    ${data.comment ? `<div class="bg-slate-50 p-3 rounded-lg border border-slate-100 text-xs text-slate-600 italic relative w-full overflow-hidden text-ellipsis whitespace-nowrap"><i class="fas fa-quote-left text-slate-300 absolute opacity-50 text-2xl -top-1 -left-1"></i><span class="relative z-10 pl-2">"${data.comment}"</span></div>` : ''}
-                                </div>
-                                <button onclick="event.stopPropagation(); window.loadHistoryItem('${docSnapId}')" class="w-full md:w-auto bg-slate-900 hover:bg-slate-800 text-white text-[0.7rem] font-bold py-3 px-5 rounded-lg transition-colors flex items-center justify-center gap-2 whitespace-nowrap shadow-sm uppercase tracking-widest">
-                                    <i class="fas fa-folder-open text-brand-400"></i> Abrir Ficha
-                                </button>
-                            </div>
-                            <div id="stepper-wrapper-${docSnapId}" class="w-full pt-4 mt-2 border-t border-slate-100">
-                                ${window.generateStepperHTML(docSnapId, data.seguimiento, data)}
-                            </div>
-                        </div>
-                    `;
+                    window.historyDataCache[docSnapId] = data;
+                    window.currentProjectDocsList.push({ id: docSnapId, data });
                 });
 
-                if (!found) historyList.innerHTML = '<div class="text-center py-12 text-slate-400"><p class="text-sm font-medium">No hay evaluaciones en esta carpeta.</p></div>';
+                window.setProjectEvalFilter('all');
 
             } catch (error) { console.error(error); historyList.innerHTML = 'Error al cargar.'; }
         };
@@ -6304,6 +6623,7 @@
             document.getElementById('input-section').classList.add('hidden');
             document.getElementById('preview-box').classList.add('hidden');
             document.getElementById('result-wrapper').classList.remove('hidden');
+            if (typeof window.switchResultTab === 'function') window.switchResultTab('diagnostico');
             
             currentEditingDocId = docId; 
             document.getElementById('edit-hint').classList.remove('hidden');
